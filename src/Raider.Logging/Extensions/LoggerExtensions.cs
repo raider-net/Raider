@@ -1,0 +1,212 @@
+﻿using Microsoft.Extensions.Logging;
+using Raider.Trace;
+using System;
+using System.Collections.Generic;
+
+namespace Raider.Logging.Extensions
+{
+	public static class LoggerExtensions
+	{
+		public static IDisposable BeginMethodCallScope(this ILogger logger, ITraceInfo traceInfo)
+			=> traceInfo?.TraceFrame == null
+				? throw new ArgumentNullException(nameof(traceInfo))
+				: logger.BeginScope(new Dictionary<string, Guid>
+					{
+						[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = traceInfo.TraceFrame.MethodCallId
+					});
+
+		public static IDisposable BeginMethodCallScope(this ILogger logger, ITraceFrame traceFrame)
+			=> traceFrame == null
+				? throw new ArgumentNullException(nameof(traceFrame))
+				: logger.BeginScope(new Dictionary<string, Guid>
+					{
+						[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = traceFrame.MethodCallId
+					});
+
+		public static IDisposable BeginMethodCallScope(this ILogger logger, Guid methodCallId)
+			=> logger.BeginScope(new Dictionary<string, Guid>
+			{
+				[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = methodCallId
+			});
+
+		public static void LogTraceMessage(this ILogger logger, ILogMessage message)
+		{
+			if (message == null)
+				throw new ArgumentNullException(nameof(message));
+
+			if (!logger.IsEnabled(LogLevel.Trace))
+				return;
+
+			message.LogLevel = LogLevel.Trace;
+
+			logger.LogTrace($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+		}
+
+		public static ILogMessage? LogTraceMessage(this ILogger logger, ITraceInfo traceInfo, Action<LogMessageBuilder> messageBuilder)
+		{
+			if (messageBuilder == null)
+				throw new ArgumentNullException(nameof(messageBuilder));
+
+			if (!logger.IsEnabled(LogLevel.Trace))
+				return null;
+
+			var builder = new LogMessageBuilder(traceInfo)
+				.LogLevel(LogLevel.Trace);
+
+			messageBuilder.Invoke(builder);
+			var message = builder.Build();
+
+			logger.LogTrace($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+
+			return message;
+		}
+
+		public static void LogDebugMessage(this ILogger logger, ILogMessage message)
+		{
+			if (message == null)
+				throw new ArgumentNullException(nameof(message));
+
+			if (!logger.IsEnabled(LogLevel.Debug))
+				return;
+
+			message.LogLevel = LogLevel.Debug;
+
+			logger.LogDebug($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+		}
+
+		public static ILogMessage? LogDebugMessage(this ILogger logger, ITraceInfo traceInfo, Action<LogMessageBuilder> messageBuilder)
+		{
+			if (messageBuilder == null)
+				throw new ArgumentNullException(nameof(messageBuilder));
+
+			if (!logger.IsEnabled(LogLevel.Debug))
+				return null;
+
+			var builder = new LogMessageBuilder(traceInfo)
+				.LogLevel(LogLevel.Debug);
+
+			messageBuilder.Invoke(builder);
+			var message = builder.Build();
+
+			logger.LogDebug($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+
+			return message;
+		}
+
+		public static void LogInformationMessage(this ILogger logger, ILogMessage message)
+		{
+			if (message == null)
+				throw new ArgumentNullException(nameof(message));
+
+			if (!logger.IsEnabled(LogLevel.Information))
+				return;
+
+			message.LogLevel = LogLevel.Information;
+
+			logger.LogInformation($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+		}
+
+		public static ILogMessage? LogInformationMessage(this ILogger logger, ITraceInfo traceInfo, Action<LogMessageBuilder> messageBuilder)
+		{
+			if (messageBuilder == null)
+				throw new ArgumentNullException(nameof(messageBuilder));
+
+			if (!logger.IsEnabled(LogLevel.Information))
+				return null;
+
+			var builder = new LogMessageBuilder(traceInfo)
+				.LogLevel(LogLevel.Information);
+
+			messageBuilder.Invoke(builder);
+			var message = builder.Build();
+
+			logger.LogInformation($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+
+			return message;
+		}
+
+		public static void LogWarningMessage(this ILogger logger, ILogMessage message)
+		{
+			if (message == null)
+				throw new ArgumentNullException(nameof(message));
+
+			if (!logger.IsEnabled(LogLevel.Warning))
+				return;
+
+			message.LogLevel = LogLevel.Warning;
+
+			logger.LogWarning($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+		}
+
+		public static ILogMessage? LogWarningMessage(this ILogger logger, ITraceInfo traceInfo, Action<LogMessageBuilder> messageBuilder)
+		{
+			if (messageBuilder == null)
+				throw new ArgumentNullException(nameof(messageBuilder));
+
+			if (!logger.IsEnabled(LogLevel.Warning))
+				return null;
+
+			var builder = new LogMessageBuilder(traceInfo)
+				.LogLevel(LogLevel.Warning);
+
+			messageBuilder.Invoke(builder);
+			var message = builder.Build();
+
+			logger.LogWarning($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+
+			return message;
+		}
+
+		public static void LogErrorMessage(this ILogger logger, IErrorMessage message)
+		{
+			if (message == null)
+				throw new ArgumentNullException(nameof(message));
+
+			message.LogLevel = LogLevel.Error;
+
+			logger.LogError($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+		}
+
+		public static IErrorMessage LogErrorMessage(this ILogger logger, ITraceInfo traceInfo, Action<ErrorMessageBuilder> messageBuilder)
+		{
+			if (messageBuilder == null)
+				throw new ArgumentNullException(nameof(messageBuilder));
+
+			var builder = new ErrorMessageBuilder(traceInfo)
+				.LogLevel(LogLevel.Error);
+
+			messageBuilder.Invoke(builder);
+			var message = builder.Build();
+
+			logger.LogError($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+
+			return message;
+		}
+
+		public static void LogCriticalMessage(this ILogger logger, IErrorMessage message)
+		{
+			if (message == null)
+				throw new ArgumentNullException(nameof(message));
+
+			message.LogLevel = LogLevel.Critical;
+
+			logger.LogCritical($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+		}
+
+		public static IErrorMessage LogCriticalMessage(this ILogger logger, ITraceInfo traceInfo, Action<ErrorMessageBuilder> messageBuilder)
+		{
+			if (messageBuilder == null)
+				throw new ArgumentNullException(nameof(messageBuilder));
+
+			var builder = new ErrorMessageBuilder(traceInfo)
+				.LogLevel(LogLevel.Critical);
+
+			messageBuilder.Invoke(builder);
+			var message = builder.Build();
+
+			logger.LogCritical($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+
+			return message;
+		}
+	}
+}

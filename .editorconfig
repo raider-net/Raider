@@ -1,0 +1,13 @@
+﻿root = true
+
+[*] 
+indent_style = tab 
+
+[*.cs] 
+indent_size = 4 
+insert_final_newline = true 
+charset = utf-8-bom 
+end_of_line = crlf
+
+# CA1051: Do not declare visible instance fields
+dotnet_diagnostic.CA1051.severity = none

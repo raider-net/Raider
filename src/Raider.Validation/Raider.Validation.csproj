@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<Description>Raider.Validation</Description>
+		<PackageTags></PackageTags>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<PackageReleaseNotes>Raider.Validation</PackageReleaseNotes>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/raider-net/Raider</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/raider-net/Raider</RepositoryUrl>
+		<PackageIcon>raider_icon.png</PackageIcon>
+		<NeutralLanguage>en</NeutralLanguage>
+		<Copyright>Copyright Raider</Copyright>
+		<Authors>Tomas Pilat</Authors>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\raider_icon.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="5.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Raider.Core\Raider.Core.csproj" />
+	</ItemGroup>
+
+</Project>

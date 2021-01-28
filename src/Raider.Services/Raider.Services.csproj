@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<Description>Raider.Services</Description>
+		<PackageTags></PackageTags>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<PackageReleaseNotes>Raider.Services</PackageReleaseNotes>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/raider-net/Raider</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/raider-net/Raider</RepositoryUrl>
+		<PackageIcon>raider_icon.png</PackageIcon>
+		<NeutralLanguage>en</NeutralLanguage>
+		<Copyright>Copyright Raider</Copyright>
+		<Authors>Tomas Pilat</Authors>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\raider_icon.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Raider.Commands\Raider.Commands.csproj" />
+	  <ProjectReference Include="..\Raider.EntityFrameworkCore\Raider.EntityFrameworkCore.csproj" />
+	  <ProjectReference Include="..\Raider.Validation\Raider.Validation.csproj" />
+	</ItemGroup>
+
+</Project>
