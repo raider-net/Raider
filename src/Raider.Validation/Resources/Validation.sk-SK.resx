@@ -177,6 +177,30 @@
   <data name="LessThan_WithProperty" xml:space="preserve">
     <value>Hodnota poľa '{PropertyName}' musí byť menšia ako '{ValueToCompare}'.</value>
   </data>
+  <data name="MultiEqual" xml:space="preserve">
+    <value>Hodnota poľa musí byť rovná jednej z hodnôt '[{ValuesToCompare}]'.</value>
+  </data>
+  <data name="MultiEqual_WithProperty" xml:space="preserve">
+    <value>Hodnota poľa '{PropertyName}' musí byť rovná jednej z hodnôt '[{ValuesToCompare}]'.</value>
+  </data>
+  <data name="MultiExclusiveBetween" xml:space="preserve">
+    <value>Hodnota poľa musí byť väčšia ako {From} a menšia ako {To}. Vami zadaná hodnota {Value}.</value>
+  </data>
+  <data name="MultiExclusiveBetween_WithProperty" xml:space="preserve">
+    <value>Hodnota poľa '{PropertyName}' musí byť väčšia ako {From} a menšia ako {To}. Vami zadaná hodnota {Value}.</value>
+  </data>
+  <data name="MultiInclusiveBetween" xml:space="preserve">
+    <value>Hodnota poľa musí byť medzi {From} a {To} (vrátane). Vami zadaná hodnota je {Value}.</value>
+  </data>
+  <data name="MultiInclusiveBetween_WithProperty" xml:space="preserve">
+    <value>Hodnota poľa '{PropertyName}' musí byť medzi {From} a {To} (vrátane). Vami zadaná hodnota je {Value}.</value>
+  </data>
+  <data name="MultiNotEqual" xml:space="preserve">
+    <value>Pole sa nesmie rovnať ani jednej z hodnôt '[{ValuesToCompare}]'.</value>
+  </data>
+  <data name="MultiNotEqual_WithProperty" xml:space="preserve">
+    <value>Pole '{PropertyName}' sa nesmie rovnať ani jednej z hodnôt '[{ValuesToCompare}]'.</value>
+  </data>
   <data name="NotDefaultOrEmpty" xml:space="preserve">
     <value>Pole nesmie byť prázdne.</value>
   </data>

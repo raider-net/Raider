@@ -12,18 +12,6 @@ namespace Raider.Validation.Test
 		public PrecisionScaleValidatorTest(ITestOutputHelper output)
 		{
 			_output = output ?? throw new ArgumentNullException(nameof(output));
-			var validationMgr = new ValidationManager();
-		}
-
-		private IValidator RegisterAndGet<T>(Validator<T> validator)
-		{
-			var validationMgr = new ValidationManager();
-			validationMgr.RegisterRulesFor<T, Command>(validator);
-			var registeredValidator = validationMgr.GetRulesFor(typeof(T), typeof(Command));
-			if (registeredValidator == null)
-				throw new InvalidOperationException("validationRuleSet == null");
-
-			return registeredValidator;
 		}
 
 		[Theory]
@@ -53,7 +41,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false));
 
 			var result = validator.Validate(person);
@@ -97,7 +85,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDecimalNotNull, x => x.PrecisionScale(4, 2, false));
 
 			var result = validator.Validate(person);

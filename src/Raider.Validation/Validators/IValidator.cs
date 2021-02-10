@@ -1,12 +1,12 @@
 ﻿namespace Raider.Validation
 {
-	public interface IValidator
+	public interface IValidator<T>
 	{
-		ValidationFrame ValidationFrame { get; }
-		ValidatorType ValidatorType { get; }
-		bool Conditional { get; }
-
 		IValidationDescriptor ToDescriptor();
-		ValidationResult Validate(object? obj);
+
+		ValidationResult Validate(T? obj);
+
+		//TODO
+		//Task<ValidationResult> ValidateAsync(object? obj, CancellationToken cancellation);
 	}
 }

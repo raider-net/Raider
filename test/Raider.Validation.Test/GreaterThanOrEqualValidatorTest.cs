@@ -12,18 +12,6 @@ namespace Raider.Validation.Test
 		public GreaterThanOrEqualValidatorTest(ITestOutputHelper output)
 		{
 			_output = output ?? throw new ArgumentNullException(nameof(output));
-			var validationMgr = new ValidationManager();
-		}
-
-		private IValidator RegisterAndGet<T>(Validator<T> validator)
-		{
-			var validationMgr = new ValidationManager();
-			validationMgr.RegisterRulesFor<T, Command>(validator);
-			var registeredValidator = validationMgr.GetRulesFor(typeof(T), typeof(Command));
-			if (registeredValidator == null)
-				throw new InvalidOperationException("validationRuleSet == null");
-
-			return registeredValidator;
 		}
 
 		[Theory]
@@ -53,7 +41,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyIntNullable, x => x.GreaterThanOrEqual(8));
 
 			var result = validator.Validate(person);
@@ -97,7 +85,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDecimalNullable, x => x.GreaterThanOrEqual(8));
 
 			var result = validator.Validate(person);
@@ -142,7 +130,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDateTimeNullable, x => x.GreaterThanOrEqual(new DateTime(2019, 12, 31)));
 
 			var result = validator.Validate(person);
@@ -202,7 +190,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyIntNotNull, x => x.GreaterThanOrEqual(8));
 
 			var result = validator.Validate(person);
@@ -246,7 +234,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDecimalNotNull, x => x.GreaterThanOrEqual(8));
 
 			var result = validator.Validate(person);
@@ -290,7 +278,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDateTimeNotNull, x => x.GreaterThanOrEqual(new DateTime(2019, 12, 31)));
 
 			var result = validator.Validate(person);
@@ -345,7 +333,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyStringNullable, x => x.GreaterThanOrEqual("k"));
 
 			var result = validator.Validate(person);
@@ -389,7 +377,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyStringNotNull, x => x.GreaterThanOrEqual("k"));
 
 			var result = validator.Validate(person);

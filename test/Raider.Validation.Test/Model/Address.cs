@@ -18,7 +18,7 @@ namespace Raider.Validation.Test.Model
 		public MyTestEnum? AddEnumNullable { get; set; }
 		public string AddStringNotNull { get; set; }
 		public string? AddStringNullable { get; set; }
-		public Profile AddProfileNotNull { get; set; }
-		public Profile? AddProfileNullable { get; set; }
+		public A AddProfileNotNull { get; set; }
+		public A? AddProfileNullable { get; set; }
 	}
 }

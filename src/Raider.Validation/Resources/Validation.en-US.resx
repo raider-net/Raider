@@ -177,6 +177,30 @@
   <data name="LessThan_WithProperty" xml:space="preserve">
     <value>'{PropertyName}' must be less than '{ValueToCompare}'.</value>
   </data>
+  <data name="MultiEqual" xml:space="preserve">
+    <value>Must be equal to one of the values '[{ValuesToCompare}]'.</value>
+  </data>
+  <data name="MultiEqual_WithProperty" xml:space="preserve">
+    <value>'{PropertyName}' must be equal to one of the values '[{ValuesToCompare}]'.</value>
+  </data>
+  <data name="MultiExclusiveBetween" xml:space="preserve">
+    <value>Must be between {From} and {To} (exclusive). You entered {Value}.</value>
+  </data>
+  <data name="MultiExclusiveBetween_WithProperty" xml:space="preserve">
+    <value>'{PropertyName}' must be between {From} and {To} (exclusive). You entered {Value}.</value>
+  </data>
+  <data name="MultiInclusiveBetween" xml:space="preserve">
+    <value>Must be between {From} and {To}. You entered {Value}.</value>
+  </data>
+  <data name="MultiInclusiveBetween_WithProperty" xml:space="preserve">
+    <value>'{PropertyName}' must be between {From} and {To}. You entered {Value}.</value>
+  </data>
+  <data name="MultiNotEqual" xml:space="preserve">
+    <value>Must not be equal to any of the values '[{ValuesToCompare}]'.</value>
+  </data>
+  <data name="MultiNotEqual_WithProperty" xml:space="preserve">
+    <value>'{PropertyName}' must not be equal to any of the values '[{ValuesToCompare}]'.</value>
+  </data>
   <data name="NotDefaultOrEmpty" xml:space="preserve">
     <value>Must not be empty.</value>
   </data>

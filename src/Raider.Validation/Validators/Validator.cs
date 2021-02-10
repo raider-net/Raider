@@ -1,4 +1,5 @@
 ﻿using Raider.Extensions;
+using Raider.Validation.Client;
 using Raider.Validation.Internal;
 using System;
 using System.Collections.Generic;
@@ -6,61 +7,92 @@ using System.Linq.Expressions;
 
 namespace Raider.Validation
 {
-	public abstract class Validator : IValidator
+	public abstract class ValidatorBase
 	{
 		public abstract bool Conditional { get; }
+		public abstract IClientConditionDefinition? ClientConditionDefinition { get; }
 		public abstract ValidatorType ValidatorType { get; }
-		internal Type CommandType { get; set; }
-		internal abstract ValidationFrame ValidationFrame { get; }
-
-		public abstract ValidationResult Validate(object? obj);
-
+		//internal abstract ValidationFrame ValidationFrame { get; }
 		internal Func<object, object>? Func { get; }
 
-		ValidationFrame IValidator.ValidationFrame => ValidationFrame;
-
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		public Validator(Func<object, object>? func)
+		public ValidatorBase(Func<object, object>? func)
 		{
 			Func = func;
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 		public abstract IValidationDescriptor ToDescriptor();
+
+		protected abstract ValidationResult Validate(object? obj);
+
+		internal abstract ValidationResult? Validate(ValidationContext ctx);
+
+		internal abstract void UpdateValidationFrame(ValidationFrame validationFrame);
 	}
 
-
-
-	public class Validator<T> : Validator, IValidator
+	public class Validator<T> : ValidatorBase, IValidator<T>
 	{
 		public override bool Conditional { get; }
-		public override ValidatorType ValidatorType { get; } = ValidatorType.NONE;
-		internal override ValidationFrame ValidationFrame { get; }
+		public override IClientConditionDefinition? ClientConditionDefinition { get; }
+		public override ValidatorType ValidatorType { get; } = ValidatorType.Validator;
+		internal ValidationFrame ValidationFrame { get; private set; }
 
-		private List<IValidator> _validators;
-		internal IReadOnlyList<IValidator> Validators => _validators;
+		private List<ValidatorBase> _validators;
+		internal IReadOnlyList<ValidatorBase> Validators => _validators;
 
-		public Validator()
-			: this(null)
-		{
-		}
-
-		public Validator(Func<object, object>? func)
+		private Validator(Func<object, object>? func, ValidationFrame? validationFrame, ValidatorType validatorType, bool conditional)
 			: base(func)
 		{
-			ValidationFrame = new ValidationFrameRoot(typeof(T).FullName ?? "$ROOT");
-			_validators = new List<IValidator>();
+			ValidationFrame = validationFrame ?? new ValidationFrameRoot(typeof(T).FullName ?? "$ROOT");
+			_validators = new List<ValidatorBase>();
+			ValidatorType = validatorType;
+			Conditional = conditional;
 		}
 
-		public Validator(Func<object, object>? func, ValidationFrame validationFrame, bool conditional)
+		internal Validator(Func<object, object>? func, ValidationFrame validationFrame, bool conditional, IClientConditionDefinition? clientConditionDefinition = null)
 			: base(func)
 		{
 			Conditional = conditional;
+			ClientConditionDefinition = clientConditionDefinition;
 			ValidationFrame = validationFrame ?? throw new ArgumentNullException(nameof(validationFrame));
-			_validators = new List<IValidator>();
+			_validators = new List<ValidatorBase>();
 		}
 
-		internal void AddValidator(IValidator validator)
+		public static Validator<T> Rules()
+		{
+			return new Validator<T>(null, null, ValidatorType.Validator, false);
+		}
+
+		public virtual Validator<T> AttachTo(Validator<T> parent)
+		{
+			if (this is not Validator<T>)
+				throw new InvalidOperationException($"Applicable only for {nameof(Validator<T>)}.");
+
+			foreach (var validator in _validators)
+			{
+				validator.UpdateValidationFrame(parent.ValidationFrame);
+				parent._validators.Add(validator);
+			}
+
+			return this;
+		}
+
+		internal override void UpdateValidationFrame(ValidationFrame validationFrame)
+		{
+			//if (ValidationFrame.Parent == null)
+			//{
+			//	ValidationFrame = validationFrame;
+			//}
+			//else
+			//{
+			//	ValidationFrame.SetParent(validationFrame);
+			//}
+
+			ValidationFrame.SetParent(validationFrame);
+		}
+
+		internal void AddValidator(ValidatorBase validator)
 		{
 			if (validator == null)
 				throw new ArgumentNullException(nameof(validator));
@@ -68,34 +100,28 @@ namespace Raider.Validation
 			_validators.Add(validator);
 		}
 
-		internal Validator<T> SoftClone(Type commandType)
-			=> new Validator<T>(Func)
-			{
-				CommandType = commandType ?? throw new ArgumentNullException(nameof(commandType)),
-				_validators = _validators, //netreba klonovat list, klonuje sa len preto aby manager mohol pri registracii nastavit CommandType
-			};
-
 		//TODO: VALIDATE ASYNC !!! ???
 
 		public override IValidationDescriptor ToDescriptor()
-			=> new ValidationDescriptor(ValidationFrame, ValidatorType, Conditional)
+			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition)
 				.AddValidators(Validators);
 
-		public override ValidationResult Validate(object? obj)
+		protected override ValidationResult Validate(object? obj)
 			=> Validate((T)obj);
 
-		public virtual ValidationResult Validate(ValidationContext ctx)
+		internal override ValidationResult? Validate(ValidationContext ctx)
 		{
 			if (ctx == null)
 				throw new ArgumentNullException(nameof(ctx));
 
 			var result = new ValidationResult();
 
+			var propertyValidatorType = typeof(PropertyValidator<,>);
 			foreach (var validator in _validators)
 			{
-				if (validator is PropertyValidator<T> propertyValidator)
+				if (validator is IPropertyValidator<T>)
 				{
-					var propResult = propertyValidator.Validate(ctx);
+					var propResult = validator.Validate(ctx);
 					result.Merge(propResult);
 
 					if (propResult.Interrupted)
@@ -104,8 +130,16 @@ namespace Raider.Validation
 
 				else if (validator is ConditionalValidator<T> conditionalValidator)
 				{
-					if (!conditionalValidator.Condition.Invoke(ctx.InstanceToValidate))
-						continue;
+					if (conditionalValidator.Condition != null)
+					{
+						if (!conditionalValidator.Condition.Invoke(ctx.InstanceToValidate))
+							continue;
+					}
+					else if (conditionalValidator.ClientConditionDefinition != null)
+					{
+						if (!conditionalValidator.ClientConditionDefinition.Execute(ctx.InstanceToValidate))
+							continue;
+					}
 
 					var condResult = conditionalValidator.Validate(ctx);
 					result.Merge(condResult);
@@ -116,8 +150,8 @@ namespace Raider.Validation
 
 				else if (validator is INavigationValidator<T> navigationValidator)
 				{
-					var navObj = ctx.InstanceToValidate == null ? null : navigationValidator.Func?.Invoke(ctx.InstanceToValidate);
-					var objResult = navigationValidator.Validate(new ValidationContext(navObj, ctx));
+					var navObj = ctx.InstanceToValidate == null ? null : validator.Func?.Invoke(ctx.InstanceToValidate);
+					var objResult = validator.Validate(new ValidationContext(navObj, ctx));
 					result.Merge(objResult);
 
 					if (objResult.Interrupted)
@@ -126,8 +160,8 @@ namespace Raider.Validation
 
 				else if (validator is IEnumerableValidator<T> enumerableValidator)
 				{
-					var enumerableObj = ctx.InstanceToValidate == null ? null : enumerableValidator.Func?.Invoke(ctx.InstanceToValidate);
-					var objResult = enumerableValidator.Validate(new ValidationContext(enumerableObj, ctx));
+					var enumerableObj = ctx.InstanceToValidate == null ? null : validator.Func?.Invoke(ctx.InstanceToValidate);
+					var objResult = validator.Validate(new ValidationContext(enumerableObj, ctx));
 					result.Merge(objResult);
 
 					if (objResult.Interrupted)
@@ -169,7 +203,6 @@ namespace Raider.Validation
 
 		public ValidationResult Validate(T? obj)
 		{
-			var result = new ValidationResult();
 			var ctx = new ValidationContext(obj, null);
 			return Validate(ctx);
 		}
@@ -227,9 +260,7 @@ namespace Raider.Validation
 			if (string.IsNullOrWhiteSpace(errorMessage))
 				throw new ArgumentNullException(nameof(errorMessage));
 
-			var newValidationFrame = ValidationFrame.AddProperty(expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
+			var newValidationFrame = ValidationFrame.AddProperty(typeof(T).FullName, expression.GetMemberName());
 
 			var getter = PropertyAccessor.GetCachedAccessor(expression);
 			var validator = new ErrorValidator<T, TProperty>(getter.ToNonGeneric(), newValidationFrame, condition.ToNonGeneric(), errorMessage);
@@ -238,27 +269,31 @@ namespace Raider.Validation
 			return this;
 		}
 
-		public Validator<T> ForProperty<TProperty>(Expression<Func<T, TProperty>> expression, Action<StructPropertyValidator<T, TProperty>> propertyValidator, Func<T?, bool>? condition = null)
-			where TProperty : struct
+		public Validator<T> ForProperty<TProperty>(
+			Expression<Func<T, TProperty>> expression,
+			Action<PropertyValidator<T, TProperty>> propertyValidator,
+			Func<T?, bool>? condition = null,
+			Func<ClientCondition<T>, IClientConditionDefinition>? clientCondition = null)
 		{
 			if (expression == null)
 				throw new ArgumentNullException(nameof(expression));
 			if (propertyValidator == null)
 				throw new ArgumentNullException(nameof(propertyValidator));
 
-			var newValidationFrame = ValidationFrame.AddProperty(expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
+			var newValidationFrame = ValidationFrame.AddProperty(typeof(T).FullName, expression.GetMemberName());
 
-			var propValidator = new StructPropertyValidator<T, TProperty>(expression, newValidationFrame, Conditional || condition != null);
+			var cc = new ClientCondition<T>();
+			var clientConditionDefinition = clientCondition?.Invoke(cc);
 
-			if (condition == null)
+			var propValidator = new PropertyValidator<T, TProperty>(PropertyAccessor.GetCachedAccessor(expression).ToNonGeneric(), newValidationFrame, condition != null, clientConditionDefinition);
+
+			if (condition == null && clientConditionDefinition == null)
 			{
 				AddValidator(propValidator);
 			}
 			else
 			{
-				var condValidator = new ConditionalValidator<T>(Func, ValidationFrame, condition?.ToNonGeneric());
+				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric(), clientConditionDefinition);
 				AddValidator(condValidator);
 				condValidator.AddValidator(propValidator);
 			}
@@ -267,121 +302,7 @@ namespace Raider.Validation
 			return this;
 		}
 
-		public Validator<T> ForProperty<TProperty>(Expression<Func<T, TProperty?>> expression, Action<NullableStructPropertyValidator<T, TProperty>> propertyValidator, Func<T?, bool>? condition = null)
-			where TProperty : struct
-		{
-			if (expression == null)
-				throw new ArgumentNullException(nameof(expression));
-			if (propertyValidator == null)
-				throw new ArgumentNullException(nameof(propertyValidator));
-
-			var newValidationFrame = ValidationFrame.AddProperty(expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
-
-			var propValidator = new NullableStructPropertyValidator<T, TProperty>(expression, newValidationFrame, Conditional || condition != null);
-
-			if (condition == null)
-			{
-				AddValidator(propValidator);
-			}
-			else
-			{
-				var condValidator = new ConditionalValidator<T>(Func, ValidationFrame, condition?.ToNonGeneric());
-				AddValidator(condValidator);
-				condValidator.AddValidator(propValidator);
-			}
-
-			propertyValidator.Invoke(propValidator);
-			return this;
-		}
-
-		public Validator<T> ForProperty(Expression<Func<T, string?>> expression, Action<ClassPropertyValidator<T, string>> propertyValidator, Func<T?, bool>? condition = null)
-		{
-			if (expression == null)
-				throw new ArgumentNullException(nameof(expression));
-			if (propertyValidator == null)
-				throw new ArgumentNullException(nameof(propertyValidator));
-
-			var newValidationFrame = ValidationFrame.AddProperty(expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
-
-			var propValidator = new ClassPropertyValidator<T, string>(expression, newValidationFrame, Conditional || condition != null);
-
-			if (condition == null)
-			{
-				AddValidator(propValidator);
-			}
-			else
-			{
-				var condValidator = new ConditionalValidator<T>(Func, ValidationFrame, condition?.ToNonGeneric());
-				AddValidator(condValidator);
-				condValidator.AddValidator(propValidator);
-			}
-
-			propertyValidator.Invoke(propValidator);
-			return this;
-		}
-
-		public Validator<T> ForProperty<TProperty>(Expression<Func<T, TProperty?>> expression, Action<ClassPropertyValidator<T, TProperty>> propertyValidator, Func<T?, bool>? condition = null)
-			where TProperty : class
-		{
-			if (expression == null)
-				throw new ArgumentNullException(nameof(expression));
-			if (propertyValidator == null)
-				throw new ArgumentNullException(nameof(propertyValidator));
-
-			var newValidationFrame = ValidationFrame.AddProperty(expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
-
-			var propValidator = new ClassPropertyValidator<T, TProperty>(expression, newValidationFrame, Conditional || condition != null);
-
-			if (condition == null)
-			{
-				AddValidator(propValidator);
-			}
-			else
-			{
-				var condValidator = new ConditionalValidator<T>(Func, ValidationFrame, condition?.ToNonGeneric());
-				AddValidator(condValidator);
-				condValidator.AddValidator(propValidator);
-			}
-
-			propertyValidator.Invoke(propValidator);
-			return this;
-		}
-
-		public Validator<T> ForProperty<TItem>(Expression<Func<T, IEnumerable<TItem>?>> expression, Action<ClassPropertyValidator<T, IEnumerable<TItem>>> propertyValidator, Func<T?, bool>? condition = null)
-		{
-			if (expression == null)
-				throw new ArgumentNullException(nameof(expression));
-			if (propertyValidator == null)
-				throw new ArgumentNullException(nameof(propertyValidator));
-
-			var newValidationFrame = ValidationFrame.AddProperty(expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
-
-			var propValidator = new ClassPropertyValidator<T, IEnumerable<TItem>>(expression, newValidationFrame, Conditional || condition != null);
-
-			if (condition == null)
-			{
-				AddValidator(propValidator);
-			}
-			else
-			{
-				var condValidator = new ConditionalValidator<T>(Func, ValidationFrame, condition?.ToNonGeneric());
-				AddValidator(condValidator);
-				condValidator.AddValidator(propValidator);
-			}
-
-			propertyValidator.Invoke(propValidator);
-			return this;
-		}
-
-		public Validator<T> ForNavigation<TProperty>(Expression<Func<T, TProperty?>> expression, Action<NavigationValidator<T, TProperty>> validator, Func<T?, bool>? condition = null)
+		public Validator<T> ForNavigation<TProperty>(Expression<Func<T, TProperty?>> expression, Action<Validator<TProperty>> validator, Func<T?, bool>? condition = null)
 			where TProperty : class
 		{
 			if (expression == null)
@@ -390,10 +311,8 @@ namespace Raider.Validation
 				throw new ArgumentNullException(nameof(validator));
 
 			var newValidationFrame = ValidationFrame.AddNavigation(typeof(TProperty).FullName, expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
 
-			var navigationValidator = new NavigationValidator<T, TProperty>(expression, newValidationFrame, Conditional || condition != null);
+			var navigationValidator = new NavigationValidator<T, TProperty>(expression, newValidationFrame, condition != null);
 
 			if (condition == null)
 			{
@@ -401,7 +320,7 @@ namespace Raider.Validation
 			}
 			else
 			{
-				var condValidator = new ConditionalValidator<T>(Func, ValidationFrame, condition?.ToNonGeneric());
+				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric());
 				AddValidator(condValidator);
 				condValidator.AddValidator(navigationValidator);
 			}
@@ -410,7 +329,7 @@ namespace Raider.Validation
 			return this;
 		}
 
-		public Validator<T> ForEach<TItem>(Expression<Func<T, IEnumerable<TItem>>> expression, Action<EnumerableValidator<T, TItem>> validator, Func<T?, bool>? condition = null)
+		public Validator<T> ForEach<TItem>(Expression<Func<T, IEnumerable<TItem>>> expression, Action<Validator<TItem>> validator, Func<T?, bool>? condition = null)
 		{
 			if (expression == null)
 				throw new ArgumentNullException(nameof(expression));
@@ -418,10 +337,8 @@ namespace Raider.Validation
 				throw new ArgumentNullException(nameof(validator));
 
 			var newValidationFrame = ValidationFrame.AddEnumeration(typeof(TItem).FullName, expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
 
-			var enumerableValidator = new EnumerableValidator<T, TItem>(expression, newValidationFrame, Conditional || condition != null);
+			var enumerableValidator = new EnumerableValidator<T, TItem>(expression, newValidationFrame, condition != null);
 
 			if (condition == null)
 			{
@@ -429,7 +346,7 @@ namespace Raider.Validation
 			}
 			else
 			{
-				var condValidator = new ConditionalValidator<T>(Func, ValidationFrame, condition?.ToNonGeneric());
+				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric());
 				AddValidator(condValidator);
 				condValidator.AddValidator(enumerableValidator);
 			}
@@ -438,32 +355,28 @@ namespace Raider.Validation
 			return this;
 		}
 
-		public NavigationValidator<T, TProperty> GetNavigateValidator<TProperty>(Expression<Func<T, TProperty?>> expression, bool setValidatorChain = true)
+		public Validator<TProperty> GetNavigateValidator<TProperty>(Expression<Func<T, TProperty?>> expression, bool setValidatorChain = true)
 			where TProperty : class
 		{
 			if (expression == null)
 				throw new ArgumentNullException(nameof(expression));
 
 			var newValidationFrame = ValidationFrame.AddNavigation(typeof(TProperty).FullName, expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
 
 			var navigationValidator = new NavigationValidator<T, TProperty>(expression, newValidationFrame, Conditional);
-			
+
 			if (setValidatorChain)
 				AddValidator(navigationValidator);
-			
+
 			return navigationValidator;
 		}
 
-		public EnumerableValidator<T, TItem> GetEnumerableValidator<TItem>(Expression<Func<T, IEnumerable<TItem>>> expression, bool setValidatorChain = true)
+		public Validator<TItem> GetEnumerableValidator<TItem>(Expression<Func<T, IEnumerable<TItem>>> expression, bool setValidatorChain = true)
 		{
 			if (expression == null)
 				throw new ArgumentNullException(nameof(expression));
 
 			var newValidationFrame = ValidationFrame.AddEnumeration(typeof(TItem).FullName, expression.GetMemberName());
-			if (newValidationFrame == null)
-				throw new InvalidOperationException($"Validator for {expression} already exists.");
 
 			var enumerableValidator = new EnumerableValidator<T, TItem>(expression, newValidationFrame, Conditional);
 
@@ -471,6 +384,11 @@ namespace Raider.Validation
 				AddValidator(enumerableValidator);
 
 			return enumerableValidator;
+		}
+
+		public override string ToString()
+		{
+			return $"{ValidatorType}<{typeof(T).FullName?.GetLastSplitSubstring(".")}> | {ValidationFrame} | Conditional={Conditional} | Validators={Validators.Count}";
 		}
 	}
 }

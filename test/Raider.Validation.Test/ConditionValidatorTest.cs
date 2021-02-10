@@ -12,18 +12,6 @@ namespace Raider.Validation.Test
 		public ConditionValidatorTest(ITestOutputHelper output)
 		{
 			_output = output ?? throw new ArgumentNullException(nameof(output));
-			var validationMgr = new ValidationManager();
-		}
-
-		private IValidator RegisterAndGet<T>(Validator<T> validator)
-		{
-			var validationMgr = new ValidationManager();
-			validationMgr.RegisterRulesFor<T, Command>(validator);
-			var registeredValidator = validationMgr.GetRulesFor(typeof(T), typeof(Command));
-			if (registeredValidator == null)
-				throw new InvalidOperationException("validationRuleSet == null");
-
-			return registeredValidator;
 		}
 
 		[Theory]
@@ -53,8 +41,8 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -66,7 +54,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyIntNullable", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -97,8 +85,8 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyDecimalNullable, x => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.MyDecimalNullable, x => x.NotDefaultOrEmptyNullable(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -110,7 +98,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyDecimalNullable", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -141,8 +129,8 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyBoolNullable, x => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.MyBoolNullable, x => x.NotDefaultOrEmptyNullable(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -154,7 +142,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyBoolNullable", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -185,8 +173,8 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -198,7 +186,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyDateTimeNullable", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -229,8 +217,8 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyGuidNullable, x => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.MyGuidNullable, x => x.NotDefaultOrEmptyNullable(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -242,7 +230,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyGuidNullable", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -289,7 +277,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyIntNotNull, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
@@ -302,7 +290,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyIntNotNull", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -333,7 +321,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDecimalNotNull, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
@@ -346,7 +334,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyDecimalNotNull", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -377,7 +365,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyBoolNotNull, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
@@ -390,7 +378,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyBoolNotNull", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -421,7 +409,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDateTimeNotNull, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
@@ -434,7 +422,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyDateTimeNotNull", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -465,7 +453,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyGuidNotNull, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
@@ -478,7 +466,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyGuidNotNull", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyStruct, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -515,7 +503,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyStringNullable, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
@@ -528,7 +516,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyStringNullable", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyClass, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -559,7 +547,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyStringNotNull, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
@@ -572,7 +560,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyStringNotNull", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyClass, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -590,20 +578,20 @@ namespace Raider.Validation.Test
 			switch (type)
 			{
 				case ValidationValueType.Null:
-					person.MyProfileNullable = null;
+					person.ANullable = null;
 					break;
 				case ValidationValueType.Empty:
-					person.MyProfileNullable = new Profile();
+					person.ANullable = new A();
 					break;
 				case ValidationValueType.Correct:
-					person.MyProfileNullable = new Profile();
+					person.ANullable = new A();
 					break;
 				default:
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyProfileNullable, x => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.ANullable, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -614,8 +602,8 @@ namespace Raider.Validation.Test
 			else
 			{
 				Assert.Equal(1, result.Errors.Count);
-				Assert.Equal("_.MyProfileNullable", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyClass, result.Errors[0].Type);
+				Assert.Equal("_.ANullable", result.Errors[0].ValidationFrame.ToString());
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -633,20 +621,20 @@ namespace Raider.Validation.Test
 			switch (type)
 			{
 				case ValidationValueType.Null:
-					person.MyProfileNotNull = null;
+					person.ANotNull = null;
 					break;
 				case ValidationValueType.Empty:
-					person.MyProfileNotNull = new Profile();
+					person.ANotNull = new A();
 					break;
 				case ValidationValueType.Correct:
-					person.MyProfileNotNull = new Profile();
+					person.ANotNull = new A();
 					break;
 				default:
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyProfileNotNull, x => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.ANotNull, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -657,8 +645,8 @@ namespace Raider.Validation.Test
 			else
 			{
 				Assert.Equal(1, result.Errors.Count);
-				Assert.Equal("_.MyProfileNotNull", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyClass, result.Errors[0].Type);
+				Assert.Equal("_.ANotNull", result.Errors[0].ValidationFrame.ToString());
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -688,8 +676,8 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyAddressesNullable, (ClassPropertyValidator<Person, System.Collections.Generic.IEnumerable<Address>> x) => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.MyAddressesNullable, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -701,7 +689,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyAddressesNullable", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyClass, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 
@@ -731,8 +719,8 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForProperty(x => x.MyAddressesNotNull, (ClassPropertyValidator<Person, System.Collections.Generic.IEnumerable<Address>> x) => x.NotDefaultOrEmpty(), x => condition);
+			var validator = Validator<Person>.Rules()
+					.ForProperty(x => x.MyAddressesNotNull, x => x.NotDefaultOrEmpty(), x => condition);
 
 			var result = validator.Validate(person);
 
@@ -744,7 +732,7 @@ namespace Raider.Validation.Test
 			{
 				Assert.Equal(1, result.Errors.Count);
 				Assert.Equal("_.MyAddressesNotNull", result.Errors[0].ValidationFrame.ToString());
-				Assert.Equal(ValidatorType.NotDefaultOrEmptyClass, result.Errors[0].Type);
+				Assert.Equal(ValidatorType.NotDefaultOrEmpty, result.Errors[0].Type);
 			}
 		}
 	}

@@ -12,18 +12,6 @@ namespace Raider.Validation.Test
 		public NavigationValidatorTest(ITestOutputHelper output)
 		{
 			_output = output ?? throw new ArgumentNullException(nameof(output));
-			var validationMgr = new ValidationManager();
-		}
-
-		private IValidator RegisterAndGet<T>(Validator<T> validator)
-		{
-			var validationMgr = new ValidationManager();
-			validationMgr.RegisterRulesFor<T, Command>(validator);
-			var registeredValidator = validationMgr.GetRulesFor(typeof(T), typeof(Command));
-			if (registeredValidator == null)
-				throw new InvalidOperationException("validationRuleSet == null");
-
-			return registeredValidator;
 		}
 
 		[Theory]
@@ -37,20 +25,20 @@ namespace Raider.Validation.Test
 			switch (type)
 			{
 				case ValidationValueType.Null:
-					person.MyProfileNullable = null;
+					person.ANullable = null;
 					break;
 				case ValidationValueType.Empty:
-					person.MyProfileNullable = new Profile();
+					person.ANullable = new A();
 					break;
 				case ValidationValueType.Correct:
-					person.MyProfileNullable = new Profile { ProfStringNullable = "test" };
+					person.ANullable = new A { AStringNullable = "test" };
 					break;
 				default:
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForNavigation(x => x.MyProfileNullable, x => x.ForProperty(p => p.ProfStringNullable, v => v.EqualsTo("test")));
+			var validator = Validator<Person>.Rules()
+					.ForNavigation(x => x.ANullable, x => x.ForProperty(p => p.AStringNullable, v => v.EqualsTo("test")));
 
 			var result = validator.Validate(person);
 
@@ -61,7 +49,7 @@ namespace Raider.Validation.Test
 			else
 			{
 				Assert.Equal(1, result.Errors.Count);
-				Assert.Equal("_.MyProfileNullable.ProfStringNullable", result.Errors[0].ValidationFrame.ToString());
+				Assert.Equal("_.ANullable.AStringNullable", result.Errors[0].ValidationFrame.ToString());
 				Assert.Equal(ValidatorType.Equal, result.Errors[0].Type);
 			}
 		}
@@ -77,20 +65,20 @@ namespace Raider.Validation.Test
 			switch (type)
 			{
 				case ValidationValueType.Null:
-					person.MyProfileNotNull = null;
+					person.ANotNull = null;
 					break;
 				case ValidationValueType.Empty:
-					person.MyProfileNotNull = new Profile();
+					person.ANotNull = new A();
 					break;
 				case ValidationValueType.Correct:
-					person.MyProfileNotNull = new Profile { ProfStringNullable = "test" };
+					person.ANotNull = new A { AStringNullable = "test" };
 					break;
 				default:
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
-					.ForNavigation(x => x.MyProfileNotNull, x => x.ForProperty(p => p.ProfStringNullable, v => v.EqualsTo("test")));
+			var validator = Validator<Person>.Rules()
+					.ForNavigation(x => x.ANotNull, x => x.ForProperty(p => p.AStringNullable, v => v.EqualsTo("test")));
 
 			var result = validator.Validate(person);
 
@@ -101,7 +89,7 @@ namespace Raider.Validation.Test
 			else
 			{
 				Assert.Equal(1, result.Errors.Count);
-				Assert.Equal("_.MyProfileNotNull.ProfStringNullable", result.Errors[0].ValidationFrame.ToString());
+				Assert.Equal("_.ANotNull.AStringNullable", result.Errors[0].ValidationFrame.ToString());
 				Assert.Equal(ValidatorType.Equal, result.Errors[0].Type);
 			}
 		}

@@ -12,28 +12,16 @@ namespace Raider.Validation.Test
 		public ErrorValidatorTest(ITestOutputHelper output)
 		{
 			_output = output ?? throw new ArgumentNullException(nameof(output));
-			var validationMgr = new ValidationManager();
-		}
-
-		private IValidator RegisterAndGet<T>(Validator<T> validator)
-		{
-			var validationMgr = new ValidationManager();
-			validationMgr.RegisterRulesFor<T, Command>(validator);
-			var registeredValidator = validationMgr.GetRulesFor(typeof(T), typeof(Command));
-			if (registeredValidator == null)
-				throw new InvalidOperationException("validationRuleSet == null");
-
-			return registeredValidator;
 		}
 
 		[Fact]
 		[Trait("Category", "base")]
 		public void Base_ObjectError()
 		{
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.WithError(x => x?.MyStringNullable == null, "E001");
 
-			var result = validator.Validate((object?)null);
+			var result = validator.Validate(null);
 
 			Assert.Equal(1, result.Errors.Count);
 			Assert.Equal("_", result.Errors[0].ValidationFrame.ToString());
@@ -46,10 +34,10 @@ namespace Raider.Validation.Test
 		[Trait("Category", "base")]
 		public void Base_PropertyError()
 		{
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.WithPropertyError(x => x.MyDateTimeNotNull, x => x?.MyStringNullable == null, "E001");
 
-			var result = validator.Validate((object?)null);
+			var result = validator.Validate(null);
 
 			Assert.Equal(1, result.Errors.Count);
 			Assert.Equal("_.MyDateTimeNotNull", result.Errors[0].ValidationFrame.ToString());
@@ -62,13 +50,13 @@ namespace Raider.Validation.Test
 		[Trait("Category", "base")]
 		public void Base_NavigationError()
 		{
-			var validator = new Validator<Person>()
-				.ForNavigation(x => x.MyProfileNotNull, x => x.WithPropertyError(e => e.ProfDecimalNotNull, c => true, "E001"));
+			var validator = Validator<Person>.Rules()
+				.ForNavigation(x => x.ANotNull, x => x.WithPropertyError(e => e.ADecimalNotNull, c => true, "E001"));
 
-			var result = validator.Validate((object?)null);
+			var result = validator.Validate(null);
 
 			Assert.Equal(1, result.Errors.Count);
-			Assert.Equal("_.MyProfileNotNull.ProfDecimalNotNull", result.Errors[0].ValidationFrame.ToString());
+			Assert.Equal("_.ANotNull.ADecimalNotNull", result.Errors[0].ValidationFrame.ToString());
 			Assert.Equal(ValidatorType.ErrorProperty, result.Errors[0].Type);
 			Assert.Equal("E001", result.Errors[0].Message);
 		}
@@ -78,10 +66,10 @@ namespace Raider.Validation.Test
 		[Trait("Category", "base")]
 		public void Base_EnumerableError()
 		{
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 				.ForNavigation(x => x.MyAddressesNotNull, x => x.WithError(c => true, "E001"));
 
-			var result = validator.Validate((object?)null);
+			var result = validator.Validate(null);
 
 			Assert.Equal(1, result.Errors.Count);
 			Assert.Equal("_.MyAddressesNotNull", result.Errors[0].ValidationFrame.ToString());
@@ -105,7 +93,7 @@ namespace Raider.Validation.Test
 		{
 			var person = new Person();
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.WithError(x => x?.MyStringNullable == null, "E001");
 
 			var result = validator.Validate(person);
@@ -123,7 +111,7 @@ namespace Raider.Validation.Test
 		{
 			var person = new Person();
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.WithPropertyError(x => x.MyDateTimeNotNull, x => x?.MyStringNullable == null, "E001");
 
 			var result = validator.Validate(person);
@@ -141,13 +129,13 @@ namespace Raider.Validation.Test
 		{
 			var person = new Person();
 
-			var validator = new Validator<Person>()
-				.ForNavigation(x => x.MyProfileNotNull, x => x.WithPropertyError(e => e.ProfDecimalNotNull, c => true, "E001"));
+			var validator = Validator<Person>.Rules()
+				.ForNavigation(x => x.ANotNull, x => x.WithPropertyError(e => e.ADecimalNotNull, c => true, "E001"));
 
 			var result = validator.Validate(person);
 
 			Assert.Equal(1, result.Errors.Count);
-			Assert.Equal("_.MyProfileNotNull.ProfDecimalNotNull", result.Errors[0].ValidationFrame.ToString());
+			Assert.Equal("_.ANotNull.ADecimalNotNull", result.Errors[0].ValidationFrame.ToString());
 			Assert.Equal(ValidatorType.ErrorProperty, result.Errors[0].Type);
 			Assert.Equal("E001", result.Errors[0].Message);
 		}
@@ -159,7 +147,7 @@ namespace Raider.Validation.Test
 		{
 			var person = new Person();
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 				.ForNavigation(x => x.MyAddressesNotNull, x => x.WithError(c => true, "E001"));
 
 			var result = validator.Validate(person);
@@ -184,7 +172,7 @@ namespace Raider.Validation.Test
 				}
 			};
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 				.ForEach(x => x.MyAddressesNotNull, x => x.WithPropertyError(e => e.AddDecimalNotNull, c => true, "E001"));
 
 			var result = validator.Validate(person);

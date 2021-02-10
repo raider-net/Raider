@@ -12,18 +12,6 @@ namespace Raider.Validation.Test
 		public NotEqualValidatorTest(ITestOutputHelper output)
 		{
 			_output = output ?? throw new ArgumentNullException(nameof(output));
-			var validationMgr = new ValidationManager();
-		}
-
-		private IValidator RegisterAndGet<T>(Validator<T> validator)
-		{
-			var validationMgr = new ValidationManager();
-			validationMgr.RegisterRulesFor<T, Command>(validator);
-			var registeredValidator = validationMgr.GetRulesFor(typeof(T), typeof(Command));
-			if (registeredValidator == null)
-				throw new InvalidOperationException("validationRuleSet == null");
-
-			return registeredValidator;
 		}
 
 		[Theory]
@@ -54,7 +42,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyIntNullable, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -99,7 +87,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDecimalNullable, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -144,7 +132,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyBoolNullable, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -189,7 +177,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDateTimeNullable, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -234,7 +222,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyGuidNullable, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -295,7 +283,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyIntNotNull, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -340,7 +328,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDecimalNotNull, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -385,7 +373,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyBoolNotNull, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -430,7 +418,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyDateTimeNotNull, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -475,7 +463,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyGuidNotNull, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -530,7 +518,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyStringNullable, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);
@@ -574,7 +562,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForProperty(x => x.MyStringNotNull, x => x.NotEqualsTo(validValue));
 
 			var result = validator.Validate(person);

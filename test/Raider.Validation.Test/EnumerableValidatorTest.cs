@@ -12,18 +12,6 @@ namespace Raider.Validation.Test
 		public EnumerableValidatorTest(ITestOutputHelper output)
 		{
 			_output = output ?? throw new ArgumentNullException(nameof(output));
-			var validationMgr = new ValidationManager();
-		}
-
-		private IValidator RegisterAndGet<T>(Validator<T> validator)
-		{
-			var validationMgr = new ValidationManager();
-			validationMgr.RegisterRulesFor<T, Command>(validator);
-			var registeredValidator = validationMgr.GetRulesFor(typeof(T), typeof(Command));
-			if (registeredValidator == null)
-				throw new InvalidOperationException("validationRuleSet == null");
-
-			return registeredValidator;
 		}
 
 		[Theory]
@@ -53,9 +41,9 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForEach(x => x.MyAddressesNullable, x => x.ForProperty(p => p.AddStringNullable, v => v.EqualsTo("test")))
-					.ForProperty(x => x.MyAddressesNullable, (ClassPropertyValidator<Person, System.Collections.Generic.IEnumerable<Address>> x) => x.DefaultOrEmpty());
+					.ForProperty(x => x.MyAddressesNullable, x => x.DefaultOrEmpty());
 
 			var result = validator.Validate(person);
 
@@ -98,7 +86,7 @@ namespace Raider.Validation.Test
 					throw new NotImplementedException();
 			}
 
-			var validator = new Validator<Person>()
+			var validator = Validator<Person>.Rules()
 					.ForEach(x => x.MyAddressesNotNull, x => x.ForProperty(p => p.AddStringNullable, v => v.EqualsTo("test")));
 
 			var result = validator.Validate(person);
