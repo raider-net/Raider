@@ -1,6 +1,7 @@
-﻿using Raider.Queries.Aspects;
-using Raider.DependencyInjection;
+﻿using Raider.DependencyInjection;
 using Raider.Exceptions;
+using Raider.Localization;
+using Raider.Queries.Aspects;
 using Raider.Trace;
 using System;
 
@@ -8,8 +9,8 @@ namespace Raider.Queries.Internal
 {
 	internal abstract class QueryProcessor<TResult> : QueryProcessorBase
 	{
-		public QueryProcessor(ServiceFactory serviceFactory)
-			: base(serviceFactory)
+		public QueryProcessor()
+			: base()
 		{
 		}
 
@@ -17,38 +18,41 @@ namespace Raider.Queries.Internal
 			ITraceInfo traceInfo,
 			IQueryHandler handler,
 			IQuery<TResult> query,
-			IQueryInterceptorOptions? options);
+			IQueryInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources);
 
 		public abstract IQueryResult<TResult> Execute(
 			ITraceInfo traceInfo,
 			IQueryHandler handler,
 			IQuery<TResult> query,
-			IQueryInterceptorOptions? options);
+			IQueryInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources);
 	}
 
 	internal class QueryProcessor<TQuery, TResult> : QueryProcessor<TResult>
 		where TQuery : IQuery<TResult>
 	{
 		private readonly IQueryHandlerRegistry _handlerRegistry;
-		private readonly IQueryHandlerFactory _handlerFactory;
 
 		public QueryProcessor(
-			IQueryHandlerRegistry handlerRegistry,
-			IQueryHandlerFactory handlerFactory,
-			ServiceFactory serviceFactory)
-			: base(serviceFactory)
+			IQueryHandlerRegistry handlerRegistry)
+			: base()
 		{
 			_handlerRegistry = handlerRegistry ?? throw new ArgumentNullException(nameof(handlerRegistry));
-			_handlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
 
 			var _handlerType = _handlerRegistry.GetQueryHandler<TQuery, TResult>();
 			if (_handlerType == null)
 				throw new ConfigurationException($"No synchronous handler registered for query: {typeof(TQuery).FullName}");
 		}
 
-		public override IQueryHandler CreateHandler()
+		public override IQueryHandler CreateHandler(IQueryHandlerFactory handlerFactory)
 		{
-			var handler = _handlerFactory.CreateQueryHandler<TQuery, TResult>();
+			if (handlerFactory == null)
+				throw new ArgumentNullException(nameof(handlerFactory));
+
+			var handler = handlerFactory.CreateQueryHandler<TQuery, TResult>();
 			if (handler == null)
 				throw new InvalidOperationException($"Handler could not be created for type: {typeof(IQueryHandler<TQuery, TResult>).FullName}");
 
@@ -59,7 +63,9 @@ namespace Raider.Queries.Internal
 			ITraceInfo traceInfo,
 			IQueryHandler handler,
 			IQuery<TResult> query,
-			IQueryInterceptorOptions? options)
+			IQueryInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources)
 		{
 			var hnd = (IQueryHandler<TQuery, TResult>)handler;
 
@@ -73,7 +79,7 @@ namespace Raider.Queries.Internal
 			}
 
 			return interceptor == null
-				? hnd.CanExecute((TQuery)query, CreateQueryHandlerContext(traceInfo))
+				? hnd.CanExecute((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext, applicationResources))
 				: interceptor.InterceptCanExecute(traceInfo, hnd, (TQuery)query, options);
 		}
 
@@ -81,7 +87,9 @@ namespace Raider.Queries.Internal
 			ITraceInfo traceInfo,
 			IQueryHandler handler,
 			IQuery<TResult> query,
-			IQueryInterceptorOptions? options)
+			IQueryInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources)
 		{
 			var hnd = (IQueryHandler<TQuery, TResult>)handler;
 
@@ -95,14 +103,19 @@ namespace Raider.Queries.Internal
 			}
 
 			return interceptor == null
-				? hnd.Execute((TQuery)query, CreateQueryHandlerContext(traceInfo))
+				? hnd.Execute((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext, applicationResources))
 				: interceptor.InterceptExecute(traceInfo, hnd, (TQuery)query, options);
 		}
 
-		public override void DisposeHandler(IQueryHandler? handler)
+		public override void DisposeHandler(IQueryHandlerFactory handlerFactory, IQueryHandler? handler)
 		{
 			if (handler != null)
-				_handlerFactory.Release(handler);
+			{
+				if (handlerFactory == null)
+					throw new ArgumentNullException(nameof(handlerFactory));
+
+				handlerFactory.Release(handler);
+			}
 		}
 	}
 }

@@ -1,5 +1,4 @@
-﻿using Raider.DependencyInjection;
-using Raider.Localization;
+﻿using Raider.Localization;
 using Raider.Trace;
 using System;
 
@@ -7,29 +6,21 @@ namespace Raider.Queries.Internal
 {
 	internal abstract class QueryProcessorBase
 	{
-		protected ServiceFactory ServiceFactory { get; }
-		protected IApplicationContext ApplicationContext { get; }
-		protected IApplicationResources ApplicationResources { get; }
+		public abstract IQueryHandler CreateHandler(IQueryHandlerFactory handlerFactory);
 
-		public abstract IQueryHandler CreateHandler();
+		public abstract void DisposeHandler(IQueryHandlerFactory handlerFactory, IQueryHandler? handler);
 
-		public abstract void DisposeHandler(IQueryHandler? handler);
-
-		public QueryProcessorBase(ServiceFactory serviceFactory)
+		protected IQueryHandlerContext CreateQueryHandlerContext(ITraceInfo traceInfo, IApplicationContext applicationContext, IApplicationResources applicationResources)
 		{
-			ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
-			ApplicationContext = ServiceFactory.GetRequiredInstance<IApplicationContext>();
-			ApplicationResources = ServiceFactory.GetRequiredInstance<IApplicationResources>();
-		}
+			if (applicationContext == null)
+				throw new ArgumentNullException(nameof(applicationContext));
 
-		protected IQueryHandlerContext CreateQueryHandlerContext(ITraceInfo traceInfo)
-		{
 			return new QueryHandlerContextInternal
 			{
 				TraceInfo = traceInfo,
-				Principal = ApplicationContext.Principal,
-				User = ApplicationContext.User,
-				ApplicationResources = ApplicationResources
+				Principal = applicationContext.Principal,
+				User = applicationContext.User,
+				ApplicationResources = applicationResources ?? throw new ArgumentNullException(nameof(applicationResources))
 			};
 		}
 	}

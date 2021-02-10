@@ -54,7 +54,7 @@ namespace Raider.Queries.Internal
 
 			_logger.LogTraceMessage(
 				traceInfo,
-				x => x.LogCode(LogCode.MethodEntry)
+				x => x.LogCode(LogCode.Method_In)
 						.CommandQueryName(queryType?.FullName));
 
 			try
@@ -65,9 +65,9 @@ namespace Raider.Queries.Internal
 				queryProcessor = (QueryProcessor<TResult>)_queryProcessors.GetOrAdd(queryType,
 					t => CreateQueryProcessor(typeof(QueryProcessor<,>).MakeGenericType(queryType, typeof(TResult))));
 
-				handler = queryProcessor.CreateHandler();
+				handler = queryProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = queryProcessor.CanExecute(traceInfo, handler, query, options);
+				var result = queryProcessor.CanExecute(traceInfo, handler, query, options, _applicationContext, _applicationResources);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -84,7 +84,7 @@ namespace Raider.Queries.Internal
 						traceInfo,
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(CanExecute)}<{nameof(TResult)}> error - Query = {query?.GetType().FullName ?? "NULL"}")
-							.LogCode((long)QueryLogCode.QueryDispatcherError)
+							.LogCode(QueryLogCode.Ex_QryDisp.ToString())
 							.ClientMessage(_applicationResources.GlobalExceptionMessage)
 							.CommandQueryName(queryType?.FullName));
 
@@ -94,11 +94,11 @@ namespace Raider.Queries.Internal
 			}
 			finally
 			{
-				queryProcessor?.DisposeHandler(handler);
+				queryProcessor?.DisposeHandler(_handlerFactory, handler);
 
 				_logger.LogDebugMessage(
 					traceInfo,
-					x => x.LogCode(LogCode.MethodExit)
+					x => x.LogCode(LogCode.Method_Out)
 						.MethodCallElapsedMilliseconds(methodCallElapsedMilliseconds)
 						.CommandQueryName(queryType?.FullName));
 			}
@@ -118,7 +118,7 @@ namespace Raider.Queries.Internal
 
 			_logger.LogTraceMessage(
 				traceInfo,
-				x => x.LogCode(LogCode.MethodEntry)
+				x => x.LogCode(LogCode.Method_In)
 						.CommandQueryName(queryType?.FullName));
 
 			try
@@ -129,9 +129,9 @@ namespace Raider.Queries.Internal
 				queryProcessor = (AsyncQueryProcessor<TResult>)_asyncQueryProcessors.GetOrAdd(queryType,
 					t => CreateQueryProcessor(typeof(AsyncQueryProcessor<,>).MakeGenericType(queryType, typeof(TResult))));
 
-				handler = queryProcessor.CreateHandler();
+				handler = queryProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = await queryProcessor.CanExecuteAsync(traceInfo, handler, query, options, cancellationToken);
+				var result = await queryProcessor.CanExecuteAsync(traceInfo, handler, query, options, _applicationContext, _applicationResources, cancellationToken);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -148,7 +148,7 @@ namespace Raider.Queries.Internal
 						traceInfo,
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(CanExecuteAsync)}<{nameof(TResult)}> error - Query = {query?.GetType().FullName ?? "NULL"}")
-							.LogCode((long)QueryLogCode.QueryDispatcherError)
+							.LogCode(QueryLogCode.Ex_QryDisp.ToString())
 							.ClientMessage(_applicationResources.GlobalExceptionMessage)
 							.CommandQueryName(queryType?.FullName));
 
@@ -158,11 +158,11 @@ namespace Raider.Queries.Internal
 			}
 			finally
 			{
-				queryProcessor?.DisposeHandler(handler);
+				queryProcessor?.DisposeHandler(_handlerFactory, handler);
 
 				_logger.LogDebugMessage(
 					traceInfo,
-					x => x.LogCode(LogCode.MethodExit)
+					x => x.LogCode(LogCode.Method_Out)
 						.MethodCallElapsedMilliseconds(methodCallElapsedMilliseconds)
 						.CommandQueryName(queryType?.FullName));
 			}
@@ -182,7 +182,7 @@ namespace Raider.Queries.Internal
 
 			_logger.LogTraceMessage(
 				traceInfo,
-				x => x.LogCode(LogCode.MethodEntry)
+				x => x.LogCode(LogCode.Method_In)
 						.CommandQueryName(queryType?.FullName));
 
 			try
@@ -193,9 +193,9 @@ namespace Raider.Queries.Internal
 				queryProcessor = (QueryProcessor<TResult>)_queryProcessors.GetOrAdd(queryType,
 					t => CreateQueryProcessor(typeof(QueryProcessor<,>).MakeGenericType(queryType, typeof(TResult))));
 
-				handler = queryProcessor.CreateHandler();
+				handler = queryProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = queryProcessor.Execute(traceInfo, handler, query, options);
+				var result = queryProcessor.Execute(traceInfo, handler, query, options, _applicationContext, _applicationResources);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -212,7 +212,7 @@ namespace Raider.Queries.Internal
 						traceInfo,
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(Execute)}<{nameof(TResult)}> error - Query = {query?.GetType().FullName ?? "NULL"}")
-							.LogCode((long)QueryLogCode.QueryDispatcherError)
+							.LogCode(QueryLogCode.Ex_QryDisp.ToString())
 							.ClientMessage(_applicationResources.GlobalExceptionMessage)
 							.CommandQueryName(queryType?.FullName));
 
@@ -222,11 +222,11 @@ namespace Raider.Queries.Internal
 			}
 			finally
 			{
-				queryProcessor?.DisposeHandler(handler);
+				queryProcessor?.DisposeHandler(_handlerFactory, handler);
 
 				_logger.LogDebugMessage(
 					traceInfo,
-					x => x.LogCode(LogCode.MethodExit)
+					x => x.LogCode(LogCode.Method_Out)
 						.MethodCallElapsedMilliseconds(methodCallElapsedMilliseconds)
 						.CommandQueryName(queryType?.FullName));
 			}
@@ -246,7 +246,7 @@ namespace Raider.Queries.Internal
 
 			_logger.LogTraceMessage(
 				traceInfo,
-				x => x.LogCode(LogCode.MethodEntry)
+				x => x.LogCode(LogCode.Method_In)
 						.CommandQueryName(queryType?.FullName));
 
 			try
@@ -257,9 +257,9 @@ namespace Raider.Queries.Internal
 				queryProcessor = (AsyncQueryProcessor<TResult>)_asyncQueryProcessors.GetOrAdd(queryType,
 					t => CreateQueryProcessor(typeof(AsyncQueryProcessor<,>).MakeGenericType(queryType, typeof(TResult))));
 
-				handler = queryProcessor.CreateHandler();
+				handler = queryProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = await queryProcessor.ExecuteAsync(traceInfo, handler, query, options, cancellationToken);
+				var result = await queryProcessor.ExecuteAsync(traceInfo, handler, query, options, _applicationContext, _applicationResources, cancellationToken);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -276,7 +276,7 @@ namespace Raider.Queries.Internal
 						traceInfo,
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(ExecuteAsync)}<{nameof(TResult)}> error - Query = {query?.GetType().FullName ?? "NULL"}")
-							.LogCode((long)QueryLogCode.QueryDispatcherError)
+							.LogCode(QueryLogCode.Ex_QryDisp.ToString())
 							.ClientMessage(_applicationResources.GlobalExceptionMessage)
 							.CommandQueryName(queryType?.FullName));
 
@@ -286,11 +286,11 @@ namespace Raider.Queries.Internal
 			}
 			finally
 			{
-				queryProcessor?.DisposeHandler(handler);
+				queryProcessor?.DisposeHandler(_handlerFactory, handler);
 
 				_logger.LogDebugMessage(
 					traceInfo,
-					x => x.LogCode(LogCode.MethodExit)
+					x => x.LogCode(LogCode.Method_Out)
 						.MethodCallElapsedMilliseconds(methodCallElapsedMilliseconds)
 						.CommandQueryName(queryType?.FullName));
 			}
@@ -298,7 +298,7 @@ namespace Raider.Queries.Internal
 
 #pragma warning disable CS8603 // Possible null reference return.
 		private QueryProcessorBase CreateQueryProcessor(Type type)
-			=> Activator.CreateInstance(type, _handlerRegistry, _handlerFactory, _serviceFactory) as QueryProcessorBase;
+			=> Activator.CreateInstance(type, _handlerRegistry) as QueryProcessorBase;
 #pragma warning restore CS8603 // Possible null reference return.
 
 	}

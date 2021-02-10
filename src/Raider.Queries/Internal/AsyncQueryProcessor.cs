@@ -1,6 +1,7 @@
-﻿using Raider.Queries.Aspects;
-using Raider.DependencyInjection;
+﻿using Raider.DependencyInjection;
 using Raider.Exceptions;
+using Raider.Localization;
+using Raider.Queries.Aspects;
 using Raider.Trace;
 using System;
 using System.Threading;
@@ -10,8 +11,8 @@ namespace Raider.Queries.Internal
 {
 	internal abstract class AsyncQueryProcessor<TResult> : QueryProcessorBase
 	{
-		public AsyncQueryProcessor(ServiceFactory serviceFactory)
-			: base(serviceFactory)
+		public AsyncQueryProcessor()
+			: base()
 		{
 		}
 
@@ -20,6 +21,8 @@ namespace Raider.Queries.Internal
 			IQueryHandler handler,
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources,
 			CancellationToken cancellationToken);
 
 		public abstract Task<IQueryResult<TResult>> ExecuteAsync(
@@ -27,6 +30,8 @@ namespace Raider.Queries.Internal
 			IQueryHandler handler,
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources,
 			CancellationToken cancellationToken);
 	}
 
@@ -34,25 +39,24 @@ namespace Raider.Queries.Internal
 		where TQuery : IQuery<TResult>
 	{
 		private readonly IQueryHandlerRegistry _handlerRegistry;
-		private readonly IQueryHandlerFactory _handlerFactory;
 
 		public AsyncQueryProcessor(
-			IQueryHandlerRegistry handlerRegistry,
-			IQueryHandlerFactory handlerFactory,
-			ServiceFactory serviceFactory)
-			: base(serviceFactory)
+			IQueryHandlerRegistry handlerRegistry)
+			: base()
 		{
 			_handlerRegistry = handlerRegistry ?? throw new ArgumentNullException(nameof(handlerRegistry));
-			_handlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
 
 			var _handlerType = _handlerRegistry.GetAsyncQueryHandler<TQuery, TResult>();
 			if (_handlerType == null)
 				throw new ConfigurationException($"No asynchronous handler registered for query: {typeof(TQuery).FullName}");
 		}
 
-		public override IQueryHandler CreateHandler()
+		public override IQueryHandler CreateHandler(IQueryHandlerFactory handlerFactory)
 		{
-			var handler = _handlerFactory.CreateAsyncQueryHandler<TQuery, TResult>();
+			if (handlerFactory == null)
+				throw new ArgumentNullException(nameof(handlerFactory));
+
+			var handler = handlerFactory.CreateAsyncQueryHandler<TQuery, TResult>();
 			if (handler == null)
 				throw new InvalidOperationException($"Handler could not be created for type: {typeof(IAsyncQueryHandler<TQuery, TResult>).FullName}");
 
@@ -64,6 +68,8 @@ namespace Raider.Queries.Internal
 			IQueryHandler handler,
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources,
 			CancellationToken cancellationToken)
 		{
 			var hnd = (IAsyncQueryHandler<TQuery, TResult>)handler;
@@ -78,7 +84,7 @@ namespace Raider.Queries.Internal
 			}
 
 			return interceptor == null
-				? hnd.CanExecuteAsync((TQuery)query, CreateQueryHandlerContext(traceInfo), cancellationToken)
+				? hnd.CanExecuteAsync((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext, applicationResources), cancellationToken)
 				: interceptor.InterceptCanExecuteAsync(traceInfo, hnd, (TQuery)query, options, cancellationToken);
 		}
 
@@ -87,6 +93,8 @@ namespace Raider.Queries.Internal
 			IQueryHandler handler,
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources,
 			CancellationToken cancellationToken)
 		{
 			var hnd = (IAsyncQueryHandler<TQuery, TResult>)handler;
@@ -101,14 +109,19 @@ namespace Raider.Queries.Internal
 			}
 
 			return interceptor == null
-				? hnd.ExecuteAsync((TQuery)query, CreateQueryHandlerContext(traceInfo), cancellationToken)
+				? hnd.ExecuteAsync((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext, applicationResources), cancellationToken)
 				: interceptor.InterceptExecuteAsync(traceInfo, hnd, (TQuery)query, options, cancellationToken);
 		}
 
-		public override void DisposeHandler(IQueryHandler? handler)
+		public override void DisposeHandler(IQueryHandlerFactory handlerFactory, IQueryHandler? handler)
 		{
 			if (handler != null)
-				_handlerFactory.Release(handler);
+			{
+				if (handlerFactory == null)
+					throw new ArgumentNullException(nameof(handlerFactory));
+
+				handlerFactory.Release(handler);
+			}
 		}
 	}
 }

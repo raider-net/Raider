@@ -1,7 +1,15 @@
 ﻿namespace Raider.Queries.Logging
 {
-	public enum QueryLogCode : long
+	public enum QueryLogCode // Max length 30
 	{
-		QueryDispatcherError = 6,
+		//*******************************//
+		//*********EXCEPTIONS**********//
+		//*******************************//
+
+
+		/// <summary>
+		/// QueryDispatcherError
+		/// </summary>
+		Ex_QryDisp
 	}
 }
