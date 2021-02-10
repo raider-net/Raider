@@ -377,7 +377,7 @@ namespace Raider.Services.Commands
 				Context = Create();
 			}
 
-			internal Builder<TContext> TraceInfo(ITraceInfo? traceInfo)
+			internal Builder<TContext> TraceInfo(ITraceInfo traceInfo)
 			{
 				Context.TraceInfo = traceInfo;
 				return this;
@@ -413,7 +413,7 @@ namespace Raider.Services.Commands
 				return this;
 			}
 
-			internal Builder<TContext> ApplicationResources(IApplicationResources? applicationResources)
+			internal Builder<TContext> ApplicationResources(IApplicationResources applicationResources)
 			{
 				Context.ApplicationResources = applicationResources;
 				return this;
