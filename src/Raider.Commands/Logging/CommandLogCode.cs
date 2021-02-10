@@ -1,7 +1,15 @@
 ﻿namespace Raider.Commands.Logging
 {
-	public enum CommandLogCode : long
+	public enum CommandLogCode // Max length 30
 	{
-		CommandDispatcherError = 5,
+		//*******************************//
+		//*********EXCEPTIONS**********//
+		//*******************************//
+
+
+		/// <summary>
+		/// CommandDispatcherError
+		/// </summary>
+		Ex_CmdDisp
 	}
 }

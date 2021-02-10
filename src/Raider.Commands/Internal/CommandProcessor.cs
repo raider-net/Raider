@@ -1,6 +1,7 @@
 ﻿using Raider.Commands.Aspects;
 using Raider.DependencyInjection;
 using Raider.Exceptions;
+using Raider.Localization;
 using Raider.Trace;
 using System;
 
@@ -8,8 +9,8 @@ namespace Raider.Commands.Internal
 {
 	internal abstract class CommandProcessor<TResult> : CommandProcessorBase
 	{
-		public CommandProcessor(ServiceFactory serviceFactory)
-			: base(serviceFactory)
+		public CommandProcessor()
+			: base()
 		{
 		}
 
@@ -17,38 +18,41 @@ namespace Raider.Commands.Internal
 			ITraceInfo traceInfo,
 			ICommandHandler handler,
 			ICommand<TResult> command,
-			ICommandInterceptorOptions? options);
+			ICommandInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources);
 
 		public abstract ICommandResult<TResult> Execute(
 			ITraceInfo traceInfo,
 			ICommandHandler handler,
 			ICommand<TResult> command,
-			ICommandInterceptorOptions? options);
+			ICommandInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources);
 	}
 
 	internal class CommandProcessor<TCommand, TResult> : CommandProcessor<TResult>
 		where TCommand : ICommand<TResult>
 	{
 		private readonly ICommandHandlerRegistry _handlerRegistry;
-		private readonly ICommandHandlerFactory _handlerFactory;
 
 		public CommandProcessor(
-			ICommandHandlerRegistry handlerRegistry,
-			ICommandHandlerFactory handlerFactory,
-			ServiceFactory serviceFactory)
-			: base(serviceFactory)
+			ICommandHandlerRegistry handlerRegistry)
+			: base()
 		{
 			_handlerRegistry = handlerRegistry ?? throw new ArgumentNullException(nameof(handlerRegistry));
-			_handlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
 
 			var _handlerType = _handlerRegistry.GetCommandHandler<TCommand, TResult>();
 			if (_handlerType == null)
 				throw new ConfigurationException($"No synchronous handler registered for command: {typeof(TCommand).FullName}");
 		}
 
-		public override ICommandHandler CreateHandler()
+		public override ICommandHandler CreateHandler(ICommandHandlerFactory handlerFactory)
 		{
-			var handler = _handlerFactory.CreateCommandHandler<TCommand, TResult>();
+			if (handlerFactory == null)
+				throw new ArgumentNullException(nameof(handlerFactory));
+
+			var handler = handlerFactory.CreateCommandHandler<TCommand, TResult>();
 			if (handler == null)
 				throw new InvalidOperationException($"Handler could not be created for type: {typeof(ICommandHandler<TCommand, TResult>).FullName}");
 
@@ -59,7 +63,9 @@ namespace Raider.Commands.Internal
 			ITraceInfo traceInfo,
 			ICommandHandler handler,
 			ICommand<TResult> command,
-			ICommandInterceptorOptions? options)
+			ICommandInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources)
 		{
 			var hnd = (ICommandHandler<TCommand, TResult>)handler;
 
@@ -73,7 +79,7 @@ namespace Raider.Commands.Internal
 			}
 
 			return interceptor == null
-				? hnd.CanExecute((TCommand)command, CreateCommandHandlerContext(traceInfo))
+				? hnd.CanExecute((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext, applicationResources))
 				: interceptor.InterceptCanExecute(traceInfo, hnd, (TCommand)command, options);
 		}
 
@@ -81,7 +87,9 @@ namespace Raider.Commands.Internal
 			ITraceInfo traceInfo,
 			ICommandHandler handler,
 			ICommand<TResult> command,
-			ICommandInterceptorOptions? options)
+			ICommandInterceptorOptions? options,
+			IApplicationContext applicationContext,
+			IApplicationResources applicationResources)
 		{
 			var hnd = (ICommandHandler<TCommand, TResult>)handler;
 
@@ -95,14 +103,19 @@ namespace Raider.Commands.Internal
 			}
 
 			return interceptor == null
-				? hnd.Execute((TCommand)command, CreateCommandHandlerContext(traceInfo))
+				? hnd.Execute((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext, applicationResources))
 				: interceptor.InterceptExecute(traceInfo, hnd, (TCommand)command, options);
 		}
 
-		public override void DisposeHandler(ICommandHandler? handler)
+		public override void DisposeHandler(ICommandHandlerFactory handlerFactory, ICommandHandler? handler)
 		{
 			if (handler != null)
-				_handlerFactory.Release(handler);
+			{
+				if (handlerFactory == null)
+					throw new ArgumentNullException(nameof(handlerFactory));
+
+				handlerFactory.Release(handler);
+			}
 		}
 	}
 }
