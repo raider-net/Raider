@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using Raider.Queries;
+using Raider.Extensions;
 using Raider.Logging;
+using Raider.Queries;
 using Raider.Trace;
+using Raider.Validation;
 using System;
-using System.Collections.Generic;
 
 namespace Raider.QueryServices.Queries
 {
@@ -16,7 +17,10 @@ namespace Raider.QueryServices.Queries
 
 		bool MergeHasError<T>(IQueryResult<T> otherQueryResult);
 
-		//bool MergeIfError(string error);
+
+		bool MergeHasError(MethodLogScope scope, ValidationResult validationResult);
+
+		bool MergeHasError(ITraceInfo traceInfo, ValidationResult validationResult);
 
 		bool HasError();
 
@@ -28,24 +32,19 @@ namespace Raider.QueryServices.Queries
 
 		TBuilder ClearAllSuccessMessages();
 
-		//TBuilder WithSuccess(string message, Action<ILogMessage>? logMessageConfigurator = null);
-
-		//TBuilder WithWarn(string message, Action<ILogMessage>? logMessageConfigurator = null);
-
-		//TBuilder WithError(string message, Action<IErrorMessage>? errorMessageConfigurator = null);
-
-		//TBuilder WithError(Exception ex, Action<IErrorMessage>? errorMessageConfigurator = null);
-
 		TBuilder WithSuccess(ILogMessage message);
 
 		TBuilder WithWarn(ILogMessage message);
 
 		TBuilder WithError(IErrorMessage message);
 
+		TBuilder WithSuccess(MethodLogScope scope, Action<LogMessageBuilder>? logMessageConfigurator);
 		TBuilder WithSuccess(ITraceInfo traceInfo, Action<LogMessageBuilder>? logMessageConfigurator);
 
+		TBuilder WithWarn(MethodLogScope scope, Action<LogMessageBuilder>? logMessageConfigurator);
 		TBuilder WithWarn(ITraceInfo traceInfo, Action<LogMessageBuilder>? logMessageConfigurator);
 
+		TBuilder WithError(MethodLogScope scope, Action<ErrorMessageBuilder>? logMessageConfigurator);
 		TBuilder WithError(ITraceInfo traceInfo, Action<ErrorMessageBuilder>? logMessageConfigurator);
 
 		//TBuilder WithTraceInfo(ITraceInfo traceInfo, bool force = false);
@@ -57,14 +56,6 @@ namespace Raider.QueryServices.Queries
 		TBuilder ForAllIErrorMessages(Action<ILogMessage> errorMessageConfigurator);
 
 		TBuilder ForAllMessages(Action<ILogMessage> messageConfigurator);
-
-		//TBuilder MergeAllIErrorMessages(string? separator = null);
-
-		//TBuilder MergeAllWarningMessages(string? separator = null);
-
-		//TBuilder MergeAllSuccessMessages(string? separator = null);
-
-		//TBuilder MergeAllMessages(string? separator = null);
 
 		TBuilder Merge(IQueryResult<TResult> otherQueryResult);
 		TBuilder WithResult(TResult? result);
@@ -134,13 +125,67 @@ namespace Raider.QueryServices.Queries
 			return _queryResult.HasError;
 		}
 
-		//public bool MergeIfError(string error)
-		//{
-		//	if (!string.IsNullOrWhiteSpace(error))
-		//		WithError(error);
+		public bool MergeHasError(MethodLogScope scope, ValidationResult validationResult)
+		{
+			if (scope == null)
+				throw new ArgumentNullException(nameof(scope));
 
-		//	return _queryResult.HasError;
-		//}
+			return MergeHasError(scope.TraceInfo, validationResult);
+		}
+
+		public bool MergeHasError(ITraceInfo traceInfo, ValidationResult validationResult)
+		{
+			if (traceInfo == null)
+				throw new ArgumentNullException(nameof(traceInfo));
+			if (validationResult == null)
+				throw new ArgumentNullException(nameof(validationResult));
+
+			foreach (var failure in validationResult.Errors)
+			{
+				if (failure.Severity == ValidationSeverity.Error)
+				{
+					var errorMessage = ValidationFailureToErrorMessage(traceInfo, failure);
+					_queryResult.ErrorMessages.Add(errorMessage);
+				}
+				else
+				{
+					var warnigMessage = ValidationFailureToWarningMessage(traceInfo, failure);
+					_queryResult.WarningMessages.Add(warnigMessage);
+				}
+			}
+
+			return _queryResult.HasError;
+		}
+
+		private IErrorMessage ValidationFailureToErrorMessage(ITraceInfo traceInfo, IValidationFailure failure)
+		{
+			if (failure == null)
+				throw new ArgumentNullException(nameof(failure));
+
+			var errorMessageBuilder =
+				new ErrorMessageBuilder(traceInfo)
+					.LogLevel( LogLevel.Error)
+					.ValidationFailure(failure, true)
+					.ClientMessage(failure.Message, true) //TODO read from settings when to use MessageWithPropertyName
+					.PropertyName(failure.ValidationFrame.ToString()?.TrimPrefix("_."), true);
+
+			return errorMessageBuilder.Build();
+		}
+
+		private ILogMessage ValidationFailureToWarningMessage(ITraceInfo traceInfo, IValidationFailure failure)
+		{
+			if (failure == null)
+				throw new ArgumentNullException(nameof(failure));
+
+			var logMessageBuilder =
+				new LogMessageBuilder(traceInfo)
+					.LogLevel(LogLevel.Warning)
+					.ValidationFailure(failure, true)
+					.ClientMessage(failure.Message, true) //TODO read from settings when to use MessageWithPropertyName
+					.PropertyName(failure.ValidationFrame.ToString()?.TrimPrefix("_."), true);
+
+			return logMessageBuilder.Build();
+		}
 
 		public bool HasError()
 		{
@@ -158,55 +203,6 @@ namespace Raider.QueryServices.Queries
 			return _builder;
 		}
 
-		//public TBuilder WithSuccess(string message, Action<ILogMessage>? logMessageConfigurator = null)
-		//{
-		//	var logMessage =
-		//		new LogMessageBuilder(_queryResult.TraceInfo)
-		//			.LogLevel(LogLevel.Information)
-		//			.Message(message)
-		//			.StackTrace(StackTraceHelper.GetStackTrace(true))
-		//			.Build();
-		//	logMessageConfigurator?.Invoke(logMessage);
-		//	_queryResult.SuccessMessages.Add(logMessage);
-		//	return _builder;
-		//}
-
-		//public TBuilder WithWarn(string message, Action<ILogMessage>? logMessageConfigurator = null)
-		//{
-		//	var logMessage =
-		//		new LogMessageBuilder(_queryResult.TraceInfo)
-		//			.LogLevel(LogLevel.Warning)
-		//			.Message(message)
-		//			.StackTrace(StackTraceHelper.GetStackTrace(true))
-		//			.Build();
-		//	logMessageConfigurator?.Invoke(logMessage);
-		//	_queryResult.WarningMessages.Add(logMessage);
-		//	return _builder;
-		//}
-
-		//public TBuilder WithError(string message, Action<IErrorMessage>? errorMessageConfigurator = null)
-		//{
-		//	var errorMessage = new LogMessageBuilder(_queryResult.TraceInfo)
-		//		.LogLevel(LogLevel.Error)
-		//		.Message(message)
-		//		.StackTrace(StackTraceHelper.GetStackTrace(true))
-		//		.BuildErrorMessage();
-		//	errorMessageConfigurator?.Invoke(errorMessage);
-		//	_queryResult.ErrorMessages.Add(errorMessage);
-		//	return _builder;
-		//}
-
-		//public TBuilder WithError(Exception ex, Action<IErrorMessage>? errorMessageConfigurator = null)
-		//{
-		//	var errorMessage = new LogMessageBuilder(_queryResult.TraceInfo)
-		//		.LogLevel(LogLevel.Error)
-		//		.ExceptionInfo(ex)
-		//		.StackTrace(StackTraceHelper.GetStackTrace(true))
-		//		.BuildErrorMessage();
-		//	errorMessageConfigurator?.Invoke(errorMessage);
-		//	_queryResult.ErrorMessages.Add(errorMessage);
-		//	return _builder;
-		//}
 
 		public TBuilder WithSuccess(ILogMessage message)
 		{
@@ -225,6 +221,8 @@ namespace Raider.QueryServices.Queries
 			_queryResult.ErrorMessages.Add(message);
 			return _builder;
 		}
+		public TBuilder WithSuccess(MethodLogScope scope, Action<LogMessageBuilder>? logMessageConfigurator)
+			=> WithSuccess(scope?.TraceInfo, logMessageConfigurator);
 
 		public TBuilder WithSuccess(ITraceInfo traceInfo, Action<LogMessageBuilder>? logMessageConfigurator)
 		{
@@ -235,6 +233,8 @@ namespace Raider.QueryServices.Queries
 			_queryResult.SuccessMessages.Add(logMessageBuilder.Build());
 			return _builder;
 		}
+		public TBuilder WithWarn(MethodLogScope scope, Action<LogMessageBuilder>? logMessageConfigurator)
+			=> WithWarn(scope?.TraceInfo, logMessageConfigurator);
 
 		public TBuilder WithWarn(ITraceInfo traceInfo, Action<LogMessageBuilder>? logMessageConfigurator)
 		{
@@ -245,6 +245,8 @@ namespace Raider.QueryServices.Queries
 			_queryResult.WarningMessages.Add(logMessageBuilder.Build());
 			return _builder;
 		}
+		public TBuilder WithError(MethodLogScope scope, Action<ErrorMessageBuilder>? errorMessageConfigurator)
+			=> WithError(scope?.TraceInfo, errorMessageConfigurator);
 
 		public TBuilder WithError(ITraceInfo traceInfo, Action<ErrorMessageBuilder>? errorMessageConfigurator)
 		{
@@ -256,19 +258,6 @@ namespace Raider.QueryServices.Queries
 			return _builder;
 		}
 
-		//public TBuilder WithTraceInfo(ITraceInfo traceInfo, bool force = false)
-		//{
-		//	_queryResult.TraceInfo = traceInfo;
-
-		//	var builder = new LogMessageBuilder(_queryResult.TraceInfo);
-		//	void SetTraceInfo(ILogMessage msg) => builder.Object(msg).TraceInfo(traceInfo, force);
-
-		//	_queryResult.SuccessMessages.ForEach(x => SetTraceInfo(x));
-		//	_queryResult.WarningMessages.ForEach(x => SetTraceInfo(x));
-		//	_queryResult.ErrorMessages.ForEach(x => SetTraceInfo(x));
-
-		//	return _builder;
-		//}
 
 		public TBuilder ForAllSuccessMessages(Action<ILogMessage> logMessageConfigurator)
 		{
@@ -308,74 +297,7 @@ namespace Raider.QueryServices.Queries
 				.ForAllWarningMessages(messageConfigurator)
 				.ForAllIErrorMessages(messageConfigurator);
 
-		//public TBuilder MergeAllIErrorMessages(string? separator = null)
-		//{
-		//	if (1 < _queryResult.ErrorMessages.Count)
-		//	{
-		//		if (separator == null)
-		//			separator = Environment.NewLine;
 
-		//		var errorMessage = _queryResult.ErrorMessages[0];
-
-		//		var joinedMessages = string.Join(separator, _queryResult.ErrorMessages.Select(x => x.Message));
-		//		var joinedDetails = string.Join(separator, _queryResult.ErrorMessages.Select(x => x.Detail));
-
-		//		new LogMessageBuilder(errorMessage).LogLevel(LogLevel.Error)
-		//			.Message(joinedMessages)
-		//			.Detail(joinedDetails);
-
-		//		_queryResult.ErrorMessages.Clear();
-		//		_queryResult.ErrorMessages.Add(errorMessage);
-		//	}
-
-		//	return _builder;
-		//}
-
-		//public TBuilder MergeAllWarningMessages(string? separator = null)
-		//{
-		//	if (1 < _queryResult.WarningMessages.Count)
-		//	{
-		//		if (separator == null)
-		//			separator = Environment.NewLine;
-
-		//		var warningMessage = new LogMessageBuilder(_queryResult.WarningMessages[0]);
-		//		var joinedMessages = string.Join(separator, _queryResult.WarningMessages.Select(x => x.Message));
-		//		var joinedDetails = string.Join(separator, _queryResult.WarningMessages.Select(x => x.Detail));
-		//		warningMessage.Message(joinedMessages);
-		//		warningMessage.Detail(joinedDetails);
-		//		_queryResult.WarningMessages.Clear();
-		//		_queryResult.WarningMessages.Add(warningMessage.Build());
-		//	}
-
-		//	return _builder;
-		//}
-
-		//public TBuilder MergeAllSuccessMessages(string? separator = null)
-		//{
-		//	if (1 < _queryResult.SuccessMessages.Count)
-		//	{
-		//		if (separator == null)
-		//			separator = Environment.NewLine;
-
-		//		var successMessage = new LogMessageBuilder(_queryResult.SuccessMessages[0]);
-		//		var joinedMessages = string.Join(separator, _queryResult.SuccessMessages.Select(x => x.Message));
-		//		var joinedDetails = string.Join(separator, _queryResult.SuccessMessages.Select(x => x.Detail));
-		//		successMessage.Message(joinedMessages);
-		//		successMessage.Detail(joinedDetails);
-		//		_queryResult.SuccessMessages.Clear();
-		//		_queryResult.SuccessMessages.Add(successMessage.Build());
-		//	}
-
-		//	return _builder;
-		//}
-
-		//public TBuilder MergeAllMessages(string? separator = null)
-		//{
-		//	MergeAllIErrorMessages(separator);
-		//	MergeAllWarningMessages(separator);
-		//	MergeAllSuccessMessages(separator);
-		//	return _builder;
-		//}
 
 		public TBuilder Merge(IQueryResult<TResult> otherQueryResult)
 		{
@@ -403,37 +325,6 @@ namespace Raider.QueryServices.Queries
 
 	public class QueryResultBuilder<TResult> : QueryResultBuilderBase<QueryResultBuilder<TResult>, TResult, IQueryResult<TResult>>
 	{
-		private class QueryResult<T> : IQueryResult<T>
-		{
-			//public ITraceInfo TraceInfo { get; set; }
-
-			public List<ILogMessage> SuccessMessages { get; }
-
-			public List<ILogMessage> WarningMessages { get; }
-
-			public List<IErrorMessage> ErrorMessages { get; }
-
-			public bool HasSuccessMessage => 0 < SuccessMessages.Count;
-
-			public bool HasWarning => 0 < WarningMessages.Count;
-
-			public bool HasError => 0 < ErrorMessages.Count;
-
-			public bool HasAnyMessage => HasSuccessMessage || HasWarning || HasError;
-
-			public long? ResultCount { get; set; }
-
-			public T? Result { get; set; }
-
-			public QueryResult()
-			{
-				//TraceInfo = traceInfo;
-				SuccessMessages = new List<ILogMessage>();
-				WarningMessages = new List<ILogMessage>();
-				ErrorMessages = new List<IErrorMessage>();
-			}
-		}
-
 		public QueryResultBuilder()
 			: this(new QueryResult<TResult>())
 		{
@@ -444,20 +335,20 @@ namespace Raider.QueryServices.Queries
 		{
 		}
 
-		//public static implicit operator QueryResult?(QueryResultBuilder builder)
-		//{
-		//	if (builder == null)
-		//		return null;
+		public static implicit operator QueryResult<TResult>?(QueryResultBuilder<TResult> builder)
+		{
+			if (builder == null)
+				return null;
 
-		//	return builder._queryResult;
-		//}
+			return builder._queryResult as QueryResult<TResult>;
+		}
 
-		//public static implicit operator QueryResultBuilder?(QueryResult queryResult)
-		//{
-		//	if (queryResult == null)
-		//		return null;
+		public static implicit operator QueryResultBuilder<TResult>?(QueryResult<TResult> queryResult)
+		{
+			if (queryResult == null)
+				return null;
 
-		//	return new QueryResultBuilder(queryResult);
-		//}
+			return new QueryResultBuilder<TResult>(queryResult);
+		}
 	}
 }

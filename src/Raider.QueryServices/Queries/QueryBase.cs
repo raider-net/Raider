@@ -2,7 +2,7 @@
 
 namespace Raider.QueryServices.Queries
 {
-	public class QueryBase<TResult> : IQuery<TResult>
+	public abstract class QueryBase<TResult> : IQuery<TResult>
 	{
 		public virtual string Serialize()
 			=> System.Text.Json.JsonSerializer.Serialize(this);

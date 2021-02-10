@@ -19,12 +19,12 @@ namespace Raider.QueryServices.Queries
 	//delegate TContext DbContextFactory<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
 	//	where TContext : DbContext;
 
-	public abstract class QueryHandlerContext : IQueryHandlerContext
+	public abstract class QueryHandlerContext : IQueryHandlerContext, IQueryServiceContext
 	{
 		private readonly ConcurrentDictionary<Type, DbContext> _dbContextCache = new ConcurrentDictionary<Type, DbContext>();
 
 		public ServiceFactory ServiceFactory { get; }
-		public ITraceInfo? TraceInfo { get; protected set; }
+		public ITraceInfo TraceInfo { get; protected set; }
 		public RaiderIdentity<int>? User { get; private set; }
 		public RaiderPrincipal<int>? Principal { get; private set; }
 		public string? QueryName { get; private set; }
@@ -32,7 +32,8 @@ namespace Raider.QueryServices.Queries
 		public IDbContextTransaction? DbContextTransaction { get; private set; }
 		public string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		public ILogger Logger { get; private set; }
-		public IApplicationResources? ApplicationResources { get; private set; }
+		public IApplicationResources ApplicationResources { get; private set; }
+		public Dictionary<object, object?> GlobalItems { get; } = new Dictionary<object, object?>();
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 		public QueryHandlerContext(ServiceFactory serviceFactory)
@@ -40,27 +41,6 @@ namespace Raider.QueryServices.Queries
 			ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
-		public QueryHandlerContext(ITraceFrame currentTraceFrame, QueryHandlerContext queryHandlerContext, Type serviceType)
-		{
-			if (currentTraceFrame == null)
-				throw new ArgumentNullException(nameof(currentTraceFrame));
-			if (queryHandlerContext == null)
-				throw new ArgumentNullException(nameof(queryHandlerContext));
-
-			ServiceFactory = queryHandlerContext.ServiceFactory;
-			TraceInfo = new TraceInfoBuilder(currentTraceFrame, queryHandlerContext.TraceInfo).Build();
-			User = queryHandlerContext.User;
-			Principal = queryHandlerContext.Principal;
-			QueryName = queryHandlerContext.QueryName;
-			IdQueryEntry = queryHandlerContext.IdQueryEntry;
-			DbContextTransaction = queryHandlerContext.DbContextTransaction;
-			ApplicationResources = queryHandlerContext.ApplicationResources;
-
-			var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
-			var serviceLogger = loggerFactory.CreateLogger(serviceType);
-			Logger = serviceLogger;
-		}
 
 		public TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext
@@ -97,7 +77,7 @@ namespace Raider.QueryServices.Queries
 			return (TContext)result;
 		}
 
-		public TService GetService<TService>(
+		public TService GetQueryService<TService>(
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
@@ -141,6 +121,29 @@ namespace Raider.QueryServices.Queries
 
 			var scope = new MethodLogScope(traceInfo, disposable);
 			return scope;
+		}
+
+		public bool TryGetGlobalItem<TKey, TValue>(TKey key, out TValue? value)
+		{
+			value = default;
+
+			if (key == null)
+				return false;
+
+			if (GlobalItems.TryGetValue(key, out object? obj))
+			{
+				if (obj is TValue val)
+				{
+					value = val;
+					return true;
+				}
+				else
+				{
+					throw new InvalidOperationException($"TryGetItem: Key = {typeof(TKey).FullName} && {obj?.GetType().FullName} != {typeof(TValue).FullName}");
+				}
+			}
+
+			return false;
 		}
 
 		public void LogTraceMessage(ILogMessage message)
@@ -374,43 +377,43 @@ namespace Raider.QueryServices.Queries
 				Context = Create();
 			}
 
-			public Builder<TContext> TraceInfo(ITraceInfo? traceInfo)
+			internal Builder<TContext> TraceInfo(ITraceInfo? traceInfo)
 			{
 				Context.TraceInfo = traceInfo;
 				return this;
 			}
 
-			public Builder<TContext> User(RaiderIdentity<int>? user)
+			internal Builder<TContext> User(RaiderIdentity<int>? user)
 			{
 				Context.User = user;
 				return this;
 			}
 
-			public Builder<TContext> Principal(RaiderPrincipal<int>? principal)
+			internal Builder<TContext> Principal(RaiderPrincipal<int>? principal)
 			{
 				Context.Principal = principal;
 				return this;
 			}
 
-			public Builder<TContext> IdQueryEntry(long? idQueryEntry)
+			internal Builder<TContext> IdQueryEntry(long? idQueryEntry)
 			{
 				Context.IdQueryEntry = idQueryEntry;
 				return this;
 			}
 
-			public Builder<TContext> QueryName(string? queryName)
+			internal Builder<TContext> QueryName(string? queryName)
 			{
 				Context.QueryName = queryName;
 				return this;
 			}
 
-			public Builder<TContext> Logger(ILogger logger)
+			internal Builder<TContext> Logger(ILogger logger)
 			{
 				Context.Logger = logger;
 				return this;
 			}
 
-			public Builder<TContext> ApplicationResources(IApplicationResources? applicationResources)
+			internal Builder<TContext> ApplicationResources(IApplicationResources? applicationResources)
 			{
 				Context.ApplicationResources = applicationResources;
 				return this;

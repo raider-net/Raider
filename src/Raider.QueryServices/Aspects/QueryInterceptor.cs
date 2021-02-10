@@ -40,7 +40,7 @@ namespace Raider.QueryServices.Aspects
 
 			_logger.LogTraceMessage(
 				traceInfo,
-				x => x.LogCode(LogCode.MethodEntry)
+				x => x.LogCode(LogCode.Method_In)
 						.CommandQueryName(queryType?.FullName));
 
 			if (handler.GetOptions() is not QueryHandlerOptions handlerOptions)
@@ -91,7 +91,7 @@ namespace Raider.QueryServices.Aspects
 			{
 				_logger.LogDebugMessage(
 					traceInfo,
-					x => x.LogCode(LogCode.MethodExit)
+					x => x.LogCode(LogCode.Method_Out)
 						.CommandQueryName(queryType?.FullName)
 						.MethodCallElapsedMilliseconds(methodCallElapsedMilliseconds));
 			}
@@ -110,7 +110,7 @@ namespace Raider.QueryServices.Aspects
 
 			_logger.LogTraceMessage(
 				traceInfo,
-				x => x.LogCode(LogCode.MethodEntry)
+				x => x.LogCode(LogCode.Method_In)
 						.CommandQueryName(queryType?.FullName));
 
 			if (handler.GetOptions() is not QueryHandlerOptions handlerOptions)
@@ -225,7 +225,7 @@ namespace Raider.QueryServices.Aspects
 
 				_logger.LogDebugMessage(
 					traceInfo,
-					x => x.LogCode(LogCode.MethodExit)
+					x => x.LogCode(LogCode.Method_Out)
 						.CommandQueryName(queryType?.FullName)
 						.MethodCallElapsedMilliseconds(methodCallElapsedMilliseconds));
 			}
