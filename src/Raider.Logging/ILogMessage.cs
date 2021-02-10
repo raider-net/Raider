@@ -16,10 +16,7 @@ namespace Raider.Logging
 
 		ITraceInfo TraceInfo { get; set; }
 
-		/// <summary>
-		/// Known and Unknow log/error codes ... based on Logging.LogCode
-		/// </summary>
-		long? LogCode { get; set; } //zahrna aj ErrorCode
+		string? LogCode { get; set; }
 
 		string? ClientMessage { get; set; }
 
@@ -45,7 +42,7 @@ namespace Raider.Logging
 
 		string? PropertyName { get; set; }
 
-		object? ValidationPropertyInfo { get; set; }
+		object? ValidationFailure { get; set; }
 
 		string? DisplayPropertyName { get; set; }
 

@@ -35,29 +35,29 @@ namespace Raider.Logging
 	public class ErrorMessageBuilder : ErrorMessageBuilderBase<ErrorMessageBuilder, IErrorMessage>
 	{
 		public ErrorMessageBuilder(ITraceInfo traceInfo)
-			: this(new Internal.ErrorMessage(traceInfo))
+			: this(new ErrorMessage(traceInfo))
 		{
 		}
 
-		public ErrorMessageBuilder(IErrorMessage errorMessage)
+		public ErrorMessageBuilder(ErrorMessage errorMessage)
 			: base(errorMessage)
 		{
 		}
 
-		//public static implicit operator ErrorMessageInternal?(ErrorMessageBuilder builder)
-		//{
-		//	if (builder == null)
-		//		return null;
+		public static implicit operator ErrorMessage?(ErrorMessageBuilder builder)
+		{
+			if (builder == null)
+				return null;
 
-		//	return builder._errorMessage as ErrorMessageInternal;
-		//}
+			return builder._logMessage as ErrorMessage;
+		}
 
-		//public static implicit operator ErrorMessageBuilder?(ErrorMessageInternal errorMessage)
-		//{
-		//	if (errorMessage == null)
-		//		return null;
+		public static implicit operator ErrorMessageBuilder?(ErrorMessage errorMessage)
+		{
+			if (errorMessage == null)
+				return null;
 
-		//	return new ErrorMessageBuilder(errorMessage);
-		//}
+			return new ErrorMessageBuilder(errorMessage);
+		}
 	}
 }

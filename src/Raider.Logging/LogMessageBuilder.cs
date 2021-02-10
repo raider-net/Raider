@@ -22,7 +22,7 @@ namespace Raider.Logging
 
 		TBuilder TraceInfo(ITraceInfo traceInfo, bool force = false);
 
-		TBuilder LogCode(long? logCode, bool force = true);
+		TBuilder LogCode(string? logCode, bool force = true);
 
 		TBuilder LogCode(LogCode? logCode, bool force = true);
 
@@ -49,8 +49,6 @@ namespace Raider.Logging
 		TBuilder MethodCallElapsedMilliseconds(decimal? methodCallElapsedMilliseconds, bool force = false);
 
 		TBuilder PropertyName(string? propertyName, bool force = false);
-
-		TBuilder ValidationPropertyInfo(object? validationPropertyInfo, bool force = false);
 
 		TBuilder DisplayPropertyName(string? displayPropertyName, bool force = false);
 
@@ -113,23 +111,18 @@ namespace Raider.Logging
 			return _builder;
 		}
 
-		public TBuilder LogCode(long? logCode, bool force = true)
+		public TBuilder LogCode(string? logCode, bool force = true)
 		{
-			//if (logCode.HasValue
-			//	&& (long)Logging.LogCode._FIRST <= logCode
-			//	&& logCode <= (long)Logging.LogCode._LAST)
-			//	throw new ArgumentOutOfRangeException(nameof(logCode), $"Reserved range for {nameof(Raider.Logging)}.{nameof(Raider.Logging.LogCode)}");
-
-			if (force || !_logMessage.LogCode.HasValue)
-				_logMessage.LogCode = logCode;
+			if (force || string.IsNullOrWhiteSpace(_logMessage.LogCode))
+				_logMessage.LogCode = logCode?.TrimLength(31);
 
 			return _builder;
 		}
 
 		public TBuilder LogCode(LogCode? logCode, bool force = true)
 		{
-			if (force || !_logMessage.LogCode.HasValue)
-				_logMessage.LogCode = logCode.HasValue ? (long)logCode : null;
+			if (force || string.IsNullOrWhiteSpace(_logMessage.LogCode))
+				_logMessage.LogCode = logCode?.ToString();
 
 			return _builder;
 		}
@@ -225,13 +218,12 @@ namespace Raider.Logging
 			return _builder;
 		}
 
-		public TBuilder ValidationPropertyInfo(object? validationPropertyInfo, bool force = false)
+		public TBuilder ValidationFailure(object? validationFailure, bool force = false)
 		{
-			if (force || _logMessage.ValidationPropertyInfo == null)
+			if (force || _logMessage.ValidationFailure == null)
 			{
-				_logMessage.ValidationPropertyInfo = validationPropertyInfo;
-				if (validationPropertyInfo != null && string.IsNullOrWhiteSpace(_logMessage.PropertyName))
-					PropertyName(validationPropertyInfo.ToString(), true);
+				_logMessage.ValidationFailure = validationFailure;
+				_logMessage.IsValidationError = validationFailure != null;
 			}
 
 			return _builder;
@@ -286,29 +278,29 @@ namespace Raider.Logging
 	public class LogMessageBuilder : LogMessageBuilderBase<LogMessageBuilder, ILogMessage>
 	{
 		public LogMessageBuilder(ITraceInfo traceInfo)
-			: this(new Internal.LogMessage(traceInfo))
+			: this(new LogMessage(traceInfo))
 		{
 		}
 
-		public LogMessageBuilder(ILogMessage logMessage)
+		public LogMessageBuilder(LogMessage logMessage)
 			: base(logMessage)
 		{
 		}
 
-		//public static implicit operator LogMessageInternal?(LogMessageBuilder builder)
-		//{
-		//	if (builder == null)
-		//		return null;
+		public static implicit operator LogMessage?(LogMessageBuilder builder)
+		{
+			if (builder == null)
+				return null;
 
-		//	return builder._logMessage as LogMessageInternal;
-		//}
+			return builder._logMessage as LogMessage;
+		}
 
-		//public static implicit operator LogMessageBuilder?(LogMessageInternal logMessage)
-		//{
-		//	if (logMessage == null)
-		//		return null;
+		public static implicit operator LogMessageBuilder?(LogMessage logMessage)
+		{
+			if (logMessage == null)
+				return null;
 
-		//	return new LogMessageBuilder(logMessage);
-		//}
+			return new LogMessageBuilder(logMessage);
+		}
 	}
 }

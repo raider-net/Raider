@@ -4,16 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Raider.Logging.Internal
+namespace Raider.Logging
 {
-	internal class LogMessage : ILogMessage
+	public class LogMessage : ILogMessage
 	{
 		public long? IdLogMessage { get; set; }
 		public LogLevel LogLevel { get; set; }
 		public int IdLogLevel => (int)LogLevel;
 		public DateTimeOffset Created { get; set; }
 		public ITraceInfo TraceInfo { get; set; }
-		public long? LogCode { get; set; }
+		public string? LogCode { get; set; }
 		public string? ClientMessage { get; set; }
 		public string? InternalMessage { get; set; }
 		public string? StackTrace { get; set; }
@@ -26,20 +26,19 @@ namespace Raider.Logging.Internal
 		public long? IdCommandQuery { get; set; }
 		public decimal? MethodCallElapsedMilliseconds { get; set; }
 		public string? PropertyName { get; set; }
-		public object? ValidationPropertyInfo { get; set; }
+		public object? ValidationFailure { get; set; }
 		public string? DisplayPropertyName { get; set; }
 		public bool? IsValidationError { get; set; }
-		public ITraceFrame? TraceFrame { get; set; }
 
-		public LogMessage(ITraceInfo traceInfo)
+		internal LogMessage(ITraceInfo traceInfo)
 		{
 			Created = DateTimeOffset.Now;
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
 
-		public IReadOnlyDictionary<string, object> ToDictionary()
+		public IReadOnlyDictionary<string, object?> ToDictionary()
 		{
-			var dict = new Dictionary<string, object>
+			var dict = new Dictionary<string, object?>
 			{
 				//{ nameof(LogLevel), LogLevel },
 				{ nameof(IdLogLevel), IdLogLevel },
@@ -47,7 +46,7 @@ namespace Raider.Logging.Internal
 				{ nameof(TraceInfo.RuntimeUniqueKey), TraceInfo.RuntimeUniqueKey }
 			};
 
-			if (LogCode.HasValue)
+			if (!string.IsNullOrWhiteSpace(LogCode))
 				dict.Add(nameof(LogCode), LogCode);
 
 			if (!string.IsNullOrWhiteSpace(ClientMessage))
@@ -85,6 +84,9 @@ namespace Raider.Logging.Internal
 
 			if (!string.IsNullOrWhiteSpace(DisplayPropertyName))
 				dict.Add(nameof(DisplayPropertyName), DisplayPropertyName);
+
+			if (ValidationFailure != null)
+				dict.Add(nameof(ValidationFailure), ValidationFailure.ToString());
 
 			if (IsValidationError.HasValue)
 				dict.Add(nameof(IsValidationError), IsValidationError);
