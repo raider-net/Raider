@@ -39,6 +39,7 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 				nameof(ILogMessage.MethodCallElapsedMilliseconds),
 				nameof(ILogMessage.PropertyName),
 				nameof(ILogMessage.DisplayPropertyName),
+				nameof(ILogMessage.ValidationFailure),
 				nameof(ILogMessage.IsValidationError),
 				nameof(ILogMessage.TraceInfo.CorrelationId)
 			};
@@ -48,7 +49,7 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 				{ nameof(ILogMessage.IdLogLevel), NpgsqlDbType.Integer },
 				{ nameof(ILogMessage.Created), NpgsqlDbType.TimestampTz },
 				{ nameof(ILogMessage.TraceInfo.RuntimeUniqueKey), NpgsqlDbType.Uuid },
-				{ nameof(ILogMessage.LogCode), NpgsqlDbType.Bigint },
+				{ nameof(ILogMessage.LogCode), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.ClientMessage), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.InternalMessage), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId), NpgsqlDbType.Uuid },
@@ -62,6 +63,7 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 				{ nameof(ILogMessage.MethodCallElapsedMilliseconds), NpgsqlDbType.Numeric },
 				{ nameof(ILogMessage.PropertyName), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.DisplayPropertyName), NpgsqlDbType.Varchar },
+				{ nameof(ILogMessage.ValidationFailure), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.IsValidationError), NpgsqlDbType.Boolean },
 				{ nameof(ILogMessage.TraceInfo.CorrelationId), NpgsqlDbType.Uuid }
 			};

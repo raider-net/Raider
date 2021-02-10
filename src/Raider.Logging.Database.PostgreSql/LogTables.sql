@@ -3,7 +3,7 @@ CREATE TABLE aud."LogMessage" (
 	"IdLogLevel" int4 NOT NULL,
 	"Created" timestamp NOT NULL,
 	"RuntimeUniqueKey" uuid NOT NULL,
-	"LogCode" bigint NULL,
+	"LogCode" varchar(31) NULL,
 	"ClientMessage" text NULL,
 	"InternalMessage" text NULL,
 	"MethodCallId" uuid  NOT NULL,
@@ -17,8 +17,8 @@ CREATE TABLE aud."LogMessage" (
 	"MethodCallElapsedMilliseconds" numeric NULL,
 	"PropertyName" varchar(255)  NULL,
 	"DisplayPropertyName" varchar(255)  NULL,
+	"ValidationFailure" text NULL,
 	"IsValidationError" bool  NULL,
-	"ExternalCorrelationId" varchar(63)  NULL,
 	"CorrelationId" uuid  NULL
 );
 GRANT INSERT, SELECT, UPDATE, DELETE ON TABLE aud."LogMessage" TO postgres;
