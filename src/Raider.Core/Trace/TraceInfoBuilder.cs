@@ -34,27 +34,8 @@ namespace Raider.Trace
 	public abstract class TraceInfoBuilderBase<TBuilder> : ITraceInfoBuilder<TBuilder>
 		where TBuilder : TraceInfoBuilderBase<TBuilder>
 	{
-		private class TraceInfo : ITraceInfo
-		{
-			public Guid RuntimeUniqueKey { get; set; }
-
-			public ITraceFrame TraceFrame { get; set; }
-
-			public int? IdUser { get; set; }
-
-			public string? ExternalCorrelationId { get; set; }
-
-			public Guid? CorrelationId { get; set; }
-
-			public TraceInfo(ITraceFrame traceFrame)
-			{
-				RuntimeUniqueKey = EnvironmentInfo.RUNTIME_UNIQUE_KEY;
-				TraceFrame = traceFrame ?? throw new ArgumentNullException(nameof(traceFrame));
-			}
-		}
-
 		private readonly TBuilder _builder;
-		private TraceInfo _traceInfo;
+		protected TraceInfo _traceInfo;
 
 		protected TraceInfoBuilderBase(ITraceFrame currentTraceFrame, ITraceInfo? previousTraceInfo)
 		{
@@ -123,14 +104,6 @@ namespace Raider.Trace
 			return _builder;
 		}
 
-		//public TBuilder TraceFrame(ITraceFrame? traceFrame, bool force = false)
-		//{
-		//	if (force || _traceInfo.TraceFrame == null)
-		//		_traceInfo.TraceFrame = traceFrame;
-
-		//	return _builder;
-		//}
-
 		public TBuilder IdUser(int? idUser, bool force = false)
 		{
 			if (force || !_traceInfo.IdUser.HasValue)
@@ -188,13 +161,13 @@ namespace Raider.Trace
 		{
 		}
 
-		//public static implicit operator TraceInfo?(TraceInfoBuilder builder)
-		//{
-		//	if (builder == null)
-		//		return null;
+		public static implicit operator TraceInfo?(TraceInfoBuilder builder)
+		{
+			if (builder == null)
+				return null;
 
-		//	return builder._traceInfo as TraceInfo;
-		//}
+			return builder._traceInfo;
+		}
 
 		//public static implicit operator TraceInfoBuilder?(TraceInfo traceInfo)
 		//{

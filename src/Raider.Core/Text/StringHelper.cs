@@ -337,6 +337,34 @@ namespace Raider.Text
 			return text;
 		}
 
+		public static string? TrimLength(string text, int maxLength, string? postfix = null)
+		{
+			if (text == null)
+				return null;
+
+			if (maxLength <= 0)
+				return "";
+
+			if (text.Length <= maxLength)
+				return text;
+
+			if (string.IsNullOrEmpty(postfix))
+			{
+				return text.Substring(0, maxLength);
+			}
+			else
+			{
+				if (maxLength < postfix.Length)
+					throw new ArgumentException($"Invalid {nameof(postfix)} length.", nameof(postfix));
+
+				var newLength = maxLength - postfix.Length;
+				if (newLength == 0)
+					return postfix;
+				else 
+					return $"{text.SubstringSafe(0, newLength)}{postfix}";
+			}
+		}
+
 		public static string Replace(string text, Dictionary<string, string> data)
 		{
 			if (text == null || data == null || data.Count == 0)
@@ -344,23 +372,6 @@ namespace Raider.Text
 
 			foreach (var kvp in data)
 				text = text.Replace(kvp.Key, kvp.Value);
-
-			return text;
-		}
-
-		public static string Elipsis(string text, int count, string postfix = "...")
-		{
-			if (text == null)
-				return null;
-
-			if (postfix == null)
-				postfix = "";
-
-			if (count < postfix.Length)
-				return "";
-
-			if (count < text.Length)
-				text = $"{text.SubstringSafe(0, count - postfix.Length)}{postfix}";
 
 			return text;
 		}

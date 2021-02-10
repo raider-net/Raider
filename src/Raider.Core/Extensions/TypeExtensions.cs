@@ -372,7 +372,7 @@ namespace Raider.Extensions
 		}
 		#endregion
 
-		public static object GetDefaultValue(this Type type)
+		public static object? GetDefaultValue(this Type type)
 		{
 			if (type.IsValueType && Nullable.GetUnderlyingType(type) == null)
 			{
@@ -383,5 +383,8 @@ namespace Raider.Extensions
 				return null;
 			}
 		}
+
+		public static ConstructorInfo? GetDefaultConstructor(this Type type)
+			=> type.GetConstructors().FirstOrDefault(t => t.GetParameters().Count() == 0);
 	}
 }

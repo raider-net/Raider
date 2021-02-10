@@ -307,9 +307,6 @@ namespace Raider.Extensions
 		public static string Replace(this string text, Dictionary<string, string> data)
 			=> StringHelper.Replace(text, data);
 
-		public static string Elipsis(this string text, int count, string postfix = "...")
-			=> StringHelper.Elipsis(text, count, postfix);
-
 		public static string ConvertToEncoding(this string text, Encoding sourceEncoding, Encoding targetEncoding)
 		{
 			if (text == null) return null;
@@ -671,6 +668,15 @@ namespace Raider.Extensions
 			}
 		}
 
+		public static bool StartsWithSafe(this string text, string? value)
+			=> value != null && text.StartsWith(value);
+
+		public static bool EndsWithSafe(this string text, string? value)
+			=> value != null && text.EndsWith(value);
+
+		public static bool ContainsSafe(this string text, string? value)
+			=> value != null && text.Contains(value);
+
 		public static string ReplaceAll(this string text, string left, string right, bool replaceFirstRight, string replceWith, bool replaceLeftRight)
 		{
 			string result = text;
@@ -831,6 +837,11 @@ namespace Raider.Extensions
 			return StringHelper.TrimPostfix(text, postfix, ignoreCase);
 		}
 
+		public static string? TrimLength(this string text, int maxLength, string? postfix = null)
+		{
+			return StringHelper.TrimLength(text, maxLength, postfix);
+		}
+
 		public static string ToCSharpClassNameConvention(this string text, bool strictCammelCase = false, bool removeUnderscores = true, bool throwIfEmpty = true)
 		{
 			return StringHelper.ToCSharpClassNameConvention(text, strictCammelCase, removeUnderscores, throwIfEmpty);
@@ -913,6 +924,15 @@ namespace Raider.Extensions
 			{
 				return char.ToLower(s[0], cultureInfo) + s.Substring(1);
 			}
+		}
+
+		public static string GetLastSplitSubstring(this string s, string delimiter)
+		{
+			if (s == null)
+				throw new ArgumentNullException(nameof(s));
+
+			string[] items = s.Split(new string[] { delimiter }, StringSplitOptions.None);
+			return items.Last();
 		}
 	}
 }

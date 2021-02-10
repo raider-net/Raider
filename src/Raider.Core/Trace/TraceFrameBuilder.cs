@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace Raider.Trace
 {
@@ -24,86 +22,8 @@ namespace Raider.Trace
 	public abstract class TraceFrameBuilderBase<TBuilder> : ITraceFrameBuilder<TBuilder>
 		where TBuilder : TraceFrameBuilderBase<TBuilder>
 	{
-		public class TraceFrame : ITraceFrame
-		{
-			public Guid MethodCallId { get; set; } = Guid.NewGuid();
-			public string? CallerMemberName { get; set; }
-			public string? CallerFilePath { get; set; }
-			public int? CallerLineNumber { get; set; }
-			public IEnumerable<MethodParameter>? MethodParameters { get; set; }
-			public ITraceFrame? Previous { get; set; }
-
-			public string ToCallerMethodFullName()
-			{
-				var empty = true;
-				var sb = new StringBuilder();
-
-				if (!string.IsNullOrWhiteSpace(CallerMemberName))
-				{
-					sb.Append(CallerMemberName);
-					empty = false;
-				}
-
-				if (!string.IsNullOrWhiteSpace(CallerFilePath))
-				{
-					var callerFileName = CallerFilePath.Trim().EndsWith(".cs", StringComparison.InvariantCultureIgnoreCase)
-						? Path.GetFileName(CallerFilePath)
-						: CallerFilePath;
-
-					sb.Append(empty
-						? callerFileName
-						: $" in {callerFileName}");
-
-					empty = false;
-				}
-
-				if (CallerLineNumber.HasValue)
-				{
-					sb.Append(empty
-						? $"line {CallerLineNumber}"
-						: $":line {CallerLineNumber}");
-				}
-
-				if (MethodParameters != null)
-				{
-					foreach (var param in MethodParameters)
-					{
-						if (string.IsNullOrWhiteSpace(param.ParameterName))
-						{
-							sb.AppendLine();
-							sb.Append($"\t-param[{param.ParameterName}]: {param.SerializedValue}");
-						}
-					}
-				}
-
-				return sb.ToString();
-			}
-
-			public IReadOnlyList<ITraceFrame> GetTrace()
-			{
-				var result = new List<ITraceFrame> { this };
-
-				if (Previous == null)
-					return result;
-
-				var previous = Previous;
-				while (previous != null)
-				{
-					result.Add(previous);
-					previous = previous.Previous;
-				}
-
-				return result;
-			}
-
-			public override string ToString()
-				=> Previous == null
-					? ToCallerMethodFullName()
-					: $"{ToCallerMethodFullName()}{Environment.NewLine}{Previous}";
-		}
-
 		private readonly TBuilder _builder;
-		private readonly TraceFrame _traceFrame;
+		protected readonly TraceFrame _traceFrame;
 
 		protected TraceFrameBuilderBase(ITraceFrame? previousTraceFrame)
 		{
@@ -166,20 +86,20 @@ namespace Raider.Trace
 		{
 		}
 
-		//public static implicit operator TraceFrame?(TraceFrameBuilder builder)
-		//{
-		//	if (builder == null)
-		//		return null;
+		public static implicit operator TraceFrame?(TraceFrameBuilder builder)
+		{
+			if (builder == null)
+				return null;
 
-		//	return builder._traceFrame;
-		//}
+			return builder._traceFrame;
+		}
 
-		//public static implicit operator TraceFrameBuilder?(TraceFrame traceFrame)
-		//{
-		//	if (traceFrame == null)
-		//		return null;
+		public static implicit operator TraceFrameBuilder?(TraceFrame traceFrame)
+		{
+			if (traceFrame == null)
+				return null;
 
-		//	return new TraceFrameBuilder(traceFrame);
-		//}
+			return new TraceFrameBuilder(traceFrame);
+		}
 	}
 }
