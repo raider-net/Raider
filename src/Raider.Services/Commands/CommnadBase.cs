@@ -12,12 +12,9 @@ namespace Raider.Services.Commands
 			=> System.Text.Json.JsonSerializer.Deserialize<TCommand>(command);
 	}
 
-	public class CommandBase<TResult> : ICommand<TResult>
+	public abstract class CommandBase<TResult> : CommandBase, ICommand<TResult>
 	{
-		public virtual string Serialize()
-			=> System.Text.Json.JsonSerializer.Serialize(this);
-
-		public virtual TCommand? Deserialize<TCommand>(string command)
+		public new TCommand? Deserialize<TCommand>(string command)
 			where TCommand : CommandBase<TResult>
 			=> System.Text.Json.JsonSerializer.Deserialize<TCommand>(command);
 	}
