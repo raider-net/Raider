@@ -23,6 +23,26 @@ namespace Raider.EntityFrameworkCore.Mapping
 		}
 
 		/// <summary>
+		/// Set default predicate to all properties.
+		/// </summary>
+		public MappingConditions<T> EnableAll()
+		{
+			_properties.Clear();
+			_default = x => true;
+			return this;
+		}
+
+		/// <summary>
+		/// Set default predicate to all properties.
+		/// </summary>
+		public MappingConditions<T> DisableAll()
+		{
+			_properties.Clear();
+			_default = x => false;
+			return this;
+		}
+
+		/// <summary>
 		/// Enable property mapping.
 		/// </summary>
 		public MappingConditions<T> Enable(params Expression<Func<T, object>>[] properties)

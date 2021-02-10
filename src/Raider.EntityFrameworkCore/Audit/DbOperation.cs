@@ -1,11 +1,11 @@
 ﻿namespace Raider.EntityFrameworkCore.Audit
 {
-	public enum AuditType
+	public enum DbOperation
 	{
 		None = 0,
 		Create = 1,
 		Update = 2,
 		Delete = 3,
-		Show = 4
+		Read = 4
 	}
 }

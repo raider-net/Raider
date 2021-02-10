@@ -16,7 +16,7 @@ namespace Raider.EntityFrameworkCore.Audit
 		public Dictionary<string, object> OldValues { get; } = new Dictionary<string, object>();
 		public Dictionary<string, object> NewValues { get; } = new Dictionary<string, object>();
 		public List<PropertyEntry> TemporaryProperties { get; } = new List<PropertyEntry>();
-		public AuditType AuditType { get; set; }
+		public DbOperation DbOperation { get; set; }
 		public List<string> ChangedColumns { get; } = new List<string>();
 		public bool HasTemporaryProperties => TemporaryProperties.Any();
 		public string? CommandQueryName { get; set; }
@@ -34,7 +34,7 @@ namespace Raider.EntityFrameworkCore.Audit
 			=> new TAuditEntry
 			{
 				IdUser = IdUser,
-				IdAuditType = (int)AuditType,
+				IdAuditType = (int)DbOperation,
 				Created = Created,
 				TableName = TableName,
 				PrimaryKey = System.Text.Json.JsonSerializer.Serialize(KeyValues),

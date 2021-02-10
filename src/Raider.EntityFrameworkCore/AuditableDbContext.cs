@@ -126,12 +126,12 @@ namespace Raider.EntityFrameworkCore
 					switch (entry.State)
 					{
 						case EntityState.Added:
-							auditEntry.AuditType = AuditType.Create;
+							auditEntry.DbOperation = DbOperation.Create;
 							auditEntry.NewValues[propertyName] = property.CurrentValue;
 							break;
 
 						case EntityState.Deleted:
-							auditEntry.AuditType = AuditType.Delete;
+							auditEntry.DbOperation = DbOperation.Delete;
 							auditEntry.OldValues[propertyName] = property.OriginalValue;
 							break;
 
@@ -139,7 +139,7 @@ namespace Raider.EntityFrameworkCore
 							if (property.IsModified)
 							{
 								auditEntry.ChangedColumns.Add(propertyName);
-								auditEntry.AuditType = AuditType.Update;
+								auditEntry.DbOperation = DbOperation.Update;
 								auditEntry.OldValues[propertyName] = property.OriginalValue;
 								auditEntry.NewValues[propertyName] = property.CurrentValue;
 							}
