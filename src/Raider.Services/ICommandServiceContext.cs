@@ -26,7 +26,7 @@ namespace Raider.Services
 		string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		ILogger Logger { get;  }
 		IApplicationResources ApplicationResources { get;  }
-		Dictionary<object, object?> GlobalItems { get; }
+		Dictionary<object, object?> CommandHandlerItems { get; }
 
 		TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext;
@@ -45,7 +45,7 @@ namespace Raider.Services
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0);
 
-		bool TryGetGlobalItem<TKey, TValue>(TKey key, out TValue? value);
+		bool TryGetCommandHandlerItem<TKey, TValue>(TKey key, out TValue? value);
 
 		void LogTraceMessage(ILogMessage message);
 

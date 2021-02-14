@@ -50,7 +50,7 @@ namespace Raider.Services
 
 		public IApplicationResources ApplicationResources => _commandHandlerContext.ApplicationResources;
 
-		public Dictionary<object, object?> GlobalItems => _commandHandlerContext.GlobalItems;
+		public Dictionary<object, object?> CommandHandlerItems => _commandHandlerContext.CommandHandlerItems;
 
 		public Type ForServiceType { get; }
 		public bool AllowCommit { get; set; }
@@ -93,8 +93,8 @@ namespace Raider.Services
 			[CallerLineNumber] int sourceLineNumber = 0)
 			=> _commandHandlerContext.CreateScope(methodParameters, memberName, sourceFilePath, sourceLineNumber);
 
-		public bool TryGetGlobalItem<TKey, TValue>(TKey key, out TValue? value)
-			=> _commandHandlerContext.TryGetGlobalItem(key, out value);
+		public bool TryGetCommandHandlerItem<TKey, TValue>(TKey key, out TValue? value)
+			=> _commandHandlerContext.TryGetCommandHandlerItem(key, out value);
 
 		public void LogTraceMessage(ILogMessage message)
 			=> _commandHandlerContext.LogTraceMessage(message);

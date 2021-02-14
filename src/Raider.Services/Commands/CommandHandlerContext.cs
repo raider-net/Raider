@@ -33,7 +33,7 @@ namespace Raider.Services.Commands
 		public string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		public ILogger Logger { get; private set; }
 		public IApplicationResources ApplicationResources { get; private set; }
-		public Dictionary<object, object?> GlobalItems { get; } = new Dictionary<object, object?>();
+		public Dictionary<object, object?> CommandHandlerItems { get; } = new Dictionary<object, object?>();
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 		public CommandHandlerContext(ServiceFactory serviceFactory)
@@ -123,14 +123,14 @@ namespace Raider.Services.Commands
 			return scope;
 		}
 
-		public bool TryGetGlobalItem<TKey, TValue>(TKey key, out TValue? value)
+		public bool TryGetCommandHandlerItem<TKey, TValue>(TKey key, out TValue? value)
 		{
 			value = default;
 
 			if (key == null)
 				return false;
 
-			if (GlobalItems.TryGetValue(key, out object? obj))
+			if (CommandHandlerItems.TryGetValue(key, out object? obj))
 			{
 				if (obj is TValue val)
 				{
