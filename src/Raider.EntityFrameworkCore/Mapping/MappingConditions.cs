@@ -45,7 +45,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		/// <summary>
 		/// Enable property mapping.
 		/// </summary>
-		public MappingConditions<T> Enable(params Expression<Func<T, object>>[] properties)
+		public MappingConditions<T> Enable(params Expression<Func<T, object?>>[] properties)
 		{
 			if (properties == null)
 				throw new ArgumentNullException(nameof(properties));
@@ -62,7 +62,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		/// <summary>
 		/// Disable property mapping.
 		/// </summary>
-		public MappingConditions<T> Ignore(params Expression<Func<T, object>>[] properties)
+		public MappingConditions<T> Ignore(params Expression<Func<T, object?>>[] properties)
 		{
 			if (properties == null)
 				throw new ArgumentNullException(nameof(properties));
@@ -79,7 +79,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		/// <summary>
 		/// Property can be mapped only if the condition will be evaluated as true.
 		/// </summary>
-		public MappingConditions<T> MapIf(Expression<Func<T, object>> property, Func<T, bool> condition)
+		public MappingConditions<T> MapIf(Expression<Func<T, object?>> property, Func<T, bool> condition)
 		{
 			var propertyName = property?.GetMemberName() ?? throw new ArgumentNullException(nameof(property));
 			_properties[propertyName] = condition ?? throw new ArgumentNullException(nameof(condition));

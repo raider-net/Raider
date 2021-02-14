@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Raider.EntityFrameworkCore.Mapping
 {
 	public abstract class Mapper<TSource, TTarget, IFrom, ITo>
 		where IFrom : notnull
 	{
+		[return: NotNullIfNotNull("source")]
 		public TTarget? Map(
 			TSource? source,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
@@ -13,6 +15,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<TSource?, TTarget?>? postMapAction = null)
 			=> MapInternal(source, default, new Dictionary<IFrom, ITo>(), referenceModifier, conditions, postMapAction);
 
+		[return: NotNullIfNotNull("source")]
 		public TTarget? Map(
 			TSource? source,
 			TTarget? target,
@@ -21,6 +24,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<TSource?, TTarget?>? postMapAction = null)
 			=> MapInternal(source, target, new Dictionary<IFrom, ITo>(), referenceModifier, conditions, postMapAction);
 
+		[return: NotNullIfNotNull("source")]
 		public List<TTarget>? Map(
 			IEnumerable<TSource>? source,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
@@ -28,6 +32,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
 			=> MapToList(source, (List<TTarget>?)null, new Dictionary<IFrom, ITo>(), MapInternal, referenceModifier, conditions, null);
 
+		[return: NotNullIfNotNull("source")]
 		public ICollection<TTarget>? Map(
 			IEnumerable<TSource>? source,
 			ICollection<TTarget>? target,
@@ -36,6 +41,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
 			=> MapToList(source, target, new Dictionary<IFrom, ITo>(), MapInternal, referenceModifier, conditions, null);
 
+		[return: NotNullIfNotNull("source")]
 		public TTarget? Map(
 			TSource? source,
 			out Dictionary<IFrom, ITo> dict,
@@ -47,6 +53,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return MapInternal(source, default, dict, referenceModifier, conditions, postMapAction);
 		}
 
+		[return: NotNullIfNotNull("source")]
 		public TTarget? Map(
 			TSource? source,
 			TTarget? target,
@@ -59,6 +66,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return MapInternal(source, target, dict, referenceModifier, conditions, postMapAction);
 		}
 
+		[return: NotNullIfNotNull("source")]
 		public List<TTarget>? Map(
 			IEnumerable<TSource>? source,
 			out Dictionary<IFrom, ITo> dict,
@@ -70,6 +78,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return MapToList(source, (List<TTarget>?)null, dict, MapInternal, referenceModifier, conditions, null);
 		}
 
+		[return: NotNullIfNotNull("source")]
 		public ICollection<TTarget>? Map(
 			IEnumerable<TSource>? source,
 			ICollection<TTarget>? target,
@@ -82,6 +91,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return MapToList(source, target, dict, MapInternal, referenceModifier, conditions, null);
 		}
 
+		[return: NotNullIfNotNull("source")]
 		public static ICollection<TTarget>? MapToList(
 			IEnumerable<TSource>? source,
 			ICollection<TTarget>? target,
@@ -104,6 +114,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 				throw new NotSupportedException($"target type is {target.GetType().FullName}");
 		}
 
+		[return: NotNullIfNotNull("source")]
 		private static List<TTarget>? MapToList(
 			IEnumerable<TSource>? source,
 			List<TTarget>? target,
@@ -169,6 +180,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return target;
 		}
 
+		[return: NotNullIfNotNull("source")]
 		private static HashSet<TTarget>? MapToList(
 			IEnumerable<TSource>? source,
 			HashSet<TTarget>? target,
@@ -234,6 +246,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return target;
 		}
 
+		[return: NotNullIfNotNull("source")]
 		protected virtual TTarget? MapInternal(
 			TSource? source,
 			TTarget? target,
@@ -251,14 +264,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return target;
 		}
 
-
-
-
-
-
-
-
-
+		[return: NotNullIfNotNull("source")]
 		public TSource? Copy(
 			TSource? source,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
@@ -266,6 +272,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<TSource?, TSource?>? postMapAction = null)
 			=> CopyInternal(source, default, new Dictionary<IFrom, IFrom>(), referenceModifier, conditions, postMapAction);
 
+		[return: NotNullIfNotNull("source")]
 		public TSource? Copy(
 			TSource? source,
 			TSource? target,
@@ -274,6 +281,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<TSource?, TSource?>? postMapAction = null)
 			=> CopyInternal(source, target, new Dictionary<IFrom, IFrom>(), referenceModifier, conditions, postMapAction);
 
+		[return: NotNullIfNotNull("source")]
 		public List<TSource>? Copy(
 			IEnumerable<TSource>? source,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
@@ -281,6 +289,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
 			=> CopyList(source, (List<TSource>?)null, new Dictionary<IFrom, IFrom>(), CopyInternal, referenceModifier, conditions, null);
 
+		[return: NotNullIfNotNull("source")]
 		public ICollection<TSource>? Copy(
 			IEnumerable<TSource>? source,
 			ICollection<TSource>? target,
@@ -289,6 +298,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
 			=> CopyList(source, target, new Dictionary<IFrom, IFrom>(), CopyInternal, referenceModifier, conditions, null);
 
+		[return: NotNullIfNotNull("source")]
 		public TSource? Copy(
 			TSource? source,
 			out Dictionary<IFrom, IFrom> dict,
@@ -300,6 +310,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return CopyInternal(source, default, dict, referenceModifier, conditions, postMapAction);
 		}
 
+		[return: NotNullIfNotNull("source")]
 		public TSource? Copy(
 			TSource? source,
 			TSource? target,
@@ -312,6 +323,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return CopyInternal(source, target, dict, referenceModifier, conditions, postMapAction);
 		}
 
+		[return: NotNullIfNotNull("source")]
 		public List<TSource>? Copy(
 			IEnumerable<TSource>? source,
 			out Dictionary<IFrom, IFrom> dict,
@@ -323,6 +335,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return CopyList(source, (List<TSource>?)null, dict, CopyInternal, referenceModifier, conditions, null);
 		}
 
+		[return: NotNullIfNotNull("source")]
 		public ICollection<TSource>? Copy(
 			IEnumerable<TSource>? source,
 			ICollection<TSource>? target,
@@ -335,6 +348,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return CopyList(source, target, dict, CopyInternal, referenceModifier, conditions, null);
 		}
 
+		[return: NotNullIfNotNull("source")]
 		public static ICollection<TSource>? CopyList(
 			IEnumerable<TSource>? source,
 			ICollection<TSource>? target,
@@ -357,6 +371,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 				throw new NotSupportedException($"target type is {target.GetType().FullName}");
 		}
 
+		[return: NotNullIfNotNull("source")]
 		private static List<TSource>? CopyList(
 			IEnumerable<TSource>? source,
 			List<TSource>? target,
@@ -422,6 +437,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return target;
 		}
 
+		[return: NotNullIfNotNull("source")]
 		private static HashSet<TSource>? CopyList(
 			IEnumerable<TSource>? source,
 			HashSet<TSource>? target,
@@ -487,6 +503,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return target;
 		}
 
+		[return: NotNullIfNotNull("source")]
 		protected virtual TSource? CopyInternal(
 			TSource? source,
 			TSource? target,
