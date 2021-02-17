@@ -103,7 +103,7 @@ namespace Raider.Validation
 		//TODO: VALIDATE ASYNC !!! ???
 
 		public override IValidationDescriptor ToDescriptor()
-			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition)
+			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition, null, null)
 				.AddValidators(Validators);
 
 		protected override ValidationResult Validate(object? obj)

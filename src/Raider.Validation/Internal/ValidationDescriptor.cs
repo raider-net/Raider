@@ -26,6 +26,9 @@ namespace Raider.Validation.Internal
 
 		IReadOnlyList<IValidationDescriptor> IValidationDescriptor.Validators => Validators;
 
+		//DefaultOrEmpty, NotDefaultOrEmpty
+		public object? DefaultValue { get; set; }
+
 		//Equal, NotEqual, GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual
 		public IComparable? ValueToCompare {get; set; }
 
@@ -56,10 +59,22 @@ namespace Raider.Validation.Internal
 		//PrecisionScaleDecimal
 		public bool IgnoreTrailingZeros {get; set; }
 
+		public string Message { get; }
+		
+		public string MessageWithPropertyName { get; }
+
 		//RegEx
 		public string? Pattern {get; set; }
 
-		public ValidationDescriptor(Type objectType, IValidationFrame validationFrame, ValidatorType validatorType, string validatorTypeInfo, bool conditional, IClientConditionDefinition? clientConditionDefinition)
+		public ValidationDescriptor(
+			Type objectType,
+			IValidationFrame validationFrame,
+			ValidatorType validatorType,
+			string validatorTypeInfo,
+			bool conditional,
+			IClientConditionDefinition? clientConditionDefinition,
+			string message,
+			string messageWithPropertyName)
 		{
 			ObjectType = objectType ?? throw new ArgumentNullException(nameof(objectType));
 			ValidationFrame = validationFrame;
@@ -67,6 +82,8 @@ namespace Raider.Validation.Internal
 			ValidatorTypeInfo = validatorTypeInfo;
 			Conditional = conditional;
 			ClientConditionDefinition = clientConditionDefinition;
+			Message = message;
+			MessageWithPropertyName = messageWithPropertyName;
 			Validators = new List<IValidationDescriptor>();
 		}
 

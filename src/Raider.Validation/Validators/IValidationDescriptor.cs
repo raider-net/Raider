@@ -22,6 +22,9 @@ namespace Raider.Validation
 
 		IReadOnlyList<IValidationDescriptor> Validators { get; }
 
+		//DefaultOrEmpty, NotDefaultOrEmpty
+		object? DefaultValue { get; }
+
 		//Equal, NotEqual, GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual
 		IComparable? ValueToCompare { get; }
 
@@ -54,6 +57,10 @@ namespace Raider.Validation
 
 		//RegEx
 		string? Pattern { get; }
+
+		public string Message { get; }
+
+		public string MessageWithPropertyName { get; }
 
 		bool IsEqualTo(IValidationDescriptor other);
 

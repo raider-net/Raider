@@ -48,11 +48,32 @@ namespace Raider.Validation
 
 		protected string GetFormattedMessage(string resourceKey, string defaultMessage, IDictionary<string, object?>? placeholderValues = null)
 		{
-			var template = ValidatorConfiguration.Localizer?[resourceKey] ?? defaultMessage;
+			string? template;
+
+			if (ValidatorConfiguration.Localizer == null)
+			{
+				template = defaultMessage;
+			}
+			else
+			{
+				var localizedString = ValidatorConfiguration.Localizer[resourceKey];
+				if (localizedString.ResourceNotFound)
+				{
+					template = defaultMessage;
+				}
+				else
+				{
+					template = localizedString;
+				}
+			}
+
+			if (string.IsNullOrWhiteSpace(template))
+				template = defaultMessage;
+
 			return TemplateFormatter.Format(template, placeholderValues) ?? "?Error";
 		}
 
-		protected string GetDisplayName()
-			=> null; // ValidatorConfiguration.DisplayNameResolver?.Invoke(typeof(T), PropertyValidator.Expression, PropertyValidator.Expression) ?? PropertyValidator.ValidationFrame.PropertyName;
+		protected string? GetDisplayName()
+			=> ValidationFrame?.PropertyName; // ValidatorConfiguration.DisplayNameResolver?.Invoke(typeof(T), PropertyValidator.Expression, PropertyValidator.Expression) ?? PropertyValidator.ValidationFrame.PropertyName;
 	}
 }

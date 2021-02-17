@@ -136,10 +136,10 @@
     <value>'{PropertyName}' must be equal to '{ValueToCompare}'.</value>
   </data>
   <data name="ExclusiveBetween" xml:space="preserve">
-    <value>Must be between {From} and {To} (exclusive). You entered {Value}.</value>
+    <value>Must be between {From} and {To} (exclusive).</value>
   </data>
   <data name="ExclusiveBetween_WithProperty" xml:space="preserve">
-    <value>'{PropertyName}' must be between {From} and {To} (exclusive). You entered {Value}.</value>
+    <value>'{PropertyName}' must be between {From} and {To} (exclusive).</value>
   </data>
   <data name="GreaterThan" xml:space="preserve">
     <value>Must be greater than '{ValueToCompare}'.</value>
@@ -154,16 +154,16 @@
     <value>'{PropertyName}' must be greater than '{ValueToCompare}'.</value>
   </data>
   <data name="InclusiveBetween" xml:space="preserve">
-    <value>Must be between {From} and {To}. You entered {Value}.</value>
+    <value>Must be between {From} and {To}..</value>
   </data>
   <data name="InclusiveBetween_WithProperty" xml:space="preserve">
-    <value>'{PropertyName}' must be between {From} and {To}. You entered {Value}.</value>
+    <value>'{PropertyName}' must be between {From} and {To}.</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>Must be between {MinLength} and {MaxLength} characters. You entered {TotalLength} characters.</value>
+    <value>Must be between {MinLength} and {MaxLength} characters.</value>
   </data>
   <data name="Length_WithProperty" xml:space="preserve">
-    <value>'{PropertyName}' must be between {MinLength} and {MaxLength} characters. You entered {TotalLength} characters.</value>
+    <value>'{PropertyName}' must be between {MinLength} and {MaxLength} characters.</value>
   </data>
   <data name="LessThan" xml:space="preserve">
     <value>Must be less than '{ValueToCompare}'.</value>
@@ -226,10 +226,10 @@
     <value>'{PropertyName}' must be empty.</value>
   </data>
   <data name="PrecisionScale" xml:space="preserve">
-    <value>Must not be more than {ExpectedPrecision} digits in total, with allowance for {ExpectedScale} decimals. {Digits} digits and {ActualScale} decimals were found.</value>
+    <value>Must not be more than {ExpectedPrecision} digits in total, with allowance for {ExpectedScale} decimals.</value>
   </data>
   <data name="PrecisionScale_WithProperty" xml:space="preserve">
-    <value>'{PropertyName}' must not be more than {ExpectedPrecision} digits in total, with allowance for {ExpectedScale} decimals. {Digits} digits and {ActualScale} decimals were found.</value>
+    <value>'{PropertyName}' must not be more than {ExpectedPrecision} digits in total, with allowance for {ExpectedScale} decimals.</value>
   </data>
   <data name="RegEx" xml:space="preserve">
     <value>Is not in the correct format.</value>

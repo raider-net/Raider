@@ -64,7 +64,7 @@ namespace Raider.Validation
 		}
 
 		public override IValidationDescriptor ToDescriptor()
-			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition)
+			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty())
 			{
 				ValueToCompare = ValueToCompare,
 				Comparer = Comparer
@@ -129,7 +129,7 @@ namespace Raider.Validation
 		}
 
 		public override IValidationDescriptor ToDescriptor()
-			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition)
+			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty())
 			{
 				ValueToCompare = ValueToCompare,
 				Comparer = Comparer

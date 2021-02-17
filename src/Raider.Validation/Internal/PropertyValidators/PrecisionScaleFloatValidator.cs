@@ -9,8 +9,8 @@ namespace Raider.Validation
 	{
 		public override ValidatorType ValidatorType { get; } = ValidatorType.PrecisionScale;
 
-		protected override string DefaultValidationMessage => "Must  not be more than {ExpectedPrecision} digits in total, with allowance for {ExpectedScale} decimals. {Digits} digits and {ActualScale} decimals were found.";
-		protected override string DefaultValidationMessageWithProperty => "'{PropertyName}' must not be more than {ExpectedPrecision} digits in total, with allowance for {ExpectedScale} decimals. {Digits} digits and {ActualScale} decimals were found.";
+		protected override string DefaultValidationMessage => "Must  not be more than {ExpectedPrecision} digits in total, with allowance for {ExpectedScale} decimals.";
+		protected override string DefaultValidationMessageWithProperty => "'{PropertyName}' must not be more than {ExpectedPrecision} digits in total, with allowance for {ExpectedScale} decimals.";
 
 		public int Scale { get; }
 		public int Precision { get; }
@@ -34,34 +34,32 @@ namespace Raider.Validation
 		}
 
 		public override IValidationDescriptor ToDescriptor()
-			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition)
+			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty())
 			{
 				Scale = Scale,
 				Precision = Precision,
 				IgnoreTrailingZeros = IgnoreTrailingZeros
 			};
 
-		private IDictionary<string, object?> GetPlaceholderValues(int scale, int actualIntegerDigits)
+		private IDictionary<string, object?> GetPlaceholderValues()
 			=> new Dictionary<string, object?>
 			{
 				{ "ExpectedPrecision", Precision },
 				{ "ExpectedScale", Scale },
-				{ "ActualScale", scale },
-				{ "Digits", actualIntegerDigits },
 				{ "PropertyName", GetDisplayName() }
 			};
 
-		private string GetValidationMessage(int scale, int actualIntegerDigits)
+		private string GetValidationMessage()
 			=> GetFormattedMessage(
 					Resources.ValidationKeys.PrecisionScale,
 					DefaultValidationMessage,
-					GetPlaceholderValues(scale, actualIntegerDigits));
+					GetPlaceholderValues());
 
-		private string GetValidationMessageWithProperty(int scale, int actualIntegerDigits)
+		private string GetValidationMessageWithProperty()
 			=> GetFormattedMessage(
 					Resources.ValidationKeys.PrecisionScale_WithProperty,
 					DefaultValidationMessageWithProperty,
-					GetPlaceholderValues(scale, actualIntegerDigits));
+					GetPlaceholderValues());
 
 		internal override ValidationResult? Validate(ValidationContext context)
 		{
@@ -76,7 +74,7 @@ namespace Raider.Validation
 			var expectedIntegerDigits = Precision - Scale;
 			if (Scale < scale || expectedIntegerDigits < actualIntegerDigits)
 			{
-				return new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(scale, actualIntegerDigits), GetValidationMessageWithProperty(scale, actualIntegerDigits)));
+				return new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty()));
 			}
 
 			return null;

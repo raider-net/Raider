@@ -136,10 +136,10 @@
     <value>Hodnota poľa '{PropertyName}' musí byť rovná '{ValueToCompare}'.</value>
   </data>
   <data name="ExclusiveBetween" xml:space="preserve">
-    <value>Hodnota poľa musí byť väčšia ako {From} a menšia ako {To}. Vami zadaná hodnota {Value}.</value>
+    <value>Hodnota poľa musí byť väčšia ako {From} a menšia ako {To}.</value>
   </data>
   <data name="ExclusiveBetween_WithProperty" xml:space="preserve">
-    <value>Hodnota poľa '{PropertyName}' musí byť väčšia ako {From} a menšia ako {To}. Vami zadaná hodnota {Value}.</value>
+    <value>Hodnota poľa '{PropertyName}' musí byť väčšia ako {From} a menšia ako {To}.</value>
   </data>
   <data name="GreaterThan" xml:space="preserve">
     <value>Hodnota poľa musí byť väčšia ako '{ValueToCompare}'.</value>
@@ -154,16 +154,16 @@
     <value>Hodnota poľa '{PropertyName}' musí byť väčšia ako '{ValueToCompare}'.</value>
   </data>
   <data name="InclusiveBetween" xml:space="preserve">
-    <value>Hodnota poľa musí byť medzi {From} a {To} (vrátane). Vami zadaná hodnota je {Value}.</value>
+    <value>Hodnota poľa musí byť medzi {From} a {To} (vrátane).</value>
   </data>
   <data name="InclusiveBetween_WithProperty" xml:space="preserve">
-    <value>Hodnota poľa '{PropertyName}' musí byť medzi {From} a {To} (vrátane). Vami zadaná hodnota je {Value}.</value>
+    <value>Hodnota poľa '{PropertyName}' musí byť medzi {From} a {To} (vrátane).</value>
   </data>
   <data name="Length" xml:space="preserve">
-    <value>Dĺžka poľa musí byť medzi {MinLength} a {MaxLength} znakmi. Vami zadaná dĺžka je {TotalLength} znakov.</value>
+    <value>Dĺžka poľa musí byť medzi {MinLength} a {MaxLength} znakmi.</value>
   </data>
   <data name="Length_WithProperty" xml:space="preserve">
-    <value>Dĺžka poľa '{PropertyName}' musí byť medzi {MinLength} a {MaxLength} znakmi. Vami zadaná dĺžka je {TotalLength} znakov.</value>
+    <value>Dĺžka poľa '{PropertyName}' musí byť medzi {MinLength} a {MaxLength} znakmi.</value>
   </data>
   <data name="LessThan" xml:space="preserve">
     <value>Hodnota poľa musí byť menšia ako '{ValueToCompare}'.</value>
@@ -226,10 +226,10 @@
     <value>Pole '{PropertyName}' musí byť prázdne.</value>
   </data>
   <data name="PrecisionScale" xml:space="preserve">
-    <value>Pole nemôže mať viac  ako {ExpectedPrecision} čísiel a {ExpectedScale} desatinných miest. Vami bolo zadané {Digits} číslic a {ActualScale} desatinných miest.</value>
+    <value>Pole nemôže mať viac  ako {ExpectedPrecision} čísiel a {ExpectedScale} desatinných miest.</value>
   </data>
   <data name="PrecisionScale_WithProperty" xml:space="preserve">
-    <value>Pole '{PropertyName}' nemôže mať viac  ako {ExpectedPrecision} čísiel a {ExpectedScale} desatinných miest. Vami bolo zadané {Digits} číslic a {ActualScale} desatinných miest.</value>
+    <value>Pole '{PropertyName}' nemôže mať viac  ako {ExpectedPrecision} čísiel a {ExpectedScale} desatinných miest.</value>
   </data>
   <data name="RegEx" xml:space="preserve">
     <value>Pole nemá správný formát.</value>

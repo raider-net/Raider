@@ -9,8 +9,8 @@ namespace Raider.Validation
 	{
 		public override ValidatorType ValidatorType { get; } = ValidatorType.ExclusiveBetween;
 
-		protected override string DefaultValidationMessage => "Must be between {From} and {To} (exclusive). You entered {Value}.";
-		protected override string DefaultValidationMessageWithProperty => "'{PropertyName}' must be between {From} and {To} (exclusive). You entered {Value}.";
+		protected override string DefaultValidationMessage => "Must be between {From} and {To} (exclusive).";
+		protected override string DefaultValidationMessageWithProperty => "'{PropertyName}' must be between {From} and {To} (exclusive).";
 
 		public IComparable? From { get; }
 		public IComparable? To { get; }
@@ -22,26 +22,25 @@ namespace Raider.Validation
 			To = to;
 		}
 
-		private IDictionary<string, object?> GetPlaceholderValues(IComparable? instanceToValidate)
+		private IDictionary<string, object?> GetPlaceholderValues()
 			=> new Dictionary<string, object?>
 			{
 				{ nameof(From), From },
 				{ nameof(To), To },
-				{ "Value", instanceToValidate },
 				{ "PropertyName", GetDisplayName() }
 			};
 
-		private string GetValidationMessage(IComparable instanceToValidate)
+		private string GetValidationMessage()
 			=> GetFormattedMessage(
 					Resources.ValidationKeys.ExclusiveBetween,
 					DefaultValidationMessage,
-					GetPlaceholderValues(instanceToValidate));
+					GetPlaceholderValues());
 
-		private string GetValidationMessageWithProperty(IComparable instanceToValidate)
+		private string GetValidationMessageWithProperty()
 			=> GetFormattedMessage(
 					Resources.ValidationKeys.ExclusiveBetween_WithProperty,
 					DefaultValidationMessageWithProperty,
-					GetPlaceholderValues(instanceToValidate));
+					GetPlaceholderValues());
 
 		internal override ValidationResult? Validate(ValidationContext context)
 		{
@@ -53,14 +52,14 @@ namespace Raider.Validation
 				if (0 < value.CompareTo(From) && value.CompareTo(To) < 0)
 					return null;
 				else
-					return new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(value), GetValidationMessageWithProperty(value)));
+					return new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty()));
 			}
 
 			throw new InvalidOperationException($"{nameof(context.InstanceToValidate)} must implement {nameof(IComparable)}.");
 		}
 
 		public override IValidationDescriptor ToDescriptor()
-			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition)
+			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty())
 			{
 				From = From,
 				To = To
