@@ -18,6 +18,8 @@ namespace Raider.Services.Extensions
 			services.TryAddTransient<ServiceFactory>(p => p.GetService);
 			services.AddRaiderCommands(assemblies);
 
+			services.TryAddTransient<ContextFactory>();
+
 			services.TryAddTransient(typeof(IAsyncCommandInterceptor<,>), typeof(AsyncCommandInterceptor<,,,>));
 			services.TryAddTransient(typeof(IAsyncCommandInterceptor<>), typeof(AsyncCommandInterceptor<,,>));
 			services.TryAddTransient(typeof(ICommandInterceptor<,>), typeof(CommandInterceptor<,,,>));
