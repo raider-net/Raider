@@ -18,6 +18,8 @@ namespace Raider.QueryServices.Extensions
 			services.TryAddTransient<ServiceFactory>(p => p.GetService);
 			services.AddRaiderQueries(assemblies);
 
+			services.TryAddTransient<ContextFactory>();
+
 			services.TryAddTransient(typeof(IAsyncQueryInterceptor<,>), typeof(AsyncQueryInterceptor<,,,>));
 			services.TryAddTransient(typeof(IQueryInterceptor<,>), typeof(QueryInterceptor<,,,>));
 

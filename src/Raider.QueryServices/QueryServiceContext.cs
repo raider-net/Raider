@@ -66,6 +66,17 @@ namespace Raider.QueryServices
 			Logger = serviceLogger;
 		}
 
+		public QueryServiceContext(ITraceInfo traceInfo, QueryHandlerContext queryHandlerContext, Type serviceType)
+		{
+			_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
+			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
+			ForServiceType = serviceType;
+
+			var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+			var serviceLogger = loggerFactory.CreateLogger(serviceType);
+			Logger = serviceLogger;
+		}
+
 		public TContext CreateNewDbContext<TContext>(
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null)
