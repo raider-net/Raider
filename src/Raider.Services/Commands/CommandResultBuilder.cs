@@ -17,6 +17,8 @@ namespace Raider.Services.Commands
 
 		bool MergeHasError(ICommandResult otherCommandResult);
 
+		bool CopyAllHasError(ICommandResult otherCommandResult);
+
 
 		bool MergeHasError(MethodLogScope scope, ValidationResult validationResult);
 
@@ -121,6 +123,25 @@ namespace Raider.Services.Commands
 		{
 			if (otherCommandResult != null && otherCommandResult.HasError)
 				_commandResult.ErrorMessages.AddRange(otherCommandResult.ErrorMessages);
+
+			return _commandResult.HasError;
+		}
+
+		public bool CopyAllHasError(ICommandResult otherCommandResult)
+		{
+			if (otherCommandResult != null)
+			{
+				if (otherCommandResult.HasSuccessMessage)
+					_commandResult.SuccessMessages.AddRange(otherCommandResult.SuccessMessages);
+
+				if (otherCommandResult.HasWarning)
+					_commandResult.WarningMessages.AddRange(otherCommandResult.WarningMessages);
+
+				if (otherCommandResult.HasError)
+					_commandResult.ErrorMessages.AddRange(otherCommandResult.ErrorMessages);
+
+				AddAffectedEntities(otherCommandResult.AffectedEntities ?? 0);
+			}
 
 			return _commandResult.HasError;
 		}
@@ -350,6 +371,8 @@ namespace Raider.Services.Commands
 		where TObject : ICommandResult<T>
 	{
 		TBuilder WithResult(T? data);
+
+		bool CopyAllHasError(ICommandResult<T> otherCommandResult);
 	}
 
 	public abstract class CommandResultBuilderBase<TBuilder, T, TObject> : CommandResultBuilderBase<TBuilder, TObject>, ICommandResultBuilder<TBuilder, T, TObject>
@@ -370,6 +393,27 @@ namespace Raider.Services.Commands
 		{
 			_commandResult.Result = result;
 			return _builder;
+		}
+
+		public bool CopyAllHasError(ICommandResult<T> otherCommandResult)
+		{
+			if (otherCommandResult != null)
+			{
+				if (otherCommandResult.HasSuccessMessage)
+					_commandResult.SuccessMessages.AddRange(otherCommandResult.SuccessMessages);
+
+				if (otherCommandResult.HasWarning)
+					_commandResult.WarningMessages.AddRange(otherCommandResult.WarningMessages);
+
+				if (otherCommandResult.HasError)
+					_commandResult.ErrorMessages.AddRange(otherCommandResult.ErrorMessages);
+
+				AddAffectedEntities(otherCommandResult.AffectedEntities ?? 0);
+
+				_commandResult.Result = otherCommandResult.Result;
+			}
+
+			return _commandResult.HasError;
 		}
 	}
 
