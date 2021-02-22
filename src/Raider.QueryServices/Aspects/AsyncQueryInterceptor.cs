@@ -161,8 +161,8 @@ namespace Raider.QueryServices.Aspects
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.ExecuteAsync)} returned null. Expected {typeof(IQueryResult<TResult>).FullName}");
 
-						//kto zaloguje reuslt message a kto tam prida ComamndName a IdSsavedCommandu ???
-						resultBuilder.MergeHasError(executeResult);
+						//TODO kto zaloguje reuslt message a kto tam prida ComamndName a IdSavedCommandu ???
+						resultBuilder.CopyAllHasError(executeResult);
 					}
 
 					tran = queryHandlerContextBuilder.Context.DbContextTransaction;

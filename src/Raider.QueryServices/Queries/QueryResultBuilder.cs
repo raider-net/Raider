@@ -17,6 +17,7 @@ namespace Raider.QueryServices.Queries
 
 		bool MergeHasError<T>(IQueryResult<T> otherQueryResult);
 
+		bool CopyAllHasError(IQueryResult<TResult> otherQueryResult);
 
 		bool MergeHasError(MethodLogScope scope, ValidationResult validationResult);
 
@@ -121,6 +122,27 @@ namespace Raider.QueryServices.Queries
 		{
 			if (otherQueryResult != null && otherQueryResult.HasError)
 				_queryResult.ErrorMessages.AddRange(otherQueryResult.ErrorMessages);
+
+			return _queryResult.HasError;
+		}
+
+		public bool CopyAllHasError(IQueryResult<TResult> otherQueryResult)
+		{
+			if (otherQueryResult != null)
+			{
+				if (otherQueryResult.HasSuccessMessage)
+					_queryResult.SuccessMessages.AddRange(otherQueryResult.SuccessMessages);
+
+				if (otherQueryResult.HasWarning)
+					_queryResult.WarningMessages.AddRange(otherQueryResult.WarningMessages);
+
+				if (otherQueryResult.HasError)
+					_queryResult.ErrorMessages.AddRange(otherQueryResult.ErrorMessages);
+
+				ResultCount(otherQueryResult.ResultCount ?? 0);
+
+				_queryResult.Result = otherQueryResult.Result;
+			}
 
 			return _queryResult.HasError;
 		}
