@@ -116,7 +116,7 @@ namespace Raider.Extensions
 			return ReflectionHelper.GetMemberInfo(expression);
 		}
 
-		public static string GetMemberName<T>(this Expression<Func<T, object>> expression) //where T : class
+		public static string GetMemberName<T>(this Expression<Func<T, object?>> expression) //where T : class
 		{
 			return ReflectionHelper.GetMemberName(expression);
 		}
