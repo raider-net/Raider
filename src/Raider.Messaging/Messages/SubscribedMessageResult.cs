@@ -8,37 +8,54 @@ namespace Raider.Messaging.Messages
 		public int RetryCount { get; set; }
 		public DateTimeOffset? DelayedToUtc { get; set; }
 
-		internal bool IsValidFor(ISubscriberMessage subscriberMessage)
+		internal static void Validate(ISubscriberMessage subscriberMessage, SubscriberMessageState state, int retryCount, DateTimeOffset? delayedToUtc)
 		{
 			if (subscriberMessage == null)
 				throw new ArgumentNullException(nameof(subscriberMessage));
 
-			if (subscriberMessage.State != SubscriberMessageState.InProcess)
-				throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {State}");
+			if (subscriberMessage.State != SubscriberMessageState.InProcess
+				&& subscriberMessage.State != SubscriberMessageState.Error)
+				throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {state}");
 
-			switch (State)
+			switch (state)
 			{
 				case SubscriberMessageState.Pending:
-					throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {State}");
+					throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {state}");
 				case SubscriberMessageState.InProcess:
-					throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {State}");
+					throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {state}");
 				case SubscriberMessageState.Consumed:
-					return true;
-				case SubscriberMessageState.Suspended:
 					{
-						if (subscriberMessage.RetryCount < RetryCount
-							|| (!subscriberMessage.DelayedToUtc.HasValue && DelayedToUtc.HasValue)
-							|| (subscriberMessage.DelayedToUtc.HasValue && DelayedToUtc.HasValue && subscriberMessage.DelayedToUtc < DelayedToUtc))
+						if (subscriberMessage.RetryCount == retryCount && subscriberMessage.DelayedToUtc == delayedToUtc)
 						{
-							return true;
+							return;
 						}
 
-						throw new InvalidOperationException($"Cannot set message state to {State} withhout changing {nameof(RetryCount)} or {nameof(DelayedToUtc)}");
+						throw new InvalidOperationException($"Cannot set message state to {state} by changing {nameof(retryCount)} or {nameof(delayedToUtc)}");
+					}
+				case SubscriberMessageState.Error:
+					{
+						if (subscriberMessage.RetryCount + 1 == retryCount
+							&& ((!subscriberMessage.DelayedToUtc.HasValue && delayedToUtc.HasValue)
+							|| (subscriberMessage.DelayedToUtc.HasValue && delayedToUtc.HasValue && subscriberMessage.DelayedToUtc < delayedToUtc)))
+						{
+							return;
+						}
+
+						throw new InvalidOperationException($"Cannot set message state to {state} withhout changing {nameof(retryCount)} and {nameof(delayedToUtc)}");
+					}
+				case SubscriberMessageState.Suspended:
+					{
+						if (subscriberMessage.RetryCount + 1 == retryCount)
+						{
+							return;
+						}
+
+						throw new InvalidOperationException($"Cannot set message state to {state} withhout changing {nameof(retryCount)} and {nameof(delayedToUtc)}");
 					}
 				case SubscriberMessageState.Corrupted:
-					return true;
+					return;
 				default:
-					throw new InvalidOperationException($"Invalid {State}");
+					throw new InvalidOperationException($"Invalid {state}");
 			}
 		}
 	}

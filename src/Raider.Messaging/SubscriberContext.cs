@@ -14,12 +14,12 @@ namespace Raider.Messaging
 		private readonly string _commandName = $"{nameof(Raider)}.{nameof(Messaging)}";
 
 		public ServiceFactory ServiceFactory { get; }
-		public ITraceInfo TraceInfo { get; protected set; }
-		public ILogger Logger { get; private set; }
-		public IApplicationResources ApplicationResources { get; private set; }
+		public ITraceInfo TraceInfo { get; internal set; }
+		public ILogger Logger { get; internal set; }
+		public IApplicationResources ApplicationResources { get; internal set; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		internal SubscriberContext(ServiceFactory serviceFactory)
+		public SubscriberContext(ServiceFactory serviceFactory)
 		{
 			ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
 		}
@@ -267,42 +267,6 @@ namespace Raider.Messaging
 			Logger.LogCritical($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
 
 			return message;
-		}
-
-
-
-		public abstract class Builder<TContext>
-			where TContext : SubscriberContext
-		{
-			public TContext Context { get; }
-
-			public ServiceFactory ServiceFactory { get; }
-
-			public Builder(ServiceFactory serviceFactory)
-			{
-				ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
-				Context = Create();
-			}
-
-			internal Builder<TContext> TraceInfo(ITraceInfo traceInfo)
-			{
-				Context.TraceInfo = traceInfo;
-				return this;
-			}
-
-			internal Builder<TContext> Logger(ILogger logger)
-			{
-				Context.Logger = logger;
-				return this;
-			}
-
-			internal Builder<TContext> ApplicationResources(IApplicationResources applicationResources)
-			{
-				Context.ApplicationResources = applicationResources;
-				return this;
-			}
-
-			public abstract TContext Create();
 		}
 	}
 }

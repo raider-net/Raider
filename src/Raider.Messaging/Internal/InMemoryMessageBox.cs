@@ -108,6 +108,27 @@ namespace Raider.Messaging.Internal
 			}
 
 
+			else if (message.State == SubscriberMessageState.Error)
+			{
+				if (message.DelayedToUtc < utcNow)
+				{
+					MarkMessageAsInProcess(message);
+					return ConvertMessage<TData>(message);
+				}
+				else
+				{
+					if (!tryNext)
+						return Task.FromResult((ISubscriberMessage<TData>?)null);
+
+					var nextMessage = subscriberQueue.Skip(1).FirstOrDefault();
+					if (nextMessage == null)
+						return Task.FromResult((ISubscriberMessage<TData>?)null);
+
+					return TryReadMessage(tryNext, nextMessage, subscriber, subscriberQueue, cancellationToken);
+				}
+			}
+
+
 			else if (message.State == SubscriberMessageState.Suspended)
 			{
 				if (!tryNext)
@@ -145,6 +166,8 @@ namespace Raider.Messaging.Internal
 		{
 			if (subscriberMessage == null)
 				throw new ArgumentNullException(nameof(subscriberMessage));
+
+			SubscribedMessageResult.Validate(subscriberMessage, state, retryCount, delayedToUtc);
 
 			if (_subscriberMessages.TryGetValue(subscriberMessage.IdSubscriber, out ConcurrentQueue<ISubscriberMessage>? subscriberQueue))
 			{

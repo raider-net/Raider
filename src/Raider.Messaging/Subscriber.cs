@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Raider.Localization;
 using Raider.Messaging.Messages;
+using Raider.Trace;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,6 +90,7 @@ namespace Raider.Messaging
 				var message = ReadMessagesFromSequentialIFIFO
 					? await MessageBox.GetFirstSubscriberMessageAsync(this, _stoppingCts?.Token ?? default)
 					: await MessageBox.GetNextSubscriberMessageAsync(this, _stoppingCts?.Token ?? default);
+
 				if (message == null)
 				{
 					State = ComponentState.Idle;
@@ -104,19 +107,19 @@ namespace Raider.Messaging
 					using (var scope = _serviceProvider.CreateScope())
 					{
 						var subscriberContext = scope.ServiceProvider.GetRequiredService<SubscriberContext>();
+						subscriberContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create()).Build();
+						subscriberContext.Logger = _logger ?? scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
+						subscriberContext.ApplicationResources = scope.ServiceProvider.GetRequiredService<IApplicationResources>();
+
 						messageResult = await ProcessMessageAsync(subscriberContext, message, _stoppingCts?.Token ?? default);
 					}
 
-					if (messageResult.IsValidFor(message))
-					{
-						await MessageBox.SetMessageStateAsync(message, messageResult);
+					await MessageBox.SetMessageStateAsync(message, messageResult);
 
-						if (ReadMessagesFromSequentialIFIFO && messageResult.State == SubscriberMessageState.Suspended)
-						{
-							State = ComponentState.Suspended;
-							await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
-							await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
-						}
+					if (ReadMessagesFromSequentialIFIFO && messageResult.State == SubscriberMessageState.Suspended)
+					{
+						State = ComponentState.Suspended;
+						await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
 					}
 				}
 				catch (Exception ex)
