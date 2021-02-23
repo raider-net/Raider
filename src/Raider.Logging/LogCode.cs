@@ -55,6 +55,11 @@
 		Ex_NotImpl,
 
 		/// <summary>
+		/// NotSupportedException
+		/// </summary>
+		Ex_NotSupp,
+
+		/// <summary>
 		/// ApplicationException
 		/// </summary>
 		Ex_App
