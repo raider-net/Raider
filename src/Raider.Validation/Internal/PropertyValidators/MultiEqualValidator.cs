@@ -34,13 +34,13 @@ namespace Raider.Validation
 
 		private string GetValidationMessage()
 			=> GetFormattedMessage(
-					Resources.ValidationKeys.Equal,
+					Resources.ValidationKeys.MultiEqual,
 					DefaultValidationMessage,
 					GetPlaceholderValues());
 
 		private string GetValidationMessageWithProperty()
 			=> GetFormattedMessage(
-					Resources.ValidationKeys.Equal_WithProperty,
+					Resources.ValidationKeys.MultiEqual_WithProperty,
 					DefaultValidationMessageWithProperty,
 					GetPlaceholderValues());
 
@@ -99,13 +99,13 @@ namespace Raider.Validation
 
 		private string GetValidationMessage()
 			=> GetFormattedMessage(
-					Resources.ValidationKeys.NotEqual,
+					Resources.ValidationKeys.MultiNotEqual,
 					DefaultValidationMessage,
 					GetPlaceholderValues());
 
 		private string GetValidationMessageWithProperty()
 			=> GetFormattedMessage(
-					Resources.ValidationKeys.NotEqual_WithProperty,
+					Resources.ValidationKeys.MultiNotEqual_WithProperty,
 					DefaultValidationMessageWithProperty,
 					GetPlaceholderValues());
 

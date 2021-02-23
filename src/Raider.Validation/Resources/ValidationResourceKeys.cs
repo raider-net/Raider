@@ -55,6 +55,22 @@ namespace Raider.Validation
 
 			public const string LessThanOrEqual_WithProperty = "LessThanOrEqual_WithProperty";
 
+			public const string MultiEqual = "MultiEqual";
+
+			public const string MultiEqual_WithProperty = "MultiEqual_WithProperty";
+
+			public const string MultiExclusiveBetween = "MultiExclusiveBetween";
+
+			public const string MultiExclusiveBetween_WithProperty = "MultiExclusiveBetween_WithProperty";
+
+			public const string MultiInclusiveBetween = "MultiInclusiveBetween";
+
+			public const string MultiInclusiveBetween_WithProperty = "MultiInclusiveBetween_WithProperty";
+
+			public const string MultiNotEqual = "MultiNotEqual";
+
+			public const string MultiNotEqual_WithProperty = "MultiNotEqual_WithProperty";
+
 			public const string NotDefaultOrEmpty = "NotDefaultOrEmpty";
 
 			public const string NotDefaultOrEmpty_WithProperty = "NotDefaultOrEmpty_WithProperty";

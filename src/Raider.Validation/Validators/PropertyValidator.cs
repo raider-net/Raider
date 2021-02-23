@@ -1,4 +1,5 @@
-﻿using Raider.Text;
+﻿using Raider.Extensions;
+using Raider.Text;
 using Raider.Validation.Client;
 using System;
 using System.Collections.Generic;
@@ -48,24 +49,7 @@ namespace Raider.Validation
 
 		protected string GetFormattedMessage(string resourceKey, string defaultMessage, IDictionary<string, object?>? placeholderValues = null)
 		{
-			string? template;
-
-			if (ValidatorConfiguration.Localizer == null)
-			{
-				template = defaultMessage;
-			}
-			else
-			{
-				var localizedString = ValidatorConfiguration.Localizer[resourceKey];
-				if (localizedString.ResourceNotFound)
-				{
-					template = defaultMessage;
-				}
-				else
-				{
-					template = localizedString;
-				}
-			}
+			string? template = ValidatorConfiguration.Localizer?.GetLocalizedString(resourceKey, defaultMessage) ?? defaultMessage;
 
 			if (string.IsNullOrWhiteSpace(template))
 				template = defaultMessage;

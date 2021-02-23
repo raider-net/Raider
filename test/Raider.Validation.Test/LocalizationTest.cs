@@ -25,7 +25,8 @@ namespace Raider.Validation.Test
 		[Trait("Category", "EN")]
 		public void English()
 		{
-			ValidatorConfiguration.Localizer = _stringLocalizerFactory.Create("Validation", "Raider.Validation");
+			var assemblyName = new AssemblyName(typeof(ValidatorBase).Assembly.FullName).Name;
+			ValidatorConfiguration.Localizer = _stringLocalizerFactory.Create("Resources.Validation", assemblyName);
 			CultureInfo.CurrentUICulture = new CultureInfo("en-US");
 
 			var person = new Person
