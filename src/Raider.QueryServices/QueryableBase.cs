@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Raider.DependencyInjection;
+using Raider.EntityFrameworkCore;
 using Raider.QueryServices.Queries;
 using System;
 using System.Data;

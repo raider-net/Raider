@@ -13,12 +13,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Runtime.CompilerServices;
+using Raider.EntityFrameworkCore;
 
 namespace Raider.QueryServices.Queries
 {
-	//delegate TContext DbContextFactory<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
-	//	where TContext : DbContext;
-
 	public abstract class QueryHandlerContext : IQueryHandlerContext, IQueryServiceContext
 	{
 		private readonly ConcurrentDictionary<Type, DbContext> _dbContextCache = new ConcurrentDictionary<Type, DbContext>();
@@ -45,27 +43,8 @@ namespace Raider.QueryServices.Queries
 		public TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext
 		{
-			var dbContext = ServiceFactory.GetRequiredInstance<TContext>();
-
-			if (transactionUsage == TransactionUsage.ReuseOrCreateNew)
-			{
-				if (DbContextTransaction == null)
-				{
-					if (transactionIsolationLevel.HasValue)
-					{
-						DbContextTransaction = dbContext.Database.BeginTransaction(transactionIsolationLevel.Value);
-					}
-					else
-					{
-						DbContextTransaction = dbContext.Database.BeginTransaction();
-					}
-				}
-				else
-				{
-					dbContext.Database.UseTransaction((DbTransaction)DbContextTransaction);
-				}
-			}
-
+			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(ServiceFactory, DbContextTransaction, out IDbContextTransaction? newDbContextTransaction, transactionUsage, transactionIsolationLevel);
+			DbContextTransaction = newDbContextTransaction;
 			return dbContext;
 		}
 
@@ -73,7 +52,6 @@ namespace Raider.QueryServices.Queries
 			where TContext : DbContext
 		{
 			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContext<TContext>(transactionUsage, transactionIsolationLevel)).CheckDbTransaction(transactionUsage);
-
 			return (TContext)result;
 		}
 
