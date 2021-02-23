@@ -14,7 +14,7 @@ namespace Raider.Messaging.Messages
 		internal void UpdateMessage(SubscriberMessageState state, int retryCount, DateTimeOffset? delayedToUtc);
 	}
 
-	public interface ISubscriberMessage<TData> : ISubscriberMessage
+	public interface ISubscriberMessage<TData> : IMessage<TData>, ISubscriberMessage
 		where TData : IMessageData
 	{
 	}

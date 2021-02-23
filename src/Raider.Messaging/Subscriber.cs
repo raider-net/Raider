@@ -4,6 +4,7 @@ using Raider.Localization;
 using Raider.Messaging.Messages;
 using Raider.Trace;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,7 +28,8 @@ namespace Raider.Messaging
 		public abstract bool ReadMessagesFromSequentialIFIFO { get; }
 		public abstract int MessageProcessRetryCount { get; }
 		public abstract TimeSpan MessageInProcessTimeout { get; set; }
-		protected abstract TimeSpan DelayedStart { get; set; }
+		public abstract Dictionary<int, TimeSpan>? DelayTable { get; set; } //Dictionary<retryCount, Delay>
+		protected abstract TimeSpan DelayedStart { get; }
 		protected abstract TimeSpan ExecuteInterval { get; set; }
 
 		private IServiceProvider? _serviceProvider;
