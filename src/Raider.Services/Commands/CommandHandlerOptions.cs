@@ -1,14 +1,9 @@
 ﻿using Raider.Commands;
+using Raider.EntityFrameworkCore;
 using System.Data;
 
 namespace Raider.Services.Commands
 {
-	public enum TransactionUsage
-	{
-		NONE = 0,
-		ReuseOrCreateNew = 1
-	}
-
 	public class CommandHandlerOptions : ICommandHandlerOptions
 	{
 		public bool SerializeCommand { get; set; } = true;

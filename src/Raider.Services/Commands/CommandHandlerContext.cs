@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Raider.Commands;
 using Raider.DependencyInjection;
+using Raider.EntityFrameworkCore;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
@@ -16,9 +17,6 @@ using System.Runtime.CompilerServices;
 
 namespace Raider.Services.Commands
 {
-	//delegate TContext DbContextFactory<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
-	//	where TContext : DbContext;
-
 	public abstract class CommandHandlerContext : ICommandHandlerContext, ICommandServiceContext
 	{
 		private readonly ConcurrentDictionary<Type, DbContext> _dbContextCache = new ConcurrentDictionary<Type, DbContext>();
@@ -45,27 +43,8 @@ namespace Raider.Services.Commands
 		public TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext
 		{
-			var dbContext = ServiceFactory.GetRequiredInstance<TContext>();
-
-			if (transactionUsage == TransactionUsage.ReuseOrCreateNew)
-			{
-				if (DbContextTransaction == null)
-				{
-					if (transactionIsolationLevel.HasValue)
-					{
-						DbContextTransaction = dbContext.Database.BeginTransaction(transactionIsolationLevel.Value);
-					}
-					else
-					{
-						DbContextTransaction = dbContext.Database.BeginTransaction();
-					}
-				}
-				else
-				{
-					dbContext.Database.UseTransaction((DbTransaction)DbContextTransaction);
-				}
-			}
-
+			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(ServiceFactory, DbContextTransaction, out IDbContextTransaction? newDbContextTransaction, transactionUsage, transactionIsolationLevel);
+			DbContextTransaction = newDbContextTransaction;
 			return dbContext;
 		}
 
@@ -73,7 +52,6 @@ namespace Raider.Services.Commands
 			where TContext : DbContext
 		{
 			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContext<TContext>(transactionUsage, transactionIsolationLevel)).CheckDbTransaction(transactionUsage);
-
 			return (TContext)result;
 		}
 
