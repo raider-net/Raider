@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Messaging.Messages;
 using System;
 using System.Threading;
@@ -27,8 +28,9 @@ namespace Raider.Messaging
 		protected abstract TimeSpan DelayedStart { get; set; }
 		protected abstract TimeSpan ExecuteInterval { get; set; }
 
-		public IServiceBusRegister? Register { get; set; }
+		private IServiceProvider? _serviceProvider;
 		internal IMessageBox? MessageBox { get; private set; }
+		public IServiceBusRegister? Register { get; set; }
 
 		public Subscriber(int idSubscriber, string name)
 			: this(idSubscriber, name, 0)
@@ -44,13 +46,14 @@ namespace Raider.Messaging
 			IdScenario = idScenario;
 		}
 
-		public abstract Task<SubscribedMessageResult> ProcessMessageAsync(ISubscriberMessage<TData> message, CancellationToken token = default);
+		public abstract Task<SubscribedMessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken token = default);
 
-		Task ISubscriber.InitializeAsync(IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
-			=> InitializeAsync(messageBox, loggerFactory, cancellationToken);
+		Task ISubscriber.InitializeAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
+			=> InitializeAsync(serviceProvider, messageBox, loggerFactory, cancellationToken);
 
-		internal async Task InitializeAsync(IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
+		internal async Task InitializeAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 		{
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			MessageBox = messageBox ?? throw new ArgumentNullException(nameof(messageBox));
 
 			if (loggerFactory == null)
@@ -71,6 +74,9 @@ namespace Raider.Messaging
 		{
 			if (_stopTimerOnExecute)
 				StopTimer();
+
+			if (_serviceProvider == null)
+				throw new InvalidOperationException($"{nameof(_serviceProvider)} == null");
 
 			if (MessageBox == null)
 				throw new InvalidOperationException($"{nameof(MessageBox)} == null");
@@ -93,7 +99,14 @@ namespace Raider.Messaging
 				{
 					State = ComponentState.InProcess;
 					await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
-					var messageResult = await ProcessMessageAsync(message, _stoppingCts?.Token ?? default);
+
+					SubscribedMessageResult messageResult;
+					using (var scope = _serviceProvider.CreateScope())
+					{
+						var subscriberContext = scope.ServiceProvider.GetRequiredService<SubscriberContext>();
+						messageResult = await ProcessMessageAsync(subscriberContext, message, _stoppingCts?.Token ?? default);
+					}
+
 					if (messageResult.IsValidFor(message))
 					{
 						await MessageBox.SetMessageStateAsync(message, messageResult);

@@ -181,7 +181,7 @@ namespace Raider.Messaging.Internal
 				publisher.Initialize(messageBox, loggerFactory);
 		}
 
-		async Task IServiceBusRegister.InitializeComponentsAsync(IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
+		async Task IServiceBusRegister.InitializeComponentsAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 		{
 			if (_allowedPublishers)
 			{
@@ -192,7 +192,7 @@ namespace Raider.Messaging.Internal
 			if (_allowedSubscribers)
 			{
 				foreach (var subscriber in _subscribers.Values)
-					await subscriber.InitializeAsync(messageBox, loggerFactory, cancellationToken);
+					await subscriber.InitializeAsync(serviceProvider, messageBox, loggerFactory, cancellationToken);
 			}
 		}
 

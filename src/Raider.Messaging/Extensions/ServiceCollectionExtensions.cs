@@ -50,6 +50,7 @@ namespace Raider.Messaging.Extensions
 		private static IServiceCollection AddServices(IServiceCollection services, ServiceBusMode mode, Action<IServiceBusRegister> registerConfiguration, out List<Type> notSubscribed, out List<Type> notPublished)
 		{
 			services.TryAddTransient<ServiceFactory>(p => p.GetService);
+			services.AddTransient<SubscriberContext>();
 
 			var register = new ServiceBusRegister(mode);
 			registerConfiguration?.Invoke(register);

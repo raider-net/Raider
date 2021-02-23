@@ -13,12 +13,12 @@ namespace Raider.Messaging
 		TimeSpan MessageInProcessTimeout { get; }
 		int MessageProcessRetryCount { get; }
 
-		internal Task InitializeAsync(IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken);
+		internal Task InitializeAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken);
 	}
 
 	public interface ISubscriber<TData> : ISubscriber, IComponent
 			where TData : IMessageData
 	{
-		Task<SubscribedMessageResult> ProcessMessageAsync(ISubscriberMessage<TData> message, CancellationToken token = default);
+		Task<SubscribedMessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken token = default);
 	}
 }

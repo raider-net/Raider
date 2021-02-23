@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Raider.Messaging.Messages;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace Raider.Messaging
 			where TData : IMessageData;
 
 		internal void InitializePublishers(IMessageBox messageBox, ILoggerFactory loggerFactory);
-		internal Task InitializeComponentsAsync(IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken);
+		internal Task InitializeComponentsAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken);
 
 		internal List<ISubscriber> GetMessageSubscribers<TData>()
 			where TData : IMessageData;

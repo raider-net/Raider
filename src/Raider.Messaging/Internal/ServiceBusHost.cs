@@ -9,6 +9,7 @@ namespace Raider.Messaging
 {
 	internal class ServiceBusHost : BackgroundService
 	{
+		private readonly IServiceProvider _serviceProvider;
 		private readonly IMessageBox _messageBox;
 		private readonly IServiceBusRegister _register;
 		private readonly ILoggerFactory _loggerFactory;
@@ -16,8 +17,9 @@ namespace Raider.Messaging
 
 		private bool _initialized;
 
-		public ServiceBusHost(IMessageBox messageBox, IServiceBusRegister register, ILoggerFactory loggerFactory)
+		public ServiceBusHost(IServiceProvider serviceProvider, IMessageBox messageBox, IServiceBusRegister register, ILoggerFactory loggerFactory)
 		{
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_messageBox = messageBox ?? throw new ArgumentNullException(nameof(messageBox));
 			_register = register ?? throw new ArgumentNullException(nameof(register));
 			_loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
@@ -40,7 +42,7 @@ namespace Raider.Messaging
 
 				_logger.LogInformation($"{nameof(ServiceBusHost)} initialization started.");
 
-				await _register.InitializeComponentsAsync(_messageBox, _loggerFactory, stoppingToken);
+				await _register.InitializeComponentsAsync(_serviceProvider, _messageBox, _loggerFactory, stoppingToken);
 
 				_logger.LogInformation($"{nameof(ServiceBusHost)} initialization finished.");
 
