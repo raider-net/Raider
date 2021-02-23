@@ -102,6 +102,30 @@ namespace Raider.EntityFrameworkCore.Mapping
 			return this;
 		}
 
+		public MappingConditions<T> For<TNested>(Expression<Func<T, ICollection<TNested>>> property, Action<MappingConditions<TNested>> conditions)
+			where TNested : class
+		{
+			var propertyName = property?.GetMemberName() ?? throw new ArgumentNullException(nameof(property));
+			_nestedConditionActions[propertyName] = conditions;
+			return this;
+		}
+
+		public MappingConditions<T> For<TNested>(Expression<Func<T, IList<TNested>>> property, Action<MappingConditions<TNested>> conditions)
+			where TNested : class
+		{
+			var propertyName = property?.GetMemberName() ?? throw new ArgumentNullException(nameof(property));
+			_nestedConditionActions[propertyName] = conditions;
+			return this;
+		}
+
+		public MappingConditions<T> For<TNested>(Expression<Func<T, TNested[]>> property, Action<MappingConditions<TNested>> conditions)
+			where TNested : class
+		{
+			var propertyName = property?.GetMemberName() ?? throw new ArgumentNullException(nameof(property));
+			_nestedConditionActions[propertyName] = conditions;
+			return this;
+		}
+
 		public MappingConditions<T> Clear()
 		{
 			_properties.Clear();
