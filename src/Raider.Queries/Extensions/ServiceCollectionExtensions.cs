@@ -37,8 +37,8 @@ namespace Raider.Queries.Extensions
 				found = registry.TryRegisterHandler(typeInfo) || found;
 			}
 
-			if (!found)
-				throw new ConfigurationException("No query handler was found.");
+			//if (!found)
+			//	throw new ConfigurationException("No query handler was found.");
 
 			services.TryAddSingleton<IQueryHandlerRegistry>(registry);
 			services.TryAddTransient<IQueryHandlerFactory, QueryHandlerFactory>();
