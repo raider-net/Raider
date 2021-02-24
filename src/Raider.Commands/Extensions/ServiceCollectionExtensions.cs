@@ -37,8 +37,8 @@ namespace Raider.Commands.Extensions
 				found = registry.TryRegisterHandler(typeInfo) || found;
 			}
 
-			if (!found)
-				throw new ConfigurationException("No command handler was found.");
+			//if (!found)
+			//	throw new ConfigurationException("No command handler was found.");
 
 			services.TryAddSingleton<ICommandHandlerRegistry>(registry);
 			services.TryAddTransient<ICommandHandlerFactory, CommandHandlerFactory>();
