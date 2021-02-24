@@ -157,7 +157,7 @@ namespace Raider.Localization
 			return result.OrderBy(rf => rf.RelativePath).ThenBy(rf => rf.CultureInfo?.Name ?? "").ToList();
 		}
 
-        public static List<ResourceFile> LoadResources(string path, Assembly resourceAssembly, CultureInfo searchForCultureIfExists = null, ResourceLoadOptions resourceLoadOptions = ResourceLoadOptions.LoadResxAllResources, SearchOption searchOption = SearchOption.AllDirectories)
+        public static List<ResourceFile> LoadResources(string path, Assembly resourceAssembly, CultureInfo? searchForCultureIfExists = null, ResourceLoadOptions resourceLoadOptions = ResourceLoadOptions.LoadResxAllResources, SearchOption searchOption = SearchOption.AllDirectories)
         {
 			List<ResourceFile> result = LoadResources(
 				path,
@@ -177,7 +177,7 @@ namespace Raider.Localization
             return result;
 		}
 
-		public static List<ResourceFile> LoadResources(string path, Type resourceSource, CultureInfo searchForCultureIfExists = null, ResourceLoadOptions resourceLoadOptions = ResourceLoadOptions.None, SearchOption searchOption = SearchOption.AllDirectories)
+		public static List<ResourceFile> LoadResources(string path, Type resourceSource, CultureInfo? searchForCultureIfExists = null, ResourceLoadOptions resourceLoadOptions = ResourceLoadOptions.None, SearchOption searchOption = SearchOption.AllDirectories)
 		{
 			if (resourceSource == null)
 				throw new ArgumentNullException(nameof(resourceSource));
