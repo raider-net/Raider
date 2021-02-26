@@ -5,10 +5,15 @@ using Raider.QueryServices.Queries;
 using System;
 using System.Data;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Raider.QueryServices
 {
-	public abstract class QueryableBase<T, TDbContext> : QueryServiceBase
+	public interface IQueryableBase
+	{
+	}
+
+	public abstract class QueryableBase<T, TDbContext> : QueryServiceBase, IQueryableBase
 		where TDbContext : DbContext
 	{
 		private readonly ServiceFactory _serviceFactory;
@@ -26,6 +31,21 @@ namespace Raider.QueryServices
 			bool asNoTracking = false)
 		{
 			QueryServiceContext = serviceContext ?? throw new ArgumentNullException(nameof(serviceContext));
+			SetDbContext(QueryServiceContext.GetOrCreateDbContext<TDbContext>(transactionUsage, transactionIsolationLevel), asNoTracking);
+		}
+
+		public QueryableBase(QueryHandlerContext queryHandlerContext,
+			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
+			IsolationLevel? transactionIsolationLevel = null,
+			bool asNoTracking = false,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			if (queryHandlerContext == null)
+				throw new ArgumentNullException(nameof(queryHandlerContext));
+
+			QueryServiceContext = queryHandlerContext.GetQueryServiceContext(GetType(), memberName, sourceFilePath, sourceLineNumber);
 			SetDbContext(QueryServiceContext.GetOrCreateDbContext<TDbContext>(transactionUsage, transactionIsolationLevel), asNoTracking);
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

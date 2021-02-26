@@ -61,6 +61,9 @@ namespace Raider.QueryServices.Queries
 			[CallerLineNumber] int sourceLineNumber = 0)
 			where TService : QueryServiceBase
 		{
+			//if (typeof(IQueryableBase).IsAssignableFrom(typeof(TService)))
+			//	throw new NotSupportedException($"For {nameof(IQueryableBase)} use Constructor {nameof(IQueryableBase)}({nameof(QueryHandlerContext)}) or {nameof(IQueryableBase)}({nameof(QueryServiceContext)}) isntead");
+
 			var service = ServiceFactory.GetRequiredInstance<TService>();
 
 			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
@@ -71,6 +74,20 @@ namespace Raider.QueryServices.Queries
 			service.QueryServiceContext = new QueryServiceContext(traceFrameBuilder.Build(), this, typeof(TService));
 
 			return service;
+		}
+
+		internal QueryServiceContext GetQueryServiceContext(
+			Type typeOfQueryService,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
+				.CallerMemberName(memberName)
+				.CallerFilePath(sourceFilePath)
+				.CallerLineNumber(sourceLineNumber);
+
+			return new QueryServiceContext(traceFrameBuilder.Build(), this, typeOfQueryService);
 		}
 
 		public MethodLogScope CreateScope(
