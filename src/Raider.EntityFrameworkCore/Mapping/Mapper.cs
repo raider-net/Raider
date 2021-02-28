@@ -30,7 +30,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
 			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
-			=> MapToList(source, (List<TTarget>?)null, new Dictionary<IFrom, ITo>(), MapInternal, referenceModifier, conditions, null);
+			=> MapToList(source, (List<TTarget>?)null, new Dictionary<IFrom, ITo>(), MapInternal, referenceModifier, conditions, postMapAction);
 
 		[return: NotNullIfNotNull("source")]
 		public ICollection<TTarget>? Map(
@@ -39,7 +39,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
 			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
-			=> MapToList(source, target, new Dictionary<IFrom, ITo>(), MapInternal, referenceModifier, conditions, null);
+			=> MapToList(source, target, new Dictionary<IFrom, ITo>(), MapInternal, referenceModifier, conditions, postMapAction);
 
 		[return: NotNullIfNotNull("source")]
 		public TTarget? Map(
@@ -75,7 +75,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
 		{
 			dict = new Dictionary<IFrom, ITo>();
-			return MapToList(source, (List<TTarget>?)null, dict, MapInternal, referenceModifier, conditions, null);
+			return MapToList(source, (List<TTarget>?)null, dict, MapInternal, referenceModifier, conditions, postMapAction);
 		}
 
 		[return: NotNullIfNotNull("source")]
@@ -88,7 +88,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
 		{
 			dict = new Dictionary<IFrom, ITo>();
-			return MapToList(source, target, dict, MapInternal, referenceModifier, conditions, null);
+			return MapToList(source, target, dict, MapInternal, referenceModifier, conditions, postMapAction);
 		}
 
 		[return: NotNullIfNotNull("source")]
@@ -287,7 +287,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
 			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
-			=> CopyList(source, (List<TSource>?)null, new Dictionary<IFrom, IFrom>(), CopyInternal, referenceModifier, conditions, null);
+			=> CopyList(source, (List<TSource>?)null, new Dictionary<IFrom, IFrom>(), CopyInternal, referenceModifier, conditions, postMapAction);
 
 		[return: NotNullIfNotNull("source")]
 		public ICollection<TSource>? Copy(
@@ -296,7 +296,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
 			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
-			=> CopyList(source, target, new Dictionary<IFrom, IFrom>(), CopyInternal, referenceModifier, conditions, null);
+			=> CopyList(source, target, new Dictionary<IFrom, IFrom>(), CopyInternal, referenceModifier, conditions, postMapAction);
 
 		[return: NotNullIfNotNull("source")]
 		public TSource? Copy(
@@ -332,7 +332,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
 		{
 			dict = new Dictionary<IFrom, IFrom>();
-			return CopyList(source, (List<TSource>?)null, dict, CopyInternal, referenceModifier, conditions, null);
+			return CopyList(source, (List<TSource>?)null, dict, CopyInternal, referenceModifier, conditions, postMapAction);
 		}
 
 		[return: NotNullIfNotNull("source")]
@@ -345,7 +345,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
 		{
 			dict = new Dictionary<IFrom, IFrom>();
-			return CopyList(source, target, dict, CopyInternal, referenceModifier, conditions, null);
+			return CopyList(source, target, dict, CopyInternal, referenceModifier, conditions, postMapAction);
 		}
 
 		[return: NotNullIfNotNull("source")]
