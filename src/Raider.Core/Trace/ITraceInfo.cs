@@ -6,7 +6,7 @@ namespace Raider.Trace
 	{
 		Guid RuntimeUniqueKey { get; }
 
-		ITraceFrame? TraceFrame { get; }
+		ITraceFrame TraceFrame { get; }
 
 		int? IdUser { get; }
 

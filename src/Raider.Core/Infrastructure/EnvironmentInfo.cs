@@ -7,9 +7,10 @@ namespace Raider.Infrastructure
 	{
 		public static readonly Guid RUNTIME_UNIQUE_KEY = Guid.NewGuid();
 
-		public static readonly EnvironmentInfo Empty = new EnvironmentInfo(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+		public static readonly EnvironmentInfo Empty = new EnvironmentInfo(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
 		public Guid RuntimeUniqueKey => RUNTIME_UNIQUE_KEY;
+		public DateTimeOffset? Created { get; set; }
 		public string? RunningEnvironment { get; }
 		public string? EntryAssemblyName { get; }
 		public string? EntryAssemblyVersion { get; }
@@ -29,6 +30,7 @@ namespace Raider.Infrastructure
 
 		public EnvironmentInfo(
 			string? runningEnvironment,
+			DateTimeOffset? created,
 			string? frameworkDescription,
 			string? targetFramework,
 			string? clrVersion,
@@ -46,6 +48,7 @@ namespace Raider.Infrastructure
 			string? commandLine)
 		{
 			RunningEnvironment = runningEnvironment;
+			Created = created;
 			FrameworkDescription = frameworkDescription;
 			TargetFramework = targetFramework;
 			CLRVersion = clrVersion;
@@ -63,15 +66,18 @@ namespace Raider.Infrastructure
 			CommandLine = commandLine;
 		}
 
-		public IReadOnlyDictionary<string, object> ToDictionary()
+		public IReadOnlyDictionary<string, object?> ToDictionary()
 		{
-			var dict = new Dictionary<string, object>
+			var dict = new Dictionary<string, object?>
 			{
 				{ nameof(RuntimeUniqueKey), RuntimeUniqueKey },
 			};
 
 			if (!string.IsNullOrWhiteSpace(RunningEnvironment))
 				dict.Add(nameof(RunningEnvironment), RunningEnvironment);
+
+			if (Created.HasValue)
+				dict.Add(nameof(Created), Created);
 
 			if (!string.IsNullOrWhiteSpace(EntryAssemblyName))
 				dict.Add(nameof(EntryAssemblyName), EntryAssemblyName);
@@ -138,6 +144,7 @@ namespace Raider.Infrastructure
 			unchecked
 			{
 				var hashCode = FrameworkDescription != null ? FrameworkDescription.GetHashCode() : 0;
+				hashCode = (hashCode * 397) ^ (Created != null ? Created.GetHashCode() : 0);
 				hashCode = (hashCode * 397) ^ (TargetFramework != null ? TargetFramework.GetHashCode() : 0);
 				hashCode = (hashCode * 397) ^ (CLRVersion != null ? CLRVersion.GetHashCode() : 0);
 				hashCode = (hashCode * 397) ^ (RunningEnvironment != null ? RunningEnvironment.GetHashCode() : 0);
@@ -161,6 +168,7 @@ namespace Raider.Infrastructure
 		{
 			return
 				   string.Equals(FrameworkDescription, other.FrameworkDescription)
+				&& string.Equals(Created, other.Created)
 				&& string.Equals(TargetFramework, other.TargetFramework)
 				&& string.Equals(CLRVersion, other.CLRVersion)
 				&& string.Equals(EntryAssemblyName, other.EntryAssemblyName)

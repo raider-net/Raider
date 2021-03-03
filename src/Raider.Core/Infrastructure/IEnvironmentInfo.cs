@@ -5,6 +5,8 @@ namespace Raider.Infrastructure
 	public interface IEnvironmentInfo : Serializer.IDictionaryObject
 	{
 		Guid RuntimeUniqueKey { get; }
+		
+		DateTimeOffset? Created { get; set; }
 
 		string? RunningEnvironment { get; }
 

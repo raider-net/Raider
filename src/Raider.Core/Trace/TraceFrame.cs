@@ -8,12 +8,12 @@ namespace Raider.Trace
 {
 	public class TraceFrame : ITraceFrame
 	{
-		public Guid MethodCallId { get; set; } = Guid.NewGuid();
-		public string? CallerMemberName { get; set; }
-		public string? CallerFilePath { get; set; }
-		public int? CallerLineNumber { get; set; }
-		public IEnumerable<MethodParameter>? MethodParameters { get; set; }
-		public ITraceFrame? Previous { get; set; }
+		public Guid MethodCallId { get; internal set; } = Guid.NewGuid();
+		public string? CallerMemberName { get; internal set; }
+		public string? CallerFilePath { get; internal set; }
+		public int? CallerLineNumber { get; internal set; }
+		public IEnumerable<MethodParameter>? MethodParameters { get; internal set; }
+		public ITraceFrame? Previous { get; internal set; }
 
 		internal TraceFrame()
 		{

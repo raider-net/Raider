@@ -10,9 +10,9 @@ namespace Raider.Trace
 	public interface ITraceInfoBuilder<TBuilder>
 		where TBuilder : ITraceInfoBuilder<TBuilder>
 	{
-		TBuilder Clone(
-			ITraceFrame currentTraceFrame,
-			ITraceInfo traceInfo);
+		//TBuilder Clone(
+		//	ITraceFrame currentTraceFrame,
+		//	ITraceInfo traceInfo);
 
 		ITraceInfo Build();
 
@@ -69,29 +69,32 @@ namespace Raider.Trace
 			_builder = (TBuilder)this;
 		}
 
-		public virtual TBuilder Clone(
-			ITraceFrame currentTraceFrame,
-			ITraceInfo traceInfo)
-		{
-			if (traceInfo == null)
-				throw new ArgumentNullException(nameof(traceInfo));
+		//public virtual TBuilder Clone(
+		//	ITraceFrame currentTraceFrame,
+		//	ITraceInfo traceInfo)
+		//{
+		//	if (currentTraceFrame == null)
+		//		throw new ArgumentNullException(nameof(currentTraceFrame));
 
-			_traceInfo = new TraceInfo(
-				new TraceFrameBuilder(traceInfo.TraceFrame)
-					.CallerMemberName(currentTraceFrame.CallerMemberName)
-					.CallerFilePath(currentTraceFrame.CallerFilePath)
-					.CallerLineNumber(currentTraceFrame.CallerLineNumber)
-					.MethodParameters(currentTraceFrame.MethodParameters)
-					.Build())
-			{
-				RuntimeUniqueKey = traceInfo.RuntimeUniqueKey,
-				IdUser = traceInfo.IdUser,
-				ExternalCorrelationId = traceInfo.ExternalCorrelationId,
-				CorrelationId = traceInfo.CorrelationId
-			};
+		//	if (traceInfo == null)
+		//		throw new ArgumentNullException(nameof(traceInfo));
 
-			return _builder;
-		}
+		//	_traceInfo = new TraceInfo(
+		//		new TraceFrameBuilder(traceInfo.TraceFrame)
+		//			.CallerMemberName(currentTraceFrame.CallerMemberName)
+		//			.CallerFilePath(currentTraceFrame.CallerFilePath)
+		//			.CallerLineNumber(currentTraceFrame.CallerLineNumber)
+		//			.MethodParameters(currentTraceFrame.MethodParameters)
+		//			.Build())
+		//	{
+		//		RuntimeUniqueKey = traceInfo.RuntimeUniqueKey,
+		//		IdUser = traceInfo.IdUser,
+		//		ExternalCorrelationId = traceInfo.ExternalCorrelationId,
+		//		CorrelationId = traceInfo.CorrelationId
+		//	};
+
+		//	return _builder;
+		//}
 
 		public ITraceInfo Build()
 			=> _traceInfo;

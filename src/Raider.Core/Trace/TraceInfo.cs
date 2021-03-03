@@ -5,15 +5,15 @@ namespace Raider.Trace
 {
 	public class TraceInfo : ITraceInfo
 	{
-		public Guid RuntimeUniqueKey { get; set; }
+		public Guid RuntimeUniqueKey { get; internal set; }
 
-		public ITraceFrame TraceFrame { get; set; }
+		public ITraceFrame TraceFrame { get; }
 
-		public int? IdUser { get; set; }
+		public int? IdUser { get; internal set; }
 
-		public string? ExternalCorrelationId { get; set; }
+		public string? ExternalCorrelationId { get; internal set; }
 
-		public Guid? CorrelationId { get; set; }
+		public Guid? CorrelationId { get; internal set; }
 
 		internal TraceInfo(ITraceFrame traceFrame)
 		{
