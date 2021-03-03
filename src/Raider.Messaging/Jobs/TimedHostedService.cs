@@ -28,10 +28,10 @@ namespace Raider.Messaging.Jobs
 		protected abstract Task ExecuteAsync(CancellationToken stoppingToken);
 
 		protected bool StartTimer()
-			=> _timer?.Change(DelayedExecuteStart, ExecuteInterval) ?? false;
+			=> _timer?.Change(ExecuteInterval, ExecuteInterval) ?? false;
 
 		private bool StopTimer()
-			=> _timer?.Change(Timeout.Infinite, 0) ?? false;
+			=> _timer?.Change(Timeout.Infinite, Timeout.Infinite) ?? false;
 
 		public virtual Task StartAsync(CancellationToken cancellationToken)
 		{

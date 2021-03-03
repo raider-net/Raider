@@ -71,7 +71,7 @@ namespace Raider.Messaging
 			_stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts.Token);
 			_timer = new Timer(TimerCallback, null, DelayedStart, ExecuteInterval);
-			_logger?.LogInformation($"{GetType().FullName}: Started timer");
+			_logger?.LogTrace($"{GetType().FullName}: Started timer");
 		}
 
 		private async void TimerCallback(object? state)
@@ -87,7 +87,7 @@ namespace Raider.Messaging
 
 			try
 			{
-				_logger?.LogInformation($"{GetType().FullName}: Timer ticks");
+				_logger?.LogTrace($"{GetType().FullName}: Timer ticks");
 
 				var message = ReadMessagesFromSequentialIFIFO
 					? await MessageBox.GetFirstSubscriberMessageAsync(this, _stoppingCts?.Token ?? default)
@@ -147,10 +147,10 @@ namespace Raider.Messaging
 		}
 
 		private bool StartTimer()
-			=> _timer?.Change(TimeSpan.Zero, ExecuteInterval) ?? false;
+			=> _timer?.Change(ExecuteInterval, ExecuteInterval) ?? false;
 
 		private bool StopTimer()
-			=> _timer?.Change(Timeout.Infinite, 0) ?? false;
+			=> _timer?.Change(Timeout.Infinite, Timeout.Infinite) ?? false;
 
 		public virtual void Dispose()
 		{
