@@ -58,7 +58,7 @@ GRANT INSERT, SELECT, UPDATE, DELETE ON TABLE aud."EnvironmentInfo" TO xyzusr;
 
 CREATE TABLE aud."EnvironmentInfo" (
 	"IdEnvironmentInfo" int4 NOT NULL,
-	"CreatedAt" timestamp NOT NULL,
+	"Created" timestamp NOT NULL,
 	"RuntimeUniqueKey" uuid NOT NULL,
 	"RunningEnvironment" varchar(255) NULL,
 	"FrameworkDescription" varchar(255) NULL,

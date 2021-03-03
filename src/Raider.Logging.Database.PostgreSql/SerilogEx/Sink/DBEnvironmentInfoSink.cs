@@ -47,9 +47,7 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 		{
 			//var environmentInfos = batch.Select(logEvent => EnvironmentInfoHelper.Convert(logEvent)).Where(x => x != null);
 			var environmentInfos = batch.Select(logEvent => LogEventHelper.ConvertEnvironmentInfoToDictionary(logEvent)).Where(x => x != null).ToList();
-
-			if (environmentInfos != null)
-				await _bulkInsert.WriteBatch(environmentInfos, _connectionString);
+			await _bulkInsert.WriteBatch(environmentInfos, _connectionString);
 		}
 	}
 }

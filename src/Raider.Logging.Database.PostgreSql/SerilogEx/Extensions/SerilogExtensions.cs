@@ -35,7 +35,10 @@ namespace Serilog
 			var sink = new DBLogSink(options);
 			return loggerConfiguration
 					.Conditional(
-						logEvent => logAllLogEvents || !LogEventHelper.IsLogMessage(logEvent),
+						logEvent => logAllLogEvents 
+							|| (!LogEventHelper.IsLogMessage(logEvent)
+								&& !LogEventHelper.IsEnvironmentInfo(logEvent)
+								&& !LogEventHelper.IsHardwareInfo(logEvent)),
 						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
 		}
 

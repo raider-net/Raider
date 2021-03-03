@@ -24,6 +24,7 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 			PropertyNames = new List<string>
 			{
 				nameof(EnvironmentInfo.RuntimeUniqueKey),
+				nameof(EnvironmentInfo.Created),
 				nameof(EnvironmentInfo.RunningEnvironment),
 				nameof(EnvironmentInfo.FrameworkDescription),
 				nameof(EnvironmentInfo.TargetFramework),
@@ -45,6 +46,7 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 			PropertyTypeMapping = new Dictionary<string, NpgsqlDbType>
 			{
 				{ nameof(EnvironmentInfo.RuntimeUniqueKey), NpgsqlDbType.Uuid },
+				{ nameof(EnvironmentInfo.Created), NpgsqlDbType.TimestampTz },
 				{ nameof(EnvironmentInfo.RunningEnvironment), NpgsqlDbType.Varchar },
 				{ nameof(EnvironmentInfo.FrameworkDescription), NpgsqlDbType.Varchar },
 				{ nameof(EnvironmentInfo.TargetFramework), NpgsqlDbType.Varchar },
