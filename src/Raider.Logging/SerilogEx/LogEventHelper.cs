@@ -1,5 +1,4 @@
 ﻿using Serilog.Events;
-using Serilog.Formatting.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,22 +43,22 @@ namespace Raider.Logging.SerilogEx
 		}
 
 		public static bool IsLogMessage(LogEvent logEvent)
-			=> IsLogType(LoggerSettings.FWK_LogMessage, logEvent);
+			=> IsLogType(LoggerSettings.LogMessage, logEvent);
 
 		public static IDictionary<string, object?>? ConvertLogMessageToDictionary(LogEvent logEvent)
-			=> ConvertToDictionary(LoggerSettings.FWK_LogMessage, logEvent);
+			=> ConvertToDictionary(LoggerSettings.LogMessage, logEvent);
 
 		public static bool IsEnvironmentInfo(LogEvent logEvent)
-			=> IsLogType(LoggerSettings.FWK_EnvironmentInfo, logEvent);
+			=> IsLogType(LoggerSettings.EnvironmentInfo, logEvent);
 
 		public static IDictionary<string, object?>? ConvertEnvironmentInfoToDictionary(LogEvent logEvent)
-			=> ConvertToDictionary(LoggerSettings.FWK_EnvironmentInfo, logEvent);
+			=> ConvertToDictionary(LoggerSettings.EnvironmentInfo, logEvent);
 
 		public static bool IsHardwareInfo(LogEvent logEvent)
-			=> IsLogType(LoggerSettings.FWK_HardwareInfo, logEvent);
+			=> IsLogType(LoggerSettings.HardwareInfo, logEvent);
 
 		public static IDictionary<string, object?>? ConvertHardwareInfoToDictionary(LogEvent logEvent)
-			=> ConvertToDictionary(LoggerSettings.FWK_HardwareInfo, logEvent);
+			=> ConvertToDictionary(LoggerSettings.HardwareInfo, logEvent);
 
 		public static IDictionary<string, object?>? ConvertLogToDictionary(LogEvent logEvent)
 		{

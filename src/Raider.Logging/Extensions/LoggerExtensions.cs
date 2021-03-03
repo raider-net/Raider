@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Raider.Infrastructure;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace Raider.Logging.Extensions
 
 			message.LogLevel = LogLevel.Trace;
 
-			logger.LogTrace($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogTrace($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 		}
 
 		public static ILogMessage? LogTraceMessage(this ILogger logger, ITraceInfo traceInfo, Action<LogMessageBuilder> messageBuilder)
@@ -56,9 +57,17 @@ namespace Raider.Logging.Extensions
 			messageBuilder.Invoke(builder);
 			var message = builder.Build();
 
-			logger.LogTrace($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogTrace($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 
 			return message;
+		}
+
+		public static ILogMessage? LogTraceMessage(this ILogger logger, MethodLogScope scope, Action<LogMessageBuilder> messageBuilder)
+		{
+			if (scope?.TraceInfo == null)
+				throw new ArgumentNullException($"{nameof(scope)}.{nameof(scope.TraceInfo)}");
+
+			return LogTraceMessage(logger, scope.TraceInfo, messageBuilder);
 		}
 
 		public static void LogDebugMessage(this ILogger logger, ILogMessage message)
@@ -71,7 +80,7 @@ namespace Raider.Logging.Extensions
 
 			message.LogLevel = LogLevel.Debug;
 
-			logger.LogDebug($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogDebug($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 		}
 
 		public static ILogMessage? LogDebugMessage(this ILogger logger, ITraceInfo traceInfo, Action<LogMessageBuilder> messageBuilder)
@@ -88,9 +97,17 @@ namespace Raider.Logging.Extensions
 			messageBuilder.Invoke(builder);
 			var message = builder.Build();
 
-			logger.LogDebug($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogDebug($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 
 			return message;
+		}
+
+		public static ILogMessage? LogDebugMessage(this ILogger logger, MethodLogScope scope, Action<LogMessageBuilder> messageBuilder)
+		{
+			if (scope?.TraceInfo == null)
+				throw new ArgumentNullException($"{nameof(scope)}.{nameof(scope.TraceInfo)}");
+
+			return LogDebugMessage(logger, scope.TraceInfo, messageBuilder);
 		}
 
 		public static void LogInformationMessage(this ILogger logger, ILogMessage message)
@@ -103,7 +120,7 @@ namespace Raider.Logging.Extensions
 
 			message.LogLevel = LogLevel.Information;
 
-			logger.LogInformation($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogInformation($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 		}
 
 		public static ILogMessage? LogInformationMessage(this ILogger logger, ITraceInfo traceInfo, Action<LogMessageBuilder> messageBuilder)
@@ -120,9 +137,17 @@ namespace Raider.Logging.Extensions
 			messageBuilder.Invoke(builder);
 			var message = builder.Build();
 
-			logger.LogInformation($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogInformation($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 
 			return message;
+		}
+
+		public static ILogMessage? LogInformationMessage(this ILogger logger, MethodLogScope scope, Action<LogMessageBuilder> messageBuilder)
+		{
+			if (scope?.TraceInfo == null)
+				throw new ArgumentNullException($"{nameof(scope)}.{nameof(scope.TraceInfo)}");
+
+			return LogInformationMessage(logger, scope.TraceInfo, messageBuilder);
 		}
 
 		public static void LogWarningMessage(this ILogger logger, ILogMessage message)
@@ -135,7 +160,7 @@ namespace Raider.Logging.Extensions
 
 			message.LogLevel = LogLevel.Warning;
 
-			logger.LogWarning($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogWarning($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 		}
 
 		public static ILogMessage? LogWarningMessage(this ILogger logger, ITraceInfo traceInfo, Action<LogMessageBuilder> messageBuilder)
@@ -152,9 +177,17 @@ namespace Raider.Logging.Extensions
 			messageBuilder.Invoke(builder);
 			var message = builder.Build();
 
-			logger.LogWarning($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogWarning($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 
 			return message;
+		}
+
+		public static ILogMessage? LogWarningMessage(this ILogger logger, MethodLogScope scope, Action<LogMessageBuilder> messageBuilder)
+		{
+			if (scope?.TraceInfo == null)
+				throw new ArgumentNullException($"{nameof(scope)}.{nameof(scope.TraceInfo)}");
+
+			return LogWarningMessage(logger, scope.TraceInfo, messageBuilder);
 		}
 
 		public static void LogErrorMessage(this ILogger logger, IErrorMessage message)
@@ -164,7 +197,7 @@ namespace Raider.Logging.Extensions
 
 			message.LogLevel = LogLevel.Error;
 
-			logger.LogError($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogError($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 		}
 
 		public static IErrorMessage LogErrorMessage(this ILogger logger, ITraceInfo traceInfo, Action<ErrorMessageBuilder> messageBuilder)
@@ -178,9 +211,17 @@ namespace Raider.Logging.Extensions
 			messageBuilder.Invoke(builder);
 			var message = builder.Build();
 
-			logger.LogError($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogError($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 
 			return message;
+		}
+
+		public static IErrorMessage LogErrorMessage(this ILogger logger, MethodLogScope scope, Action<ErrorMessageBuilder> messageBuilder)
+		{
+			if (scope?.TraceInfo == null)
+				throw new ArgumentNullException($"{nameof(scope)}.{nameof(scope.TraceInfo)}");
+
+			return LogErrorMessage(logger, scope.TraceInfo, messageBuilder);
 		}
 
 		public static void LogCriticalMessage(this ILogger logger, IErrorMessage message)
@@ -190,7 +231,7 @@ namespace Raider.Logging.Extensions
 
 			message.LogLevel = LogLevel.Critical;
 
-			logger.LogCritical($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogCritical($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 		}
 
 		public static IErrorMessage LogCriticalMessage(this ILogger logger, ITraceInfo traceInfo, Action<ErrorMessageBuilder> messageBuilder)
@@ -204,9 +245,25 @@ namespace Raider.Logging.Extensions
 			messageBuilder.Invoke(builder);
 			var message = builder.Build();
 
-			logger.LogCritical($"{LoggerSettings.FWK_LogMessage_Template}", message.ToDictionary());
+			logger.LogCritical($"{LoggerSettings.LogMessage_Template}", message.ToDictionary());
 
 			return message;
+		}
+
+		public static IErrorMessage LogCriticalMessage(this ILogger logger, MethodLogScope scope, Action<ErrorMessageBuilder> messageBuilder)
+		{
+			if (scope?.TraceInfo == null)
+				throw new ArgumentNullException($"{nameof(scope)}.{nameof(scope.TraceInfo)}");
+
+			return LogCriticalMessage(logger, scope.TraceInfo, messageBuilder);
+		}
+
+		public static void LogEnvironmentInfo(this ILogger logger)
+			=> LogEnvironmentInfo(logger, EnvironmentInfoProvider.GetEnvironmentInfo());
+
+		public static void LogEnvironmentInfo(this ILogger logger, EnvironmentInfo environmentInfo)
+		{
+			logger.LogInformation($"{LoggerSettings.EnvironmentInfo_Template}", environmentInfo.ToDictionary());
 		}
 	}
 }

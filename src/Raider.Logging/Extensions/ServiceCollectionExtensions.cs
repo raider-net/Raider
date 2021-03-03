@@ -7,10 +7,17 @@ namespace Raider.Logging.Extensions
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddRaiderLogger(this IServiceCollection services, Action<LoggerConfiguration> configurator)
-			=> AddRaiderLogger(services, LogLevel.None, configurator);
+		public static IServiceCollection AddRaiderLogger(
+			this IServiceCollection services,
+			Action<LoggerConfiguration> configurator,
+			Action<ILoggingBuilder>? configureLoggingBuilder = null)
+			=> AddRaiderLogger(services, LogLevel.None, configurator, configureLoggingBuilder);
 
-		public static IServiceCollection AddRaiderLogger(this IServiceCollection services, LogLevel logEventMinimumLevel, Action<LoggerConfiguration> configurator)
+		public static IServiceCollection AddRaiderLogger(
+			this IServiceCollection services,
+			LogLevel logEventMinimumLevel,
+			Action<LoggerConfiguration> configurator,
+			Action<ILoggingBuilder>? configureLoggingBuilder = null)
 		{
 			switch (logEventMinimumLevel)
 			{
@@ -48,7 +55,10 @@ namespace Raider.Logging.Extensions
 
 			Log.Logger = loggerConfiguration.CreateLogger();
 
-			services.AddLogging(configure => configure.AddSerilog());
+			if (configureLoggingBuilder == null)
+				configureLoggingBuilder = x => x.AddSerilog();
+
+			services.AddLogging(configureLoggingBuilder);
 
 			return services;
 		}
