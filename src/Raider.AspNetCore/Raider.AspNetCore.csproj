@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<Description>Raider.AspNetCore</Description>
+		<PackageTags></PackageTags>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<PackageReleaseNotes>Raider.AspNetCore</PackageReleaseNotes>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/raider-net/Raider</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/raider-net/Raider</RepositoryUrl>
+		<PackageIcon>raider_icon.png</PackageIcon>
+		<NeutralLanguage>en</NeutralLanguage>
+		<Copyright>Copyright Raider</Copyright>
+		<Authors>Tomas Pilat</Authors>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
+		<Version>1.0.0</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\raider_icon.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.3" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="5.0.3" />
+	  <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Raider.Logging\Raider.Logging.csproj" />
+	</ItemGroup>
+
+</Project>
