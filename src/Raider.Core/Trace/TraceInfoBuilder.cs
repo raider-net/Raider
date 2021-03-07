@@ -154,11 +154,6 @@ namespace Raider.Trace
 
 	public sealed class TraceInfoBuilder : TraceInfoBuilderBase<TraceInfoBuilder>
 	{
-		public TraceInfoBuilder(ITraceFrame currentTraceFrame)
-			: this(currentTraceFrame, null)
-		{
-		}
-
 		public TraceInfoBuilder(ITraceFrame currentTraceFrame, ITraceInfo? previousTraceInfo)
 			: base(currentTraceFrame, previousTraceInfo)
 		{

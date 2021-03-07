@@ -57,9 +57,9 @@ namespace Raider.Identity
 			string login,
 			string displayName,
 			object? userData,
-			List<string> roles,
-			List<int> roleIds,
-			List<string> activities,
+			List<string>? roles,
+			List<int>? roleIds,
+			List<string>? activities,
 			bool rolesToClams,
 			bool activitiesToClaims)
 			: base(new GenericIdentity(
@@ -92,9 +92,9 @@ namespace Raider.Identity
 			string login,
 			string displayName,
 			object? userData,
-			List<string> roles,
-			List<int> roleIds,
-			List<string> activities,
+			List<string>? roles,
+			List<int>? roleIds,
+			List<string>? activities,
 			bool rolesToClams,
 			bool activitiesToClaims)
 			: base(identity, (identity as ClaimsIdentity)?.Claims)
@@ -469,9 +469,9 @@ namespace Raider.Identity
 			string login,
 			string displayName,
 			object? userData,
-			List<string> roles,
-			List<int> roleIds,
-			List<string> activities,
+			List<string>? roles,
+			List<int>? roleIds,
+			List<string>? activities,
 			bool rolesToClams,
 			bool activitiesToClaims)
 			: base(
@@ -498,9 +498,9 @@ namespace Raider.Identity
 			string login,
 			string displayName,
 			object? userData,
-			List<string> roles,
-			List<int> roleIds,
-			List<string> activities,
+			List<string>? roles,
+			List<int>? roleIds,
+			List<string>? activities,
 			bool rolesToClams,
 			bool activitiesToClaims)
 			: base(
