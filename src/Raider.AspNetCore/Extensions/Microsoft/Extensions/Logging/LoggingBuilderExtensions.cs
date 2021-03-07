@@ -34,14 +34,6 @@ namespace Raider.Extensions
 					configureLogging.AddConsole(configureConsoleLogger);
 			}
 
-			if (addConsoleLogger)
-			{
-				if (configureConsoleLogger == null)
-					configureLogging.AddConsole();
-				else
-					configureLogging.AddConsole(configureConsoleLogger);
-			}
-
 			if (addDebugLogger)
 				configureLogging.AddDebug();
 
