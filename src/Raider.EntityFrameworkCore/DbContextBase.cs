@@ -15,7 +15,7 @@ namespace Raider.EntityFrameworkCore
 	{
 		protected readonly IApplicationContext _applicationContext;
 		protected readonly ILogger _logger;
-		protected readonly int _userId;
+		protected readonly int? _userId;
 
 		protected string connectionString;
 
@@ -46,20 +46,28 @@ namespace Raider.EntityFrameworkCore
 			}
 		}
 
-		public DbContextBase(DbContextOptions options, ILogger logger, IApplicationContext appContext/*, disabledEtitiesFromAudit, disabledEtityPropertiesFromAudit*/)
+		public DbContextBase(DbContextOptions options, ILogger logger, IApplicationContext appContext, bool allowAnonymousUser/*, disabledEtitiesFromAudit, disabledEtityPropertiesFromAudit*/)
 			: base(options)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_applicationContext = appContext ?? throw new ArgumentNullException(nameof(appContext));
-			_userId = appContext?.TraceInfo?.IdUser ?? throw new ArgumentException(null, $"{nameof(appContext)}.{nameof(appContext.TraceInfo)}.{nameof(appContext.TraceInfo.IdUser)}");
+
+			if (allowAnonymousUser)
+				_userId = appContext?.TraceInfo?.IdUser;
+			else
+				_userId = appContext?.TraceInfo?.IdUser ?? throw new ArgumentException(null, $"{nameof(appContext)}.{nameof(appContext.TraceInfo)}.{nameof(appContext.TraceInfo.IdUser)}");
 		}
 
-		protected DbContextBase(ILogger logger, IApplicationContext appContext)
+		protected DbContextBase(ILogger logger, IApplicationContext appContext, bool allowAnonymousUser)
 			: base()
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_applicationContext = appContext ?? throw new ArgumentNullException(nameof(appContext));
-			_userId = appContext?.TraceInfo?.IdUser ?? throw new ArgumentException(null, nameof(appContext));
+
+			if (allowAnonymousUser)
+				_userId = appContext?.TraceInfo?.IdUser;
+			else
+				_userId = appContext?.TraceInfo?.IdUser ?? throw new ArgumentException(null, nameof(appContext));
 		}
 
 		public override int SaveChanges(bool acceptAllChangesOnSuccess)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace Raider.EntityFrameworkCore.Mapping
 {
@@ -8,121 +9,121 @@ namespace Raider.EntityFrameworkCore.Mapping
 		where IFrom : notnull
 	{
 		[return: NotNullIfNotNull("source")]
-		public TTarget? Map(
+		public Task<TTarget?> MapAsync(
 			TSource? source,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TTarget?>? postMapAction = null)
-			=> MapInternal(source, default, new Dictionary<IFrom, ITo>(), referenceModifier, conditions, postMapAction);
+			Func<TSource?, TTarget?, Task>? postMapActionAsync = null)
+			=> MapInternalAsync(source, default, new Dictionary<IFrom, ITo>(), referenceModifier, conditions, postMapActionAsync);
 
 		[return: NotNullIfNotNull("source")]
-		public TTarget? Map(
+		public Task<TTarget?> MapAsync(
 			TSource? source,
 			TTarget? target,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TTarget?>? postMapAction = null)
-			=> MapInternal(source, target, new Dictionary<IFrom, ITo>(), referenceModifier, conditions, postMapAction);
+			Func<TSource?, TTarget?, Task>? postMapActionAsync = null)
+			=> MapInternalAsync(source, target, new Dictionary<IFrom, ITo>(), referenceModifier, conditions, postMapActionAsync);
 
 		[return: NotNullIfNotNull("source")]
-		public List<TTarget>? Map(
+		public Task<List<TTarget>?> MapAsync(
 			IEnumerable<TSource>? source,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
-			=> MapToList(source, (List<TTarget>?)null, new Dictionary<IFrom, ITo>(), MapInternal, referenceModifier, conditions, postMapAction);
+			Func<IEnumerable<TSource?>, IEnumerable<TTarget?>, Task>? postMapActionAsync = null)
+			=> MapToListAsync(source, (List<TTarget>?)null, new Dictionary<IFrom, ITo>(), MapInternalAsync, referenceModifier, conditions, postMapActionAsync);
 
 		[return: NotNullIfNotNull("source")]
-		public ICollection<TTarget>? Map(
+		public Task<ICollection<TTarget>?> MapAsync(
 			IEnumerable<TSource>? source,
 			ICollection<TTarget>? target,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
-			=> MapToList(source, target, new Dictionary<IFrom, ITo>(), MapInternal, referenceModifier, conditions, postMapAction);
+			Func<IEnumerable<TSource?>, IEnumerable<TTarget?>, Task>? postMapActionAsync = null)
+			=> MapToListAsync(source, target, new Dictionary<IFrom, ITo>(), MapInternalAsync, referenceModifier, conditions, postMapActionAsync);
 
 		[return: NotNullIfNotNull("source")]
-		public TTarget? Map(
+		public Task<TTarget?> MapAsync(
 			TSource? source,
 			out Dictionary<IFrom, ITo> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TTarget?>? postMapAction = null)
+			Func<TSource?, TTarget?, Task>? postMapActionAsync = null)
 		{
 			dict = new Dictionary<IFrom, ITo>();
-			return MapInternal(source, default, dict, referenceModifier, conditions, postMapAction);
+			return MapInternalAsync(source, default, dict, referenceModifier, conditions, postMapActionAsync);
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public TTarget? Map(
+		public Task<TTarget?> MapAsync(
 			TSource? source,
 			TTarget? target,
 			out Dictionary<IFrom, ITo> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TTarget?>? postMapAction = null)
+			Func<TSource?, TTarget?, Task>? postMapActionAsync = null)
 		{
 			dict = new Dictionary<IFrom, ITo>();
-			return MapInternal(source, target, dict, referenceModifier, conditions, postMapAction);
+			return MapInternalAsync(source, target, dict, referenceModifier, conditions, postMapActionAsync);
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public List<TTarget>? Map(
+		public Task<List<TTarget>?> MapAsync(
 			IEnumerable<TSource>? source,
 			out Dictionary<IFrom, ITo> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TTarget?>, Task>? postMapActionAsync = null)
 		{
 			dict = new Dictionary<IFrom, ITo>();
-			return MapToList(source, (List<TTarget>?)null, dict, MapInternal, referenceModifier, conditions, postMapAction);
+			return MapToListAsync(source, (List<TTarget>?)null, dict, MapInternalAsync, referenceModifier, conditions, postMapActionAsync);
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public ICollection<TTarget>? Map(
+		public Task<ICollection<TTarget>?> MapAsync(
 			IEnumerable<TSource>? source,
 			ICollection<TTarget>? target,
 			out Dictionary<IFrom, ITo> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TTarget?>, Task>? postMapActionAsync = null)
 		{
 			dict = new Dictionary<IFrom, ITo>();
-			return MapToList(source, target, dict, MapInternal, referenceModifier, conditions, postMapAction);
+			return MapToListAsync(source, target, dict, MapInternalAsync, referenceModifier, conditions, postMapActionAsync);
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public static ICollection<TTarget>? MapToList(
+		public static async Task<ICollection<TTarget>?> MapToListAsync(
 			IEnumerable<TSource>? source,
 			ICollection<TTarget>? target,
 			Dictionary<IFrom, ITo> dict,
-			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TTarget?>?, TTarget?> map,
+			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Func<TSource?, TTarget?, Task>?, Task<TTarget?>> map,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TTarget?>, Task>? postMapActionAsync = null)
 		{
 			if (map == null)
 				throw new ArgumentNullException(nameof(map));
 
 			if (target == null)
-				return MapToList(source, (List<TTarget>?)target, dict, map, referenceModifier, conditions, postMapAction);
+				return await MapToListAsync(source, (List<TTarget>?)target, dict, map, referenceModifier, conditions, postMapActionAsync);
 			else if (target is List<TTarget> targetList)
-				return MapToList(source, targetList, dict, map, referenceModifier, conditions, postMapAction);
+				return await MapToListAsync(source, targetList, dict, map, referenceModifier, conditions, postMapActionAsync);
 			else if (target is HashSet<TTarget> targetHashSet)
-				return MapToList(source, targetHashSet, dict, map, referenceModifier, conditions, postMapAction);
+				return await MapToListAsync(source, targetHashSet, dict, map, referenceModifier, conditions, postMapActionAsync);
 			else
 				throw new NotSupportedException($"target type is {target.GetType().FullName}");
 		}
 
 		[return: NotNullIfNotNull("source")]
-		private static List<TTarget>? MapToList(
+		private static async Task<List<TTarget>?> MapToListAsync(
 			IEnumerable<TSource>? source,
 			List<TTarget>? target,
 			Dictionary<IFrom, ITo> dict,
-			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TTarget?>?, TTarget?> map,
+			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Func<TSource?, TTarget?, Task>?, Task<TTarget?>> map,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TTarget?>, Task>? postMapActionAsync = null)
 		{
 			if (source == null)
 			{
@@ -145,11 +146,11 @@ namespace Raider.EntityFrameworkCore.Mapping
 					mappedCount++;
 					if (targetIndex < targetCount && tar.MoveNext())
 					{
-						map(src.Current, tar.Current, dict, referenceModifier, conditions, null);
+						await map(src.Current, tar.Current, dict, referenceModifier, conditions, null);
 					}
 					else
 					{
-						var itemResult = map(src.Current, default, dict, referenceModifier, conditions, null);
+						var itemResult = await map(src.Current, default, dict, referenceModifier, conditions, null);
 						if (itemResult != null)
 							target.Add(itemResult);
 					}
@@ -175,20 +176,21 @@ namespace Raider.EntityFrameworkCore.Mapping
 					target.Remove(tmp);
 			}
 
-			postMapAction?.Invoke(source, target);
+			if (postMapActionAsync != null)
+				await postMapActionAsync.Invoke(source, target);
 
 			return target;
 		}
 
 		[return: NotNullIfNotNull("source")]
-		private static HashSet<TTarget>? MapToList(
+		private static async Task<HashSet<TTarget>?> MapToListAsync(
 			IEnumerable<TSource>? source,
 			HashSet<TTarget>? target,
 			Dictionary<IFrom, ITo> dict,
-			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TTarget?>?, TTarget?> map,
+			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Func<TSource?, TTarget?, Task>?, Task<TTarget?>> map,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TTarget?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TTarget?>, Task>? postMapActionAsync = null)
 		{
 			if (source == null)
 			{
@@ -211,11 +213,11 @@ namespace Raider.EntityFrameworkCore.Mapping
 					mappedCount++;
 					if (targetIndex < targetCount && tar.MoveNext())
 					{
-						map(src.Current, tar.Current, dict, referenceModifier, conditions, null);
+						await map(src.Current, tar.Current, dict, referenceModifier, conditions, null);
 					}
 					else
 					{
-						var itemResult = map(src.Current, default, dict, referenceModifier, conditions, null);
+						var itemResult = await map(src.Current, default, dict, referenceModifier, conditions, null);
 						if (itemResult != null)
 							target.Add(itemResult);
 					}
@@ -241,145 +243,146 @@ namespace Raider.EntityFrameworkCore.Mapping
 					target.Remove(tmp);
 			}
 
-			postMapAction?.Invoke(source, target);
+			if (postMapActionAsync != null)
+				await postMapActionAsync.Invoke(source, target);
 
 			return target;
 		}
 
 		[return: NotNullIfNotNull("source")]
-		protected virtual TTarget? MapInternal(
+		protected virtual Task<TTarget?> MapInternalAsync(
 			TSource? source,
 			TTarget? target,
 			Dictionary<IFrom, ITo> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TTarget?>? postMapAction = null)
-			=> ApplyPostAction(source, target, postMapAction);
+			Func<TSource?, TTarget?, Task>? postMapActionAsync = null)
+			=> ApplyPostActionAsync(source, target, postMapActionAsync);
 
-		protected virtual TTarget? ApplyPostAction(TSource? source, TTarget? target, Action<TSource?, TTarget?>? postMapAction)
+		protected virtual async Task<TTarget?> ApplyPostActionAsync(TSource? source, TTarget? target, Func<TSource?, TTarget?, Task>? postMapActionAsync)
 		{
-			if (target != null)
-				postMapAction?.Invoke(source, target);
+			if (target != null && postMapActionAsync != null)
+				await postMapActionAsync.Invoke(source, target);
 
 			return target;
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public TSource? Copy(
+		public Task<TSource?> CopyAsync(
 			TSource? source,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TSource?>? postMapAction = null)
-			=> CopyInternal(source, default, new Dictionary<IFrom, IFrom>(), referenceModifier, conditions, postMapAction);
+			Func<TSource?, TSource?, Task>? postMapActionAsync = null)
+			=> CopyInternalAsync(source, default, new Dictionary<IFrom, IFrom>(), referenceModifier, conditions, postMapActionAsync);
 
 		[return: NotNullIfNotNull("source")]
-		public TSource? Copy(
+		public Task<TSource?> CopyAsync(
 			TSource? source,
 			TSource? target,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TSource?>? postMapAction = null)
-			=> CopyInternal(source, target, new Dictionary<IFrom, IFrom>(), referenceModifier, conditions, postMapAction);
+			Func<TSource?, TSource?, Task>? postMapActionAsync = null)
+			=> CopyInternalAsync(source, target, new Dictionary<IFrom, IFrom>(), referenceModifier, conditions, postMapActionAsync);
 
 		[return: NotNullIfNotNull("source")]
-		public List<TSource>? Copy(
+		public Task<List<TSource>?> CopyAsync(
 			IEnumerable<TSource>? source,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
-			=> CopyList(source, (List<TSource>?)null, new Dictionary<IFrom, IFrom>(), CopyInternal, referenceModifier, conditions, postMapAction);
+			Func<IEnumerable<TSource?>, IEnumerable<TSource?>, Task>? postMapActionAsync = null)
+			=> CopyListAsync(source, (List<TSource>?)null, new Dictionary<IFrom, IFrom>(), CopyInternalAsync, referenceModifier, conditions, postMapActionAsync);
 
 		[return: NotNullIfNotNull("source")]
-		public ICollection<TSource>? Copy(
+		public Task<ICollection<TSource>?> CopyAsync(
 			IEnumerable<TSource>? source,
 			ICollection<TSource>? target,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
-			=> CopyList(source, target, new Dictionary<IFrom, IFrom>(), CopyInternal, referenceModifier, conditions, postMapAction);
+			Func<IEnumerable<TSource?>, IEnumerable<TSource?>, Task>? postMapActionAsync = null)
+			=> CopyListAsync(source, target, new Dictionary<IFrom, IFrom>(), CopyInternalAsync, referenceModifier, conditions, postMapActionAsync);
 
 		[return: NotNullIfNotNull("source")]
-		public TSource? Copy(
+		public Task<TSource?> CopyAsync(
 			TSource? source,
 			out Dictionary<IFrom, IFrom> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TSource?>? postMapAction = null)
+			Func<TSource?, TSource?, Task>? postMapActionAsync = null)
 		{
 			dict = new Dictionary<IFrom, IFrom>();
-			return CopyInternal(source, default, dict, referenceModifier, conditions, postMapAction);
+			return CopyInternalAsync(source, default, dict, referenceModifier, conditions, postMapActionAsync);
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public TSource? Copy(
+		public Task<TSource?> CopyAsync(
 			TSource? source,
 			TSource? target,
 			out Dictionary<IFrom, IFrom> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TSource?>? postMapAction = null)
+			Func<TSource?, TSource?, Task>? postMapActionAsync = null)
 		{
 			dict = new Dictionary<IFrom, IFrom>();
-			return CopyInternal(source, target, dict, referenceModifier, conditions, postMapAction);
+			return CopyInternalAsync(source, target, dict, referenceModifier, conditions, postMapActionAsync);
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public List<TSource>? Copy(
+		public Task<List<TSource>?> CopyAsync(
 			IEnumerable<TSource>? source,
 			out Dictionary<IFrom, IFrom> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TSource?>, Task>? postMapActionAsync = null)
 		{
 			dict = new Dictionary<IFrom, IFrom>();
-			return CopyList(source, (List<TSource>?)null, dict, CopyInternal, referenceModifier, conditions, postMapAction);
+			return CopyListAsync(source, (List<TSource>?)null, dict, CopyInternalAsync, referenceModifier, conditions, postMapActionAsync);
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public ICollection<TSource>? Copy(
+		public Task<ICollection<TSource>?> CopyAsync(
 			IEnumerable<TSource>? source,
 			ICollection<TSource>? target,
 			out Dictionary<IFrom, IFrom> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TSource?>, Task>? postMapActionAsync = null)
 		{
 			dict = new Dictionary<IFrom, IFrom>();
-			return CopyList(source, target, dict, CopyInternal, referenceModifier, conditions, postMapAction);
+			return CopyListAsync(source, target, dict, CopyInternalAsync, referenceModifier, conditions, postMapActionAsync);
 		}
 
 		[return: NotNullIfNotNull("source")]
-		public static ICollection<TSource>? CopyList(
+		public static async Task<ICollection<TSource>?> CopyListAsync(
 			IEnumerable<TSource>? source,
 			ICollection<TSource>? target,
 			Dictionary<IFrom, IFrom> dict,
-			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TSource?>?, TSource?> copy,
+			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Func<TSource?, TSource?, Task>?, Task<TSource?>> copy,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TSource?>, Task>? postMapActionAsync = null)
 		{
 			if (copy == null)
 				throw new ArgumentNullException(nameof(copy));
 
 			if (target == null)
-				return CopyList(source, (List<TSource>?)target, dict, copy, referenceModifier, conditions, postMapAction);
+				return await CopyListAsync(source, (List<TSource>?)target, dict, copy, referenceModifier, conditions, postMapActionAsync);
 			else if (target is List<TSource> targetList)
-				return CopyList(source, targetList, dict, copy, referenceModifier, conditions, postMapAction);
+				return await CopyListAsync(source, targetList, dict, copy, referenceModifier, conditions, postMapActionAsync);
 			else if (target is HashSet<TSource> targetHashSet)
-				return CopyList(source, targetHashSet, dict, copy, referenceModifier, conditions, postMapAction);
+				return await CopyListAsync(source, targetHashSet, dict, copy, referenceModifier, conditions, postMapActionAsync);
 			else
 				throw new NotSupportedException($"target type is {target.GetType().FullName}");
 		}
 
 		[return: NotNullIfNotNull("source")]
-		private static List<TSource>? CopyList(
+		private static async Task<List<TSource>?> CopyListAsync(
 			IEnumerable<TSource>? source,
 			List<TSource>? target,
 			Dictionary<IFrom, IFrom> dict,
-			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TSource?>?, TSource?> copy,
+			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Func<TSource?, TSource?, Task>?, Task<TSource?>> copy,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TSource?>, Task>? postMapActionAsync = null)
 		{
 			if (source == null)
 			{
@@ -402,11 +405,11 @@ namespace Raider.EntityFrameworkCore.Mapping
 					mappedCount++;
 					if (targetIndex < targetCount && tar.MoveNext())
 					{
-						copy(src.Current, tar.Current, dict, referenceModifier, conditions, null);
+						await copy(src.Current, tar.Current, dict, referenceModifier, conditions, null);
 					}
 					else
 					{
-						var itemResult = copy(src.Current, default, dict, referenceModifier, conditions, null);
+						var itemResult = await copy(src.Current, default, dict, referenceModifier, conditions, null);
 						if (itemResult != null)
 							target.Add(itemResult);
 					}
@@ -432,20 +435,21 @@ namespace Raider.EntityFrameworkCore.Mapping
 					target.Remove(tmp);
 			}
 
-			postMapAction?.Invoke(source, target);
+			if (postMapActionAsync != null)
+				await postMapActionAsync.Invoke(source, target);
 
 			return target;
 		}
 
 		[return: NotNullIfNotNull("source")]
-		private static HashSet<TSource>? CopyList(
+		private static async Task<HashSet<TSource>?> CopyListAsync(
 			IEnumerable<TSource>? source,
 			HashSet<TSource>? target,
 			Dictionary<IFrom, IFrom> dict,
-			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TSource?>?, TSource?> copy,
+			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Func<TSource?, TSource?, Task>?, Task<TSource?>> copy,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<IEnumerable<TSource?>, IEnumerable<TSource?>>? postMapAction = null)
+			Func<IEnumerable<TSource?>, IEnumerable<TSource?>, Task>? postMapActionAsync = null)
 		{
 			if (source == null)
 			{
@@ -468,11 +472,11 @@ namespace Raider.EntityFrameworkCore.Mapping
 					mappedCount++;
 					if (targetIndex < targetCount && tar.MoveNext())
 					{
-						copy(src.Current, tar.Current, dict, referenceModifier, conditions, null);
+						await copy(src.Current, tar.Current, dict, referenceModifier, conditions, null);
 					}
 					else
 					{
-						var itemResult = copy(src.Current, default, dict, referenceModifier, conditions, null);
+						var itemResult = await copy(src.Current, default, dict, referenceModifier, conditions, null);
 						if (itemResult != null)
 							target.Add(itemResult);
 					}
@@ -498,25 +502,26 @@ namespace Raider.EntityFrameworkCore.Mapping
 					target.Remove(tmp);
 			}
 
-			postMapAction?.Invoke(source, target);
+			if (postMapActionAsync != null)
+				await postMapActionAsync.Invoke(source, target);
 
 			return target;
 		}
 
 		[return: NotNullIfNotNull("source")]
-		protected virtual TSource? CopyInternal(
+		protected virtual Task<TSource?> CopyInternalAsync(
 			TSource? source,
 			TSource? target,
 			Dictionary<IFrom, IFrom> dict,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
-			Action<TSource?, TSource?>? postMapAction = null)
-			=> ApplyPostAction(source, target, postMapAction);
+			Func<TSource?, TSource?, Task>? postMapActionAsync = null)
+			=> ApplyPostActionAsync(source, target, postMapActionAsync);
 
-		protected virtual TSource? ApplyPostAction(TSource? source, TSource? target, Action<TSource?, TSource?>? postMapAction)
+		protected virtual async Task<TSource?> ApplyPostActionAsync(TSource? source, TSource? target, Func<TSource?, TSource?, Task>? postMapActionAsync)
 		{
-			if (target != null)
-				postMapAction?.Invoke(source, target);
+			if (target != null && postMapActionAsync != null)
+				await postMapActionAsync.Invoke(source, target);
 
 			return target;
 		}
