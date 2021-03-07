@@ -108,8 +108,10 @@ namespace Raider.Messaging
 					SubscribedMessageResult messageResult;
 					using (var scope = _serviceProvider.CreateScope())
 					{
+						var tc = scope.ServiceProvider.GetService<TraceContext>();
+
 						var subscriberContext = scope.ServiceProvider.GetRequiredService<SubscriberContext>();
-						subscriberContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create()).Build();
+						subscriberContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create(), tc?.Next()).Build();
 						subscriberContext.Logger = _logger ?? scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
 						subscriberContext.ApplicationResources = scope.ServiceProvider.GetRequiredService<IApplicationResources>();
 
