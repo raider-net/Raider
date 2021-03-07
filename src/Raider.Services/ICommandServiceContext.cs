@@ -14,18 +14,16 @@ using System.Runtime.CompilerServices;
 
 namespace Raider.Services
 {
-	public interface ICommandServiceContext
+	public interface ICommandServiceContext : IApplicationContext
 	{
 		ServiceFactory ServiceFactory { get; }
-		ITraceInfo TraceInfo { get; }
-		RaiderIdentity<int>? User { get;  }
-		RaiderPrincipal<int>? Principal { get;  }
+		new ITraceInfo TraceInfo { get; }
 		string? CommandName { get;  }
 		long? IdCommandEntry { get;  }
 		IDbContextTransaction? DbContextTransaction { get;  }
 		string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		ILogger Logger { get;  }
-		IApplicationResources ApplicationResources { get;  }
+		new IApplicationResources ApplicationResources { get;  }
 		Dictionary<object, object?> CommandHandlerItems { get; }
 
 		TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
