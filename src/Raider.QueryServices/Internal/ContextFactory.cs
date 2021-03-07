@@ -103,7 +103,9 @@ namespace Raider.QueryServices
 				.MethodParameters(methodParameters)
 				.Build();
 
-			var traceInfo = new TraceInfoBuilder(traceFrame, null).Build();
+			var tc = _serviceFactory.GetInstance<TraceContext>();
+
+			var traceInfo = new TraceInfoBuilder(traceFrame, tc?.Next()).Build();
 			var queryHandlerContextBuilder = CreateQueryHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, queryName, handlerType);
 			var queryHandlerContext = queryHandlerContextBuilder.Context;
 
@@ -136,7 +138,9 @@ namespace Raider.QueryServices
 				.MethodParameters(methodParameters)
 				.Build();
 
-			var traceInfo = new TraceInfoBuilder(traceFrame, null).Build();
+			var tc = _serviceFactory.GetInstance<TraceContext>();
+
+			var traceInfo = new TraceInfoBuilder(traceFrame, tc?.Next()).Build();
 			var queryHandlerContextBuilder = CreateQueryHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, queryName, handlerType);
 			var queryHandlerContext = queryHandlerContextBuilder.Context;
 
