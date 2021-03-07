@@ -12,23 +12,21 @@ namespace Raider.QueryServices
 	internal class ContextFactory
 	{
 		private readonly ServiceFactory _serviceFactory;
-		private readonly IApplicationContext _applicationContext;
 		private readonly IApplicationResources _applicationResources;
 		private readonly ILoggerFactory _loggerFactory;
 
 		public ContextFactory(
 			ServiceFactory serviceFactory,
-			IApplicationContext applicationContext,
 			IApplicationResources applicationResources,
 			ILoggerFactory loggerFactory)
 		{
 			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
-			_applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
 			_applicationResources = applicationResources ?? throw new ArgumentNullException(nameof(applicationResources));
 			_loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 		}
 
 		public QueryHandlerContext.Builder<TContext> CreateQueryHandlerContextBuilder<TContext, TBuilder>(
+			bool allowAnonymousUser,
 			string? queryName = null,
 			Type? handlerType = null,
 			ITraceInfo? previousTraceInfo = null,
@@ -47,11 +45,12 @@ namespace Raider.QueryServices
 				.Build();
 
 			var traceInfo = new TraceInfoBuilder(traceFrame, previousTraceInfo).Build();
-			return CreateQueryHandlerContextBuilder<TContext, TBuilder>(traceInfo, queryName, handlerType);
+			return CreateQueryHandlerContextBuilder<TContext, TBuilder>(traceInfo, allowAnonymousUser, queryName, handlerType);
 		}
 
 		public QueryHandlerContext.Builder<TContext> CreateQueryHandlerContextBuilder<TContext, TBuilder>(
 			ITraceFrame traceFrame,
+			bool allowAnonymousUser,
 			string? queryName = null,
 			ITraceInfo? previousTraceInfo = null,
 			Type? handlerType = null)
@@ -59,11 +58,12 @@ namespace Raider.QueryServices
 			where TBuilder : QueryHandlerContext.Builder<TContext>
 		{
 			var traceInfo = new TraceInfoBuilder(traceFrame, previousTraceInfo).Build();
-			return CreateQueryHandlerContextBuilder<TContext, TBuilder>(traceInfo, queryName, handlerType);
+			return CreateQueryHandlerContextBuilder<TContext, TBuilder>(traceInfo, allowAnonymousUser, queryName, handlerType);
 		}
 
 		public QueryHandlerContext.Builder<TContext> CreateQueryHandlerContextBuilder<TContext, TBuilder>(
 			ITraceInfo traceInfo,
+			bool allowAnonymousUser,
 			string? queryName = null,
 			Type? handlerType = null)
 			where TContext : QueryHandlerContext
@@ -74,10 +74,14 @@ namespace Raider.QueryServices
 
 			var queryHandlerContextBuilder = _serviceFactory.GetRequiredInstance<TBuilder>();
 
+			IApplicationContext? applicationContext = null;
+			if (!allowAnonymousUser)
+				applicationContext = _serviceFactory.GetRequiredInstance<IApplicationContext>();
+
 			queryHandlerContextBuilder
 				.TraceInfo(traceInfo)
-				.Principal(_applicationContext.Principal)
-				.User(_applicationContext.User)
+				.Principal(applicationContext?.Principal)
+				.User(applicationContext?.User)
 				.Logger(_loggerFactory.CreateLogger(handlerType ?? typeof(TContext)))
 				.ApplicationResources(_applicationResources)
 				.QueryName(queryName);
@@ -86,6 +90,7 @@ namespace Raider.QueryServices
 		}
 
 		public QueryServiceContext CreateQueryServiceContext<TQueryService, THandlerContext, TBuilder>(
+			bool allowAnonymousUser,
 			string? queryName = null,
 			Type? handlerType = null,
 			IEnumerable<MethodParameter>? methodParameters = null,
@@ -106,7 +111,7 @@ namespace Raider.QueryServices
 			var tc = _serviceFactory.GetInstance<TraceContext>();
 
 			var traceInfo = new TraceInfoBuilder(traceFrame, tc?.Next()).Build();
-			var queryHandlerContextBuilder = CreateQueryHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, queryName, handlerType);
+			var queryHandlerContextBuilder = CreateQueryHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, allowAnonymousUser, queryName, handlerType);
 			var queryHandlerContext = queryHandlerContextBuilder.Context;
 
 			var serviceContext = new QueryServiceContext(traceInfo, queryHandlerContext, typeof(TQueryService));
@@ -115,6 +120,7 @@ namespace Raider.QueryServices
 
 		public QueryServiceContext CreateQueryServiceContext<THandlerContext, TBuilder>(
 			Type queryServiceType,
+			bool allowAnonymousUser,
 			string? queryName = null,
 			Type? handlerType = null,
 			IEnumerable<MethodParameter>? methodParameters = null,
@@ -141,7 +147,7 @@ namespace Raider.QueryServices
 			var tc = _serviceFactory.GetInstance<TraceContext>();
 
 			var traceInfo = new TraceInfoBuilder(traceFrame, tc?.Next()).Build();
-			var queryHandlerContextBuilder = CreateQueryHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, queryName, handlerType);
+			var queryHandlerContextBuilder = CreateQueryHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, allowAnonymousUser, queryName, handlerType);
 			var queryHandlerContext = queryHandlerContextBuilder.Context;
 
 			var serviceContext = new QueryServiceContext(traceInfo, queryHandlerContext, queryServiceType);

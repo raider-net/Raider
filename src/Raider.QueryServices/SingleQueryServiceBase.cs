@@ -8,13 +8,13 @@ namespace Raider.QueryServices
 			where THandlerContext : QueryHandlerContext
 			where TBuilder : QueryHandlerContext.Builder<THandlerContext>
 	{
-		public SingleQueryServiceBase(ServiceFactory serviceFactory)
+		public SingleQueryServiceBase(ServiceFactory serviceFactory, bool alowAnonymousUser)
 		{
 			if (serviceFactory == null)
 				throw new ArgumentNullException(nameof(serviceFactory));
 
 			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
-			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder>(this.GetType());
+			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder>(this.GetType(), alowAnonymousUser);
 		}
 	}
 }

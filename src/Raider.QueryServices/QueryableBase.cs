@@ -63,7 +63,7 @@ namespace Raider.QueryServices
 			where TBuilder : QueryHandlerContext.Builder<THandlerContext>
 		{
 			var contextFactory = _serviceFactory.GetRequiredInstance<ContextFactory>();
-			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder>(this.GetType());
+			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder>(this.GetType(), false);
 			SetDbContext(QueryServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
 		}
 
