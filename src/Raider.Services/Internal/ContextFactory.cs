@@ -12,23 +12,21 @@ namespace Raider.Services
 	internal class ContextFactory
 	{
 		private readonly ServiceFactory _serviceFactory;
-		private readonly IApplicationContext _applicationContext;
 		private readonly IApplicationResources _applicationResources;
 		private readonly ILoggerFactory _loggerFactory;
 
 		public ContextFactory(
 			ServiceFactory serviceFactory,
-			IApplicationContext applicationContext,
 			IApplicationResources applicationResources,
 			ILoggerFactory loggerFactory)
 		{
 			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
-			_applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
 			_applicationResources = applicationResources ?? throw new ArgumentNullException(nameof(applicationResources));
 			_loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 		}
 
 		public CommandHandlerContext.Builder<TContext> CreateCommandHandlerContextBuilder<TContext, TBuilder>(
+			bool allowAnonymousUser,
 			string? commandName = null,
 			Type? handlerType = null,
 			ITraceInfo? previousTraceInfo = null,
@@ -47,11 +45,12 @@ namespace Raider.Services
 				.Build();
 
 			var traceInfo = new TraceInfoBuilder(traceFrame, previousTraceInfo).Build();
-			return CreateCommandHandlerContextBuilder<TContext, TBuilder>(traceInfo, commandName, handlerType);
+			return CreateCommandHandlerContextBuilder<TContext, TBuilder>(traceInfo, allowAnonymousUser, commandName, handlerType);
 		}
 
 		public CommandHandlerContext.Builder<TContext> CreateCommandHandlerContextBuilder<TContext, TBuilder>(
 			ITraceFrame traceFrame,
+			bool allowAnonymousUser,
 			string? commandName = null,
 			ITraceInfo? previousTraceInfo = null,
 			Type? handlerType = null)
@@ -59,11 +58,12 @@ namespace Raider.Services
 			where TBuilder : CommandHandlerContext.Builder<TContext>
 		{
 			var traceInfo = new TraceInfoBuilder(traceFrame, previousTraceInfo).Build();
-			return CreateCommandHandlerContextBuilder<TContext, TBuilder>(traceInfo, commandName, handlerType);
+			return CreateCommandHandlerContextBuilder<TContext, TBuilder>(traceInfo, allowAnonymousUser, commandName, handlerType);
 		}
 
 		public CommandHandlerContext.Builder<TContext> CreateCommandHandlerContextBuilder<TContext, TBuilder>(
 			ITraceInfo traceInfo,
+			bool allowAnonymousUser,
 			string? commandName = null,
 			Type? handlerType = null)
 			where TContext : CommandHandlerContext
@@ -74,10 +74,14 @@ namespace Raider.Services
 
 			var commandHandlerContextBuilder = _serviceFactory.GetRequiredInstance<TBuilder>();
 
+			IApplicationContext? applicationContext = null;
+			if (!allowAnonymousUser)
+				applicationContext = _serviceFactory.GetRequiredInstance<IApplicationContext>();
+
 			commandHandlerContextBuilder
 				.TraceInfo(traceInfo)
-				.Principal(_applicationContext.Principal)
-				.User(_applicationContext.User)
+				.Principal(applicationContext?.Principal)
+				.User(applicationContext?.User)
 				.Logger(_loggerFactory.CreateLogger(handlerType ?? typeof(TContext)))
 				.ApplicationResources(_applicationResources)
 				.CommandName(commandName);
@@ -86,6 +90,7 @@ namespace Raider.Services
 		}
 
 		public ServiceContext CreateServiceContext<TService, THandlerContext, TBuilder>(
+			bool allowAnonymousUser,
 			string? commandName = null,
 			Type? handlerType = null,
 			IEnumerable<MethodParameter>? methodParameters = null,
@@ -106,7 +111,7 @@ namespace Raider.Services
 			var tc = _serviceFactory.GetInstance<TraceContext>();
 
 			var traceInfo = new TraceInfoBuilder(traceFrame, tc?.Next()).Build();
-			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, commandName, handlerType);
+			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, allowAnonymousUser, commandName, handlerType);
 			var commandHandlerContext = commandHandlerContextBuilder.Context;
 
 			var serviceContext = new ServiceContext(traceInfo, commandHandlerContext, typeof(TService));
@@ -115,6 +120,7 @@ namespace Raider.Services
 
 		public ServiceContext CreateServiceContext<THandlerContext, TBuilder>(
 			Type serviceType,
+			bool allowAnonymousUser,
 			string? commandName = null,
 			Type? handlerType = null,
 			IEnumerable<MethodParameter>? methodParameters = null,
@@ -141,7 +147,7 @@ namespace Raider.Services
 			var tc = _serviceFactory.GetInstance<TraceContext>();
 
 			var traceInfo = new TraceInfoBuilder(traceFrame, tc?.Next()).Build();
-			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, commandName, handlerType);
+			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, allowAnonymousUser, commandName, handlerType);
 			var commandHandlerContext = commandHandlerContextBuilder.Context;
 
 			var serviceContext = new ServiceContext(traceInfo, commandHandlerContext, serviceType);

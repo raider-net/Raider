@@ -8,13 +8,13 @@ namespace Raider.Services
 			where THandlerContext : CommandHandlerContext
 			where TBuilder : CommandHandlerContext.Builder<THandlerContext>
 	{
-		public SingleServiceBase(ServiceFactory serviceFactory)
+		public SingleServiceBase(ServiceFactory serviceFactory, bool alowAnonymousUser)
 		{
 			if (serviceFactory == null)
 				throw new ArgumentNullException(nameof(serviceFactory));
 
 			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
-			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder>(this.GetType());
+			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder>(this.GetType(), alowAnonymousUser);
 		}
 	}
 }

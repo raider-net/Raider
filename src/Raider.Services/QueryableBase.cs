@@ -63,7 +63,7 @@ namespace Raider.Services
 			where TBuilder : CommandHandlerContext.Builder<THandlerContext>
 		{
 			var contextFactory = _serviceFactory.GetRequiredInstance<ContextFactory>();
-			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder>(this.GetType());
+			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder>(this.GetType(), false);
 			SetDbContext(ServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
 		}
 
