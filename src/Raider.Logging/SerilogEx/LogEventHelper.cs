@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace Raider.Logging.SerilogEx
 {
-	public class LogEventHelper
+	public static class LogEventHelper
 	{
-		private static bool IsLogType(string logType, LogEvent logEvent)
+		public static bool IsLogType(string logType, LogEvent logEvent)
 		=> logEvent != null
 			&& logEvent.Properties.TryGetValue(logType, out LogEventPropertyValue? value)
 			&& value is DictionaryValue;
 
-		private static IDictionary<string, object?>? ConvertToDictionary(string logType, LogEvent logEvent)
+		public static IDictionary<string, object?>? ConvertToDictionary(string logType, LogEvent logEvent)
 		{
 			if (logEvent == null || logEvent.Properties == null)
 				return null;
