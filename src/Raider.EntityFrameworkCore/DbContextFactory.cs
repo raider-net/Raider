@@ -36,7 +36,7 @@ namespace Raider.EntityFrameworkCore
 			return SetDbTransaction(dbContext, existingDbContextTransaction, out newDbContextTransaction, transactionUsage, transactionIsolationLevel);
 		}
 
-		private static TContext SetDbTransaction<TContext>(
+		public static TContext SetDbTransaction<TContext>(
 			TContext dbContext,
 			IDbContextTransaction? existingDbContextTransaction,
 			out IDbContextTransaction? newDbContextTransaction,
