@@ -27,6 +27,7 @@ namespace Raider.Messaging
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 		public MethodLogScope CreateScope(
+			int? idUser = null,
 			IEnumerable<MethodParameter>? methodParameters = null,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
@@ -41,6 +42,7 @@ namespace Raider.Messaging
 						.MethodParameters(methodParameters)
 						.Build(),
 					TraceInfo)
+					.IdUser(idUser)
 					.Build();
 
 			var disposable = Logger.BeginScope(new Dictionary<string, Guid>
