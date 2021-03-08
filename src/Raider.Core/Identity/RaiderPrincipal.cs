@@ -65,34 +65,34 @@ namespace Raider.Identity
 			return IdentityBase != null && IdentityBase.IsInAnyRole(roles);
 		}
 
-		public bool HasActivity(string activity)
+		public bool HasPermission(string permission)
 		{
-			return IdentityBase != null && IdentityBase.HasActivity(activity);
+			return IdentityBase != null && IdentityBase.HasPermission(permission);
 		}
 
-		public bool HasAllActivities(params string[] activities)
+		public bool HasAllPermissions(params string[] permissions)
 		{
-			return IdentityBase != null && IdentityBase.HasAllActivities(activities);
+			return IdentityBase != null && IdentityBase.HasAllPermissions(permissions);
 		}
 
-		public bool HasAnyActivity(params string[] activities)
+		public bool HasAnyPermission(params string[] permissions)
 		{
-			return IdentityBase != null && IdentityBase.HasAnyActivity(activities);
+			return IdentityBase != null && IdentityBase.HasAnyPermission(permissions);
 		}
 
-		public bool HasActivityClaim(string activity)
+		public bool HasPermissionClaim(string permission)
 		{
-			return IdentityBase != null && IdentityBase.HasActivityClaim(activity);
+			return IdentityBase != null && IdentityBase.HasPermissionClaim(permission);
 		}
 
-		public bool HasAllActivityClaims(params string[] activities)
+		public bool HasAllPermissionClaims(params string[] permissions)
 		{
-			return IdentityBase != null && IdentityBase.HasAllActivityClaims(activities);
+			return IdentityBase != null && IdentityBase.HasAllPermissionClaims(permissions);
 		}
 
-		public bool HasAnyActivityClaim(params string[] activities)
+		public bool HasAnyPermissionClaim(params string[] permissions)
 		{
-			return IdentityBase != null && IdentityBase.HasAnyActivityClaim(activities);
+			return IdentityBase != null && IdentityBase.HasAnyPermissionClaim(permissions);
 		}
 
 		public void AddClaim(Claim claim)

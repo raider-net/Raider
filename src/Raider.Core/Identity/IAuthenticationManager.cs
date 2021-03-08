@@ -6,20 +6,22 @@ namespace Raider.AspNetCore.Authentication
 {
 	public interface IAuthenticationManager
 	{
+		bool LogRoles { get; }
+		bool LogPermissions { get; }
 		int? StaticUserId { get; }
 
-		Task<UserRoleActivities?> CreateFromWindowsIdentityAsync(string? logonWithoutDomain, string? windowsIdentityName);
+		Task<AuthenticatedUser?> CreateFromWindowsIdentityAsync(string? logonWithoutDomain, string? windowsIdentityName);
 
-		Task<UserRoleActivities?> CreateFromLoginPasswordAsync(string? login, string? password);
+		Task<AuthenticatedUser?> CreateFromLoginPasswordAsync(string? login, string? password);
 
-		Task<UserRoleActivities?> CreateFromLoginAsync(string? login);
+		Task<AuthenticatedUser?> CreateFromLoginAsync(string? login);
 
-		Task<UserRoleActivities?> CreateFromUserIdAsync(int? idUser);
+		Task<AuthenticatedUser?> CreateFromUserIdAsync(int? idUser);
 
-		Task<UserRoleActivities?> CreateFromRequestAsync(IDictionary<string, string[]> requestHeaders);
+		Task<AuthenticatedUser?> CreateFromRequestAsync(IDictionary<string, string[]> requestHeaders);
 
-		Task<UserRoleActivities?> SetRolesAndActivities(UserRoleActivities user);
+		Task<AuthenticatedUser?> SetRolesAndPremissions(AuthenticatedUser user);
 
-		Task<UserRoleActivities?> SetUserDataAsync(UserRoleActivities user);
+		Task<AuthenticatedUser?> SetUserDataAsync(AuthenticatedUser user);
 	}
 }

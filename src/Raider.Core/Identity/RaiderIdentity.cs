@@ -14,11 +14,13 @@ namespace Raider.Identity
 		public const string USER_ID_CLAIM_NAME = "userId";
 		public const string ROLE_CLAIM_NAME = "role";
 		public const string ROLE_ID_CLAIM_NAME = "roleId";
-		public const string ACTIVITY_CLAIM_NAME = "activity";
+		public const string PERMISSION_CLAIM_NAME = "permission";
+		public const string PERMISSION_ID_CLAIM_NAME = "permissionId";
 
 		private readonly IReadOnlyCollection<string> EMPTY_ROLES = new List<string>();
 		private readonly IReadOnlyCollection<int> EMPTY_ROLE_IDS = new List<int>();
-		private readonly IReadOnlyCollection<string> EMPTY_ACTIVITIES = new List<string>();
+		private readonly IReadOnlyCollection<string> EMPTY_PERMISSIONS = new List<string>();
+		private readonly IReadOnlyCollection<int> EMPTY_PERMISSIONS_IDS = new List<int>();
 
 		public string UserId { get; }
 
@@ -32,23 +34,9 @@ namespace Raider.Identity
 
 		public IReadOnlyCollection<int> RoleIds { get; }
 
-		public IReadOnlyCollection<string> Activities { get; }
+		public IReadOnlyCollection<string> Permissions { get; }
 
-		//public WindowsIdentity WindowsIdentity { get; }
-
-		//public RaiderIdentity(string name)
-		//	: base(new GenericIdentity(name))
-		//{
-		//	Roles = EMPTY_ROLES;
-		//	Activities = EMPTY_ACTIVITIES;
-		//}
-
-		//public RaiderIdentity(string name, string authenticationType)
-		//	: base(new GenericIdentity(name, authenticationType))
-		//{
-		//	Roles = EMPTY_ROLES;
-		//	Activities = EMPTY_ACTIVITIES;
-		//}
+		public IReadOnlyCollection<int> PermissionIds { get; }
 
 		public RaiderIdentity(
 			string name,
@@ -59,9 +47,10 @@ namespace Raider.Identity
 			object? userData,
 			List<string>? roles,
 			List<int>? roleIds,
-			List<string>? activities,
+			List<string>? permissions,
+			List<int>? permissionIds,
 			bool rolesToClams,
-			bool activitiesToClaims)
+			bool permissionsToClaims)
 			: base(new GenericIdentity(
 				string.IsNullOrWhiteSpace(name)
 					? throw new ArgumentNullException(name)
@@ -82,8 +71,9 @@ namespace Raider.Identity
 			UserData = userData;
 			Roles = roles?.AsReadOnly() ?? EMPTY_ROLES;
 			RoleIds = roleIds?.AsReadOnly() ?? EMPTY_ROLE_IDS;
-			Activities = activities?.AsReadOnly() ?? EMPTY_ACTIVITIES;
-			AddImplicitClaims(rolesToClams, activitiesToClaims);
+			Permissions = permissions?.AsReadOnly() ?? EMPTY_PERMISSIONS;
+			PermissionIds = permissionIds?.AsReadOnly() ?? EMPTY_PERMISSIONS_IDS;
+			AddImplicitClaims(rolesToClams, permissionsToClaims);
 		}
 
 		public RaiderIdentity(
@@ -94,9 +84,10 @@ namespace Raider.Identity
 			object? userData,
 			List<string>? roles,
 			List<int>? roleIds,
-			List<string>? activities,
+			List<string>? permissions,
+			List<int>? permissionIds,
 			bool rolesToClams,
-			bool activitiesToClaims)
+			bool permissionsToClaims)
 			: base(identity, (identity as ClaimsIdentity)?.Claims)
 		{
 			//if (identity is WindowsIdentity winIdentity)
@@ -114,11 +105,12 @@ namespace Raider.Identity
 			UserData = userData;
 			Roles = roles?.AsReadOnly() ?? EMPTY_ROLES;
 			RoleIds = roleIds?.AsReadOnly() ?? EMPTY_ROLE_IDS;
-			Activities = activities?.AsReadOnly() ?? EMPTY_ACTIVITIES;
-			AddImplicitClaims(rolesToClams, activitiesToClaims);
+			Permissions = permissions?.AsReadOnly() ?? EMPTY_PERMISSIONS;
+			PermissionIds = permissionIds?.AsReadOnly() ?? EMPTY_PERMISSIONS_IDS;
+			AddImplicitClaims(rolesToClams, permissionsToClaims);
 		}
 
-		private void AddImplicitClaims(bool rolesToClams, bool activitiesToClaims)
+		private void AddImplicitClaims(bool rolesToClams, bool permissionsToClaims)
 		{
 			AddClaim(new Claim(LOGIN_CLAIM_NAME, Login));
 			AddClaim(new Claim(DISPLAYNAME_CLAIM_NAME, DisplayName));
@@ -129,8 +121,11 @@ namespace Raider.Identity
 				AddClaims(ROLE_CLAIM_NAME, Roles);
 				AddClaims(ROLE_ID_CLAIM_NAME, RoleIds);
 			}
-			if (activitiesToClaims)
-				AddClaims(ACTIVITY_CLAIM_NAME, Activities);
+			if (permissionsToClaims)
+			{
+				AddClaims(PERMISSION_CLAIM_NAME, Permissions);
+				AddClaims(PERMISSION_ID_CLAIM_NAME, PermissionIds);
+			}
 		}
 
 		public bool IsInRole(string role)
@@ -178,52 +173,94 @@ namespace Raider.Identity
 			return roles.Any(r => RoleIds.Contains(r));
 		}
 
-		public bool HasActivity(string activity)
+		public bool HasPermission(string permission)
 		{
-			if (string.IsNullOrWhiteSpace(activity))
-				throw new ArgumentNullException(nameof(activity));
+			if (string.IsNullOrWhiteSpace(permission))
+				throw new ArgumentNullException(nameof(permission));
 
-			return Activities.Contains(activity, StringComparer.InvariantCultureIgnoreCase);
+			return Permissions.Contains(permission, StringComparer.InvariantCultureIgnoreCase);
 		}
 
-		public bool HasAllActivities(params string[] activities)
+		public bool HasPermission(int permission)
 		{
-			if (activities == null)
-				throw new ArgumentNullException(nameof(activities));
-
-			return activities.All(r => Activities.Contains(r, StringComparer.InvariantCultureIgnoreCase));
+			return PermissionIds.Contains(permission);
 		}
 
-		public bool HasAnyActivity(params string[] activities)
+		public bool HasAllPermissions(params string[] permissions)
 		{
-			if (activities == null)
-				throw new ArgumentNullException(nameof(activities));
+			if (permissions == null)
+				throw new ArgumentNullException(nameof(permissions));
 
-			return activities.Any(r => Activities.Contains(r, StringComparer.InvariantCultureIgnoreCase));
+			return permissions.All(p => Permissions.Contains(p, StringComparer.InvariantCultureIgnoreCase));
 		}
 
-		public bool HasActivityClaim(string activity)
+		public bool HasAllPermissions(params int[] permissions)
 		{
-			if (string.IsNullOrWhiteSpace(activity))
-				throw new ArgumentNullException(nameof(activity));
+			if (permissions == null)
+				throw new ArgumentNullException(nameof(permissions));
 
-			return HasRaiderClaim(ACTIVITY_CLAIM_NAME, activity);
+			return permissions.All(p => PermissionIds.Contains(p));
 		}
 
-		public bool HasAllActivityClaims(params string[] activities)
+		public bool HasAnyPermission(params string[] permissions)
 		{
-			if (activities == null)
-				throw new ArgumentNullException(nameof(activities));
+			if (permissions == null)
+				throw new ArgumentNullException(nameof(permissions));
 
-			return activities.All(activity => HasRaiderClaim(ACTIVITY_CLAIM_NAME, activity));
+			return permissions.Any(p => Permissions.Contains(p, StringComparer.InvariantCultureIgnoreCase));
 		}
 
-		public bool HasAnyActivityClaim(params string[] activities)
+		public bool HasAnyPermission(params int[] permissions)
 		{
-			if (activities == null)
-				throw new ArgumentNullException(nameof(activities));
+			if (permissions == null)
+				throw new ArgumentNullException(nameof(permissions));
 
-			return activities.Any(activity => HasRaiderClaim(ACTIVITY_CLAIM_NAME, activity));
+			return permissions.Any(r => PermissionIds.Contains(r));
+		}
+
+		public bool HasPermissionClaim(string permission)
+		{
+			if (string.IsNullOrWhiteSpace(permission))
+				throw new ArgumentNullException(nameof(permission));
+
+			return HasRaiderClaim(PERMISSION_CLAIM_NAME, permission);
+		}
+
+		public bool HasAllPermissionClaims(params string[] permissions)
+		{
+			if (permissions == null)
+				throw new ArgumentNullException(nameof(permissions));
+
+			return permissions.All(permission => HasRaiderClaim(PERMISSION_CLAIM_NAME, permission));
+		}
+
+		public bool HasAnyPermissionClaim(params string[] permissions)
+		{
+			if (permissions == null)
+				throw new ArgumentNullException(nameof(permissions));
+
+			return permissions.Any(permission => HasRaiderClaim(PERMISSION_CLAIM_NAME, permission));
+		}
+
+		public bool HasPermissionClaim(int permission)
+		{
+			return HasRaiderClaim(PERMISSION_ID_CLAIM_NAME, permission);
+		}
+
+		public bool HasAllPermissionClaims(params int[] permissions)
+		{
+			if (permissions == null)
+				throw new ArgumentNullException(nameof(permissions));
+
+			return permissions.All(permission => HasRaiderClaim(PERMISSION_ID_CLAIM_NAME, permission));
+		}
+
+		public bool HasAnyPermissionClaim(params int[] permissions)
+		{
+			if (permissions == null)
+				throw new ArgumentNullException(nameof(permissions));
+
+			return permissions.Any(permission => HasRaiderClaim(PERMISSION_ID_CLAIM_NAME, permission));
 		}
 
 		public override void AddClaim(Claim claim)
@@ -434,6 +471,24 @@ namespace Raider.Identity
 			return false;
 		}
 
+		public bool HasRaiderClaim(string type, int value)
+		{
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+
+			if (string.IsNullOrWhiteSpace(type))
+				return false;
+
+			foreach (Claim claim in Claims)
+				if (claim != null
+						&& string.Equals(claim.Type, type, StringComparison.OrdinalIgnoreCase)
+						&& int.TryParse(claim.Value, out int intValue) && intValue == value
+						&& IsRaiderClaim(claim))
+					return true;
+
+			return false;
+		}
+
 		public bool HasRaiderClaim(Predicate<Claim> match)
 		{
 			if (match == null)
@@ -471,9 +526,10 @@ namespace Raider.Identity
 			object? userData,
 			List<string>? roles,
 			List<int>? roleIds,
-			List<string>? activities,
+			List<string>? permissions,
+			List<int>? permissionIds,
 			bool rolesToClams,
-			bool activitiesToClaims)
+			bool permissionsToClaims)
 			: base(
 				  name,
 				  authenticationType,
@@ -485,9 +541,10 @@ namespace Raider.Identity
 				  userData,
 				  roles,
 				  roleIds,
-				  activities,
+				  permissions,
+				  permissionIds,
 				  rolesToClams,
-				  activitiesToClaims)
+				  permissionsToClaims)
 		{
 			this.UserId = userId;
 		}
@@ -500,9 +557,10 @@ namespace Raider.Identity
 			object? userData,
 			List<string>? roles,
 			List<int>? roleIds,
-			List<string>? activities,
+			List<string>? permissions,
+			List<int>? permissionIds,
 			bool rolesToClams,
-			bool activitiesToClaims)
+			bool permissionsToClaims)
 			: base(
 				  identity,
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -513,9 +571,10 @@ namespace Raider.Identity
 				  userData,
 				  roles,
 				  roleIds,
-				  activities,
+				  permissions,
+				  permissionIds,
 				  rolesToClams,
-				  activitiesToClaims)
+				  permissionsToClaims)
 		{
 			this.UserId = userId;
 		}

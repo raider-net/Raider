@@ -1,24 +1,28 @@
-﻿using System;
+﻿using Raider.Trace;
+using System;
 using System.Collections.Generic;
 
 namespace Raider.Identity
 {
-	public class UserRoleActivities
+	public class AuthenticatedUser
 	{
-		public int UserId { get; set; }
-		public string Login { get; set; }
-		public string DisplayName { get; set; }
+		public int UserId { get; }
+		public string Login { get; }
+		public string DisplayName { get; }
 		public object? UserData { get; set; }
 		public List<string>? Roles { get; set; }
+		public List<string>? Permissions { get; set; }
 		public List<int>? RoleIds { get; set; }
-		public List<string>? Activities { get; set; }
+		public List<int>? PermissionIds { get; set; }
+
+		public ITraceInfo? TraceInfo { get; }
 
 		public string? Password { get; set; }
 		public string? Salt { get; set; }
 		public string? Error { get; set; }
 		public string? PasswordTemporaryUrlSlug { get; set; }
 
-		public UserRoleActivities(int userId, string login, string? displayName)
+		public AuthenticatedUser(int userId, string login, string? displayName, ITraceInfo? traceInfo)
 		{
 			UserId = userId;
 			Login = string.IsNullOrWhiteSpace(login)
@@ -27,6 +31,7 @@ namespace Raider.Identity
 			DisplayName = string.IsNullOrWhiteSpace(displayName)
 				? Login
 				: displayName;
+			TraceInfo = traceInfo;
 		}
 	}
 }
