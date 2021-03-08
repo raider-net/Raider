@@ -43,7 +43,7 @@ namespace Raider.AspNetCore.Extensions
 				configureOptions: configureAuthenticationOptions);
 
 			services.AddScoped<IAuthenticationManager, TAuthMngr>();
-			services.AddSingleton<IAuthorizationHandler, ActivityAuthorizationHandler>();
+			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 			services.AddSingleton<IAuthorizationHandler, AuthenticateAuthorizationHandler>();
 
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

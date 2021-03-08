@@ -32,6 +32,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				new List<string> { "Role1" },
 				new List<int> { 1 },
 				new List<string>() { "action1" },
+				new List<int> { 1 },
 				false,
 				false);
 

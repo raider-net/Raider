@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Raider.AspNetCore.Middleware.Authorization
 {
-	public class ActivityAuthorizationFilter : Attribute, IAsyncAuthorizationFilter, IAsyncActionFilter
+	public class PermissionAuthorizationFilter : Attribute, IAsyncAuthorizationFilter, IAsyncActionFilter
 	{
         private readonly IAuthorizationService _authService;
-        private readonly ActivityAuthorizationRequirement _requirement;
+        private readonly PermissionAuthorizationRequirement _requirement;
 
-        public ActivityAuthorizationFilter(IAuthorizationService authService, ActivityAuthorizationRequirement requirement)
+        public PermissionAuthorizationFilter(IAuthorizationService authService, PermissionAuthorizationRequirement requirement)
         {
             _authService = authService;
             _requirement = requirement;
@@ -23,10 +23,10 @@ namespace Raider.AspNetCore.Middleware.Authorization
 		public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
 			var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
-			var activityToken = _requirement?.Tokens?.Select(x => x.ToString()).ToList();
+			var premission = _requirement?.Tokens?.Select(x => x.ToString()).ToList();
 
-			if (activityToken != null && 0 < activityToken.Count)
-				context.HttpContext.Items[Raider.AspNetCore.Defaults.Keys.Activity] = activityToken;
+			if (premission != null && 0 < premission.Count)
+				context.HttpContext.Items[Raider.AspNetCore.Defaults.Keys.Premission] = premission;
 
 			await next();
 		}

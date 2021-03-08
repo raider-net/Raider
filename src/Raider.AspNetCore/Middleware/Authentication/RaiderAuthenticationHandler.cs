@@ -168,6 +168,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		private async Task<AuthenticateResult> ReadCookieTicket()
 		{
+			//TODO: skontroluj ci toto cookie bolo zapisane do taublky aud.UserToken, ak nie tzn. ze utocnik chce znova pouzit cookie, ktore sice este stale je zive, ale realny pouzivatel sa uz odhlasil a z tabulky aud.UserToken
+			//sa toto cookie odstranilo a tak je potrebne zablokovat reuse
 			var cookie = Options.CookieAuthenticationOptions.CookieManager.GetRequestCookie(Context, Options.CookieAuthenticationOptions.Cookie.Name);
 			if (string.IsNullOrEmpty(cookie))
 			{
@@ -264,6 +266,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 					cookieOptions.Expires = _refreshExpiresUtc.Value.ToUniversalTime();
 				}
 
+				//TODO: zaloguj toto cookie do taublky aud.UserToken aby potom nasledne pri odhlaseni bolo mozne cookie zneplatnit na strane servera
 				Options.CookieAuthenticationOptions.CookieManager.AppendResponseCookie(
 					Context,
 					Options.CookieAuthenticationOptions.Cookie.Name,
@@ -319,7 +322,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			return path[0] == '/' && path[1] != '/' && path[1] != '\\';
 		}
 
-		private string GetTlsTokenBinding()
+		private string? GetTlsTokenBinding()
 		{
 			var binding = Context.Features.Get<ITlsTokenBindingFeature>()?.GetProvidedTokenBindingId();
 			return binding == null ? null : Convert.ToBase64String(binding);
@@ -390,6 +393,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 				var cookieValue = Options.CookieAuthenticationOptions.TicketDataFormat.Protect(ticket, GetTlsTokenBinding());
 
+				//TODO: zaloguj toto cookie do taublky aud.UserToken aby potom nasledne pri odhlaseni bolo mozne cookie zneplatnit na strane servera
 				Options.CookieAuthenticationOptions.CookieManager.AppendResponseCookie(
 					Context,
 					Options.CookieAuthenticationOptions.Cookie.Name,
@@ -443,6 +447,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 				await Events.CookieEvents.SigningOut(context);
 
+				//TODO: vymaz toto cookie z taublky aud.UserToken
 				Options.CookieAuthenticationOptions.CookieManager.DeleteCookie(
 					Context,
 					Options.CookieAuthenticationOptions.Cookie.Name,
@@ -844,7 +849,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		}
 
 		/// <summary>
-		/// Called from <see cref="Raider.AspNetCore.Middleware.Authorization.ActivityAuthorizationFilter.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)"/>
+		/// Called from <see cref="Raider.AspNetCore.Middleware.Authorization.PermissionAuthorizationFilter.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)"/>
 		/// </summary>
 		/// <param name="properties"></param>
 		/// <returns></returns>
@@ -932,7 +937,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		}
 
 		/// <summary>
-		/// Called from <see cref="Raider.AspNetCore.Middleware.Authorization.ActivityAuthorizationFilter.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)"/>
+		/// Called from <see cref="Raider.AspNetCore.Middleware.Authorization.PermissionAuthorizationFilter.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)"/>
 		/// </summary>
 		/// <param name="properties"></param>
 		/// <returns></returns>

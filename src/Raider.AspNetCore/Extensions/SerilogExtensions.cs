@@ -37,5 +37,20 @@ namespace Serilog
 						logEvent => LogEventHelper.IsResponse(logEvent),
 						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
 		}
+
+		public static LoggerConfiguration RequestAuthenticationSinkToPostgreSql(
+			this LoggerSinkConfiguration loggerConfiguration,
+			DBRequestAuthenticationSinkOptions options,
+			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+		{
+			if (loggerConfiguration == null)
+				throw new ArgumentNullException(nameof(loggerConfiguration));
+
+			var sink = new DBRequestAuthenticationSink(options);
+			return loggerConfiguration
+					.Conditional(
+						logEvent => LogEventHelper.IsRequestAuthentication(logEvent),
+						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
+		}
 	}
 }

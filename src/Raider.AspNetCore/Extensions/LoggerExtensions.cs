@@ -10,5 +10,8 @@ namespace Raider.Logging.Extensions
 
 		public static void LogResponse(this ILogger logger, Response response)
 			=> logger.LogInformation($"{Raider.AspNetCore.Logging.LoggerSettings.Response_Template}", response.ToDictionary());
+
+		public static void LogRequestAuthentication(this ILogger logger, RequestAuthentication requestAuthentication)
+			=> logger.LogInformation($"{Raider.AspNetCore.Logging.LoggerSettings.RequestAuthentication_Template}", requestAuthentication.ToDictionary());
 	}
 }

@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using Raider.AspNetCore.Identity;
 using Raider.Extensions;
 using Raider.Identity;
+using Raider.Logging.Extensions;
+using Raider.Trace;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -40,14 +42,15 @@ namespace Raider.AspNetCore.Authentication
 			IIdentity? identity = null;
 			string? logonWithoutDomain;
 			string? windowsIdentityName = null;
-			UserRoleActivities? user = null;
+			AuthenticatedUser? user = null;
 
+			IAuthenticationManager? authenticationManager = null;
 			if (windowsPrincipal?.Identity is WindowsIdentity windowsIdentity)
 			{
 				logonWithoutDomain = windowsIdentity.GetLogonNameWithoutDomain().ToLower();
 				windowsIdentityName = windowsIdentity.Name.ToLower();
 
-				var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
+				authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
 				user = await authenticationManager.CreateFromWindowsIdentityAsync(logonWithoutDomain, windowsIdentityName);
 			}
 
@@ -61,7 +64,7 @@ namespace Raider.AspNetCore.Authentication
 				identity = claimsIdentity;
 			}
 
-			return CreateRaiderPrincipal(identity, user, true, true);
+			return CreateRaiderPrincipal(identity, user, true, true, logger, authenticationManager);
 		}
 
 		public static async Task<RaiderPrincipal?> CreateFromRequestAsync(HttpContext context, string authenticationSchemeType, ILogger? logger)
@@ -81,7 +84,7 @@ namespace Raider.AspNetCore.Authentication
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
 			var user = await authenticationManager.CreateFromRequestAsync(context.Request.Headers.ToDictionary(x => x.Key, x => (string[])x.Value));
-			return CreateRaiderPrincipal(identity, user, true, true);
+			return CreateRaiderPrincipal(identity, user, true, true, logger, authenticationManager);
 		}
 
 		public static async Task<RaiderPrincipal?> CreateStaticAsync(HttpContext context, string authenticationSchemeType, ILogger? logger, bool allowStaticLogin)
@@ -99,7 +102,7 @@ namespace Raider.AspNetCore.Authentication
 				logger = GetLogger(context);
 
 			IIdentity? identity = null;
-			UserRoleActivities? user = null;
+			AuthenticatedUser? user = null;
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
 			if (authenticationManager.StaticUserId.HasValue)
@@ -112,7 +115,7 @@ namespace Raider.AspNetCore.Authentication
 				identity = claimsIdentity;
 			}
 
-			return CreateRaiderPrincipal(identity, user, true, true);
+			return CreateRaiderPrincipal(identity, user, true, true, logger, authenticationManager);
 		}
 
 		public static async Task<RaiderPrincipal?> RecreateCookieIdentityAsync(HttpContext context, string? userName, string authenticationSchemeType, ILogger? logger)
@@ -133,7 +136,7 @@ namespace Raider.AspNetCore.Authentication
 			var user = await authenticationManager.CreateFromLoginAsync(userName.ToLower());
 			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
 			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, userName));
-			return CreateRaiderPrincipal(claimsIdentity, user, true, true);
+			return CreateRaiderPrincipal(claimsIdentity, user, true, true, logger, authenticationManager);
 		}
 
 		public static async Task<RaiderPrincipal?> RenewTokenIdentityAsync(HttpContext context, ClaimsPrincipal? principal, ILogger? logger)
@@ -180,22 +183,24 @@ namespace Raider.AspNetCore.Authentication
 							.Where(c => RaiderIdentity.IsRaiderClaim(c)
 												&& string.Equals(c.Type, RaiderIdentity.ROLE_ID_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
 
-			var activityClaims = principal
+			var premissionClaims = principal
 							.Claims
 							.Where(c => RaiderIdentity.IsRaiderClaim(c)
-												&& string.Equals(c.Type, RaiderIdentity.ACTIVITY_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+												&& string.Equals(c.Type, RaiderIdentity.PERMISSION_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
 
-			var user = new UserRoleActivities(userId, loginClaim.Value, displayNameClaim.Value)
+			var tc = context.RequestServices.GetRequiredService<TraceContext>();
+
+			var user = new AuthenticatedUser(userId, loginClaim.Value, displayNameClaim.Value, tc.Next())
 			{
 				UserData = null,
 				Roles = roleClaims?.Select(c => c.Value).ToList(),
 				RoleIds = roleIdClaims?.Select(c => int.Parse(c.Value)).ToList(),
-				Activities = activityClaims?.Select(c => c.Value).ToList()
+				Permissions = premissionClaims?.Select(c => c.Value).ToList()
 			};
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
 			user = await authenticationManager.SetUserDataAsync(user);
-			return CreateRaiderPrincipal(principal.Identity, user, true, true);
+			return CreateRaiderPrincipal(principal.Identity, user, true, true, logger, authenticationManager);
 		}
 
 		public static async Task<RaiderPrincipal?> CreateIdentityAsync(HttpContext context, string? login, string? password, string authenticationSchemeType, ILogger? logger/*, out string? error, out string? passwordTemporaryUrlSlug*/)
@@ -227,12 +232,12 @@ namespace Raider.AspNetCore.Authentication
 				//error = user.Error;
 				//passwordTemporaryUrlSlug = user.PasswordTemporaryUrlSlug;
 
-				user = await authenticationManager.SetRolesAndActivities(user);
+				user = await authenticationManager.SetRolesAndPremissions(user);
 			}
 
 			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
 			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, login));
-			return CreateRaiderPrincipal(claimsIdentity, user, false, false);
+			return CreateRaiderPrincipal(claimsIdentity, user, false, false, logger, authenticationManager);
 		}
 
 		#region withhout HttpContext
@@ -305,26 +310,46 @@ namespace Raider.AspNetCore.Authentication
 
 		private static RaiderPrincipal? CreateRaiderPrincipal(
 			IIdentity? identity,
-			UserRoleActivities? userRoleActivities,
+			AuthenticatedUser? userRolePermissions,
 			bool rolesToClams,
-			bool activitiesToClaims)
+			bool permissionsToClaims,
+			ILogger logger,
+			IAuthenticationManager? authenticationManager)
 		{
-			if (identity == null || userRoleActivities == null)
+			if (identity == null || userRolePermissions == null)
 				return null;
 
-			var RaiderIdentity = new RaiderIdentity<int>(
+			var raiderIdentity = new RaiderIdentity<int>(
 				identity,
-				userRoleActivities.UserId,
-				userRoleActivities.Login,
-				userRoleActivities.DisplayName,
-				userRoleActivities.UserData,
-				userRoleActivities.Roles,
-				userRoleActivities.RoleIds,
-				userRoleActivities.Activities,
+				userRolePermissions.UserId,
+				userRolePermissions.Login,
+				userRolePermissions.DisplayName,
+				userRolePermissions.UserData,
+				userRolePermissions.Roles,
+				userRolePermissions.RoleIds,
+				userRolePermissions.Permissions,
+				userRolePermissions.PermissionIds,
 				rolesToClams,
-				activitiesToClaims);
+				permissionsToClaims);
 
-			var RaiderPrincipal = new RaiderPrincipal<int>(RaiderIdentity);
+			logger?.LogRequestAuthentication(new Logging.Dto.RequestAuthentication
+			{
+				CorrelationId = userRolePermissions.TraceInfo?.CorrelationId,
+				ExternalCorrelationId = userRolePermissions.TraceInfo?.ExternalCorrelationId,
+				IdUser = raiderIdentity.UserId,
+				Roles = (authenticationManager?.LogRoles ?? false)
+				? ((0 < raiderIdentity.RoleIds?.Count)
+					? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.RoleIds)
+					: (0 < raiderIdentity.Roles?.Count ? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.Roles) : null))
+				: null,
+				Permissions = (authenticationManager?.LogPermissions ?? false)
+				? ((0 < raiderIdentity.PermissionIds?.Count)
+					? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.PermissionIds)
+					: (0 < raiderIdentity.Permissions?.Count ? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.Permissions) : null))
+				: null
+			});
+
+			var RaiderPrincipal = new RaiderPrincipal<int>(raiderIdentity);
 			return RaiderPrincipal;
 		}
 	}

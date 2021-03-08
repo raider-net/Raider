@@ -4,7 +4,7 @@
 	{
 		public static class Keys
 		{
-			public const string Activity = "activity";
+			public const string Premission = "premission";
 		}
 	}
 }

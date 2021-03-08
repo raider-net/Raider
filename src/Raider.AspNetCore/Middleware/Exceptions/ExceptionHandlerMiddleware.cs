@@ -55,7 +55,7 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 			}
 		}
 
-		private bool Handle(ITraceInfo traceInfo, HttpContext context, Exception? ex, [MaybeNullWhen(false)] out string? redirectPath)
+		private bool Handle(ITraceInfo traceInfo, HttpContext context, Exception? ex, [NotNullWhen(true)] out string? redirectPath)
 		{
 			var error = _logger.LogErrorMessage(traceInfo, x => x.ExceptionInfo(ex));
 

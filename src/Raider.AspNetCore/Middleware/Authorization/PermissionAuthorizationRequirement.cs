@@ -2,11 +2,11 @@
 
 namespace Raider.AspNetCore.Middleware.Authorization
 {
-    public class ActivityAuthorizationRequirement : IAuthorizationRequirement
+    public class PermissionAuthorizationRequirement : IAuthorizationRequirement
     {
         public object[] Tokens { get; set; }
 
-        public ActivityAuthorizationRequirement(object[] tokens)
+        public PermissionAuthorizationRequirement(object[] tokens)
         {
 			Tokens = tokens;
         }

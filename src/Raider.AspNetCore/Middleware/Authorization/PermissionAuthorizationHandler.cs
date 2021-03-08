@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace Raider.AspNetCore.Middleware.Authorization
 {
-	public class ActivityAuthorizationHandler : AuthorizationHandler<ActivityAuthorizationRequirement>
+	public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionAuthorizationRequirement>
 	{
-		private readonly ActivityAuthorizationOptions _options;
+		private readonly PermissionAuthorizationOptions _options;
 
-		public ActivityAuthorizationHandler(IOptions<ActivityAuthorizationOptions> options)
+		public PermissionAuthorizationHandler(IOptions<PermissionAuthorizationOptions> options)
 		{
 			_options = options?.Value;
 		}
 
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
-            ActivityAuthorizationRequirement requirement)
+            PermissionAuthorizationRequirement requirement)
         {
 			if (context.User is RaiderPrincipal principal)
 			{
-				if (principal.HasAnyActivityClaim(
+				if (principal.HasAnyPermissionClaim(
 						requirement
 							.Tokens
 							.Where(x => x != null)

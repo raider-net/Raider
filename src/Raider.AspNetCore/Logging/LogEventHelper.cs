@@ -16,5 +16,11 @@ namespace Raider.AspNetCore.Logging
 
 		public static IDictionary<string, object?>? ConvertResponseToDictionary(LogEvent logEvent)
 			=> Raider.Logging.SerilogEx.LogEventHelper.ConvertToDictionary(LoggerSettings.Response, logEvent);
+
+		public static bool IsRequestAuthentication(LogEvent logEvent)
+			=> Raider.Logging.SerilogEx.LogEventHelper.IsLogType(LoggerSettings.RequestAuthentication, logEvent);
+
+		public static IDictionary<string, object?>? ConvertRequestAuthenticationToDictionary(LogEvent logEvent)
+			=> Raider.Logging.SerilogEx.LogEventHelper.ConvertToDictionary(LoggerSettings.RequestAuthentication, logEvent);
 	}
 }
