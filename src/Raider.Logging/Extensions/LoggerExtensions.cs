@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Raider.Infrastructure;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
@@ -258,12 +257,12 @@ namespace Raider.Logging.Extensions
 			return LogCriticalMessage(logger, scope.TraceInfo, messageBuilder);
 		}
 
-		public static void LogEnvironmentInfo(this ILogger logger)
-			=> LogEnvironmentInfo(logger, EnvironmentInfoProvider.GetEnvironmentInfo());
+		//public static void LogEnvironmentInfo(this ILogger logger)
+		//	=> LogEnvironmentInfo(logger, EnvironmentInfoProvider.GetEnvironmentInfo());
 
-		public static void LogEnvironmentInfo(this ILogger logger, EnvironmentInfo environmentInfo)
-		{
-			logger.LogInformation($"{LoggerSettings.EnvironmentInfo_Template}", environmentInfo.ToDictionary());
-		}
+		//public static void LogEnvironmentInfo(this ILogger logger, EnvironmentInfo environmentInfo)
+		//{
+		//	logger.LogInformation($"{LoggerSettings.EnvironmentInfo_Template}", environmentInfo.ToDictionary());
+		//}
 	}
 }

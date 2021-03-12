@@ -36,7 +36,7 @@ namespace Raider.Logging
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 		{
 			var dict = new Dictionary<string, object?>
 			{

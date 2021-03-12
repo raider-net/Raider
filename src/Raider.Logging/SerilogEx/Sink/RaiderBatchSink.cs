@@ -1,7 +1,10 @@
-﻿using Serilog.Core;
+﻿using Raider.Data;
+using Serilog.Core;
+using Serilog.Debugging;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Raider.Logging.SerilogEx.Sink
@@ -15,22 +18,18 @@ namespace Raider.Logging.SerilogEx.Sink
 			.WriteTo.Console())
 	 */
 
-	public class RaiderBatchSink : RaiderBaseSink, ILogEventSink, IDisposable
+	public class RaiderBatchSink : BatchWriter<LogEvent>, ILogEventSink, IDisposable
 	{
-		private readonly Func<LogEvent, bool> _includeCallBack;
-		private readonly Func<IEnumerable<LogEvent>, Task> _writeBatchCallback;
-
-		public RaiderBatchSink(Func<LogEvent, bool> includeCallBack, Func<IEnumerable<LogEvent>, Task> writeBatchCallback, RaiderBatchSinkOptions? options)
-			: base(options)
+		public RaiderBatchSink(
+			Func<LogEvent, bool> includeCallBack,
+			Func<IEnumerable<LogEvent>, CancellationToken, Task> writeBatchCallback,
+			BatchWriterOptions? options,
+			Action<string, object?, object?, object?>? errorLogger = null)
+			: base(includeCallBack, writeBatchCallback, options, errorLogger ?? SelfLog.WriteLine)
 		{
-			_writeBatchCallback = writeBatchCallback ?? throw new ArgumentNullException(nameof(writeBatchCallback));
-			_includeCallBack = includeCallBack ?? (e => true);
 		}
 
-		public override bool Include(LogEvent logEvent)
-			=> _includeCallBack(logEvent);
-
-		public override Task WriteBatch(IEnumerable<LogEvent> batch)
-			=> _writeBatchCallback(batch);
+		public void Emit(LogEvent logEvent)
+			=> Write(logEvent);
 	}
 }

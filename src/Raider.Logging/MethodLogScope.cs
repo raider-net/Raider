@@ -15,9 +15,24 @@ namespace Raider.Logging
 			_logScope = logScope;
 		}
 
+		private bool disposed;
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposed)
+			{
+				if (disposing)
+				{
+					_logScope?.Dispose();
+				}
+
+				disposed = true;
+			}
+		}
+
 		public void Dispose()
 		{
-			_logScope?.Dispose();
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 	}
 }
