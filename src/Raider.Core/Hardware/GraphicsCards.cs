@@ -13,7 +13,7 @@ namespace Raider.Hardware
 			GPUs = new List<GraphicsCard>();
 		}
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 		{
 			var dict = new Dictionary<string, object?>();
 

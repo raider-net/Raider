@@ -43,7 +43,7 @@ namespace Raider.Hardware
 				HWJson = System.Text.Json.JsonSerializer.Serialize(this, new System.Text.Json.JsonSerializerOptions { WriteIndented = true })
 			};
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 		{
 			var dict = new DictionaryBuilder<string>()
 				.TryAdd(nameof(RuntimeUniqueKey), RuntimeUniqueKey, out _)

@@ -14,7 +14,7 @@ namespace Raider.Hardware
 		public string? DNSDomain { get; set; }
 		public string? DNSHostName { get; set; }
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 			=> new DictionaryBuilder<string>()
 				.AddIfNotWhiteSpace(nameof(Caption), Caption, out _)
 				.AddIfNotWhiteSpace(nameof(Description), Description, out _)

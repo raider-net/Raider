@@ -24,9 +24,24 @@ namespace Raider.Threading
 			return this;
 		}
 
+		private bool disposed;
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposed)
+			{
+				if (disposing)
+				{
+					_semaphoreSlim.Release();
+				}
+
+				disposed = true;
+			}
+		}
+
 		public void Dispose()
 		{
-			_semaphoreSlim.Release();
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 	}
 }

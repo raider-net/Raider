@@ -65,7 +65,7 @@ namespace Raider.Hardware
 			return this;
 		}
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 			=> new DictionaryBuilder<string>()
 				.AddIfNotWhiteSpace(nameof(MachineName), MachineName, out _)
 				.AddIfNotWhiteSpace(nameof(Caption), Caption, out _)

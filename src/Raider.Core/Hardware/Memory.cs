@@ -28,7 +28,7 @@ namespace Raider.Hardware
 			RamSticks = new List<RamStick>();
 		}
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 			=> new DictionaryBuilder<string>()
 				.AddIfHasValue(nameof(TotalMemoryCapacity), TotalMemoryCapacity, out _)
 				.AddIfHasValue(nameof(TotalMemoryCapacityGB), TotalMemoryCapacityGB, out _)

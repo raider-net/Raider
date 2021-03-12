@@ -13,7 +13,7 @@ namespace Raider.Hardware
 		public string? SerialNumber { get; set; }
 		public uint? PositionInRow { get; set; }
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 			=> new DictionaryBuilder<string>()
 				.AddIfHasValue(nameof(Capacity), Capacity, out _)
 				.AddIfHasValue(nameof(ClockSpeed), ClockSpeed, out _)

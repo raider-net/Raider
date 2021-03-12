@@ -12,9 +12,9 @@ namespace Raider.Hardware
 			CPUs = new List<Processor>();
 		}
 
-		public IReadOnlyDictionary<string, object> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 		{
-			var dict = new Dictionary<string, object>();
+			var dict = new Dictionary<string, object?>();
 
 			if (CPUs != null)
 				for (int i = 0; i < CPUs.Count; i++)
@@ -23,7 +23,7 @@ namespace Raider.Hardware
 			return dict;
 		}
 
-		public void WriteTo(StringBuilder sb, string before = null, string after = null)
+		public void WriteTo(StringBuilder sb, string? before = null, string? after = null)
 		{
 			if (before != null)
 				sb.AppendLine(before);

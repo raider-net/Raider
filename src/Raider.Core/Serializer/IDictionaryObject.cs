@@ -4,6 +4,6 @@ namespace Raider.Serializer
 {
 	public interface IDictionaryObject
 	{
-		IReadOnlyDictionary<string, object?> ToDictionary();
+		IDictionary<string, object?> ToDictionary();
 	}
 }

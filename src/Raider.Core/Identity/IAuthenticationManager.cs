@@ -6,6 +6,7 @@ namespace Raider.AspNetCore.Authentication
 {
 	public interface IAuthenticationManager
 	{
+		bool LogRequestAuthentication { get; }
 		bool LogRoles { get; }
 		bool LogPermissions { get; }
 		int? StaticUserId { get; }

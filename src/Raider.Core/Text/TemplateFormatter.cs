@@ -26,7 +26,7 @@ namespace Raider.Text
 		public virtual string? Format(string template, IDictionary<string, object?>? values)
 			=> ReplacePlaceholders(template, values);
 
-		public static string? ReplacePlaceholders(string template, IDictionary<string, object?>? values)
+		private static string? ReplacePlaceholders(string template, IDictionary<string, object?>? values)
 		{
 			if (template == null)
 				return null;

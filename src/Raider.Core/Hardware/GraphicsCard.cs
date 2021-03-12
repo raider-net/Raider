@@ -18,7 +18,7 @@ namespace Raider.Hardware
 		public string? Name { get; set; }
 		public string? DeviceID { get; set; }
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 			=> new DictionaryBuilder<string>()
 					.AddIfHasValue(nameof(MemoryCapacity), MemoryCapacity, out _)
 					.AddIfHasValue(nameof(MemoryCapacityMB), MemoryCapacityMB, out _)

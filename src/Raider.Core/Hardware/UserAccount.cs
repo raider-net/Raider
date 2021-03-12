@@ -10,7 +10,7 @@ namespace Raider.Hardware
 		public string? FullName { get; set; }
 		public bool? IsDisabled { get; set; }
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 			=> new DictionaryBuilder<string>()
 				.AddIfNotWhiteSpace(nameof(Name), Name, out _)
 				.AddIfNotWhiteSpace(nameof(FullName), FullName, out _)

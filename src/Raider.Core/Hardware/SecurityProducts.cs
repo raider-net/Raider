@@ -12,9 +12,9 @@ namespace Raider.Hardware
 			Products = new List<SecurityProduct>();
 		}
 
-		public IReadOnlyDictionary<string, object> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 		{
-			var dict = new Dictionary<string, object>();
+			var dict = new Dictionary<string, object?>();
 
 			if (Products != null)
 				for (int i = 0; i < Products.Count; i++)
@@ -23,7 +23,7 @@ namespace Raider.Hardware
 			return dict;
 		}
 
-		public void WriteTo(StringBuilder sb, string before = null, string after = null)
+		public void WriteTo(StringBuilder sb, string? before = null, string? after = null)
 		{
 			if (before != null)
 				sb.AppendLine(before);
