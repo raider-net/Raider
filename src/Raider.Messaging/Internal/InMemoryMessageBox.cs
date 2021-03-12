@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,7 +48,7 @@ namespace Raider.Messaging.Internal
 		}
 
 		private void MarkMessageAsInProcess(ISubscriberMessage message)
-			=> message.UpdateMessage(SubscriberMessageState.InProcess, message.RetryCount, message.DelayedToUtc);
+			=> message.UpdateMessage(MessageState.InProcess, message.RetryCount, message.DelayedToUtc);
 
 		private Task<ISubscriberMessage<TData>?> ConvertMessage<TData>(ISubscriberMessage message)
 			where TData : IMessageData
@@ -67,14 +68,14 @@ namespace Raider.Messaging.Internal
 		{
 			var utcNow = DateTimeOffset.UtcNow;
 
-			if (message.State == SubscriberMessageState.Pending)
+			if (message.State == MessageState.Pending)
 			{
 				MarkMessageAsInProcess(message);
 				return ConvertMessage<TData>(message);
 			}
 
 
-			else if (message.State == SubscriberMessageState.InProcess)
+			else if (message.State == MessageState.InProcess)
 			{
 				if (message.LastAccessUtc.Add(subscriber.MessageInProcessTimeout) < utcNow)
 				{
@@ -95,10 +96,10 @@ namespace Raider.Messaging.Internal
 			}
 
 
-			else if (message.State == SubscriberMessageState.Consumed)
+			else if (message.State == MessageState.Consumed)
 			{
 				if (!tryNext)
-					throw new InvalidOperationException($"{SubscriberMessageState.Consumed} message found in queue.");
+					throw new InvalidOperationException($"{MessageState.Consumed} message found in queue.");
 
 				var nextMessage = subscriberQueue.Skip(1).FirstOrDefault();
 				if (nextMessage == null)
@@ -108,7 +109,7 @@ namespace Raider.Messaging.Internal
 			}
 
 
-			else if (message.State == SubscriberMessageState.Error)
+			else if (message.State == MessageState.Error)
 			{
 				if (message.DelayedToUtc < utcNow)
 				{
@@ -129,10 +130,10 @@ namespace Raider.Messaging.Internal
 			}
 
 
-			else if (message.State == SubscriberMessageState.Suspended)
+			else if (message.State == MessageState.Suspended)
 			{
 				if (!tryNext)
-					throw new InvalidOperationException($"{SubscriberMessageState.Suspended} message found in queue.");
+					throw new InvalidOperationException($"{MessageState.Suspended} message found in queue.");
 
 				var nextMessage = subscriberQueue.Skip(1).FirstOrDefault();
 				if (nextMessage == null)
@@ -142,10 +143,10 @@ namespace Raider.Messaging.Internal
 			}
 
 
-			else if (message.State == SubscriberMessageState.Corrupted)
+			else if (message.State == MessageState.Corrupted)
 			{
 				if (!tryNext)
-					throw new InvalidOperationException($"{SubscriberMessageState.Corrupted} message found in queue.");
+					throw new InvalidOperationException($"{MessageState.Corrupted} message found in queue.");
 
 				var nextMessage = subscriberQueue.Skip(1).FirstOrDefault();
 				if (nextMessage == null)
@@ -157,17 +158,17 @@ namespace Raider.Messaging.Internal
 			throw new InvalidOperationException($"Invalid state {message.State}");
 		}
 
-		public Task SetMessageStateAsync<TData>(ISubscriberMessage<TData> subscriberMessage, SubscribedMessageResult result, CancellationToken cancellationToken = default)
+		public Task SetMessageStateAsync<TData>(ISubscriberMessage<TData> subscriberMessage, MessageResult result, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
 			where TData : IMessageData
-			=> SetMessageStateAsync<TData>(subscriberMessage, result.State, result.RetryCount, result.DelayedToUtc, cancellationToken);
+			=> SetMessageStateAsync<TData>(subscriberMessage, result.State, result.RetryCount, result.DelayedToUtc, dbTransaction, cancellationToken);
 
-		public Task SetMessageStateAsync<TData>(ISubscriberMessage<TData> subscriberMessage, SubscriberMessageState state, int retryCount, DateTimeOffset? delayedToUtc, CancellationToken cancellationToken = default)
+		public Task SetMessageStateAsync<TData>(ISubscriberMessage<TData> subscriberMessage, MessageState state, int retryCount, DateTimeOffset? delayedToUtc, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
 			where TData : IMessageData
 		{
 			if (subscriberMessage == null)
 				throw new ArgumentNullException(nameof(subscriberMessage));
 
-			SubscribedMessageResult.Validate(subscriberMessage, state, retryCount, delayedToUtc);
+			MessageResult.Validate(subscriberMessage, state, retryCount, delayedToUtc);
 
 			if (_subscriberMessages.TryGetValue(subscriberMessage.IdSubscriber, out ConcurrentQueue<ISubscriberMessage>? subscriberQueue))
 			{
@@ -175,7 +176,7 @@ namespace Raider.Messaging.Internal
 				{
 					if (topMessage.IdSubscriberMessage == subscriberMessage.IdSubscriberMessage)
 					{
-						if (state == SubscriberMessageState.Consumed)
+						if (state == MessageState.Consumed)
 						{
 							subscriberQueue.TryDequeue(out _); //remove from queue
 						}
@@ -202,10 +203,10 @@ namespace Raider.Messaging.Internal
 			return Task.CompletedTask;
 		}
 
-		public Task SetSubscriberStateAsync(ISubscriber subscriber, ComponentState state, CancellationToken cancellationToken = default)
+		public Task SetComponentStateAsync(IComponent component, ComponentState state, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
 			=> Task.CompletedTask;
 
-		public Task<bool> WriteAsync<TData>(List<IMessage<TData>> messages, IReadOnlyList<ISubscriber> subscribers, CancellationToken cancellationToken = default)
+		public Task<bool> WriteAsync<TData>(List<IMessage<TData>> messages, IReadOnlyList<ISubscriber> subscribers, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
 			where TData : IMessageData
 		{
 			if (messages == null)

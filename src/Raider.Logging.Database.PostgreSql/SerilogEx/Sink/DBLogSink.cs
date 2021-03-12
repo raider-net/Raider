@@ -1,14 +1,10 @@
 ﻿using Raider.Database.PostgreSql;
 using Raider.Logging.SerilogEx;
-using Raider.Logging.SerilogEx.Sink;
 using Serilog.Core;
+using Serilog.Debugging;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-#nullable disable
 
 namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 {
@@ -16,7 +12,6 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 	 USAGE:
 		Serilog.LoggerConfiguration
 			.MinimumLevel.Verbose()
-			//.Enrich.WithLogMessage()
 			.WriteTo.DBLogSink(new Raider.Logging.DB.SerilogEx.Sink.DBLogSinkOptions
 			{
 				ConnectionString = "Host=localhost;Database=..."
@@ -24,31 +19,17 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 			.WriteTo.Console())
 	 */
 
-	public class DBLogSink : RaiderBaseSink, ILogEventSink, IDisposable
+	public class DBLogSink : DbBatchWriter<LogEvent>, ILogEventSink, IDisposable
 	{
-		private readonly string _connectionString;
-		private readonly BulkInsert _bulkInsert;
-
-		public DBLogSink(DBLogSinkOptions options)
-			: base(options)
+		public DBLogSink(DBLogSinkOptions options, Action<string, object?, object?, object?>? errorLogger = null)
+			: base(options ?? new DBLogSinkOptions(), errorLogger ?? SelfLog.WriteLine)
 		{
-			if (options == null)
-				options = new DBLogSinkOptions();
-
-			options.Validate();
-
-			_connectionString = options.ConnectionString;
-			_bulkInsert = new BulkInsert(options.ToBulkInsertOptions());
 		}
 
-		//public override bool Include(LogEvent logEvent)
-		//	=> LogMessageHelper.IsLogMessage(logEvent);
+		public override IDictionary<string, object?>? ToDictionary(LogEvent logEvent)
+			=> LogEventHelper.ConvertLogToDictionary(logEvent);
 
-		public override async Task WriteBatch(IEnumerable<LogEvent> batch)
-		{
-			//var logs = batch.Select(logEvent => LogHelper.Convert(logEvent)).Where(x => x != null);
-			var logs = batch.Select(logEvent => LogEventHelper.ConvertLogToDictionary(logEvent)).Where(x => x != null).ToList();
-			await _bulkInsert.WriteBatch(logs, _connectionString);
-		}
+		public void Emit(LogEvent logEvent)
+			=> Write(logEvent);
 	}
 }

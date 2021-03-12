@@ -13,7 +13,7 @@ namespace Raider.Generator.Compilation
 		public static void UpdateResource(
 			IEnumerable<string> keys,
 			IEnumerable<string> keyFormatters,
-			string activitiesResxFilePath)
+			string resxFilePath)
 		{
 			var keysList = keys?.ToList() ?? throw new ArgumentNullException(nameof(keys));
 			var keyFormattersList = keyFormatters?.ToList() ?? throw new ArgumentNullException(nameof(keyFormatters));
@@ -32,7 +32,7 @@ namespace Raider.Generator.Compilation
 				}
 			}
 
-			var resxBuilder = new ResxBuilder(activitiesResxFilePath);
+			var resxBuilder = new ResxBuilder(resxFilePath);
 			List<ResxData> dataList = new List<ResxData>();
 
 			foreach (var key in keysList)

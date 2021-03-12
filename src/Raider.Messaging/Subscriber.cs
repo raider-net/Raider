@@ -50,7 +50,7 @@ namespace Raider.Messaging
 			IdScenario = idScenario;
 		}
 
-		public abstract Task<SubscribedMessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken token = default);
+		public abstract Task<MessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken token = default);
 
 		Task ISubscriber.InitializeAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 			=> InitializeAsync(serviceProvider, messageBox, loggerFactory, cancellationToken);
@@ -69,7 +69,7 @@ namespace Raider.Messaging
 
 			State = ComponentState.Idle;
 			_stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-			await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts.Token);
+			await MessageBox.SetComponentStateAsync(this, State, null, _stoppingCts.Token);
 			_timer = new Timer(TimerCallback, null, DelayedStart, ExecuteInterval);
 			_logger?.LogTrace($"{GetType().FullName}: Started timer");
 		}
@@ -96,16 +96,16 @@ namespace Raider.Messaging
 				if (message == null)
 				{
 					State = ComponentState.Idle;
-					await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
+					await MessageBox.SetComponentStateAsync(this, State, null, _stoppingCts?.Token ?? default);
 					return;
 				}
 
 				try
 				{
 					State = ComponentState.InProcess;
-					await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
+					await MessageBox.SetComponentStateAsync(this, State, null, _stoppingCts?.Token ?? default);
 
-					SubscribedMessageResult messageResult;
+					MessageResult messageResult;
 					using (var scope = _serviceProvider.CreateScope())
 					{
 						var tc = scope.ServiceProvider.GetService<TraceContext>();
@@ -120,24 +120,24 @@ namespace Raider.Messaging
 
 					await MessageBox.SetMessageStateAsync(message, messageResult);
 
-					if (ReadMessagesFromSequentialIFIFO && messageResult.State == SubscriberMessageState.Suspended)
+					if (ReadMessagesFromSequentialIFIFO && messageResult.State == MessageState.Suspended)
 					{
 						State = ComponentState.Suspended;
-						await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
+						await MessageBox.SetComponentStateAsync(this, State, null, _stoppingCts?.Token ?? default);
 					}
 				}
 				catch (Exception ex)
 				{
 					State = ComponentState.Error;
-					await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
-					_logger?.LogError(ex, $"{GetType().FullName}: ProcessMessage error {nameof(message.IdSubscriberMessage)}: {message.IdSubscriberMessage}");
-					await MessageBox.SetMessageStateAsync(message, SubscriberMessageState.InProcess, message.RetryCount + 1, null); //TODO vypocitaj RetryCount a delayedToUtc
+					await MessageBox.SetComponentStateAsync(this, State, null, _stoppingCts?.Token ?? default);
+					_logger?.LogError(ex, $"{GetType().FullName}: ProcessMessage error {nameof(IdComponent)}: {IdComponent} | {nameof(message.IdSubscriberMessage)}: {message.IdSubscriberMessage}");
+					await MessageBox.SetMessageStateAsync(message, MessageState.InProcess, message.RetryCount + 1, null); //TODO vypocitaj RetryCount a delayedToUtc
 				}
 			}
 			catch (Exception ex)
 			{
 				State = ComponentState.Error;
-				await MessageBox.SetSubscriberStateAsync(this, State, _stoppingCts?.Token ?? default);
+				await MessageBox.SetComponentStateAsync(this, State, null, _stoppingCts?.Token ?? default);
 
 				_logger?.LogError(ex, $"{GetType().FullName}: TimerCallback error");
 			}
@@ -154,9 +154,24 @@ namespace Raider.Messaging
 		private bool StopTimer()
 			=> _timer?.Change(Timeout.Infinite, Timeout.Infinite) ?? false;
 
-		public virtual void Dispose()
+		private bool disposed;
+		protected virtual void Dispose(bool disposing)
 		{
-			_timer?.Dispose();
+			if (!disposed)
+			{
+				if (disposing)
+				{
+					_timer?.Dispose();
+				}
+
+				disposed = true;
+			}
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 	}
 }

@@ -24,6 +24,8 @@ namespace Raider.Messaging
 		IServiceBusRegister RegisterSubscriber<TData>(Subscriber<TData> subscriber)
 			where TData : IMessageData;
 
+		IServiceBusRegister RegisterJob(Job job);
+
 
 
 		IScenario? TryGetScenario(int idScenario);
@@ -33,6 +35,8 @@ namespace Raider.Messaging
 
 		ISubscriber<TData>? TryGetSubscriber<TData>(int idSubscriber)
 			where TData : IMessageData;
+
+		IJob? TryGetJob(int idJob);
 
 		internal void InitializePublishers(IMessageBox messageBox, ILoggerFactory loggerFactory);
 		internal Task InitializeComponentsAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken);

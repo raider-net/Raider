@@ -1,26 +1,17 @@
 ﻿using NpgsqlTypes;
+using Raider.Data;
 using Raider.Database.PostgreSql;
 using Raider.Infrastructure;
-using Raider.Logging.SerilogEx.Sink;
-using System;
 using System.Collections.Generic;
 
-namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
+namespace Raider.Logging.Database.PostgreSql
 {
-	public class DBEnvironmentInfoSinkOptions : RaiderBatchSinkOptions, IBatchedPeriodOptions
+	public class DBEnvironmentInfoSinkOptions : DbBatchWriterOptions, IBatchWriterOptions
 	{
-		public string? ConnectionString { get; set; }
-		public string? SchemaName { get; set; }
-		public string? TableName { get; set; } = nameof(EnvironmentInfo);
-		public List<string>? PropertyNames { get; set; }
-		public Dictionary<string, string>? PropertyColumnMapping { get; set; }
-		public Dictionary<string, NpgsqlDbType>? PropertyTypeMapping { get; set; }
-		public Dictionary<string, Func<object?, object?>>? PropertyValueConverter { get; set; }
-		public bool UseQuotationMarksForTableName { get; set; } = true;
-		public bool UseQuotationMarksForColumnNames { get; set; } = true;
-
 		public DBEnvironmentInfoSinkOptions()
 		{
+			TableName = nameof(EnvironmentInfo);
+
 			PropertyNames = new List<string>
 			{
 				nameof(EnvironmentInfo.RuntimeUniqueKey),
@@ -65,27 +56,5 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 				{ nameof(EnvironmentInfo.CommandLine), NpgsqlDbType.Varchar }
 			};
 		}
-
-		public DBEnvironmentInfoSinkOptions Validate()
-		{
-			if (string.IsNullOrWhiteSpace(ConnectionString))
-				throw new ArgumentNullException(nameof(ConnectionString));
-
-			return this;
-		}
-
-		public BulkInsertOptions ToBulkInsertOptions()
-			=> new BulkInsertOptions
-			{
-				SchemaName = SchemaName,
-				TableName = TableName,
-				PropertyNames = PropertyNames,
-				PropertyColumnMapping = PropertyColumnMapping,
-				PropertyTypeMapping = PropertyTypeMapping,
-				PropertyValueConverter = PropertyValueConverter,
-				UseQuotationMarksForTableName = UseQuotationMarksForTableName,
-				UseQuotationMarksForColumnNames = UseQuotationMarksForColumnNames
-			}
-			.Validate(validateProperties: true);
 	}
 }

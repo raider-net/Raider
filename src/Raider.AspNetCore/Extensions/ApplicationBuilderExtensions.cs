@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Raider.AspNetCore.Middleware.Exceptions;
 using Raider.AspNetCore.Middleware.HostNormalizer;
 using Raider.AspNetCore.Middleware.Initialization;
 using Raider.AspNetCore.Middleware.Tracking;
-using Raider.Logging.Extensions;
+using Raider.Logging.Database.PostgreSql;
 using System;
 
 namespace Raider.AspNetCore.Extensions
@@ -17,10 +15,11 @@ namespace Raider.AspNetCore.Extensions
 			if (app == null)
 				throw new ArgumentNullException(nameof(app));
 
-			var loggerFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
-			var logger = loggerFactory.CreateLogger<RequestInitializationMiddleware>();
+			//var loggerFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
+			//var logger = loggerFactory.CreateLogger<RequestInitializationMiddleware>();
+			//logger.LogEnvironmentInfo();
 
-			logger.LogEnvironmentInfo();
+			DbLogWriter.Instance.WriteEnvironmentInfo();
 
 			app.UseMiddleware<RequestInitializationMiddleware>();
 

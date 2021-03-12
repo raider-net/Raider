@@ -4,54 +4,54 @@ using System.Linq;
 
 namespace Raider.Messaging.Messages
 {
-	public class SubscribedMessageResult
+	public class MessageResult
 	{
-		public SubscriberMessageState State { get; set; }
+		public MessageState State { get; set; }
 		public int RetryCount { get; set; }
 		public DateTimeOffset? DelayedToUtc { get; set; }
 
-		internal SubscribedMessageResult()
+		internal MessageResult()
 		{
 		}
 
-		public static SubscribedMessageResult Consume(ISubscriberMessage message)
-			=> new SubscribedMessageResult
+		public static MessageResult Consume(ISubscriberMessage message)
+			=> new MessageResult
 			{
-				State = SubscriberMessageState.Consumed,
+				State = MessageState.Consumed,
 				RetryCount = message.RetryCount,
 				DelayedToUtc = message.DelayedToUtc
 			};
 
-		public static SubscribedMessageResult Error(ISubscriberMessage message, TimeSpan delay)
-			=> new SubscribedMessageResult
+		public static MessageResult Error(ISubscriberMessage message, TimeSpan delay)
+			=> new MessageResult
 			{
-				State = SubscriberMessageState.Error,
+				State = MessageState.Error,
 				RetryCount = message.RetryCount + 1,
 				DelayedToUtc = DateTimeOffset.UtcNow.Add(delay)
 			};
 
-		public static SubscribedMessageResult Error(ISubscriberMessage message, Dictionary<int, TimeSpan>? delayTable, TimeSpan defaultTimeSpan)
+		public static MessageResult Error(ISubscriberMessage message, Dictionary<int, TimeSpan>? delayTable, TimeSpan defaultTimeSpan)
 			=> (delayTable == null || delayTable.Count == 0 || delayTable.All(x => x.Key < 0))
 			? throw new ArgumentNullException(nameof(delayTable))
-			: new SubscribedMessageResult
+			: new MessageResult
 				{
-					State = SubscriberMessageState.Error,
+					State = MessageState.Error,
 					RetryCount = message.RetryCount + 1,
 					DelayedToUtc = DateTimeOffset.UtcNow.Add(FindDelay(message.RetryCount, delayTable, defaultTimeSpan))
 				};
 
-		public static SubscribedMessageResult Suspended(ISubscriberMessage message)
-			=> new SubscribedMessageResult
+		public static MessageResult Suspended(ISubscriberMessage message)
+			=> new MessageResult
 			{
-				State = SubscriberMessageState.Suspended,
+				State = MessageState.Suspended,
 				RetryCount = message.RetryCount + 1,
 				DelayedToUtc = null
 			};
 
-		public static SubscribedMessageResult Corrupted(ISubscriberMessage message)
-			=> new SubscribedMessageResult
+		public static MessageResult Corrupted(ISubscriberMessage message)
+			=> new MessageResult
 			{
-				State = SubscriberMessageState.Corrupted,
+				State = MessageState.Corrupted,
 				RetryCount = message.RetryCount,
 				DelayedToUtc = null
 			};
@@ -85,22 +85,22 @@ namespace Raider.Messaging.Messages
 			return result ?? defaultTimeSpan;
 		}
 
-		internal static void Validate(ISubscriberMessage subscriberMessage, SubscriberMessageState state, int retryCount, DateTimeOffset? delayedToUtc)
+		internal static void Validate(ISubscriberMessage subscriberMessage, MessageState state, int retryCount, DateTimeOffset? delayedToUtc)
 		{
 			if (subscriberMessage == null)
 				throw new ArgumentNullException(nameof(subscriberMessage));
 
-			if (subscriberMessage.State != SubscriberMessageState.InProcess
-				&& subscriberMessage.State != SubscriberMessageState.Error)
+			if (subscriberMessage.State != MessageState.InProcess
+				&& subscriberMessage.State != MessageState.Error)
 				throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {state}");
 
 			switch (state)
 			{
-				case SubscriberMessageState.Pending:
+				case MessageState.Pending:
 					throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {state}");
-				case SubscriberMessageState.InProcess:
+				case MessageState.InProcess:
 					throw new InvalidOperationException($"Cannot set message state {subscriberMessage.State} to {state}");
-				case SubscriberMessageState.Consumed:
+				case MessageState.Consumed:
 					{
 						if (subscriberMessage.RetryCount == retryCount && subscriberMessage.DelayedToUtc == delayedToUtc)
 						{
@@ -109,7 +109,7 @@ namespace Raider.Messaging.Messages
 
 						throw new InvalidOperationException($"Cannot set message state to {state} by changing {nameof(retryCount)} or {nameof(delayedToUtc)}");
 					}
-				case SubscriberMessageState.Error:
+				case MessageState.Error:
 					{
 						if (subscriberMessage.RetryCount + 1 == retryCount
 							&& ((!subscriberMessage.DelayedToUtc.HasValue && delayedToUtc.HasValue)
@@ -120,7 +120,7 @@ namespace Raider.Messaging.Messages
 
 						throw new InvalidOperationException($"Cannot set message state to {state} withhout changing {nameof(retryCount)} and {nameof(delayedToUtc)}");
 					}
-				case SubscriberMessageState.Suspended:
+				case MessageState.Suspended:
 					{
 						if (subscriberMessage.RetryCount + 1 == retryCount)
 						{
@@ -129,7 +129,7 @@ namespace Raider.Messaging.Messages
 
 						throw new InvalidOperationException($"Cannot set message state to {state} withhout changing {nameof(retryCount)} and {nameof(delayedToUtc)}");
 					}
-				case SubscriberMessageState.Corrupted:
+				case MessageState.Corrupted:
 					return;
 				default:
 					throw new InvalidOperationException($"Invalid {state}");

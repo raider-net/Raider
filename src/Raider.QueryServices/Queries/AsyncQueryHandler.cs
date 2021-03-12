@@ -22,8 +22,14 @@ namespace Raider.QueryServices.Queries
 		public abstract Task<IQueryResult<bool>> CanExecuteAsync(TQuery query, TContext context, CancellationToken cancellationToken);
 		public abstract Task<IQueryResult<TResult>> ExecuteAsync(TQuery query, TContext context, CancellationToken cancellationToken);
 
-		public virtual void Dispose()
+		protected virtual void Dispose(bool disposing)
 		{
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 #pragma warning disable CS8604 // Possible null reference argument.

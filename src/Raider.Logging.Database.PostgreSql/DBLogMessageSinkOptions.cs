@@ -1,23 +1,12 @@
 ﻿using NpgsqlTypes;
+using Raider.Data;
 using Raider.Database.PostgreSql;
-using Raider.Logging.SerilogEx.Sink;
-using System;
 using System.Collections.Generic;
 
-namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
+namespace Raider.Logging.Database.PostgreSql
 {
-	public class DBLogMessageSinkOptions : RaiderBatchSinkOptions, IBatchedPeriodOptions
+	public class DBLogMessageSinkOptions : DbBatchWriterOptions, IBatchWriterOptions
 	{
-		public string? ConnectionString { get; set; }
-		public string? SchemaName { get; set; }
-		public string? TableName { get; set; }
-		public List<string> PropertyNames { get; set; }
-		public Dictionary<string, string>? PropertyColumnMapping { get; set; }
-		public Dictionary<string, NpgsqlDbType>? PropertyTypeMapping { get; set; }
-		public Dictionary<string, Func<object?, object?>>? PropertyValueConverter { get; set; }
-		public bool UseQuotationMarksForTableName { get; set; } = true;
-		public bool UseQuotationMarksForColumnNames { get; set; } = true;
-
 		public DBLogMessageSinkOptions()
 		{
 			PropertyNames = new List<string>
@@ -68,27 +57,5 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 				{ nameof(ILogMessage.TraceInfo.CorrelationId), NpgsqlDbType.Uuid }
 			};
 		}
-
-		public DBLogMessageSinkOptions Validate()
-		{
-			if (string.IsNullOrWhiteSpace(ConnectionString))
-				throw new ArgumentNullException(nameof(ConnectionString));
-
-			return this;
-		}
-
-		public BulkInsertOptions ToBulkInsertOptions()
-			=> new BulkInsertOptions
-			{
-				SchemaName = SchemaName,
-				TableName = TableName,
-				PropertyNames = PropertyNames,
-				PropertyColumnMapping = PropertyColumnMapping,
-				PropertyTypeMapping = PropertyTypeMapping,
-				PropertyValueConverter = PropertyValueConverter,
-				UseQuotationMarksForTableName = UseQuotationMarksForTableName,
-				UseQuotationMarksForColumnNames = UseQuotationMarksForColumnNames
-			}
-			.Validate(validateProperties: true);
 	}
 }

@@ -3,7 +3,6 @@ using Raider.Messaging.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,19 +13,22 @@ namespace Raider.Messaging.Internal
 		private readonly ServiceBusMode _mode;
 		private readonly bool _allowedPublishers;
 		private readonly bool _allowedSubscribers;
+		private readonly bool _allowedJobs;
 
 		private readonly Dictionary<int, Scenario> _scenarios = new Dictionary<int, Scenario>();
 		private readonly Dictionary<int, IPublisher> _publishers = new Dictionary<int, IPublisher>();
 		private readonly Dictionary<int, ISubscriber> _subscribers = new Dictionary<int, ISubscriber>();
+		private readonly Dictionary<int, IJob> _jobs = new Dictionary<int, IJob>();
 		private readonly Dictionary<Type, List<ISubscriber>> _messageTypeSubscribers = new Dictionary<Type, List<ISubscriber>>();
 
 		public bool RegistrationFinished { get; private set; }
 
-		public ServiceBusRegister(ServiceBusMode mode)
+		public ServiceBusRegister(ServiceBusMode mode, bool allowJobs)
 		{
 			_mode = mode;
 			_allowedPublishers = _mode == ServiceBusMode.OnlyMessagePublishing || mode == ServiceBusMode.PublishingAndSubscribing;
 			_allowedSubscribers = _mode == ServiceBusMode.OnlyMessageSubscribing || mode == ServiceBusMode.PublishingAndSubscribing;
+			_allowedJobs = allowJobs;
 
 			RegisterScenario(0, "DEFAULT");
 		}
@@ -150,6 +152,29 @@ namespace Raider.Messaging.Internal
 
 
 
+		public IServiceBusRegister RegisterJob(Job job)
+		{
+			if (!_allowedJobs)
+				return this;
+
+			if (RegistrationFinished)
+				throw new NotSupportedException("Component registration was finished.");
+
+			if (job == null)
+				throw new ArgumentNullException(nameof(job));
+
+			var added = _jobs.TryAdd(job.IdComponent, job);
+
+			if (!added)
+				throw new InvalidOperationException($"{nameof(job)} = {job.IdComponent} already registered");
+
+			job.Register = this;
+
+			return this;
+		}
+
+
+
 
 
 		public IScenario? TryGetScenario(int idScenario)
@@ -168,8 +193,14 @@ namespace Raider.Messaging.Internal
 		public ISubscriber<TData>? TryGetSubscriber<TData>(int idSubscriber)
 			where TData : IMessageData
 		{
-			_subscribers.TryGetValue(idSubscriber, out ISubscriber? Subscriber);
-			return Subscriber as ISubscriber<TData>;
+			_subscribers.TryGetValue(idSubscriber, out ISubscriber? subscriber);
+			return subscriber as ISubscriber<TData>;
+		}
+
+		public IJob? TryGetJob(int idJob)
+		{
+			_jobs.TryGetValue(idJob, out IJob? job);
+			return job as IJob;
 		}
 
 		void IServiceBusRegister.InitializePublishers(IMessageBox messageBox, ILoggerFactory loggerFactory)
@@ -193,6 +224,12 @@ namespace Raider.Messaging.Internal
 			{
 				foreach (var subscriber in _subscribers.Values)
 					await subscriber.InitializeAsync(serviceProvider, messageBox, loggerFactory, cancellationToken);
+			}
+
+			if (_allowedJobs)
+			{
+				foreach (var job in _jobs.Values)
+					await job.InitializeAsync(serviceProvider, messageBox, loggerFactory, cancellationToken);
 			}
 		}
 

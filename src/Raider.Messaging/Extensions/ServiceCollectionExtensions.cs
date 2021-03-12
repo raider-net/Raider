@@ -10,13 +10,13 @@ namespace Raider.Messaging.Extensions
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddRaiderMessaging<TMessageBox>(this IServiceCollection services, ServiceBusMode mode, Action<IServiceBusRegister> registerConfiguration, bool throwIfNotSubscribedMessageFound, bool throwIfNotPublishedMessageFound)
+		public static IServiceCollection AddRaiderMessaging<TMessageBox>(this IServiceCollection services, ServiceBusMode mode, bool allowJobs, Action<IServiceBusRegister> registerConfiguration, bool throwIfNotSubscribedMessageFound, bool throwIfNotPublishedMessageFound)
 			where TMessageBox : class, IMessageBox
 		{
 			if (registerConfiguration == null)
 				throw new ArgumentNullException(nameof(registerConfiguration));
 
-			AddServices(services, mode, registerConfiguration, out List<Type> notSubscribed, out List<Type> notPublished);
+			AddServices(services, mode, allowJobs, registerConfiguration, out List<Type> notSubscribed, out List<Type> notPublished);
 
 			if (throwIfNotSubscribedMessageFound && 0 < notSubscribed.Count)
 				throw new InvalidOperationException($"Not subscribed message data types:{Environment.NewLine}{string.Join(Environment.NewLine, notSubscribed.Select(x => x.FullName))}");
@@ -29,12 +29,12 @@ namespace Raider.Messaging.Extensions
 			return services;
 		}
 
-		public static IServiceCollection AddRaiderMessaging(this IServiceCollection services, ServiceBusMode mode, Action<IServiceBusRegister> registerConfiguration, bool throwIfNotSubscribedMessageFound, bool throwIfNotPublishedMessageFound)
+		public static IServiceCollection AddRaiderMessaging(this IServiceCollection services, ServiceBusMode mode, bool allowJobs, Action<IServiceBusRegister> registerConfiguration, bool throwIfNotSubscribedMessageFound, bool throwIfNotPublishedMessageFound)
 		{
 			if (registerConfiguration == null)
 				throw new ArgumentNullException(nameof(registerConfiguration));
 
-			AddServices(services, mode, registerConfiguration, out List<Type> notSubscribed, out List<Type> notPublished);
+			AddServices(services, mode, allowJobs, registerConfiguration, out List<Type> notSubscribed, out List<Type> notPublished);
 
 			if (throwIfNotSubscribedMessageFound && 0 < notSubscribed.Count)
 				throw new InvalidOperationException($"Not subscribed message data types:{Environment.NewLine}{string.Join(Environment.NewLine, notSubscribed.Select(x => x.FullName))}");
@@ -47,12 +47,12 @@ namespace Raider.Messaging.Extensions
 			return services;
 		}
 
-		private static IServiceCollection AddServices(IServiceCollection services, ServiceBusMode mode, Action<IServiceBusRegister> registerConfiguration, out List<Type> notSubscribed, out List<Type> notPublished)
+		private static IServiceCollection AddServices(IServiceCollection services, ServiceBusMode mode, bool allowJobs, Action<IServiceBusRegister> registerConfiguration, out List<Type> notSubscribed, out List<Type> notPublished)
 		{
 			services.TryAddTransient<ServiceFactory>(p => p.GetService);
 			services.AddTransient<SubscriberContext>();
 
-			var register = new ServiceBusRegister(mode);
+			var register = new ServiceBusRegister(mode, allowJobs);
 			registerConfiguration?.Invoke(register);
 			register.FinalizeRegistration(out notSubscribed, out notPublished);
 
@@ -60,7 +60,8 @@ namespace Raider.Messaging.Extensions
 			services.TryAddSingleton<IServiceBus, ServiceBusPublisher>();
 
 			if (mode == ServiceBusMode.PublishingAndSubscribing
-				|| mode == ServiceBusMode.OnlyMessageSubscribing)
+				|| mode == ServiceBusMode.OnlyMessageSubscribing
+				|| allowJobs)
 			{
 				services.AddHostedService<ServiceBusHost>();
 			}

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Raider.AspNetCore.Middleware.Tracking;
 using Raider.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Raider.AspNetCore.Logging.Dto
 {
-	internal class Request : Serializer.IDictionaryObject
+	public class Request : Serializer.IDictionaryObject
 	{
 		public Guid RuntimeUniqueKey { get; set; }
 		public DateTimeOffset Created { get; set; }
@@ -130,7 +129,7 @@ namespace Raider.AspNetCore.Logging.Dto
 			return request;
 		}
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 		{
 			var dict = new Dictionary<string, object?>
 			{

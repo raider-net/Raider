@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Raider.AspNetCore.Logging;
 using Raider.AspNetCore.Logging.Dto;
 using Raider.Diagnostics;
 using Raider.Extensions;
@@ -61,7 +62,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 							canLog && _options.LogRequestBody && !bodyAsString,
 							canLog && _options.LogRequestFiles);
 
-					_logger.LogRequest(request);
+					AspNetLogWriter.Instance.WriteRequest(request);
 				}
 				catch (Exception ex)
 				{
@@ -155,7 +156,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 									elapsedMilliseconds,
 									_options.LogResponseHeaders);
 
-							_logger.LogResponse(response);
+							AspNetLogWriter.Instance.WriteResponse(response);
 						}
 					}
 				}
@@ -199,7 +200,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 					elapsedMilliseconds,
 					_options.LogResponseHeaders);
 
-			_logger.LogResponse(response);
+			AspNetLogWriter.Instance.WriteResponse(response);
 
 			return false;
 		}

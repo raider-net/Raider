@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Raider.Messaging.Messages;
-using Raider.Threading;
 using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,13 +27,13 @@ namespace Raider.Messaging
 			_register.InitializePublishers(_messageBox, _loggerFactory);
 		}
 
-		public Task<IMessage<TData>> PublishMessageAsync<TData>(int idPublisher, TData mesage, IMessage? previousMessage = null, bool isRecovery = false, CancellationToken token = default) where TData : IMessageData
+		public Task<IMessage<TData>> PublishMessageAsync<TData>(int idPublisher, TData mesage, IMessage? previousMessage = null, bool isRecovery = false, IDbTransaction? dbTransaction = null, CancellationToken token = default) where TData : IMessageData
 		{
 			var publisher = _register.TryGetPublisher<TData>(idPublisher);
 			if (publisher == null)
 				throw new ArgumentException($"Not registered {nameof(idPublisher)}: {idPublisher}", nameof(idPublisher));
 
-			return publisher.PublishMessageAsync(mesage, previousMessage, isRecovery, token);
+			return publisher.PublishMessageAsync(mesage, previousMessage, isRecovery, dbTransaction, token);
 		}
 	}
 }

@@ -86,10 +86,13 @@ namespace Raider.Database.PostgreSql
 			_isInternalConnection = false;
 		}
 
-		public async Task WriteBatch(IEnumerable<IDictionary<string, object?>?> rows, string connectionString)
+		public async Task WriteBatch(IEnumerable<IDictionary<string, object?>?>? rows, string connectionString)
 		{
-			if (rows == null || rows.Count() == 0)
+			if (rows == null || !rows.Any())
 				return;
+
+			if (string.IsNullOrWhiteSpace(connectionString))
+				throw new ArgumentNullException(nameof(connectionString));
 
 			await using (var connection = new NpgsqlConnection(connectionString))
 			{
@@ -100,7 +103,7 @@ namespace Raider.Database.PostgreSql
 
 		public Task WriteBatch(IEnumerable<IDictionary<string, object?>> rows, bool openConnection = false, bool disposeConnection = false)
 		{
-			if (rows == null || rows.Count() == 0)
+			if (rows == null || !rows.Any())
 				return Task.CompletedTask;
 
 			if (_connection == null)
@@ -111,7 +114,7 @@ namespace Raider.Database.PostgreSql
 
 		public async Task WriteBatch(IEnumerable<IDictionary<string, object?>?> rows, NpgsqlConnection connection, bool openConnection = false, bool disposeConnection = false)
 		{
-			if (rows == null || rows.Count() == 0)
+			if (rows == null || !rows.Any())
 				return;
 
 			if (connection == null)
@@ -167,10 +170,25 @@ namespace Raider.Database.PostgreSql
 				throw new ArgumentException($"Property has no type defined", nameof(BulkInsertOptions.PropertyTypeMapping));
 		}
 
+		private bool disposed;
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposed)
+			{
+				if (disposing)
+				{
+					if (_isInternalConnection)
+						_connection?.Dispose();
+				}
+
+				disposed = true;
+			}
+		}
+
 		public void Dispose()
 		{
-			if (_isInternalConnection)
-				_connection?.Dispose();
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 	}
 
@@ -194,7 +212,7 @@ namespace Raider.Database.PostgreSql
 					Message = "sjdlfjslk s klhs lskjdhf lksdl fkhsl dhlfsk x",
 					Detail = "abababa ab ba ab ba   ab ab ab ab ba ab ab",
 					CorrelationId = "skldjfhskldjhf-klshd",
-					ActivityToken = "tokeeen1"
+					Permission = "tokeeen1"
 				});
 			}
 
@@ -214,11 +232,11 @@ namespace Raider.Database.PostgreSql
 						nameof(Error.Detail),
 						nameof(Error.IdOperationEntry),
 						nameof(Error.CorrelationId),
-						nameof(Error.ActivityToken),
+						nameof(Error.Permission),
 					}
 				}))
 			{
-				await bi.WriteBatch(listErr, "Host=localhost;Database=cdcp;Username=name;Password=pwd");
+				await bi.WriteBatch(listErr, "Host=localhost;Database=database;Username=name;Password=pwd");
 			}
 	 */
 

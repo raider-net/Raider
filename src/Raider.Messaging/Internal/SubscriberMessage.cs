@@ -8,7 +8,7 @@ namespace Raider.Messaging.Messages
 		public Guid IdSubscriberMessage { get; set; }
 		public DateTimeOffset LastAccessUtc { get; set; }
 		public int IdSubscriber { get; set; }
-		public SubscriberMessageState State { get; set; }
+		public MessageState State { get; set; }
 		public int RetryCount { get; set; }
 		public DateTimeOffset? DelayedToUtc { get; set; }
 
@@ -33,12 +33,12 @@ namespace Raider.Messaging.Messages
 			IdSubscriberMessage = Guid.NewGuid();
 			LastAccessUtc = DateTimeOffset.UtcNow;
 			IdSubscriber = idSubscriber;
-			State = SubscriberMessageState.Pending;
+			State = MessageState.Pending;
 			RetryCount = 0;
 			DelayedToUtc = null;
 		}
 
-		void ISubscriberMessage.UpdateMessage(SubscriberMessageState state, int retryCount, DateTimeOffset? delayedToUtc)
+		void ISubscriberMessage.UpdateMessage(MessageState state, int retryCount, DateTimeOffset? delayedToUtc)
 		{
 			LastAccessUtc = DateTimeOffset.UtcNow;
 			State = state;

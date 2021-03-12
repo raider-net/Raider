@@ -2,6 +2,7 @@
 using Raider.Messaging.Messages;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ namespace Raider.Messaging
 			Subscribers = new List<ISubscriber>();
 		}
 
-		public async Task<IMessage<TData>> PublishMessageAsync(TData data, IMessage? previousMessage = null, bool isRecovery = false, CancellationToken token = default)
+		public async Task<IMessage<TData>> PublishMessageAsync(TData data, IMessage? previousMessage = null, bool isRecovery = false, IDbTransaction? dbTransaction = null, CancellationToken token = default)
 		{
 			if (!Initialized || MessageBox == null)
 				throw new InvalidOperationException("Not initialized");
@@ -53,7 +54,7 @@ namespace Raider.Messaging
 				Data = data
 			};
 
-			await MessageBox.WriteAsync(new List<IMessage<TData>> { message }, Subscribers, token);
+			await MessageBox.WriteAsync(new List<IMessage<TData>> { message }, Subscribers, dbTransaction, token);
 
 			return message;
 		}

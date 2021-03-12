@@ -1,14 +1,10 @@
 ﻿using Raider.Database.PostgreSql;
 using Raider.Logging.SerilogEx;
-using Raider.Logging.SerilogEx.Sink;
 using Serilog.Core;
+using Serilog.Debugging;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-#nullable disable
 
 namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 {
@@ -23,31 +19,17 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 			.WriteTo.Console())
 	 */
 
-	public class DBEnvironmentInfoSink : RaiderBaseSink, ILogEventSink, IDisposable
+	public class DBEnvironmentInfoSink : DbBatchWriter<LogEvent>, ILogEventSink, IDisposable
 	{
-		private readonly string _connectionString;
-		private readonly BulkInsert _bulkInsert;
-
-		public DBEnvironmentInfoSink(DBEnvironmentInfoSinkOptions options)
-			: base(options)
+		public DBEnvironmentInfoSink(DBEnvironmentInfoSinkOptions options, Action<string, object?, object?, object?>? errorLogger = null)
+			: base(options ?? new DBEnvironmentInfoSinkOptions(), errorLogger ?? SelfLog.WriteLine)
 		{
-			if (options == null)
-				options = new DBEnvironmentInfoSinkOptions();
-
-			options.Validate();
-
-			_connectionString = options.ConnectionString;
-			_bulkInsert = new BulkInsert(options.ToBulkInsertOptions());
 		}
 
-		//public override bool Include(LogEvent logEvent)
-		//	=> EnvironmentInfoHelper.IsEnvironmentInfo(logEvent);
+		public override IDictionary<string, object?>? ToDictionary(LogEvent logEvent)
+			=> LogEventHelper.ConvertEnvironmentInfoToDictionary(logEvent);
 
-		public override async Task WriteBatch(IEnumerable<LogEvent> batch)
-		{
-			//var environmentInfos = batch.Select(logEvent => EnvironmentInfoHelper.Convert(logEvent)).Where(x => x != null);
-			var environmentInfos = batch.Select(logEvent => LogEventHelper.ConvertEnvironmentInfoToDictionary(logEvent)).Where(x => x != null).ToList();
-			await _bulkInsert.WriteBatch(environmentInfos, _connectionString);
-		}
+		public void Emit(LogEvent logEvent)
+			=> Write(logEvent);
 	}
 }

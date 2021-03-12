@@ -79,10 +79,25 @@ namespace Raider.Messaging.Jobs
 			}
 		}
 
-		public virtual void Dispose()
+		private bool disposed;
+		protected virtual void Dispose(bool disposing)
 		{
-			_timer?.Dispose();
-			_stoppingCts?.Cancel();
+			if (!disposed)
+			{
+				if (disposing)
+				{
+					_timer?.Dispose();
+					_stoppingCts?.Cancel();
+				}
+
+				disposed = true;
+			}
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 	}
 }

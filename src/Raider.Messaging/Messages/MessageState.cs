@@ -1,6 +1,6 @@
 ﻿namespace Raider.Messaging.Messages
 {
-	public enum SubscriberMessageState
+	public enum MessageState
 	{
 		Pending = 1,
 		InProcess = 2,

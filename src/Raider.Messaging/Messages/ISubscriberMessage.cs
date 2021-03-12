@@ -7,11 +7,11 @@ namespace Raider.Messaging.Messages
 		Guid IdSubscriberMessage { get; }
 		DateTimeOffset LastAccessUtc { get; }
 		int IdSubscriber { get; }
-		SubscriberMessageState State { get; }
+		MessageState State { get; }
 		int RetryCount { get; }
 		DateTimeOffset? DelayedToUtc { get; }
 
-		internal void UpdateMessage(SubscriberMessageState state, int retryCount, DateTimeOffset? delayedToUtc);
+		internal void UpdateMessage(MessageState state, int retryCount, DateTimeOffset? delayedToUtc);
 	}
 
 	public interface ISubscriberMessage<TData> : IMessage<TData>, ISubscriberMessage

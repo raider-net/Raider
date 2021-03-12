@@ -1,4 +1,5 @@
-﻿using Raider.Logging.Database.PostgreSql.SerilogEx.Sink;
+﻿using Raider.Logging.Database.PostgreSql;
+using Raider.Logging.Database.PostgreSql.SerilogEx.Sink;
 using Raider.Logging.SerilogEx;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -42,34 +43,34 @@ namespace Serilog
 						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
 		}
 
-		public static LoggerConfiguration HardwareInfoSinkToPostgreSql(
-			this LoggerSinkConfiguration loggerConfiguration,
-			DBHardwareInfoSinkOptions options,
-			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
-		{
-			if (loggerConfiguration == null)
-				throw new ArgumentNullException(nameof(loggerConfiguration));
+		//public static LoggerConfiguration HardwareInfoSinkToPostgreSql(
+		//	this LoggerSinkConfiguration loggerConfiguration,
+		//	DBHardwareInfoSinkOptions options,
+		//	LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+		//{
+		//	if (loggerConfiguration == null)
+		//		throw new ArgumentNullException(nameof(loggerConfiguration));
 
-			var sink = new DBHardwareInfoSink(options);
-			return loggerConfiguration
-					.Conditional(
-						logEvent => LogEventHelper.IsHardwareInfo(logEvent),
-						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
-		}
+		//	var sink = new DBHardwareInfoSink(options);
+		//	return loggerConfiguration
+		//			.Conditional(
+		//				logEvent => LogEventHelper.IsHardwareInfo(logEvent),
+		//				cfg => cfg.Sink(sink, restrictedToMinimumLevel));
+		//}
 
-		public static LoggerConfiguration EnvironmentInfoSinkToPostgreSql(
-			this LoggerSinkConfiguration loggerConfiguration,
-			DBEnvironmentInfoSinkOptions options,
-			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
-		{
-			if (loggerConfiguration == null)
-				throw new ArgumentNullException(nameof(loggerConfiguration));
+		//public static LoggerConfiguration EnvironmentInfoSinkToPostgreSql(
+		//	this LoggerSinkConfiguration loggerConfiguration,
+		//	DBEnvironmentInfoSinkOptions options,
+		//	LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+		//{
+		//	if (loggerConfiguration == null)
+		//		throw new ArgumentNullException(nameof(loggerConfiguration));
 
-			var sink = new DBEnvironmentInfoSink(options);
-			return loggerConfiguration
-					.Conditional(
-						logEvent => LogEventHelper.IsEnvironmentInfo(logEvent),
-						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
-		}
+		//	var sink = new DBEnvironmentInfoSink(options);
+		//	return loggerConfiguration
+		//			.Conditional(
+		//				logEvent => LogEventHelper.IsEnvironmentInfo(logEvent),
+		//				cfg => cfg.Sink(sink, restrictedToMinimumLevel));
+		//}
 	}
 }

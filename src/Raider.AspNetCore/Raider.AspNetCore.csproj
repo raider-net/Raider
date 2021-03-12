@@ -16,7 +16,7 @@
 		<Authors>Tomas Pilat</Authors>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
-		<Version>1.1.1</Version>
+		<Version>1.1.2</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -35,8 +35,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Raider.Database.PostgreSql\Raider.Database.PostgreSql.csproj" />
-	  <ProjectReference Include="..\Raider.Logging\Raider.Logging.csproj" />
+	  <ProjectReference Include="..\Raider.Logging.Database.PostgreSql\Raider.Logging.Database.PostgreSql.csproj" />
 	</ItemGroup>
 
 </Project>

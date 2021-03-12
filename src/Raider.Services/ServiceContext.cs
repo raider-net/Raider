@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Raider.Services
 {
@@ -97,6 +99,14 @@ namespace Raider.Services
 			[CallerLineNumber] int sourceLineNumber = 0)
 			where TService : ServiceBase
 			=> _commandHandlerContext.GetService<TService>(memberName, sourceFilePath, sourceLineNumber);
+
+		public Task<TService> GetServiceAsync<TService>(
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0,
+			CancellationToken cancellationToken = default)
+			where TService : ServiceBase
+			=> _commandHandlerContext.GetServiceAsync<TService>(memberName, sourceFilePath, sourceLineNumber, cancellationToken);
 
 		public MethodLogScope CreateScope(
 			IEnumerable<MethodParameter>? methodParameters = null,

@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Raider.Services.Commands
 {
@@ -73,6 +75,30 @@ namespace Raider.Services.Commands
 				.CallerLineNumber(sourceLineNumber);
 
 			service.ServiceContext = new ServiceContext(traceFrameBuilder.Build(), this, typeof(TService));
+			service.Initialize();
+
+			return service;
+		}
+
+		public async Task<TService> GetServiceAsync<TService>(
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0,
+			CancellationToken cancellationToken = default)
+			where TService : ServiceBase
+		{
+			if (typeof(IQueryableBase).IsAssignableFrom(typeof(TService)))
+				throw new NotSupportedException($"For {nameof(IQueryableBase)} use Constructor {nameof(IQueryableBase)}({nameof(CommandHandlerContext)}) or {nameof(IQueryableBase)}({nameof(ServiceContext)}) isntead");
+
+			var service = ServiceFactory.GetRequiredInstance<TService>();
+
+			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
+				.CallerMemberName(memberName)
+				.CallerFilePath(sourceFilePath)
+				.CallerLineNumber(sourceLineNumber);
+
+			service.ServiceContext = new ServiceContext(traceFrameBuilder.Build(), this, typeof(TService));
+			await service.InitializeAsync(cancellationToken);
 
 			return service;
 		}

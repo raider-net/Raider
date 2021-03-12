@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Raider.AspNetCore.Identity;
+using Raider.AspNetCore.Logging;
 using Raider.Extensions;
 using Raider.Identity;
 using Raider.Logging.Extensions;
@@ -332,22 +333,25 @@ namespace Raider.AspNetCore.Authentication
 				rolesToClams,
 				permissionsToClaims);
 
-			logger?.LogRequestAuthentication(new Logging.Dto.RequestAuthentication
+			if (authenticationManager?.LogRequestAuthentication ?? false)
 			{
-				CorrelationId = userRolePermissions.TraceInfo?.CorrelationId,
-				ExternalCorrelationId = userRolePermissions.TraceInfo?.ExternalCorrelationId,
-				IdUser = raiderIdentity.UserId,
-				Roles = (authenticationManager?.LogRoles ?? false)
-				? ((0 < raiderIdentity.RoleIds?.Count)
-					? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.RoleIds)
-					: (0 < raiderIdentity.Roles?.Count ? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.Roles) : null))
-				: null,
-				Permissions = (authenticationManager?.LogPermissions ?? false)
-				? ((0 < raiderIdentity.PermissionIds?.Count)
-					? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.PermissionIds)
-					: (0 < raiderIdentity.Permissions?.Count ? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.Permissions) : null))
-				: null
-			});
+				AspNetLogWriter.Instance.WriteRequestAuthentication(new Logging.Dto.RequestAuthentication
+				{
+					CorrelationId = userRolePermissions.TraceInfo?.CorrelationId,
+					ExternalCorrelationId = userRolePermissions.TraceInfo?.ExternalCorrelationId,
+					IdUser = raiderIdentity.UserId,
+					Roles = authenticationManager.LogRoles
+					? ((0 < raiderIdentity.RoleIds?.Count)
+						? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.RoleIds)
+						: (0 < raiderIdentity.Roles?.Count ? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.Roles) : null))
+					: null,
+					Permissions = authenticationManager.LogPermissions
+					? ((0 < raiderIdentity.PermissionIds?.Count)
+						? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.PermissionIds)
+						: (0 < raiderIdentity.Permissions?.Count ? System.Text.Json.JsonSerializer.Serialize(raiderIdentity.Permissions) : null))
+					: null
+				});
+			}
 
 			var RaiderPrincipal = new RaiderPrincipal<int>(raiderIdentity);
 			return RaiderPrincipal;

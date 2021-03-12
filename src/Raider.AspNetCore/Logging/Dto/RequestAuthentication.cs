@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Raider.AspNetCore.Logging.Dto
 {
-	internal class RequestAuthentication : Serializer.IDictionaryObject
+	public class RequestAuthentication : Serializer.IDictionaryObject
 	{
 		public Guid RuntimeUniqueKey { get; set; }
 		public DateTimeOffset Created { get; set; }
@@ -20,7 +20,7 @@ namespace Raider.AspNetCore.Logging.Dto
 			Created = DateTimeOffset.Now;
 		}
 
-		public IReadOnlyDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary()
 		{
 			var dict = new Dictionary<string, object?>
 			{
