@@ -1,13 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Database;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable disable
 
 namespace Raider.EntityFrameworkCore
 {
@@ -17,7 +18,7 @@ namespace Raider.EntityFrameworkCore
 		protected readonly ILogger _logger;
 		protected readonly int? _userId;
 
-		protected string connectionString;
+		protected string? connectionString;
 
 		private DbConnection dbConnection;
 		public DbConnection DbConnection
@@ -32,6 +33,8 @@ namespace Raider.EntityFrameworkCore
 			}
 		}
 
+		public IDbTransaction? DbTransaction => Database?.CurrentTransaction?.GetDbTransaction();
+
 		private string _dbConnectionString;
 		public string DBConnectionString
 		{
@@ -40,7 +43,7 @@ namespace Raider.EntityFrameworkCore
 
 				if (_dbConnectionString == null)
 				{
-					_dbConnectionString = DbConnection?.ConnectionString;
+					_dbConnectionString = DbConnection.ConnectionString;
 				}
 				return _dbConnectionString;
 			}
