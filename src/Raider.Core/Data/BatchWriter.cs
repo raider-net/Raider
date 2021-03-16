@@ -22,7 +22,7 @@ namespace Raider.Data
 		private readonly Action<string, object?, object?, object?>? _errorLogger;
 
 		private readonly Func<T, bool>? _includeCallBack;
-		private readonly Func<IEnumerable<T>, CancellationToken, Task>? _writeBatchCallback;
+		private readonly Func<IEnumerable<T>, CancellationToken, Task<ulong>>? _writeBatchCallback;
 
 		private readonly object _stateLock = new object();
 
@@ -60,7 +60,7 @@ namespace Raider.Data
 
 		public BatchWriter(
 			Func<T, bool>? includeCallBack,
-			Func<IEnumerable<T>, CancellationToken, Task>? writeBatchCallback,
+			Func<IEnumerable<T>, CancellationToken, Task<ulong>>? writeBatchCallback,
 			BatchWriterOptions? options,
 			Action<string, object?, object?, object?>? errorLogger = null) // errorLogger = Action<format, arg0, arg1, arg2>
 			: this(options, errorLogger)
@@ -77,7 +77,7 @@ namespace Raider.Data
 			return _includeCallBack(obj);
 		}
 
-		protected virtual Task WriteBatch(IEnumerable<T> batch, CancellationToken cancellationToken = default)
+		protected virtual Task<ulong> WriteBatchAsync(IEnumerable<T> batch, CancellationToken cancellationToken = default)
 		{
 			if (_writeBatchCallback == null)
 				throw new InvalidOperationException($"{nameof(_writeBatchCallback)} == null");
@@ -153,7 +153,7 @@ namespace Raider.Data
 					if (_waitingBatch.Count == 0)
 						return;
 
-					await WriteBatch(_waitingBatch);
+					await WriteBatchAsync(_waitingBatch);
 
 					batchWasFull = _waitingBatch.Count >= _batchSizeLimit;
 					_waitingBatch.Clear();
