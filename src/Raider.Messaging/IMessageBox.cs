@@ -12,6 +12,7 @@ namespace Raider.Messaging
 		Task<ISubscriberMessage<TData>?> GetSubscriberMessageFromFIFOAsync<TData>(
 			ISubscriber<TData> subscriber,
 			List<int> readMessageStates,
+			DateTime utcNow,
 			CancellationToken cancellationToken = default)
 			where TData : IMessageData;
 

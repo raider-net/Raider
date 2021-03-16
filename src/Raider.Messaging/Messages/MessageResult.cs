@@ -11,6 +11,8 @@ namespace Raider.Messaging.Messages
 		public MessageState State { get; internal set; }
 		public int RetryCount { get; internal set; }
 		public DateTimeOffset? DelayedToUtc { get; internal set; }
+		public Guid OriginalConcurrencyToken { get; internal set; }
+		public Guid NewConcurrencyToken { get; internal set; }
 
 		internal MessageResult()
 		{
@@ -23,7 +25,9 @@ namespace Raider.Messaging.Messages
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Consumed,
 				RetryCount = message.RetryCount,
-				DelayedToUtc = message.DelayedToUtc
+				DelayedToUtc = message.DelayedToUtc,
+				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
+				NewConcurrencyToken = message.NewConcurrencyToken
 			};
 
 		public static MessageResult Error(ISubscriberMessage message, TimeSpan delay)
@@ -32,7 +36,9 @@ namespace Raider.Messaging.Messages
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Error,
 				RetryCount = message.RetryCount + 1,
-				DelayedToUtc = DateTimeOffset.UtcNow.Add(delay)
+				DelayedToUtc = DateTimeOffset.UtcNow.Add(delay),
+				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
+				NewConcurrencyToken = message.NewConcurrencyToken
 			};
 
 		public static MessageResult Error(ISubscriberMessage message, Dictionary<int, TimeSpan>? delayTable, TimeSpan defaultTimeSpan)
@@ -43,7 +49,9 @@ namespace Raider.Messaging.Messages
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Error,
 				RetryCount = message.RetryCount + 1,
-				DelayedToUtc = DateTimeOffset.UtcNow.Add(FindDelay(message.RetryCount, delayTable, defaultTimeSpan))
+				DelayedToUtc = DateTimeOffset.UtcNow.Add(FindDelay(message.RetryCount, delayTable, defaultTimeSpan)),
+				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
+				NewConcurrencyToken = message.NewConcurrencyToken
 			};
 
 		public static MessageResult Suspended(ISubscriberMessage message)
@@ -52,7 +60,9 @@ namespace Raider.Messaging.Messages
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Suspended,
 				RetryCount = message.RetryCount + 1,
-				DelayedToUtc = null
+				DelayedToUtc = null,
+				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
+				NewConcurrencyToken = message.NewConcurrencyToken
 			};
 
 		public static MessageResult Corrupted(ISubscriberMessage message)
@@ -61,7 +71,9 @@ namespace Raider.Messaging.Messages
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Corrupted,
 				RetryCount = message.RetryCount,
-				DelayedToUtc = null
+				DelayedToUtc = null,
+				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
+				NewConcurrencyToken = message.NewConcurrencyToken
 			};
 
 		private static TimeSpan FindDelay(int currentRetryCount, Dictionary<int, TimeSpan>? delayTable, TimeSpan defaultTimeSpan)

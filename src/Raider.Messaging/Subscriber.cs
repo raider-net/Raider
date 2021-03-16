@@ -228,16 +228,18 @@ namespace Raider.Messaging
 						new List<int>
 						{
 							(int)MessageState.Pending,
+							//(int)MessageState.InProcess, - automatically picked up if last access timedout
 							(int)MessageState.Error,
 							(int)MessageState.Expired
 						},
+						nowUtc,
 						_stoppingCts?.Token ?? default)
 					: await MessageBox.GetSubscriberMessageFromNonFIFOAsync(
 						this,
 						new List<int>
 						{
 							(int)MessageState.Pending,
-							(int)MessageState.InProcess,
+							//(int)MessageState.InProcess, - automatically picked up if last access timedout
 							(int)MessageState.Error,
 							(int)MessageState.Suspended,
 							(int)MessageState.Corrupted,
