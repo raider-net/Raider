@@ -6,10 +6,9 @@ namespace Raider.Messaging.Messages
 	{
 		Guid IdMessage { get; }
 		Guid? IdPreviousMessage { get; }
-		Guid BusinessId { get; }
-		int IdScenario { get; }
-		int IdPublisher { get; }
+		Guid IdPublisherInstance { get; }
 		DateTimeOffset CreatedUtc { get; }
+		DateTimeOffset? ValidToUtc { get; }
 		bool IsRecovery { get; }
 		bool HasData { get; }
 		object? GetData();

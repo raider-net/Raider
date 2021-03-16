@@ -38,8 +38,15 @@ namespace Raider.Messaging
 
 		IJob? TryGetJob(int idJob);
 
-		internal void InitializePublishers(IMessageBox messageBox, ILoggerFactory loggerFactory);
-		internal Task InitializeComponentsAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken);
+		internal Task InitializeComponentsAsync(
+			IServiceProvider serviceProvider,
+			IServiceBusStorage storage,
+			IServiceBusStorageContext context,
+			IMessageBox messageBox,
+			ILoggerFactory loggerFactory,
+			CancellationToken cancellationToken);
+
+		internal Task StartComponentsAsync(IServiceBusStorageContext context, CancellationToken cancellationToken);
 
 		internal List<ISubscriber> GetMessageSubscribers<TData>()
 			where TData : IMessageData;

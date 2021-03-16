@@ -7,6 +7,7 @@
 		Consumed = 3,
 		Error = 4,
 		Suspended = 5,
-		Corrupted = 6
+		Corrupted = 6,
+		Expired = 7
 	}
 }

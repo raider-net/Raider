@@ -4,5 +4,6 @@
 	{
 		int IdScenario { get; }
 		string Name { get; }
+		public string? Description { get; }
 	}
 }

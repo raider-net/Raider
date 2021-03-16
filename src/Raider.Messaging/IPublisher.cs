@@ -9,14 +9,14 @@ namespace Raider.Messaging
 {
 	public interface IPublisher : IComponent
 	{
-		Type PublishMessageDataType { get; }
+		Type PublishingMessageDataType { get; }
 
-		internal void Initialize(IMessageBox messageBox, ILoggerFactory loggerFactory);
+		internal Task InitializeAsync(IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken = default);
 	}
 
 	public interface IPublisher<TData> : IPublisher, IComponent
 			where TData : IMessageData
 	{
-		Task<IMessage<TData>> PublishMessageAsync(TData data, IMessage? previousMessage = null, bool isRecovery = false, IDbTransaction? dbTransaction = null, CancellationToken token = default);
+		Task<IMessage<TData>> PublishMessageAsync(TData data, IMessage? previousMessage = null, DateTimeOffset? validToUtc = null, bool isRecovery = false, IDbTransaction? dbTransaction = null, CancellationToken token = default);
 	}
 }

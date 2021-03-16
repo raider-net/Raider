@@ -5,28 +5,25 @@ namespace Raider.Messaging.Messages
 	internal class SubscriberMessage<TData> : Message<TData>, ISubscriberMessage<TData>
 		where TData : IMessageData
 	{
-		public Guid IdSubscriberMessage { get; set; }
-		public DateTimeOffset LastAccessUtc { get; set; }
-		public int IdSubscriber { get; set; }
-		public MessageState State { get; set; }
-		public int RetryCount { get; set; }
-		public DateTimeOffset? DelayedToUtc { get; set; }
+		public Guid IdSubscriberMessage { get; private set; }
+		public DateTimeOffset? LastAccessUtc { get; private set; }
+		public int IdSubscriber { get; private set; }
+		public MessageState State { get; private set; }
+		public int RetryCount { get; private set; }
+		public DateTimeOffset? DelayedToUtc { get; private set; }
+		public Guid OriginalConcurrencyToken { get; private set; }
+		public Guid NewConcurrencyToken { get; private set; }
 
-		public SubscriberMessage()
-		{
-		}
-
-		public SubscriberMessage(IMessage<TData> message, int idSubscriber)
+		public SubscriberMessage(IMessage<TData> message, int idSubscriber, Guid originalConcurrencyToken)
 		{
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
 
 			IdMessage = message.IdMessage;
 			IdPreviousMessage = message.IdPreviousMessage;
-			BusinessId = message.BusinessId;
-			IdScenario = message.IdScenario;
-			IdPublisher = message.IdPublisher;
+			IdPublisherInstance = message.IdPublisherInstance;
 			CreatedUtc = message.CreatedUtc;
+			ValidToUtc = message.ValidToUtc;
 			IsRecovery = message.IsRecovery;
 			Data = message.Data;
 
@@ -36,14 +33,18 @@ namespace Raider.Messaging.Messages
 			State = MessageState.Pending;
 			RetryCount = 0;
 			DelayedToUtc = null;
+			OriginalConcurrencyToken = originalConcurrencyToken;
+			NewConcurrencyToken = Guid.NewGuid();
 		}
 
-		void ISubscriberMessage.UpdateMessage(MessageState state, int retryCount, DateTimeOffset? delayedToUtc)
-		{
-			LastAccessUtc = DateTimeOffset.UtcNow;
-			State = state;
-			RetryCount = retryCount;
-			DelayedToUtc = delayedToUtc;
-		}
+		//void ISubscriberMessage.UpdateMessage(MessageState state, int retryCount, DateTimeOffset? delayedToUtc)
+		//{
+		//	LastAccessUtc = DateTimeOffset.UtcNow;
+		//	State = state;
+		//	RetryCount = retryCount;
+		//	DelayedToUtc = delayedToUtc;
+		//	OriginalConcurrencyToken = NewConcurrencyToken;
+		//	NewConcurrencyToken = Guid.NewGuid();
+		//}
 	}
 }

@@ -45,20 +45,23 @@ namespace Raider.Messaging.Internal
 			if (_allowedSubscribers && _subscribers.Count == 0)
 				throw new InvalidOperationException("No subscriber registered");
 
+			if (_allowedJobs && _jobs.Count == 0)
+				throw new InvalidOperationException("No job registered");
+
 			if (_mode == ServiceBusMode.PublishingAndSubscribing)
 			{
-				var publishMessageDataTypes = _publishers.Values.Select(x => x.PublishMessageDataType).Distinct().ToDictionary(x => x, y => 0);
+				var publishMessageDataTypes = _publishers.Values.Select(x => x.PublishingMessageDataType).Distinct().ToDictionary(x => x, y => 0);
 				var notPublishedMessageDataTypes = new List<Type>();
 
 				foreach (var subscriber in _subscribers.Values)
 				{
-					if (publishMessageDataTypes.TryGetValue(subscriber.SubscribeMessageDataType, out int count))
+					if (publishMessageDataTypes.TryGetValue(subscriber.SubscribingMessageDataType, out int count))
 					{
-						publishMessageDataTypes[subscriber.SubscribeMessageDataType] = count + 1;
+						publishMessageDataTypes[subscriber.SubscribingMessageDataType] = count + 1;
 					}
 					else
 					{
-						notPublishedMessageDataTypes.Add(subscriber.SubscribeMessageDataType);
+						notPublishedMessageDataTypes.Add(subscriber.SubscribingMessageDataType);
 					}
 				}
 
@@ -200,36 +203,58 @@ namespace Raider.Messaging.Internal
 		public IJob? TryGetJob(int idJob)
 		{
 			_jobs.TryGetValue(idJob, out IJob? job);
-			return job as IJob;
+			return job;
 		}
 
-		void IServiceBusRegister.InitializePublishers(IMessageBox messageBox, ILoggerFactory loggerFactory)
+		async Task IServiceBusRegister.InitializeComponentsAsync(
+			IServiceProvider serviceProvider,
+			IServiceBusStorage storage,
+			IServiceBusStorageContext context,
+			IMessageBox messageBox,
+			ILoggerFactory loggerFactory,
+			CancellationToken cancellationToken)
 		{
-			if (!_allowedPublishers)
-				return;
+			var nowUtc = DateTime.UtcNow;
+			foreach (var scenario in _scenarios.Values)
+				await storage.WriteScenarioAsync(context, scenario, nowUtc, cancellationToken);
 
-			foreach (var publisher in _publishers.Values)
-				publisher.Initialize(messageBox, loggerFactory);
-		}
-
-		async Task IServiceBusRegister.InitializeComponentsAsync(IServiceProvider serviceProvider, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
-		{
 			if (_allowedPublishers)
 			{
 				foreach (var publisher in _publishers.Values)
-					publisher.Initialize(messageBox, loggerFactory);
+					await publisher.InitializeAsync(storage, messageBox, loggerFactory, cancellationToken);
 			}
 
 			if (_allowedSubscribers)
 			{
 				foreach (var subscriber in _subscribers.Values)
-					await subscriber.InitializeAsync(serviceProvider, messageBox, loggerFactory, cancellationToken);
+					await subscriber.InitializeAsync(serviceProvider, storage, messageBox, loggerFactory, cancellationToken);
 			}
 
 			if (_allowedJobs)
 			{
 				foreach (var job in _jobs.Values)
-					await job.InitializeAsync(serviceProvider, messageBox, loggerFactory, cancellationToken);
+					await job.InitializeAsync(serviceProvider, storage, messageBox, loggerFactory, cancellationToken);
+			}
+		}
+
+		async Task IServiceBusRegister.StartComponentsAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
+		{
+			if (_allowedPublishers)
+			{
+				foreach (var publisher in _publishers.Values)
+					await publisher.StartAsync(context, cancellationToken);
+			}
+
+			if (_allowedSubscribers)
+			{
+				foreach (var subscriber in _subscribers.Values)
+					await subscriber.StartAsync(context, cancellationToken);
+			}
+
+			if (_allowedJobs)
+			{
+				foreach (var job in _jobs.Values)
+					await job.StartAsync(context, cancellationToken);
 			}
 		}
 

@@ -9,21 +9,28 @@ namespace Raider.Messaging
 {
 	public interface IMessageBox
 	{
-		Task<ISubscriberMessage<TData>?> GetFirstSubscriberMessageAsync<TData>(ISubscriber<TData> subscriber, CancellationToken cancellationToken = default)
+		Task<ISubscriberMessage<TData>?> GetSubscriberMessageFromFIFOAsync<TData>(
+			ISubscriber<TData> subscriber,
+			List<int> readMessageStates,
+			CancellationToken cancellationToken = default)
 			where TData : IMessageData;
 
-		Task<ISubscriberMessage<TData>?> GetNextSubscriberMessageAsync<TData>(ISubscriber<TData> subscriber, CancellationToken cancellationToken = default)
+		Task<ISubscriberMessage<TData>?> GetSubscriberMessageFromNonFIFOAsync<TData>(
+			ISubscriber<TData> subscriber,
+			List<int> readMessageStates,
+			DateTime utcNow,
+			CancellationToken cancellationToken = default)
 			where TData : IMessageData;
 
-		Task SetMessageStateAsync<TData>(ISubscriberMessage<TData> subscriberMessage, MessageResult result, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
-			where TData : IMessageData;
+		//Task SetMessageStateAsync<TData>(ISubscriberMessage<TData> subscriberMessage, MessageResult result, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
+		//	where TData : IMessageData;
 
-		Task SetMessageStateAsync<TData>(ISubscriberMessage<TData> subscriberMessage, MessageState state, int retryCount, DateTimeOffset? delayedToUtc, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
-			where TData : IMessageData;
+		//Task SetMessageStateAsync<TData>(ISubscriberMessage<TData> subscriberMessage, MessageState state, int retryCount, DateTimeOffset? delayedToUtc, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
+		//	where TData : IMessageData;
 
-		Task SetComponentStateAsync(IComponent component, ComponentState state, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default);
+		//Task SetComponentStateAsync(IComponent component, ComponentState state, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default);
 
-		Task<bool> WriteAsync<TData>(List<IMessage<TData>> messages, IReadOnlyList<ISubscriber> subscribers, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
+		Task WriteMessageAsync<TData>(IMessage<TData> message, IReadOnlyList<ISubscriber> subscribers, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
 			where TData : IMessageData;
 	}
 }

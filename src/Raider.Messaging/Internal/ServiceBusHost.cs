@@ -1,58 +1,35 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Raider.Threading;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace Raider.Messaging
 {
-	internal class ServiceBusHost : BackgroundService
+	internal class ServiceBusHost : IServiceBusHost
 	{
-		private readonly IServiceProvider _serviceProvider;
-		private readonly IMessageBox _messageBox;
-		private readonly IServiceBusRegister _register;
-		private readonly ILoggerFactory _loggerFactory;
-		private readonly ILogger _logger;
+		public string? ConnectionString { get; }
+		public Guid IdServiceBusHost { get; }
+		public Guid IdServiceBusHostRuntime { get; }
+		public string Name { get; }
+		public string? Description { get; set; }
+		public DateTime StartedUtc { get; }
+		public int? IdUser { get; }
 
-		private bool _initialized;
-
-		public ServiceBusHost(IServiceProvider serviceProvider, IMessageBox messageBox, IServiceBusRegister register, ILoggerFactory loggerFactory)
+		public ServiceBusHost(ServiceBusHostOptions options)
 		{
-			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-			_messageBox = messageBox ?? throw new ArgumentNullException(nameof(messageBox));
-			_register = register ?? throw new ArgumentNullException(nameof(register));
-			_loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-			_logger = _loggerFactory.CreateLogger<ServiceBusHost>();
+			if (options == null)
+				throw new ArgumentNullException(nameof(options));
 
-			if (!_register.RegistrationFinished)
-				throw new InvalidOperationException("Component registration was not finished.");
-		}
+			ConnectionString = string.IsNullOrWhiteSpace(options.ConncetionString)
+				? throw new ArgumentException($"{nameof(options.ConncetionString)} == null", nameof(options))
+				: options.ConncetionString;
 
-		private readonly AsyncLock _initLock = new AsyncLock();
-		private async Task InitializeAsync(CancellationToken stoppingToken)
-		{
-			if (_initialized)
-				return;
+			IdServiceBusHost = options.IdServiceBusHost;
+			IdServiceBusHostRuntime = Guid.NewGuid();
 
-			using (await _initLock.LockAsync())
-			{
-				if (_initialized)
-					return;
+			Name = string.IsNullOrWhiteSpace(options.Name)
+				? throw new ArgumentException($"{nameof(options.Name)} == null", nameof(options))
+				: options.Name;
 
-				_logger.LogInformation($"{nameof(ServiceBusHost)} initialization started.");
-
-				await _register.InitializeComponentsAsync(_serviceProvider, _messageBox, _loggerFactory, stoppingToken);
-
-				_logger.LogInformation($"{nameof(ServiceBusHost)} initialization finished.");
-
-				_initialized = true;
-			}
-		}
-
-		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-		{
-			await InitializeAsync(stoppingToken);
+			StartedUtc = DateTime.UtcNow;
+			IdUser = options.IdUser;
 		}
 	}
 }

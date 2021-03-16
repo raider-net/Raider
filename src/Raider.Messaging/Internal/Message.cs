@@ -7,10 +7,9 @@ namespace Raider.Messaging.Messages
 	{
 		public Guid IdMessage { get; set; }
 		public Guid? IdPreviousMessage { get; set; }
-		public Guid BusinessId { get; set; }
-		public int IdScenario { get; set; }
-		public int IdPublisher { get; set; }
+		public Guid IdPublisherInstance { get; set; }
 		public DateTimeOffset CreatedUtc { get; set; }
+		public DateTimeOffset? ValidToUtc { get; set; }
 		public bool IsRecovery { get; set; }
 		public TData? Data { get; set; }
 	}

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Raider.Extensions;
 using Raider.Localization;
+using Raider.Logging.Extensions;
 using Raider.Messaging.Messages;
 using Raider.Threading;
 using Raider.Trace;
@@ -12,8 +13,7 @@ using System.Threading.Tasks;
 
 namespace Raider.Messaging
 {
-	public abstract class Subscriber<TData> : ISubscriber<TData>, IDisposable
-			where TData : IMessageData
+	public abstract class Job : IJob, IComponent, IDisposable
 	{
 		private Timer? _timer;
 		private CancellationTokenSource? _stoppingCts;
@@ -21,44 +21,37 @@ namespace Raider.Messaging
 		private ILogger? _fallbackLogger;
 
 		/// <summary>
-		/// IdSubscriberInstance
+		/// IdJob
 		/// </summary>
 		public int IdComponent { get; }
 
 		/// <summary>
-		/// IdSubscriberInstance
+		/// IdJobInstance
 		/// </summary>
 		public Guid IdInstance { get; } = Guid.NewGuid();
 		public bool Initialized { get; private set; }
 		public bool Started { get; private set; }
 		public string Name { get; }
-		public string? Description { get; set; }
+		public string? Description { get; }
 		public int IdScenario { get; }
 		public DateTime LastActivityUtc { get; private set; }
 		public ComponentState State { get; private set; }
-		public Type SubscribingMessageDataType { get; } = typeof(TData);
 
-		public abstract bool ReadMessagesFromSequentialFIFO { get; }
-		public abstract int MaxMessageProcessingRetryCount { get; }
-		public abstract TimeSpan TimeoutForMessageProcessing { get; set; }
 		protected abstract Dictionary<int, TimeSpan>? DelayTable { get; set; } //Dictionary<retryCount, Delay>
-		protected abstract TimeSpan DefaultDelaTimeStamp { get; set; }
 		protected abstract TimeSpan DelayedStart { get; }
 		protected abstract TimeSpan ExecuteInterval { get; set; }
-		protected virtual bool AllowMessageReadAcceleration { get; set; } = true;
-		protected abstract bool DropExpiredMessages { get; set; }
 
 		private IServiceProvider? _serviceProvider;
 		internal IServiceBusStorage? Storage { get; set; }
 		internal IMessageBox? MessageBox { get; private set; }
 		public IServiceBusRegister? Register { get; set; }
 
-		public Subscriber(int idSubscriber, string name)
+		public Job(int idSubscriber, string name)
 			: this(idSubscriber, name, 0)
 		{
 		}
 
-		public Subscriber(int idSubscriber, string name, int idScenario)
+		public Job(int idSubscriber, string name, int idScenario)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
@@ -74,10 +67,13 @@ namespace Raider.Messaging
 			State = ComponentState.Offline;
 		}
 
-		public abstract Task<MessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken token = default);
+		public abstract Task<ComponentState> ExecuteAsync(SubscriberContext context, CancellationToken token = default);
+
+		Task IJob.InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
+			=> InitializeAsync(serviceProvider, storage, messageBox, loggerFactory, cancellationToken);
 
 		private readonly AsyncLock _initLock = new AsyncLock();
-		async Task ISubscriber.InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
+		internal async Task InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 		{
 			var traceInfo = TraceInfo.Create(storage?.ServiceBusHost?.IdUser, storage?.ServiceBusHost?.IdServiceBusHostRuntime);
 
@@ -146,7 +142,6 @@ namespace Raider.Messaging
 
 				Initialized = true;
 			}
-
 		}
 
 		async Task IComponent.StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
@@ -168,14 +163,14 @@ namespace Raider.Messaging
 
 			try
 			{
-				await Storage.WriteSubscriberStartAsync(context, this, cancellationToken);
+				await Storage.WriteJobStartAsync(context, this, cancellationToken);
 
 				_stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 				_timer = new Timer(TimerCallback, null, DelayedStart, ExecuteInterval);
 			}
 			catch (Exception ex)
 			{
-				ServiceBusLogger.SeriLogError(_fallbackLogger, traceInfo, $"{nameof(Storage)}.{nameof(Storage.WriteSubscriberStartAsync)}", ex);
+				ServiceBusLogger.SeriLogError(_fallbackLogger, traceInfo, $"{nameof(Storage)}.{nameof(Storage.WriteJobStartAsync)}", ex);
 				throw;
 			}
 
@@ -191,8 +186,7 @@ namespace Raider.Messaging
 				return;
 
 			var traceInfo = TraceInfo.Create(Storage?.ServiceBusHost?.IdUser, Storage?.ServiceBusHost?.IdServiceBusHostRuntime);
-			var nowUtc = DateTime.UtcNow;
-			LastActivityUtc = nowUtc;
+			LastActivityUtc = DateTime.UtcNow;
 
 			if (_serviceProvider == null)
 			{
@@ -218,102 +212,28 @@ namespace Raider.Messaging
 				throw new InvalidOperationException(error);
 			}
 
-			var timerNextInterval = ExecuteInterval;
-
 			try
 			{
-				var message = ReadMessagesFromSequentialFIFO
-					? await MessageBox.GetSubscriberMessageFromFIFOAsync(
-						this,
-						new List<int>
-						{
-							(int)MessageState.Pending,
-							(int)MessageState.Error,
-							(int)MessageState.Expired
-						},
-						_stoppingCts?.Token ?? default)
-					: await MessageBox.GetSubscriberMessageFromNonFIFOAsync(
-						this,
-						new List<int>
-						{
-							(int)MessageState.Pending,
-							(int)MessageState.InProcess,
-							(int)MessageState.Error,
-							(int)MessageState.Suspended,
-							(int)MessageState.Corrupted,
-							(int)MessageState.Expired
-						},
-						nowUtc,
-						_stoppingCts?.Token ?? default);
-
-				if (message == null)
-					return;
-
 				try
 				{
-					if (DropExpiredMessages && message.State == MessageState.Expired)
-					{
-						await LogMessageStateAsync(traceInfo, MessageResult.Consume(message), _stoppingCts?.Token ?? default);
-
-						//skratime interval nacitania novej spravy na 1s
-						if (AllowMessageReadAcceleration && timerNextInterval == ExecuteInterval && 1 < ExecuteInterval.TotalSeconds)
-							timerNextInterval = TimeSpan.FromSeconds(1);
-
-						return;
-					}
-
-					if (ReadMessagesFromSequentialFIFO)
-					{
-						if (message.State == MessageState.InProcess && message.LastAccessUtc.HasValue)
-						{
-							//ak este neuplynul timeout od posledneho spracovania spravy, tak sa uspi
-							if (nowUtc < message.LastAccessUtc.Value.Add(TimeoutForMessageProcessing))
-							{
-								timerNextInterval = message.LastAccessUtc.Value.Subtract(nowUtc);
-								return;
-							}
-						}
-
-						if (message.DelayedToUtc.HasValue && nowUtc < message.DelayedToUtc.Value)
-						{
-							//ak este neuplynul DelayedToUtc, tak sa uspi
-							timerNextInterval = message.DelayedToUtc.Value.Subtract(nowUtc);
-							return;
-						}
-
-						if (message.State == MessageState.Suspended || message.State == MessageState.Corrupted)
-						{
-							await LogActivityAsync(traceInfo, ComponentState.Suspended, null, null, _stoppingCts?.Token ?? default);
-							return;
-						}
-					}
-
 					await LogActivityAsync(traceInfo, ComponentState.InProcess, null, null, _stoppingCts?.Token ?? default);
 
-					MessageResult messageResult;
+					ComponentState componentState;
 					using (var scope = _serviceProvider.CreateScope())
 					{
 						var tc = scope.ServiceProvider.GetService<TraceContext>();
 
-						var subscriberContext = scope.ServiceProvider.GetRequiredService<SubscriberContext>();
+						var subscriberContext = scope.ServiceProvider.GetRequiredService<SubscriberContext>(); //TODO JobContext
 						subscriberContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create(), tc?.Next()).Build();
 						subscriberContext.Logger = _fallbackLogger ?? scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
 						subscriberContext.ApplicationResources = scope.ServiceProvider.GetRequiredService<IApplicationResources>();
 
-						messageResult = await ProcessMessageAsync(subscriberContext, message, _stoppingCts?.Token ?? default);
+						componentState = await ExecuteAsync(subscriberContext, _stoppingCts?.Token ?? default);
 					}
 
-					if (ReadMessagesFromSequentialFIFO && messageResult.State == MessageState.Suspended)
+					if (componentState == ComponentState.Suspended)
 					{
-						await LogActivityAsync(traceInfo, ComponentState.Suspended, messageResult, null, _stoppingCts?.Token ?? default);
-					}
-					else
-					{
-						await LogMessageStateAsync(traceInfo, messageResult, _stoppingCts?.Token ?? default);
-
-						//ak nejaka sprava bola uspesne spracovana, skratime interval nacitania novej spravy na 1s
-						if (AllowMessageReadAcceleration && timerNextInterval == ExecuteInterval && 1 < ExecuteInterval.TotalSeconds)
-							timerNextInterval = TimeSpan.FromSeconds(1);
+						await LogActivityAsync(traceInfo, ComponentState.Suspended, null, null, _stoppingCts?.Token ?? default);
 					}
 				}
 				catch (Exception ex)
@@ -321,11 +241,8 @@ namespace Raider.Messaging
 					await LogActivityAsync(
 						traceInfo,
 						ComponentState.Error,
-						MessageResult.Error(message, DelayTable, DefaultDelaTimeStamp == TimeSpan.Zero ? TimeSpan.FromMinutes(5) : DefaultDelaTimeStamp),
-						new LogError(traceInfo, nameof(TimerCallback), $"{nameof(ProcessMessageAsync)}", ex.ToStringTrace())
-						{
-							IdSubscriberMessage = message.IdSubscriberMessage
-						},
+						null,
+						new LogError(traceInfo, nameof(TimerCallback), $"{nameof(ExecuteAsync)}", ex.ToStringTrace()),
 						_stoppingCts?.Token ?? default);
 				}
 			}
@@ -350,7 +267,7 @@ namespace Raider.Messaging
 				catch { }
 
 				if (_stopTimerOnExecute && State != ComponentState.Suspended)
-					StartTimer(timerNextInterval);
+					StartTimer();
 			}
 		}
 
@@ -378,7 +295,7 @@ namespace Raider.Messaging
 					}
 					else
 					{
-						await Storage.WriteSubscriberLogAsync(
+						await Storage.WriteJobLogAsync(
 							this,
 							new LogError(traceInfo, logMessageType, message, ex?.ToStringTrace()),
 							cancellationToken);
@@ -387,7 +304,7 @@ namespace Raider.Messaging
 				catch (Exception storageEx)
 				{
 					ServiceBusLogger.SeriLogError(_fallbackLogger, traceInfo, message, ex);
-					ServiceBusLogger.SeriLogError(_fallbackLogger, traceInfo, $"{nameof(IServiceBusStorage)}.{nameof(Storage.WriteSubscriberLogAsync)}", storageEx);
+					ServiceBusLogger.SeriLogError(_fallbackLogger, traceInfo, $"{nameof(IServiceBusStorage)}.{nameof(Storage.WriteJobLogAsync)}", storageEx);
 					throw;
 				}
 			}
@@ -404,7 +321,7 @@ namespace Raider.Messaging
 				if (Storage == null)
 					throw new InvalidOperationException($"{nameof(Storage)} == null");
 
-				await Storage.WriteSubscriberActivityAsync(
+				await Storage.WriteJobActivityAsync(
 					this,
 					messageResult,
 					log,
@@ -412,7 +329,7 @@ namespace Raider.Messaging
 			}
 			catch (Exception ex)
 			{
-				await LogErrorAsync(traceInfo, $"{nameof(LogActivityAsync)}", $"{nameof(IServiceBusStorage)}.{nameof(Storage.WriteSubscriberActivityAsync)}", ex, false, cancellationToken);
+				await LogErrorAsync(traceInfo, $"{nameof(LogActivityAsync)}", $"{nameof(IServiceBusStorage)}.{nameof(Storage.WriteJobActivityAsync)}", ex, false, cancellationToken);
 
 				if (state != ComponentState.Error || state != ComponentState.Suspended)
 				{
@@ -428,27 +345,8 @@ namespace Raider.Messaging
 			}
 		}
 
-		private async Task LogMessageStateAsync(ITraceInfo? traceInfo, MessageResult messageResult, CancellationToken cancellationToken = default)
-		{
-			try
-			{
-				if (Storage == null)
-					throw new InvalidOperationException($"{nameof(Storage)} == null");
-
-				await Storage.WriteMessageStateAsync(
-					this,
-					messageResult,
-					cancellationToken);
-			}
-			catch (Exception ex)
-			{
-				await LogErrorAsync(traceInfo, $"{nameof(LogMessageStateAsync)}", $"{nameof(IServiceBusStorage)}.{nameof(Storage.WriteMessageStateAsync)}", ex, false, cancellationToken);
-				throw;
-			}
-		}
-
-		private bool StartTimer(TimeSpan interval)
-			=> _timer?.Change(interval, interval) ?? false;
+		private bool StartTimer()
+			=> _timer?.Change(ExecuteInterval, ExecuteInterval) ?? false;
 
 		private bool StopTimer()
 			=> _timer?.Change(Timeout.Infinite, Timeout.Infinite) ?? false;
