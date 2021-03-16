@@ -22,7 +22,7 @@ namespace Raider.Logging.SerilogEx.Sink
 	{
 		public RaiderBatchSink(
 			Func<LogEvent, bool> includeCallBack,
-			Func<IEnumerable<LogEvent>, CancellationToken, Task> writeBatchCallback,
+			Func<IEnumerable<LogEvent>, CancellationToken, Task<ulong>> writeBatchCallback,
 			BatchWriterOptions? options,
 			Action<string, object?, object?, object?>? errorLogger = null)
 			: base(includeCallBack, writeBatchCallback, options, errorLogger ?? SelfLog.WriteLine)

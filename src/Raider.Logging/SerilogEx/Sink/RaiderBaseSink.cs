@@ -56,7 +56,7 @@
 
 //		public virtual bool Include(LogEvent logEvent) => true;
 
-//		public abstract Task WriteBatch(IEnumerable<LogEvent> batch);
+//		public abstract Task WriteBatchAsync(IEnumerable<LogEvent> batch);
 
 //		private void SetTimer(TimeSpan interval)
 //		{
@@ -126,7 +126,7 @@
 //					if (_waitingBatch.Count == 0)
 //						return;
 
-//					await WriteBatch(_waitingBatch);
+//					await WriteBatchAsync(_waitingBatch);
 
 //					batchWasFull = _waitingBatch.Count >= _batchSizeLimit;
 //					_waitingBatch.Clear();

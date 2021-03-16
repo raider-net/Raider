@@ -21,7 +21,7 @@ namespace Serilog
 
 		public static LoggerConfiguration RaiderBatchSink(
 			this LoggerSinkConfiguration loggerConfiguration,
-			Func<IEnumerable<LogEvent>, CancellationToken, Task> writeBatchCallback,
+			Func<IEnumerable<LogEvent>, CancellationToken, Task<ulong>> writeBatchCallback,
 			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
 			=> RaiderBatchSink(
 				loggerConfiguration,
@@ -31,7 +31,7 @@ namespace Serilog
 
 		public static LoggerConfiguration RaiderBatchSink(
 			this LoggerSinkConfiguration loggerConfiguration,
-			Func<IEnumerable<LogEvent>, CancellationToken, Task> writeBatchCallback,
+			Func<IEnumerable<LogEvent>, CancellationToken, Task<ulong>> writeBatchCallback,
 			BatchWriterOptions? options,
 			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
 			=> RaiderBatchSink(
@@ -44,7 +44,7 @@ namespace Serilog
 		public static LoggerConfiguration RaiderBatchSink(
 			this LoggerSinkConfiguration loggerConfiguration,
 			Func<LogEvent, bool> includeCallBack,
-			Func<IEnumerable<LogEvent>, CancellationToken, Task> writeBatchCallback,
+			Func<IEnumerable<LogEvent>, CancellationToken, Task<ulong>> writeBatchCallback,
 			BatchWriterOptions? options,
 			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
 		{
