@@ -438,6 +438,7 @@ namespace Raider.Messaging.PostgreSql
 		public async Task<ISubscriberMessage<TData>?> GetSubscriberMessageFromFIFOAsync<TData>(
 			ISubscriber<TData> subscriber,
 			List<int> readMessageStates,
+			DateTime utcNow,
 			CancellationToken cancellationToken = default)
 			where TData : IMessageData
 		{
@@ -450,7 +451,7 @@ namespace Raider.Messaging.PostgreSql
 			ISubscriberMessage<TData>? result;
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
 			{
-				result = await _dbSubscriberMessage.GetSubscriberMessageFromFIFOAsync(connection, null, subscriber, readMessageStates, cancellationToken);
+				result = await _dbSubscriberMessage.GetSubscriberMessageFromFIFOAsync(connection, null, subscriber, readMessageStates, utcNow, cancellationToken);
 			}
 
 			return result;

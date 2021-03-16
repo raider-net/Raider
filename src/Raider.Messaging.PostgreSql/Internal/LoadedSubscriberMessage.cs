@@ -23,5 +23,10 @@ namespace Raider.Messaging.PostgreSql
 		public DateTimeOffset? DelayedToUtc { get; set; }
 		public Guid OriginalConcurrencyToken { get; set; }
 		public Guid NewConcurrencyToken { get; set; }
+
+		public LoadedSubscriberMessage()
+		{
+			NewConcurrencyToken = Guid.NewGuid();
+		}
 	}
 }

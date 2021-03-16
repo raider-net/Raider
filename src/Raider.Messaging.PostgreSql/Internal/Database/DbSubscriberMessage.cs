@@ -81,7 +81,7 @@ namespace Raider.Messaging.PostgreSql.Database
 				RetryCount = reader.GetValueOrDefault<int>(10),
 				DelayedToUtc = reader.GetValueOrDefault<DateTime?>(11),
 				OriginalConcurrencyToken = reader.GetValueOrDefault<Guid>(12),
-				NewConcurrencyToken = Guid.NewGuid(),
+				//NewConcurrencyToken = Guid.NewGuid(), also in ctor
 				Data = default
 			};
 
@@ -118,6 +118,7 @@ namespace Raider.Messaging.PostgreSql.Database
 			NpgsqlTransaction? transaction,
 			ISubscriber<TData> subscriber,
 			List<int> readMessageStates,
+			DateTime utcNow,
 			CancellationToken cancellationToken = default)
 			where TData : IMessageData
 		{
@@ -146,7 +147,7 @@ SELECT
 	sm.""{nameof(ConcurrencyToken)}""
 FROM {nameof(Defaults.Schema.bus)}.""{nameof(SubscriberMessage)}"" sm
 JOIN {nameof(Defaults.Schema.bus)}.""{nameof(DbMessage.Message)}"" m ON sm.""{nameof(IdMessage)}"" = m.""{nameof(DbMessage.IdMessage)}""
-WHERE (sm.""{nameof(IdSubscriberInstance)}"" IS NULL OR sm.""{nameof(IdSubscriberInstance)}"" = @idSubscInst)
+WHERE (sm.""{nameof(IdSubscriberInstance)}"" IS NULL OR sm.""{nameof(IdSubscriberInstance)}"" = @idSubscInst OR (sm.""{nameof(IdMessageState)}"" = 2 AND sm.""{nameof(LastAccessUtc)}"" < @lastAcc))
 	AND sm.""{nameof(IdMessageState)}"" IN ({inClausule})
 ORDER BY m.""{nameof(DbMessage.CreatedUtc)}""
 LIMIT 1";
@@ -156,6 +157,7 @@ LIMIT 1";
 				cmd.Transaction = transaction;
 
 			cmd.Parameters.AddWithValue("@idSubscInst", subscriber.IdInstance);
+			cmd.Parameters.AddWithValue("@lastAcc", (DateTime)utcNow.Subtract(subscriber.TimeoutForMessageProcessing));
 
 			foreach (var readMessageState in readMessageStates)
 				cmd.Parameters.AddWithValue($"@s{readMessageState}", readMessageState);
@@ -208,9 +210,9 @@ SELECT
 	sm.""{nameof(ConcurrencyToken)}""
 FROM {nameof(Defaults.Schema.bus)}.""{nameof(SubscriberMessage)}"" sm
 JOIN {nameof(Defaults.Schema.bus)}.""{nameof(DbMessage.Message)}"" m ON sm.""{nameof(IdMessage)}"" = m.""{nameof(DbMessage.IdMessage)}""
-WHERE (sm.""{nameof(IdSubscriberInstance)}"" IS NULL OR sm.""{nameof(IdSubscriberInstance)}"" = @idSubscInst)
+WHERE (sm.""{nameof(IdSubscriberInstance)}"" IS NULL OR sm.""{nameof(IdSubscriberInstance)}"" = @idSubscInst OR (sm.""{nameof(IdMessageState)}"" = 2 AND sm.""{nameof(LastAccessUtc)}"" < @lastAcc))
 	AND (sm.""{nameof(IdMessageState)}"" IN ({inClausule}) OR (sm.""{nameof(IdMessageState)}"" = 2 AND sm.""{nameof(LastAccessUtc)}"" < @lastAcc))
-	AND sm.""{nameof(DelayedToUtc)}"" < @delay
+	AND (sm.""{nameof(DelayedToUtc)}"" IS NULL OR sm.""{nameof(DelayedToUtc)}"" < @delay)
 ORDER BY m.""{nameof(DbMessage.CreatedUtc)}""
 LIMIT 1";
 
@@ -293,8 +295,13 @@ LIMIT 1";
 			var sql = _table.ToUpdateSql(new List<string>
 				{
 					nameof(IdSubscriberInstance),
+					nameof(LastAccessUtc),
+					nameof(IdMessageState),
+					nameof(RetryCount),
+					nameof(DelayedToUtc),
+					nameof(ConcurrencyToken),
 				},
-				where: $"\"{nameof(IdSubscriberMessage)}\"=@id AND (\"{nameof(IdSubscriberInstance)}\" IS NULL OR \"{nameof(IdSubscriberInstance)}\"=@idSubscInst)");
+				where: $"\"{nameof(IdSubscriberMessage)}\"=@id AND (\"{nameof(IdSubscriberInstance)}\" IS NULL OR \"{nameof(ConcurrencyToken)}\"=@ct)");
 
 			using var cmd = new NpgsqlCommand(sql, connection);
 			if (transaction != null)
@@ -307,8 +314,9 @@ LIMIT 1";
 					{ nameof(IdMessageState), (int)messageResult.State },
 					{ nameof(RetryCount), messageResult.RetryCount },
 					{ nameof(DelayedToUtc), messageResult.DelayedToUtc },
+					{ nameof(ConcurrencyToken), messageResult.NewConcurrencyToken },
 					{ "@id", messageResult.IdSubscriberMessage },
-					{ "@idSubscInst", idSubscriberInstance}
+					{ "@ct", messageResult.OriginalConcurrencyToken}
 				});
 
 			var result = await cmd.ExecuteNonQueryAsync(cancellationToken);
