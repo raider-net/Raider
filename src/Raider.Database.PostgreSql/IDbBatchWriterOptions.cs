@@ -19,6 +19,6 @@ namespace Raider.Database.PostgreSql
 
 		DbBatchWriterOptions Validate();
 
-		BulkInsertOptions ToBulkInsertOptions(bool validateProperties = true);
+		DictionaryTableOptions ToDictionaryTableOptions(bool validateProperties = true, bool validatePropertyMapping = true);
 	}
 }

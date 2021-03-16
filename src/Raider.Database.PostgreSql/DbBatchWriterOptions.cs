@@ -30,8 +30,8 @@ namespace Raider.Database.PostgreSql
 			return this;
 		}
 
-		public BulkInsertOptions ToBulkInsertOptions(bool validateProperties = true)
-			=> new BulkInsertOptions
+		public DictionaryTableOptions ToDictionaryTableOptions(bool validateProperties = true, bool validatePropertyMapping = true)
+			=> new DictionaryTableOptions
 			{
 				SchemaName = SchemaName,
 				TableName = TableName,
@@ -42,6 +42,6 @@ namespace Raider.Database.PostgreSql
 				UseQuotationMarksForTableName = UseQuotationMarksForTableName,
 				UseQuotationMarksForColumnNames = UseQuotationMarksForColumnNames
 			}
-			.Validate(validateProperties);
+			.Validate(validateProperties, validatePropertyMapping);
 	}
 }

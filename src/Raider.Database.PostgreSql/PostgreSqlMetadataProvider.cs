@@ -1,6 +1,6 @@
 ﻿using Npgsql;
-using Raider.Data.Extensions;
 using Raider.Enums;
+using Raider.Extensions;
 using Raider.MathUtils;
 using Raider.Sql;
 using Raider.Sql.Metadata;

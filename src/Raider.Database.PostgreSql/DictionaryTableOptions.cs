@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Raider.Database.PostgreSql
 {
-	public class BulkInsertOptions
+	public class DictionaryTableOptions
 	{
 		public string? SchemaName { get; set; }
 		public string? TableName { get; set; }
@@ -14,8 +14,9 @@ namespace Raider.Database.PostgreSql
 		public Dictionary<string, Func<object?, object?>>? PropertyValueConverter { get; set; }
 		public bool UseQuotationMarksForTableName { get; set; } = true;
 		public bool UseQuotationMarksForColumnNames { get; set; } = true;
+		public bool PropertyTypeMappingIsRequired { get; set; }
 
-		public BulkInsertOptions Validate(bool validateProperties)
+		public DictionaryTableOptions Validate(bool validateProperties, bool validatePropertyMapping)
 		{
 			if (string.IsNullOrWhiteSpace(SchemaName))
 				throw new ArgumentNullException(nameof(SchemaName));
@@ -36,7 +37,7 @@ namespace Raider.Database.PostgreSql
 					if (string.IsNullOrWhiteSpace(kvp.Value))
 						throw new ArgumentException($"Property {kvp.Key} has NULL column mapping.", nameof(PropertyColumnMapping));
 
-			if (validateProperties && (PropertyTypeMapping == null || PropertyTypeMapping.Count == 0))
+			if (validatePropertyMapping && (PropertyTypeMapping == null || PropertyTypeMapping.Count == 0))
 				throw new ArgumentNullException(nameof(PropertyTypeMapping));
 
 			return this;
