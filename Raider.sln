@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Generator.Compilatio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.AspNetCore", "src\Raider.AspNetCore\Raider.AspNetCore.csproj", "{C00DA1C3-5A7F-43B8-A6AE-6EB2BE9FD577}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Messaging.PostgreSql", "src\Raider.Messaging.PostgreSql\Raider.Messaging.PostgreSql.csproj", "{5B9C16C5-00CC-4AB7-8100-CE2185967451}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -103,6 +105,10 @@ Global
 		{C00DA1C3-5A7F-43B8-A6AE-6EB2BE9FD577}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C00DA1C3-5A7F-43B8-A6AE-6EB2BE9FD577}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C00DA1C3-5A7F-43B8-A6AE-6EB2BE9FD577}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B9C16C5-00CC-4AB7-8100-CE2185967451}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B9C16C5-00CC-4AB7-8100-CE2185967451}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B9C16C5-00CC-4AB7-8100-CE2185967451}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B9C16C5-00CC-4AB7-8100-CE2185967451}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,6 +129,7 @@ Global
 		{0AD2ED4D-4D72-4AF1-988F-79F552007574} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 		{76760A11-2BA8-4FC5-905A-26844D323151} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 		{C00DA1C3-5A7F-43B8-A6AE-6EB2BE9FD577} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
+		{5B9C16C5-00CC-4AB7-8100-CE2185967451} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4CE87C92-BF04-4D94-B102-15AC816005FB}
