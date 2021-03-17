@@ -147,7 +147,8 @@ SELECT
 	sm.""{nameof(ConcurrencyToken)}""
 FROM {nameof(Defaults.Schema.bus)}.""{nameof(SubscriberMessage)}"" sm
 JOIN {nameof(Defaults.Schema.bus)}.""{nameof(DbMessage.Message)}"" m ON sm.""{nameof(IdMessage)}"" = m.""{nameof(DbMessage.IdMessage)}""
-WHERE (sm.""{nameof(IdSubscriberInstance)}"" IS NULL OR sm.""{nameof(IdSubscriberInstance)}"" = @idSubscInst OR (sm.""{nameof(IdMessageState)}"" = 2 AND sm.""{nameof(LastAccessUtc)}"" < @lastAcc))
+WHERE sm.""{nameof(IdSubscriber)}"" = @idSubsc
+	AND (sm.""{nameof(IdSubscriberInstance)}"" IS NULL OR sm.""{nameof(IdSubscriberInstance)}"" = @idSubscInst OR (sm.""{nameof(IdMessageState)}"" = 2 AND sm.""{nameof(LastAccessUtc)}"" < @lastAcc))
 	AND sm.""{nameof(IdMessageState)}"" IN ({inClausule})
 ORDER BY m.""{nameof(DbMessage.CreatedUtc)}""
 LIMIT 1";
@@ -156,6 +157,7 @@ LIMIT 1";
 			if (transaction != null)
 				cmd.Transaction = transaction;
 
+			cmd.Parameters.AddWithValue("@idSubsc", subscriber.IdComponent);
 			cmd.Parameters.AddWithValue("@idSubscInst", subscriber.IdInstance);
 			cmd.Parameters.AddWithValue("@lastAcc", (DateTime)utcNow.Subtract(subscriber.TimeoutForMessageProcessing));
 
@@ -210,7 +212,8 @@ SELECT
 	sm.""{nameof(ConcurrencyToken)}""
 FROM {nameof(Defaults.Schema.bus)}.""{nameof(SubscriberMessage)}"" sm
 JOIN {nameof(Defaults.Schema.bus)}.""{nameof(DbMessage.Message)}"" m ON sm.""{nameof(IdMessage)}"" = m.""{nameof(DbMessage.IdMessage)}""
-WHERE (sm.""{nameof(IdSubscriberInstance)}"" IS NULL OR sm.""{nameof(IdSubscriberInstance)}"" = @idSubscInst OR (sm.""{nameof(IdMessageState)}"" = 2 AND sm.""{nameof(LastAccessUtc)}"" < @lastAcc))
+WHERE sm.""{nameof(IdSubscriber)}"" = @idSubsc
+	AND (sm.""{nameof(IdSubscriberInstance)}"" IS NULL OR sm.""{nameof(IdSubscriberInstance)}"" = @idSubscInst OR (sm.""{nameof(IdMessageState)}"" = 2 AND sm.""{nameof(LastAccessUtc)}"" < @lastAcc))
 	AND (sm.""{nameof(IdMessageState)}"" IN ({inClausule}) OR (sm.""{nameof(IdMessageState)}"" = 2 AND sm.""{nameof(LastAccessUtc)}"" < @lastAcc))
 	AND (sm.""{nameof(DelayedToUtc)}"" IS NULL OR sm.""{nameof(DelayedToUtc)}"" < @delay)
 ORDER BY m.""{nameof(DbMessage.CreatedUtc)}""
@@ -220,6 +223,7 @@ LIMIT 1";
 			if (transaction != null)
 				cmd.Transaction = transaction;
 
+			cmd.Parameters.AddWithValue("@idSubsc", subscriber.IdComponent);
 			cmd.Parameters.AddWithValue("@idSubscInst", subscriber.IdInstance);
 
 			foreach (var readMessageState in readMessageStates)
