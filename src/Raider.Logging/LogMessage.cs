@@ -23,7 +23,7 @@ namespace Raider.Logging
 		public string FullMessage => ToString(true, true, true);
 		public bool IsLogged { get; set; }
 		public string? CommandQueryName { get; set; }
-		public long? IdCommandQuery { get; set; }
+		public Guid? IdCommandQuery { get; set; }
 		public decimal? MethodCallElapsedMilliseconds { get; set; }
 		public string? PropertyName { get; set; }
 		public object? ValidationFailure { get; set; }

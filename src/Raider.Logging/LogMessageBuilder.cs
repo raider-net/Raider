@@ -44,7 +44,7 @@ namespace Raider.Logging
 
 		TBuilder CommandQueryName(string? commandQueryName, bool force = false);
 
-		TBuilder IdCommandQuery(long? idCommandQuery, bool force = false);
+		TBuilder IdCommandQuery(Guid? idCommandQuery, bool force = false);
 
 		TBuilder MethodCallElapsedMilliseconds(decimal? methodCallElapsedMilliseconds, bool force = false);
 
@@ -202,7 +202,7 @@ namespace Raider.Logging
 			return _builder;
 		}
 
-		public TBuilder IdCommandQuery(long? idCommandQuery, bool force = false)
+		public TBuilder IdCommandQuery(Guid? idCommandQuery, bool force = false)
 		{
 			if (force || !_logMessage.IdCommandQuery.HasValue)
 				_logMessage.IdCommandQuery = idCommandQuery;

@@ -34,7 +34,7 @@ namespace Raider.Logging
 
 		string? CommandQueryName { get; set; }
 
-		long? IdCommandQuery { get; set; }
+		Guid? IdCommandQuery { get; set; }
 
 		bool IsLogged { get; set; }
 
