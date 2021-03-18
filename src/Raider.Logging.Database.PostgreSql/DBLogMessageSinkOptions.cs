@@ -48,7 +48,7 @@ namespace Raider.Logging.Database.PostgreSql
 				{ nameof(ILogMessage.Detail), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.TraceInfo.IdUser), NpgsqlDbType.Integer },
 				{ nameof(ILogMessage.CommandQueryName), NpgsqlDbType.Varchar },
-				{ nameof(ILogMessage.IdCommandQuery), NpgsqlDbType.Bigint },
+				{ nameof(ILogMessage.IdCommandQuery), NpgsqlDbType.Uuid },
 				{ nameof(ILogMessage.MethodCallElapsedMilliseconds), NpgsqlDbType.Numeric },
 				{ nameof(ILogMessage.PropertyName), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.DisplayPropertyName), NpgsqlDbType.Varchar },
