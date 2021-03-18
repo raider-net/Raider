@@ -47,7 +47,8 @@ namespace Raider.Services.Commands
 				{ nameof(IdCommandQueryEntry), IdCommandQueryEntry },
 				{ nameof(Created), Created },
 				{ nameof(CommandQueryName), CommandQueryName },
-				{ nameof(TraceFrame), TraceFrame }
+				{ nameof(TraceFrame), TraceFrame.ToString() },
+				{ nameof(IsQuery), IsQuery }
 			};
 
 			if (!string.IsNullOrWhiteSpace(Data))

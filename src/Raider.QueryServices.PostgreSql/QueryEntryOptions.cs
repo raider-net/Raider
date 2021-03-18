@@ -29,9 +29,9 @@ namespace Raider.QueryServices.PostgreSql
 				{ nameof(IQueryEntry.IdCommandQueryEntry), NpgsqlDbType.Uuid },
 				{ nameof(IQueryEntry.Created), NpgsqlDbType.TimestampTz },
 				{ nameof(IQueryEntry.CommandQueryName), NpgsqlDbType.Varchar },
-				{ nameof(IQueryEntry.TraceFrame), NpgsqlDbType.Varchar },
+				{ nameof(IQueryEntry.TraceFrame), NpgsqlDbType.Text },
 				{ nameof(IQueryEntry.IsQuery), NpgsqlDbType.Boolean },
-				{ nameof(IQueryEntry.Data), NpgsqlDbType.Varchar },
+				{ nameof(IQueryEntry.Data), NpgsqlDbType.Text },
 				{ nameof(IQueryEntry.IdUser), NpgsqlDbType.Integer },
 				{ nameof(IQueryEntry.CorrelationId), NpgsqlDbType.Uuid }
 			};

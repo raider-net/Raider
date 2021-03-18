@@ -5,14 +5,14 @@ namespace Raider.Services.PostgreSql
 {
 	public class CommandExit : Serializer.IDictionaryObject
 	{
-		public Guid IdCommandQueryEntry { get; set; }
+		public Guid IdCommandQueryExit { get; set; }
 		public decimal ElapsedMilliseconds { get; set; }
 
 		public IDictionary<string, object?> ToDictionary()
 		{
 			var dict = new Dictionary<string, object?>
 			{
-				{ nameof(IdCommandQueryEntry), IdCommandQueryEntry },
+				{ nameof(IdCommandQueryExit), IdCommandQueryExit },
 				{ nameof(ElapsedMilliseconds), ElapsedMilliseconds }
 			};
 

@@ -10,7 +10,7 @@ namespace Raider.Services.PostgreSql
 
 		internal static void SetEntryWriter(CommandEntryWriter writer)
 		{
-			if (_entryWriter == null)
+			if (_entryWriter != null)
 				throw new InvalidOperationException($"{nameof(CommandEntryWriter)} already set.");
 
 			_entryWriter = writer ?? throw new ArgumentNullException(nameof(writer));
@@ -18,7 +18,7 @@ namespace Raider.Services.PostgreSql
 
 		internal static void SetExitWriter(CommandExitWriter writer)
 		{
-			if (_exitWriter == null)
+			if (_exitWriter != null)
 				throw new InvalidOperationException($"{nameof(CommandExitWriter)} already set.");
 
 			_exitWriter = writer ?? throw new ArgumentNullException(nameof(writer));
@@ -37,7 +37,7 @@ namespace Raider.Services.PostgreSql
 			if (_exitWriter == null)
 				throw new InvalidOperationException($"{nameof(CommandExitWriter)} was not set.");
 
-			_exitWriter.Write(new CommandExit { IdCommandQueryEntry = entry.IdCommandQueryEntry, ElapsedMilliseconds = elapsedMilliseconds });
+			_exitWriter.Write(new CommandExit { IdCommandQueryExit = entry.IdCommandQueryEntry, ElapsedMilliseconds = elapsedMilliseconds });
 		}
 	}
 }

@@ -13,13 +13,13 @@ namespace Raider.Services.PostgreSql
 
 			PropertyNames = new List<string>
 			{
-				nameof(CommandExit.IdCommandQueryEntry),
+				nameof(CommandExit.IdCommandQueryExit),
 				nameof(CommandExit.ElapsedMilliseconds)
 			};
 
 			PropertyTypeMapping = new Dictionary<string, NpgsqlDbType>
 			{
-				{ nameof(CommandExit.IdCommandQueryEntry), NpgsqlDbType.Uuid },
+				{ nameof(CommandExit.IdCommandQueryExit), NpgsqlDbType.Uuid },
 				{ nameof(CommandExit.ElapsedMilliseconds), NpgsqlDbType.Numeric },
 			};
 		}
