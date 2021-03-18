@@ -45,7 +45,7 @@ namespace Raider.QueryServices
 
 		public string? QueryName => _queryHandlerContext.QueryName;
 
-		public long? IdQueryEntry => _queryHandlerContext.IdQueryEntry;
+		public Guid? IdQueryEntry => _queryHandlerContext.IdQueryEntry;
 
 		public IDbContextTransaction? DbContextTransaction => _queryHandlerContext.DbContextTransaction;
 

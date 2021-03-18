@@ -1,22 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
-using Raider.Queries;
 using Raider.DependencyInjection;
+using Raider.EntityFrameworkCore;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
+using Raider.Logging.Extensions;
+using Raider.Queries;
 using Raider.Trace;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Runtime.CompilerServices;
-using Raider.EntityFrameworkCore;
-using Raider.Logging.Extensions;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Raider.QueryServices.Queries
 {
@@ -29,7 +28,7 @@ namespace Raider.QueryServices.Queries
 		public RaiderIdentity<int>? User { get; private set; }
 		public RaiderPrincipal<int>? Principal { get; private set; }
 		public string? QueryName { get; private set; }
-		public long? IdQueryEntry { get; private set; }
+		public Guid? IdQueryEntry { get; private set; }
 		public IDbContextTransaction? DbContextTransaction { get; private set; }
 		public string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		public ILogger Logger { get; private set; }
@@ -333,7 +332,7 @@ namespace Raider.QueryServices.Queries
 				return this;
 			}
 
-			internal Builder<TContext> IdQueryEntry(long? idQueryEntry)
+			internal Builder<TContext> IdQueryEntry(Guid? idQueryEntry)
 			{
 				Context.IdQueryEntry = idQueryEntry;
 				return this;

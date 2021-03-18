@@ -11,6 +11,7 @@ using Raider.Trace;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Raider.Extensions;
 
 namespace Raider.QueryServices.Aspects
 {
@@ -120,7 +121,7 @@ namespace Raider.QueryServices.Aspects
 
 			var resultBuilder = new QueryResultBuilder<TResult>();
 			var result = resultBuilder.Build();
-			long? idQuery = null;
+			Guid? idQuery = null;
 			IDbContextTransaction? tran = null;
 
 			try
@@ -132,11 +133,20 @@ namespace Raider.QueryServices.Aspects
 				if (query is not QueryBase<TResult> queryBase)
 					throw new InvalidOperationException($"Query {queryType?.FullName} must implement {typeof(QueryBase<TResult>).FullName}");
 
-				if (handlerOptions.SerializeQuery)
+				IQueryLogger? queryEntryLogger = null;
+				QueryEntry? queryEntry = null;
+				long? startTicks = null;
+
+				if (handlerOptions.LogQueryEntry)
 				{
-					var queryJson = queryBase.Serialize();
-					//TODO save serialized query to DB in separated transaction (like logging)
-					idQuery = 1; //TODO set inserted query id
+					startTicks = StaticWatch.CurrentTicks;
+					queryEntryLogger = ServiceFactory.GetInstance<IQueryLogger>();
+					if (queryEntryLogger == null)
+						throw new InvalidOperationException($"{nameof(IQueryLogger)} is not configured");
+
+					queryEntry = new QueryEntry(typeof(TQuery).ToFriendlyFullName(), traceInfo, handlerOptions.SerializeQuery ? queryBase.Serialize() : null);
+					queryEntryLogger.WriteQueryEntry(queryEntry);
+					idQuery = queryEntry?.IdCommandQueryEntry;
 				}
 
 				queryHandlerContextBuilder.IdQueryEntry(idQuery);
@@ -201,6 +211,15 @@ namespace Raider.QueryServices.Aspects
 									.Detail(tran == null ? $"Unhandled handler ({handler.GetType().FullName}) exception." : $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded.")
 									.IdCommandQuery(idQuery))
 						.Build();
+				}
+				finally
+				{
+					if (handlerOptions.LogQueryEntry && queryEntryLogger != null && queryEntry != null && startTicks.HasValue)
+					{
+						long endTicks = StaticWatch.CurrentTicks;
+						var elapsedMilliseconds = StaticWatch.ElapsedMilliseconds(startTicks.Value, endTicks);
+						queryEntryLogger.WriteQueryExit(queryEntry, elapsedMilliseconds);
+					}
 				}
 			}
 			catch (Exception interEx)
