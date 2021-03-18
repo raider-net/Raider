@@ -19,7 +19,7 @@ namespace Raider.Services
 		ServiceFactory ServiceFactory { get; }
 		new ITraceInfo TraceInfo { get; }
 		string? CommandName { get;  }
-		long? IdCommandEntry { get;  }
+		Guid? IdCommandEntry { get;  }
 		IDbContextTransaction? DbContextTransaction { get;  }
 		string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		ILogger Logger { get;  }

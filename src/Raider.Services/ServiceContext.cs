@@ -45,7 +45,7 @@ namespace Raider.Services
 
 		public string? CommandName => _commandHandlerContext.CommandName;
 
-		public long? IdCommandEntry => _commandHandlerContext.IdCommandEntry;
+		public Guid? IdCommandEntry => _commandHandlerContext.IdCommandEntry;
 
 		public IDbContextTransaction? DbContextTransaction => _commandHandlerContext.DbContextTransaction;
 

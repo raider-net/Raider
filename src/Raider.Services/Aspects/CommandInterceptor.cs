@@ -4,6 +4,7 @@ using Raider.Commands;
 using Raider.Commands.Aspects;
 using Raider.DependencyInjection;
 using Raider.Diagnostics;
+using Raider.Extensions;
 using Raider.Logging;
 using Raider.Logging.Extensions;
 using Raider.Services.Commands;
@@ -118,7 +119,7 @@ namespace Raider.Services.Aspects
 
 			var resultBuilder = new CommandResultBuilder<TResult>();
 			var result = resultBuilder.Build();
-			long? idCommand = null;
+			Guid? idCommand = null;
 			IDbContextTransaction? tran = null;
 
 			try
@@ -130,11 +131,20 @@ namespace Raider.Services.Aspects
 				if (command is not CommandBase<TResult> commandBase)
 					throw new InvalidOperationException($"Command {commandType?.FullName} must implement {typeof(CommandBase<TResult>).FullName}");
 
-				if (handlerOptions.SerializeCommand)
+				ICommandLogger? commandEntryLogger = null;
+				CommandEntry? commandEntry = null;
+				long? startTicks = null;
+
+				if (handlerOptions.LogCommandEntry)
 				{
-					var commandJson = commandBase.Serialize();
-					//TODO save serialized command to DB in separated transaction (like logging)
-					idCommand = 1; //TODO set inserted command id
+					startTicks = StaticWatch.CurrentTicks;
+					commandEntryLogger = ServiceFactory.GetInstance<ICommandLogger>();
+					if (commandEntryLogger == null)
+						throw new InvalidOperationException($"{nameof(ICommandLogger)} is not configured");
+
+					commandEntry = new CommandEntry(typeof(TCommand).ToFriendlyFullName(), traceInfo, handlerOptions.SerializeCommand ? commandBase.Serialize() : null);
+					commandEntryLogger.WriteCommandEntry(commandEntry);
+					idCommand = commandEntry?.IdCommandQueryEntry;
 				}
 
 				commandHandlerContextBuilder.IdCommandEntry(idCommand);
@@ -199,6 +209,15 @@ namespace Raider.Services.Aspects
 									.Detail(tran == null ? $"Unhandled handler ({handler.GetType().FullName}) exception." : $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded.")
 									.IdCommandQuery(idCommand))
 						.Build();
+				}
+				finally
+				{
+					if (handlerOptions.LogCommandEntry && commandEntryLogger != null && commandEntry != null && startTicks.HasValue)
+					{
+						long endTicks = StaticWatch.CurrentTicks;
+						var elapsedMilliseconds = StaticWatch.ElapsedMilliseconds(startTicks.Value, endTicks);
+						commandEntryLogger.WriteCommandExit(commandEntry, elapsedMilliseconds);
+					}
 				}
 			}
 			catch (Exception interEx)

@@ -29,7 +29,7 @@ namespace Raider.Services.Commands
 		public RaiderIdentity<int>? User { get; private set; }
 		public RaiderPrincipal<int>? Principal { get; private set; }
 		public string? CommandName { get; private set; }
-		public long? IdCommandEntry { get; private set; }
+		public Guid? IdCommandEntry { get; private set; }
 		public IDbContextTransaction? DbContextTransaction { get; private set; }
 		public string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		public ILogger Logger { get; private set; }
@@ -333,7 +333,7 @@ namespace Raider.Services.Commands
 				return this;
 			}
 
-			internal Builder<TContext> IdCommandEntry(long? idCommandEntry)
+			internal Builder<TContext> IdCommandEntry(Guid? idCommandEntry)
 			{
 				Context.IdCommandEntry = idCommandEntry;
 				return this;
