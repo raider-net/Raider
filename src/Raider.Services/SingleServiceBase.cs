@@ -4,7 +4,8 @@ using System;
 
 namespace Raider.Services
 {
-	public class SingleServiceBase<THandlerContext, TBuilder> : ServiceBase
+	public class SingleServiceBase<THandlerContext, TBuilder, TServiceContext> : ServiceBase<TServiceContext>
+			where TServiceContext : ServiceContext, new()
 			where THandlerContext : CommandHandlerContext
 			where TBuilder : CommandHandlerContext.Builder<THandlerContext>
 	{
@@ -14,7 +15,7 @@ namespace Raider.Services
 				throw new ArgumentNullException(nameof(serviceFactory));
 
 			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
-			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder>(this.GetType(), alowAnonymousUser);
+			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder, TServiceContext>(this.GetType(), alowAnonymousUser);
 		}
 	}
 }

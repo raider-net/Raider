@@ -1,15 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Raider.DependencyInjection;
-using Raider.EntityFrameworkCore;
-using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Runtime.CompilerServices;
 
 namespace Raider.Services
@@ -20,22 +15,16 @@ namespace Raider.Services
 		new ITraceInfo TraceInfo { get; }
 		string? CommandName { get;  }
 		Guid? IdCommandEntry { get;  }
-		IDbContextTransaction? DbContextTransaction { get;  }
-		string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		ILogger Logger { get;  }
 		new IApplicationResources ApplicationResources { get;  }
 		Dictionary<object, object?> CommandHandlerItems { get; }
 
-		TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
-			where TContext : DbContext;
-		TContext GetOrCreateDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
-			where TContext : DbContext;
-
-		TService GetService<TService>(
+		TService GetService<TService, TServiceContext>(
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-			where TService : ServiceBase;
+			where TServiceContext : ServiceContext, new()
+			where TService : ServiceBase<TServiceContext>;
 
 		MethodLogScope CreateScope(
 			IEnumerable<MethodParameter>? methodParameters = null,

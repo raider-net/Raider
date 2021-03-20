@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Raider.Commands;
 using Raider.Commands.Aspects;
 using Raider.DependencyInjection;
@@ -10,6 +9,7 @@ using Raider.Logging.Extensions;
 using Raider.Services.Commands;
 using Raider.Trace;
 using System;
+using System.Data;
 
 namespace Raider.Services.Aspects
 {
@@ -120,13 +120,15 @@ namespace Raider.Services.Aspects
 			var resultBuilder = new CommandResultBuilder<TResult>();
 			var result = resultBuilder.Build();
 			Guid? idCommand = null;
-			IDbContextTransaction? tran = null;
+			TContext? context = default;
 
 			try
 			{
 				var commandHandlerContextBuilder =
 					CreateCommandHandlerContext(traceInfo, _loggerFactory.CreateLogger(handler.GetType()))
 						.CommandName(commandType?.FullName);
+
+				context = commandHandlerContextBuilder.Context;
 
 				if (command is not CommandBase<TResult> commandBase)
 					throw new InvalidOperationException($"Command {commandType?.FullName} must implement {typeof(CommandBase<TResult>).FullName}");
@@ -165,7 +167,7 @@ namespace Raider.Services.Aspects
 
 					if (!resultBuilder.MergeHasError(canExecuteResult))
 					{
-						var executeResult = handler.Execute(command, commandHandlerContextBuilder.Context);
+						var executeResult = handler.Execute(command, context);
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.Execute)} returned null. Expected {typeof(ICommandResult<TResult>).FullName}");
 
@@ -173,21 +175,13 @@ namespace Raider.Services.Aspects
 						resultBuilder.CopyAllHasError(executeResult);
 					}
 
-					tran = commandHandlerContextBuilder.Context.DbContextTransaction;
-
 					if (result.HasError)
 					{
-						if (tran != null)
-						{
-							tran.Rollback();
-						}
+						context.Rollback();
 					}
 					else
 					{
-						if (tran != null)
-						{
-							tran.Commit();
-						}
+						context.Commit();
 					}
 
 					callEndTicks = StaticWatch.CurrentTicks;
@@ -198,15 +192,13 @@ namespace Raider.Services.Aspects
 					callEndTicks = StaticWatch.CurrentTicks;
 					methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
 
-					if (tran != null)
-					{
-						tran.Rollback();
-					}
+					var hasTrans = context.HasTransaction();
+					context.Rollback();
 
 					result = new CommandResultBuilder<TResult>()
 						.WithError(traceInfo,
 							x => x.ExceptionInfo(executeEx)
-									.Detail(tran == null ? $"Unhandled handler ({handler.GetType().FullName}) exception." : $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded.")
+									.Detail(hasTrans ? $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded." : $"Unhandled handler ({handler.GetType().FullName}) exception.")
 									.IdCommandQuery(idCommand))
 						.Build();
 				}
@@ -236,10 +228,7 @@ namespace Raider.Services.Aspects
 			{
 				try
 				{
-					if (tran != null)
-					{
-						tran.Dispose();
-					}
+					context?.DisposeTransaction();
 				}
 				catch { }
 

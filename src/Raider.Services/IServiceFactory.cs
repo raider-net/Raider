@@ -7,13 +7,14 @@ namespace Raider.Services
 {
 	public interface IServiceFactory
 	{
-		TService Create<TService, THandlerContext, TBuilder>(
+		TService Create<TService, TServiceContext, THandlerContext, TBuilder>(
 			string? commandName = null,
 			IEnumerable<MethodParameter>? methodParameters = null,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-			where TService : ServiceBase
+			where TServiceContext : ServiceContext, new()
+			where TService : ServiceBase<TServiceContext>
 			where THandlerContext : CommandHandlerContext
 			where TBuilder : CommandHandlerContext.Builder<THandlerContext>;
 	}

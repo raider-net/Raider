@@ -89,7 +89,7 @@ namespace Raider.Services
 			return commandHandlerContextBuilder;
 		}
 
-		public ServiceContext CreateServiceContext<TService, THandlerContext, TBuilder>(
+		public TServiceContext CreateServiceContext<TService, TServiceContext, THandlerContext, TBuilder>(
 			bool allowAnonymousUser,
 			string? commandName = null,
 			Type? handlerType = null,
@@ -97,7 +97,8 @@ namespace Raider.Services
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-			where TService : ServiceBase
+			where TServiceContext : ServiceContext, new()
+			where TService : ServiceBase<TServiceContext>
 			where THandlerContext : CommandHandlerContext
 			where TBuilder : CommandHandlerContext.Builder<THandlerContext>
 		{
@@ -114,11 +115,12 @@ namespace Raider.Services
 			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, allowAnonymousUser, commandName, handlerType);
 			var commandHandlerContext = commandHandlerContextBuilder.Context;
 
-			var serviceContext = new ServiceContext(traceInfo, commandHandlerContext, typeof(TService));
+			var serviceContext = new TServiceContext();
+			serviceContext.Init(traceInfo, commandHandlerContext, typeof(TService));
 			return serviceContext;
 		}
 
-		public ServiceContext CreateServiceContext<THandlerContext, TBuilder>(
+		public TServiceContext CreateServiceContext<THandlerContext, TBuilder, TServiceContext>(
 			Type serviceType,
 			bool allowAnonymousUser,
 			string? commandName = null,
@@ -127,13 +129,14 @@ namespace Raider.Services
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
+			where TServiceContext : ServiceContext, new()
 			where THandlerContext : CommandHandlerContext
 			where TBuilder : CommandHandlerContext.Builder<THandlerContext>
 		{
 			if (serviceType == null)
 				throw new ArgumentNullException(nameof(serviceType));
 
-			var serviceBaseType = typeof(ServiceBase);
+			var serviceBaseType = typeof(ServiceBase<TServiceContext>);
 			if (!serviceBaseType.IsAssignableFrom(serviceType))
 				throw new InvalidOperationException($"serviceType {serviceType.FullName} must inherit from {serviceBaseType.FullName}");
 
@@ -150,7 +153,8 @@ namespace Raider.Services
 			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, allowAnonymousUser, commandName, handlerType);
 			var commandHandlerContext = commandHandlerContextBuilder.Context;
 
-			var serviceContext = new ServiceContext(traceInfo, commandHandlerContext, serviceType);
+			var serviceContext = new TServiceContext();
+			serviceContext.Init(traceInfo, commandHandlerContext, serviceType);
 			return serviceContext;
 		}
 	}

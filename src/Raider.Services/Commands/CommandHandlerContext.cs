@@ -1,19 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Raider.Commands;
 using Raider.DependencyInjection;
-using Raider.EntityFrameworkCore;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
 using Raider.Logging.Extensions;
 using Raider.Trace;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,16 +17,12 @@ namespace Raider.Services.Commands
 {
 	public abstract class CommandHandlerContext : ICommandHandlerContext, ICommandServiceContext
 	{
-		private readonly ConcurrentDictionary<Type, DbContext> _dbContextCache = new ConcurrentDictionary<Type, DbContext>();
-
 		public ServiceFactory ServiceFactory { get; }
 		public ITraceInfo TraceInfo { get; protected set; }
 		public RaiderIdentity<int>? User { get; private set; }
 		public RaiderPrincipal<int>? Principal { get; private set; }
 		public string? CommandName { get; private set; }
 		public Guid? IdCommandEntry { get; private set; }
-		public IDbContextTransaction? DbContextTransaction { get; private set; }
-		public string? DbContextTransactionId => DbContextTransaction?.TransactionId.ToString();
 		public ILogger Logger { get; private set; }
 		public IApplicationResources ApplicationResources { get; private set; }
 		public Dictionary<object, object?> CommandHandlerItems { get; } = new Dictionary<object, object?>();
@@ -43,30 +34,13 @@ namespace Raider.Services.Commands
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-		public TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
-			where TContext : DbContext
-		{
-			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(ServiceFactory, DbContextTransaction, out IDbContextTransaction? newDbContextTransaction, transactionUsage, transactionIsolationLevel);
-			DbContextTransaction = newDbContextTransaction;
-			return dbContext;
-		}
-
-		public TContext GetOrCreateDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
-			where TContext : DbContext
-		{
-			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContext<TContext>(transactionUsage, transactionIsolationLevel)).CheckDbTransaction(transactionUsage);
-			return (TContext)result;
-		}
-
-		public TService GetService<TService>(
+		public virtual TService GetService<TService, TServiceContext>(
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-			where TService : ServiceBase
+			where TServiceContext : ServiceContext, new()
+			where TService : ServiceBase<TServiceContext>
 		{
-			if (typeof(IQueryableBase).IsAssignableFrom(typeof(TService)))
-				throw new NotSupportedException($"For {nameof(IQueryableBase)} use Constructor {nameof(IQueryableBase)}({nameof(CommandHandlerContext)}) or {nameof(IQueryableBase)}({nameof(ServiceContext)}) isntead");
-
 			var service = ServiceFactory.GetRequiredInstance<TService>();
 
 			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
@@ -74,22 +48,21 @@ namespace Raider.Services.Commands
 				.CallerFilePath(sourceFilePath)
 				.CallerLineNumber(sourceLineNumber);
 
-			service.ServiceContext = new ServiceContext(traceFrameBuilder.Build(), this, typeof(TService));
+			service.ServiceContext = new TServiceContext();
+			service.ServiceContext.Init(traceFrameBuilder.Build(), this, typeof(TService));
 			service.Initialize();
 
 			return service;
 		}
 
-		public async Task<TService> GetServiceAsync<TService>(
+		public virtual async Task<TService> GetServiceAsync<TService, TServiceContext>(
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0,
 			CancellationToken cancellationToken = default)
-			where TService : ServiceBase
+			where TServiceContext : ServiceContext, new()
+			where TService : ServiceBase<TServiceContext>
 		{
-			if (typeof(IQueryableBase).IsAssignableFrom(typeof(TService)))
-				throw new NotSupportedException($"For {nameof(IQueryableBase)} use Constructor {nameof(IQueryableBase)}({nameof(CommandHandlerContext)}) or {nameof(IQueryableBase)}({nameof(ServiceContext)}) isntead");
-
 			var service = ServiceFactory.GetRequiredInstance<TService>();
 
 			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
@@ -97,24 +70,28 @@ namespace Raider.Services.Commands
 				.CallerFilePath(sourceFilePath)
 				.CallerLineNumber(sourceLineNumber);
 
-			service.ServiceContext = new ServiceContext(traceFrameBuilder.Build(), this, typeof(TService));
+			service.ServiceContext = new TServiceContext();
+			service.ServiceContext.Init(traceFrameBuilder.Build(), this, typeof(TService));
 			await service.InitializeAsync(cancellationToken);
 
 			return service;
 		}
 
-		internal ServiceContext GetServiceContext(
+		public TServiceContext GetServiceContext<TServiceContext>(
 			Type typeOfService,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
+			where TServiceContext : ServiceContext, new()
 		{
 			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
 				.CallerMemberName(memberName)
 				.CallerFilePath(sourceFilePath)
 				.CallerLineNumber(sourceLineNumber);
 
-			return new ServiceContext(traceFrameBuilder.Build(), this, typeOfService);
+			var serviceContext = new TServiceContext();
+			serviceContext.Init(traceFrameBuilder.Build(), this, typeOfService);
+			return serviceContext;
 		}
 
 		public MethodLogScope CreateScope(
@@ -299,6 +276,31 @@ namespace Raider.Services.Commands
 
 			return Logger.LogCriticalMessage(scope, (x => x.CommandQueryName(CommandName)) + messageBuilder);
 		}
+
+		public virtual bool HasTransaction()
+			=> false;
+
+		public virtual void Commit()
+		{
+		}
+
+		public virtual void Rollback()
+		{
+		}
+
+		public virtual void DisposeTransaction()
+		{
+		}
+
+		public virtual Task CommitAsync(CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
+
+		public virtual Task RollbackAsync(CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
+
+		public virtual ValueTask DisposeTransactionAsync()
+			=> ValueTask.CompletedTask;
+
 
 
 

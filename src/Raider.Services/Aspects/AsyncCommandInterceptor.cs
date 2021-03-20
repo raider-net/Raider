@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Raider.Commands;
 using Raider.Commands.Aspects;
 using Raider.DependencyInjection;
@@ -10,6 +9,7 @@ using Raider.Logging.Extensions;
 using Raider.Services.Commands;
 using Raider.Trace;
 using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -122,13 +122,15 @@ namespace Raider.Services.Aspects
 			var resultBuilder = new CommandResultBuilder<TResult>();
 			var result = resultBuilder.Build();
 			Guid? idCommand = null;
-			IDbContextTransaction? tran = null;
+			TContext? context = default;
 
 			try
 			{
 				var commandHandlerContextBuilder =
 					CreateCommandHandlerContext(traceInfo, _loggerFactory.CreateLogger(handler.GetType()))
 						.CommandName(commandType?.FullName);
+
+				context = commandHandlerContextBuilder.Context;
 
 				if (command is not CommandBase<TResult> commandBase)
 					throw new InvalidOperationException($"Command {commandType?.FullName} must implement {typeof(CommandBase<TResult>).FullName}");
@@ -151,10 +153,6 @@ namespace Raider.Services.Aspects
 
 				commandHandlerContextBuilder.IdCommandEntry(idCommand);
 
-				//TODO ako nastavit transaction id, ked transakcia ani dbcontext este nevznikli
-				//traceInfoBuilder
-				//	.TransactionId(tran?.TransactionId.ToString());
-
 				try
 				{
 					var canExecuteContextBuilder =
@@ -167,7 +165,7 @@ namespace Raider.Services.Aspects
 
 					if (!resultBuilder.MergeHasError(canExecuteResult))
 					{
-						var executeResult = await handler.ExecuteAsync(command, commandHandlerContextBuilder.Context, cancellationToken);
+						var executeResult = await handler.ExecuteAsync(command, context, cancellationToken);
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.ExecuteAsync)} returned null. Expected {typeof(ICommandResult<TResult>).FullName}");
 
@@ -175,21 +173,13 @@ namespace Raider.Services.Aspects
 						resultBuilder.CopyAllHasError(executeResult);
 					}
 
-					tran = commandHandlerContextBuilder.Context.DbContextTransaction;
-
 					if (result.HasError)
 					{
-						if (tran != null)
-						{
-							tran.Rollback();
-						}
+						await context.RollbackAsync(cancellationToken);
 					}
 					else
 					{
-						if (tran != null)
-						{
-							tran.Commit();
-						}
+						await context.CommitAsync(cancellationToken);
 					}
 
 					callEndTicks = StaticWatch.CurrentTicks;
@@ -200,15 +190,13 @@ namespace Raider.Services.Aspects
 					callEndTicks = StaticWatch.CurrentTicks;
 					methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
 
-					if (tran != null)
-					{
-						tran.Rollback();
-					}
+					var hasTrans = context.HasTransaction();
+					await context.RollbackAsync(cancellationToken);
 
 					result = new CommandResultBuilder<TResult>()
 						.WithError(traceInfo,
 							x => x.ExceptionInfo(executeEx)
-									.Detail(tran == null ? $"Unhandled handler ({handler.GetType().FullName}) exception." : $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded.")
+									.Detail(hasTrans ? $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded." : $"Unhandled handler ({handler.GetType().FullName}) exception.")
 									.IdCommandQuery(idCommand))
 						.Build();
 				}
@@ -238,10 +226,8 @@ namespace Raider.Services.Aspects
 			{
 				try
 				{
-					if (tran != null)
-					{
-						await tran.DisposeAsync();
-					}
+					if (context != null)
+						await context.DisposeTransactionAsync();
 				}
 				catch { }
 
