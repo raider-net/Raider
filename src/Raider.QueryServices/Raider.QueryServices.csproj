@@ -16,7 +16,7 @@
 		<Authors>Tomas Pilat</Authors>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
-		<Version>1.1.9</Version>
+		<Version>1.1.10</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,7 +27,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Raider.EntityFrameworkCore\Raider.EntityFrameworkCore.csproj" />
 		<ProjectReference Include="..\Raider.Queries\Raider.Queries.csproj" />
 		<ProjectReference Include="..\Raider.Validation\Raider.Validation.csproj" />
 	</ItemGroup>

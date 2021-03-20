@@ -4,7 +4,8 @@ using System;
 
 namespace Raider.QueryServices
 {
-	public class SingleQueryServiceBase<THandlerContext, TBuilder> : QueryServiceBase
+	public class SingleQueryServiceBase<THandlerContext, TBuilder, TQueryServiceContext> : QueryServiceBase<TQueryServiceContext>
+			where TQueryServiceContext : QueryServiceContext, new()
 			where THandlerContext : QueryHandlerContext
 			where TBuilder : QueryHandlerContext.Builder<THandlerContext>
 	{
@@ -14,7 +15,7 @@ namespace Raider.QueryServices
 				throw new ArgumentNullException(nameof(serviceFactory));
 
 			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
-			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder>(this.GetType(), alowAnonymousUser);
+			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder, TQueryServiceContext>(this.GetType(), alowAnonymousUser);
 		}
 	}
 }

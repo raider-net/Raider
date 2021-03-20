@@ -1,15 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
-using Raider.Queries;
-using Raider.Queries.Aspects;
+﻿using Microsoft.Extensions.Logging;
 using Raider.DependencyInjection;
 using Raider.Diagnostics;
+using Raider.Extensions;
 using Raider.Logging;
 using Raider.Logging.Extensions;
+using Raider.Queries;
+using Raider.Queries.Aspects;
 using Raider.QueryServices.Queries;
 using Raider.Trace;
 using System;
-using Raider.Extensions;
 
 namespace Raider.QueryServices.Aspects
 {
@@ -120,13 +119,15 @@ namespace Raider.QueryServices.Aspects
 			var resultBuilder = new QueryResultBuilder<TResult>();
 			var result = resultBuilder.Build();
 			Guid? idQuery = null;
-			IDbContextTransaction? tran = null;
+			TContext? context = default;
 
 			try
 			{
 				var queryHandlerContextBuilder =
 					CreateQueryHandlerContext(traceInfo, _loggerFactory.CreateLogger(handler.GetType()))
 						.QueryName(queryType?.FullName);
+
+				context = queryHandlerContextBuilder.Context;
 
 				if (query is not QueryBase<TResult> queryBase)
 					throw new InvalidOperationException($"Query {queryType?.FullName} must implement {typeof(QueryBase<TResult>).FullName}");
@@ -149,10 +150,6 @@ namespace Raider.QueryServices.Aspects
 
 				queryHandlerContextBuilder.IdQueryEntry(idQuery);
 
-				//TODO ako nastavit transaction id, ked transakcia ani dbcontext este nevznikli
-				//traceInfoBuilder
-				//	.TransactionId(tran?.TransactionId.ToString());
-
 				try
 				{
 					var canExecuteContextBuilder =
@@ -165,7 +162,7 @@ namespace Raider.QueryServices.Aspects
 
 					if (!resultBuilder.MergeHasError(canExecuteResult))
 					{
-						var executeResult = handler.Execute(query, queryHandlerContextBuilder.Context);
+						var executeResult = handler.Execute(query, context);
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.Execute)} returned null. Expected {typeof(IQueryResult<TResult>).FullName}");
 
@@ -173,21 +170,13 @@ namespace Raider.QueryServices.Aspects
 						resultBuilder.CopyAllHasError(executeResult);
 					}
 
-					tran = queryHandlerContextBuilder.Context.DbContextTransaction;
-
 					if (result.HasError)
 					{
-						if (tran != null)
-						{
-							tran.Rollback();
-						}
+						context.Rollback();
 					}
 					else
 					{
-						if (tran != null)
-						{
-							tran.Commit();
-						}
+						context.Commit();
 					}
 
 					callEndTicks = StaticWatch.CurrentTicks;
@@ -198,15 +187,13 @@ namespace Raider.QueryServices.Aspects
 					callEndTicks = StaticWatch.CurrentTicks;
 					methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
 
-					if (tran != null)
-					{
-						tran.Rollback();
-					}
+					var hasTrans = context.HasTransaction();
+					context.Rollback();
 
 					result = new QueryResultBuilder<TResult>()
 						.WithError(traceInfo,
 							x => x.ExceptionInfo(executeEx)
-									.Detail(tran == null ? $"Unhandled handler ({handler.GetType().FullName}) exception." : $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded.")
+									.Detail(hasTrans ? $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded." : $"Unhandled handler ({handler.GetType().FullName}) exception.")
 									.IdCommandQuery(idQuery))
 						.Build();
 				}
@@ -236,10 +223,8 @@ namespace Raider.QueryServices.Aspects
 			{
 				try
 				{
-					if (tran != null)
-					{
-						tran.Dispose();
-					}
+					if (context != null)
+						context.DisposeTransaction();
 				}
 				catch { }
 

@@ -89,7 +89,7 @@ namespace Raider.QueryServices
 			return queryHandlerContextBuilder;
 		}
 
-		public QueryServiceContext CreateQueryServiceContext<TQueryService, THandlerContext, TBuilder>(
+		public TQueryServiceContext CreateQueryServiceContext<TQueryService, TQueryServiceContext, THandlerContext, TBuilder>(
 			bool allowAnonymousUser,
 			string? queryName = null,
 			Type? handlerType = null,
@@ -97,7 +97,8 @@ namespace Raider.QueryServices
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-			where TQueryService : QueryServiceBase
+			where TQueryServiceContext : QueryServiceContext, new()
+			where TQueryService : QueryServiceBase<TQueryServiceContext>
 			where THandlerContext : QueryHandlerContext
 			where TBuilder : QueryHandlerContext.Builder<THandlerContext>
 		{
@@ -114,11 +115,12 @@ namespace Raider.QueryServices
 			var queryHandlerContextBuilder = CreateQueryHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, allowAnonymousUser, queryName, handlerType);
 			var queryHandlerContext = queryHandlerContextBuilder.Context;
 
-			var serviceContext = new QueryServiceContext(traceInfo, queryHandlerContext, typeof(TQueryService));
+			var serviceContext = new TQueryServiceContext();
+			serviceContext.Init(traceInfo, queryHandlerContext, typeof(TQueryService));
 			return serviceContext;
 		}
 
-		public QueryServiceContext CreateQueryServiceContext<THandlerContext, TBuilder>(
+		public TQueryServiceContext CreateQueryServiceContext<THandlerContext, TBuilder, TQueryServiceContext>(
 			Type queryServiceType,
 			bool allowAnonymousUser,
 			string? queryName = null,
@@ -127,13 +129,14 @@ namespace Raider.QueryServices
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
+			where TQueryServiceContext : QueryServiceContext, new()
 			where THandlerContext : QueryHandlerContext
 			where TBuilder : QueryHandlerContext.Builder<THandlerContext>
 		{
 			if (queryServiceType == null)
 				throw new ArgumentNullException(nameof(queryServiceType));
 
-			var queryServiceBaseType = typeof(QueryServiceBase);
+			var queryServiceBaseType = typeof(QueryServiceBase<TQueryServiceContext>);
 			if (!queryServiceBaseType.IsAssignableFrom(queryServiceType))
 				throw new InvalidOperationException($"queryServiceType {queryServiceType.FullName} must inherit from {queryServiceBaseType.FullName}");
 
@@ -150,7 +153,8 @@ namespace Raider.QueryServices
 			var queryHandlerContextBuilder = CreateQueryHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, allowAnonymousUser, queryName, handlerType);
 			var queryHandlerContext = queryHandlerContextBuilder.Context;
 
-			var serviceContext = new QueryServiceContext(traceInfo, queryHandlerContext, queryServiceType);
+			var serviceContext = new TQueryServiceContext();
+			serviceContext.Init(traceInfo, queryHandlerContext, queryServiceType);
 			return serviceContext;
 		}
 	}

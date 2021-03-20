@@ -1,6 +1,4 @@
-﻿using Raider.EntityFrameworkCore;
-using Raider.Queries;
-using System.Data;
+﻿using Raider.Queries;
 
 namespace Raider.QueryServices.Queries
 {
@@ -8,7 +6,5 @@ namespace Raider.QueryServices.Queries
 	{
 		public bool LogQueryEntry { get; set; } = true;
 		public bool SerializeQuery { get; set; } = false;
-		public TransactionUsage TransactionUsage { get; set; } = TransactionUsage.ReuseOrCreateNew;
-		public IsolationLevel? TransactionIsolationLevel { get; set; }
 	}
 }

@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Raider.DependencyInjection;
-using Raider.EntityFrameworkCore;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
@@ -10,34 +7,19 @@ using Raider.QueryServices.Queries;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Raider.QueryServices
 {
-	internal static class DbContextExtensions
-	{
-		public static DbContext CheckDbTransaction(this DbContext dbContext, TransactionUsage transactionUsage)
-		{
-			if (transactionUsage == TransactionUsage.NONE && dbContext.Database.CurrentTransaction != null)
-				throw new InvalidOperationException($"DbContext has transaction, but expected {nameof(TransactionUsage)} is {transactionUsage}");
-
-			if (transactionUsage == TransactionUsage.ReuseOrCreateNew && dbContext.Database.CurrentTransaction == null)
-				throw new InvalidOperationException($"DbContext has no transaction, but expected {nameof(TransactionUsage)} is {transactionUsage}");
-
-			return dbContext;
-		}
-	}
-
 	public class QueryServiceContext : IServiceContext, IQueryServiceContext
 	{
-		private readonly QueryHandlerContext _queryHandlerContext;
+		private QueryHandlerContext _queryHandlerContext;
 
 		public ServiceFactory ServiceFactory => _queryHandlerContext.ServiceFactory;
 
-		public ITraceInfo TraceInfo { get; }
+		public ITraceInfo TraceInfo { get; private set; }
 
 		public RaiderIdentity<int>? User => _queryHandlerContext.User;
 
@@ -47,20 +29,45 @@ namespace Raider.QueryServices
 
 		public Guid? IdQueryEntry => _queryHandlerContext.IdQueryEntry;
 
-		public IDbContextTransaction? DbContextTransaction => _queryHandlerContext.DbContextTransaction;
-
-		public ILogger Logger { get; }
+		public ILogger Logger { get; private set; }
 
 		public IApplicationResources ApplicationResources => _queryHandlerContext.ApplicationResources;
 
 		public Dictionary<object, object?> CommandHandlerItems => _queryHandlerContext.CommandHandlerItems;
-		public Type ForServiceType { get; }
+		public Type ForServiceType { get; private set; }
 		public bool AllowCommit { get; set; }
 		public Dictionary<object, object?> LocalItems { get; } = new Dictionary<object, object?>();
 
-		public QueryServiceContext(ITraceFrame currentTraceFrame, QueryHandlerContext queryHandlerContext, Type serviceType)
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+		public QueryServiceContext() { }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
+		//public QueryServiceContext(ITraceFrame currentTraceFrame, QueryHandlerContext queryHandlerContext, Type serviceType)
+		//{
+		//	_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
+		//	TraceInfo = new TraceInfoBuilder(currentTraceFrame, queryHandlerContext.TraceInfo).Build();
+		//	ForServiceType = serviceType;
+
+		//	var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
+		//	Logger = serviceLogger;
+		//}
+
+		//public QueryServiceContext(ITraceInfo traceInfo, QueryHandlerContext queryHandlerContext, Type serviceType)
+		//{
+		//	_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
+		//	TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
+		//	ForServiceType = serviceType;
+
+		//	var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
+		//	Logger = serviceLogger;
+		//}
+
+		internal void Init(ITraceFrame currentTraceFrame, QueryHandlerContext queryHandlerContext, Type serviceType)
 		{
 			_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
+			OnSetQueryHandlerContext(_queryHandlerContext);
 			TraceInfo = new TraceInfoBuilder(currentTraceFrame, queryHandlerContext.TraceInfo).Build();
 			ForServiceType = serviceType;
 
@@ -69,9 +76,10 @@ namespace Raider.QueryServices
 			Logger = serviceLogger;
 		}
 
-		public QueryServiceContext(ITraceInfo traceInfo, QueryHandlerContext queryHandlerContext, Type serviceType)
+		internal void Init(ITraceInfo traceInfo, QueryHandlerContext queryHandlerContext, Type serviceType)
 		{
 			_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
+			OnSetQueryHandlerContext(_queryHandlerContext);
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 			ForServiceType = serviceType;
 
@@ -80,32 +88,26 @@ namespace Raider.QueryServices
 			Logger = serviceLogger;
 		}
 
-		public TContext CreateNewDbContext<TContext>(
-			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
-			IsolationLevel? transactionIsolationLevel = null)
-			where TContext : DbContext
-			=> _queryHandlerContext.CreateNewDbContext<TContext>(transactionUsage, transactionIsolationLevel);
+		protected virtual void OnSetQueryHandlerContext(QueryHandlerContext queryHandlerContext)
+		{
+		}
 
-		public TContext GetOrCreateDbContext<TContext>(
-			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
-			IsolationLevel? transactionIsolationLevel = null) 
-			where TContext : DbContext
-			=> _queryHandlerContext.GetOrCreateDbContext<TContext>(transactionUsage, transactionIsolationLevel);
-
-		public TService GetQueryService<TService>(
+		public TQueryService GetQueryService<TQueryService, TQueryServiceContext>(
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-			where TService : QueryServiceBase
-			=> _queryHandlerContext.GetQueryService<TService>(memberName, sourceFilePath, sourceLineNumber);
+			where TQueryServiceContext : QueryServiceContext, new()
+			where TQueryService : QueryServiceBase<TQueryServiceContext>
+			=> _queryHandlerContext.GetQueryService<TQueryService, TQueryServiceContext>(memberName, sourceFilePath, sourceLineNumber);
 
-		public Task<TService> GetQueryServiceAsync<TService>(
+		public Task<TQueryService> GetQueryServiceAsync<TQueryService, TQueryServiceContext>(
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0,
 			CancellationToken cancellationToken = default)
-			where TService : QueryServiceBase
-			=> _queryHandlerContext.GetQueryServiceAsync<TService>(memberName, sourceFilePath, sourceLineNumber, cancellationToken);
+			where TQueryServiceContext : QueryServiceContext, new()
+			where TQueryService : QueryServiceBase<TQueryServiceContext>
+			=> _queryHandlerContext.GetQueryServiceAsync<TQueryService, TQueryServiceContext>(memberName, sourceFilePath, sourceLineNumber, cancellationToken);
 
 		public MethodLogScope CreateScope(
 			IEnumerable<MethodParameter>? methodParameters = null,
