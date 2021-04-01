@@ -30,20 +30,20 @@ namespace Raider.QueryServices.EntityFramework
 		}
 	}
 
-	public class QueryServiceContext : Raider.QueryServices.QueryServiceContext, IServiceContext, IQueryServiceContext
+	public class DbQueryServiceContext : Raider.QueryServices.QueryServiceContext, IServiceContext, IDbQueryServiceContext
 	{
-		private QueryHandlerContext? _queryHandlerContext;
+		private DbQueryHandlerContext? _queryHandlerContext;
 
 		public IDbContextTransaction? DbContextTransaction => _queryHandlerContext.DbContextTransaction;
 
-		public QueryServiceContext()
+		public DbQueryServiceContext()
 			: base()
 		{
 		}
 
 		protected override void OnSetQueryHandlerContext(QueryServices.Queries.QueryHandlerContext queryHandlerContext)
 		{
-			_queryHandlerContext = (QueryHandlerContext)queryHandlerContext;
+			_queryHandlerContext = (DbQueryHandlerContext)queryHandlerContext;
 		}
 
 		public TContext CreateNewDbContext<TContext>(

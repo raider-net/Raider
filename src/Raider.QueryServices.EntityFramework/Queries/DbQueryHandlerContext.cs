@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace Raider.QueryServices.EntityFramework.Queries
 {
-	public abstract class QueryHandlerContext : Raider.QueryServices.Queries.QueryHandlerContext, IQueryHandlerContext, IQueryServiceContext
+	public abstract class DbQueryHandlerContext : Raider.QueryServices.Queries.QueryHandlerContext, IQueryHandlerContext, IDbQueryServiceContext
 	{
 		private readonly ConcurrentDictionary<Type, DbContext> _dbContextCache = new ConcurrentDictionary<Type, DbContext>();
 
 		public IDbContextTransaction? DbContextTransaction { get; private set; }
 
-		public QueryHandlerContext(ServiceFactory serviceFactory)
+		public DbQueryHandlerContext(ServiceFactory serviceFactory)
 			: base(serviceFactory)
 		{
 		}

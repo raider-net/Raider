@@ -13,7 +13,7 @@ namespace Raider.QueryServices.EntityFramework
 	{
 	}
 
-	public abstract class QueryableBase<T, TDbContext> : QueryServiceBase<QueryServiceContext>, IQueryableBase
+	public abstract class QueryableBase<T, TDbContext> : QueryServiceBase<DbQueryServiceContext>, IQueryableBase
 		where TDbContext : DbContext
 	{
 		private readonly ServiceFactory _serviceFactory;
@@ -25,7 +25,7 @@ namespace Raider.QueryServices.EntityFramework
 			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
 		}
 
-		public QueryableBase(QueryServiceContext serviceContext,
+		public QueryableBase(DbQueryServiceContext serviceContext,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null,
 			bool asNoTracking = false)
@@ -34,7 +34,7 @@ namespace Raider.QueryServices.EntityFramework
 			SetDbContext(QueryServiceContext.GetOrCreateDbContext<TDbContext>(transactionUsage, transactionIsolationLevel), asNoTracking);
 		}
 
-		public QueryableBase(QueryHandlerContext queryHandlerContext,
+		public QueryableBase(DbQueryHandlerContext queryHandlerContext,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null,
 			bool asNoTracking = false,
@@ -45,7 +45,7 @@ namespace Raider.QueryServices.EntityFramework
 			if (queryHandlerContext == null)
 				throw new ArgumentNullException(nameof(queryHandlerContext));
 
-			SetQueryServiceContext(queryHandlerContext.GetQueryServiceContext<QueryServiceContext>(GetType(), memberName, sourceFilePath, sourceLineNumber));
+			SetQueryServiceContext(queryHandlerContext.GetQueryServiceContext<DbQueryServiceContext>(GetType(), memberName, sourceFilePath, sourceLineNumber));
 			SetDbContext(QueryServiceContext.GetOrCreateDbContext<TDbContext>(transactionUsage, transactionIsolationLevel), asNoTracking);
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -59,8 +59,8 @@ namespace Raider.QueryServices.EntityFramework
 		}
 
 		protected void SetDbContext<THandlerContext, TBuilder>()
-			where THandlerContext : QueryHandlerContext
-			where TBuilder : QueryHandlerContext.Builder<THandlerContext>
+			where THandlerContext : DbQueryHandlerContext
+			where TBuilder : DbQueryHandlerContext.Builder<THandlerContext>
 		{
 			SetQueryServiceContext<THandlerContext, TBuilder>(_serviceFactory, this.GetType());
 			SetDbContext(QueryServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);

@@ -151,10 +151,6 @@ namespace Raider.Services.Aspects
 
 				commandHandlerContextBuilder.IdCommandEntry(idCommand);
 
-				//TODO ako nastavit transaction id, ked transakcia ani dbcontext este nevznikli
-				//traceInfoBuilder
-				//	.TransactionId(tran?.TransactionId.ToString());
-
 				try
 				{
 					var canExecuteContextBuilder =
