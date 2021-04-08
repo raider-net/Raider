@@ -364,13 +364,44 @@ namespace Raider.Extensions
 		{
 			if (type == null || interfaceType == null || type == interfaceType || !interfaceType.IsInterface)
 				return false;
+
 			if (interfaceType.IsGenericTypeDefinition && type.GetInterfaces().Where(t => t.IsGenericType).Select(t => t.GetGenericTypeDefinition()).Any(gt => gt == interfaceType))
-			{
 				return true;
-			}
+
 			return interfaceType.IsAssignableFrom(type);
 		}
 		#endregion
+
+		public static IEnumerable<Type> GetBaseTypes(this Type type)
+		{
+			if (type == null)
+				yield break;
+
+			var currentBaseType = type.BaseType;
+			while (currentBaseType != null)
+			{
+				yield return currentBaseType;
+				currentBaseType = currentBaseType.BaseType;
+			}
+		}
+
+		public static IEnumerable<Type> GetBaseTypesAndInterfaces(this Type type)
+		{
+			if (type == null)
+				yield break;
+
+			var currentBaseType = type.BaseType;
+			while (currentBaseType != null)
+			{
+				yield return currentBaseType;
+				currentBaseType = currentBaseType.BaseType;
+			}
+
+			foreach (var ifc in type.GetInterfaces())
+			{
+				yield return ifc;
+			}
+		}
 
 		public static object? GetDefaultValue(this Type type)
 		{

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Raider.DependencyInjection;
 using Raider.EntityFrameworkCore;
 using Raider.Services.EntityFramework.Commands;
@@ -18,6 +19,8 @@ namespace Raider.Services.EntityFramework
 	{
 		private readonly ServiceFactory _serviceFactory;
 		protected TDbContext DbContext { get; private set; }
+
+		public abstract IQueryable<T> Queryable { get; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 		public QueryableBase(ServiceFactory serviceFactory)
@@ -66,8 +69,28 @@ namespace Raider.Services.EntityFramework
 			SetDbContext(ServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
 		}
 
-		public abstract IQueryable<T> Default(Func<IQueryable<T>, IQueryable<T>>? queryableConfigurator = null);
+		protected virtual IQueryable<T> DefaultInternal<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
+			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
 
-		public abstract IQueryable<T> WithAcl(Func<IQueryable<T>, IQueryable<T>>? queryableConfigurator = null);
+		protected virtual IQueryable<T> DefaultInternal<T1, T2>(
+			Func<IQueryable<T>, IIncludableQueryable<T, T1>>? aclIncludableConfigurator = null,
+			Func<IQueryable<T>, IIncludableQueryable<T, T2>>? includableConfigurator = null)
+		{
+			var queryable = aclIncludableConfigurator?.Invoke(Queryable) ?? Queryable;
+			queryable = includableConfigurator?.Invoke(queryable) ?? queryable;
+			return queryable;
+		}
+
+		public IQueryable<T> Default()
+			=> Default<T>();
+
+		public IQueryable<T> WithAcl()
+			=> WithAcl<T>();
+
+		public virtual IQueryable<T> Default<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
+			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
+
+		public virtual IQueryable<T> WithAcl<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
+			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
 	}
 }
