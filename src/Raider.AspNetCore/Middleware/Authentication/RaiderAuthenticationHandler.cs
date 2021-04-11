@@ -144,6 +144,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				var timeElapsed = currentUtc.Subtract(issuedUtc.Value);
 				var timeRemaining = expiresUtc.Value.Subtract(currentUtc);
 
+				//re-issue a new cookie with a new expiration time any time it processes a request which is more than halfway through the expiration window
 				if (timeRemaining < timeElapsed)
 				{
 					RequestRefresh(ticket);
@@ -168,13 +169,9 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		private async Task<AuthenticateResult> ReadCookieTicket()
 		{
-			//TODO: skontroluj ci toto cookie bolo zapisane do taublky aud.UserToken, ak nie tzn. ze utocnik chce znova pouzit cookie, ktore sice este stale je zive, ale realny pouzivatel sa uz odhlasil a z tabulky aud.UserToken
-			//sa toto cookie odstranilo a tak je potrebne zablokovat reuse
 			var cookie = Options.CookieAuthenticationOptions.CookieManager.GetRequestCookie(Context, Options.CookieAuthenticationOptions.Cookie.Name);
 			if (string.IsNullOrEmpty(cookie))
-			{
 				return AuthenticateResult.NoResult();
-			}
 
 			var ticket = Options.CookieAuthenticationOptions.TicketDataFormat.Unprotect(cookie, GetTlsTokenBinding());
 			if (ticket == null)
@@ -208,6 +205,14 @@ namespace Raider.AspNetCore.Middleware.Authentication
 					await Options.CookieAuthenticationOptions.SessionStore.RemoveAsync(_sessionKey);
 				}
 				return AuthenticateResult.Fail("Ticket expired");
+			}
+
+			var cookieStore = Context.RequestServices.GetService<ICookieStore>();
+			if (cookieStore != null)
+			{
+				var existsInStore = await cookieStore.ExistsAsync(Context, cookie);
+				if (!existsInStore)
+					return AuthenticateResult.NoResult();
 			}
 
 			CheckForRefresh(ticket);
@@ -266,7 +271,6 @@ namespace Raider.AspNetCore.Middleware.Authentication
 					cookieOptions.Expires = _refreshExpiresUtc.Value.ToUniversalTime();
 				}
 
-				//TODO: zaloguj toto cookie do taublky aud.UserToken aby potom nasledne pri odhlaseni bolo mozne cookie zneplatnit na strane servera
 				Options.CookieAuthenticationOptions.CookieManager.AppendResponseCookie(
 					Context,
 					Options.CookieAuthenticationOptions.Cookie.Name,
@@ -274,6 +278,24 @@ namespace Raider.AspNetCore.Middleware.Authentication
 					cookieOptions);
 
 				await ApplyHeaders(shouldRedirectToReturnUrl: false, properties: properties);
+
+				var cookieStore = Context.RequestServices.GetService<ICookieStore>();
+				if (cookieStore != null)
+				{
+					int? idUser = null;
+					if (ticket.Principal is RaiderPrincipal<int> principal)
+						idUser = principal.IdentityBase?.UserId;
+
+					var issuedUtc = properties.IssuedUtc ?? Clock.UtcNow;
+					var expiresUtc = properties.ExpiresUtc ?? issuedUtc.Add(Options.CookieAuthenticationOptions.ExpireTimeSpan);
+
+					await cookieStore.InsertAsync(Context, cookieValue, issuedUtc.UtcDateTime, expiresUtc.UtcDateTime, idUser);
+
+					//cannot delete previous cookie because parallel requests can be rejected
+					//var cookie = Options.CookieAuthenticationOptions.CookieManager.GetRequestCookie(Context, Options.CookieAuthenticationOptions.Cookie.Name);
+					//if (!string.IsNullOrWhiteSpace(cookie))
+					//	await cookieStore.DeleteAsync(Context, cookie, true);
+				}
 			}
 		}
 
@@ -369,10 +391,14 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 				await Events.CookieEvents.SigningIn(signInContext);
 
+				DateTimeOffset expiresUtc = issuedUtc.Add(Options.CookieAuthenticationOptions.ExpireTimeSpan);
 				if (signInContext.Properties.IsPersistent)
 				{
-					var expiresUtc = signInContext.Properties.ExpiresUtc ?? issuedUtc.Add(Options.CookieAuthenticationOptions.ExpireTimeSpan);
-					signInContext.CookieOptions.Expires = expiresUtc.ToUniversalTime();
+					if (signInContext.Properties.ExpiresUtc.HasValue)
+						expiresUtc = signInContext.Properties.ExpiresUtc.Value;
+
+					expiresUtc = expiresUtc.ToUniversalTime();
+					signInContext.CookieOptions.Expires = expiresUtc;
 				}
 
 				var ticket = new AuthenticationTicket(signInContext.Principal, signInContext.Properties, signInContext.Scheme.Name);
@@ -393,7 +419,6 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 				var cookieValue = Options.CookieAuthenticationOptions.TicketDataFormat.Protect(ticket, GetTlsTokenBinding());
 
-				//TODO: zaloguj toto cookie do taublky aud.UserToken aby potom nasledne pri odhlaseni bolo mozne cookie zneplatnit na strane servera
 				Options.CookieAuthenticationOptions.CookieManager.AppendResponseCookie(
 					Context,
 					Options.CookieAuthenticationOptions.Cookie.Name,
@@ -408,6 +433,16 @@ namespace Raider.AspNetCore.Middleware.Authentication
 					Options.CookieAuthenticationOptions);
 
 				await Events.CookieEvents.SignedIn(signedInContext);
+
+				var cookieStore = Context.RequestServices.GetService<ICookieStore>();
+				if (cookieStore != null)
+				{
+					int? idUser = null;
+					if (user is RaiderPrincipal<int> principal)
+						idUser = principal.IdentityBase?.UserId;
+
+					await cookieStore.InsertAsync(Context, cookieValue, issuedUtc.UtcDateTime, expiresUtc.UtcDateTime, idUser);
+				}
 
 				// Only redirect on the login path
 				var shouldRedirect = Options.CookieAuthenticationOptions.LoginPath.HasValue && OriginalPath == Options.CookieAuthenticationOptions.LoginPath;
@@ -447,7 +482,14 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 				await Events.CookieEvents.SigningOut(context);
 
-				//TODO: vymaz toto cookie z taublky aud.UserToken
+				var cookieStore = Context.RequestServices.GetService<ICookieStore>();
+				if (cookieStore != null)
+				{
+					var cookie = Options.CookieAuthenticationOptions.CookieManager.GetRequestCookie(Context, Options.CookieAuthenticationOptions.Cookie.Name);
+					if (!string.IsNullOrWhiteSpace(cookie))
+						await cookieStore.DeleteAsync(Context, cookie, true);
+				}
+
 				Options.CookieAuthenticationOptions.CookieManager.DeleteCookie(
 					Context,
 					Options.CookieAuthenticationOptions.Cookie.Name,

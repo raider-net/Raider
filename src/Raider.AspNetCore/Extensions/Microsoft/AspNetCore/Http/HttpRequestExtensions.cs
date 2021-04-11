@@ -1,11 +1,19 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
+using Raider.Web;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Raider.Extensions
 {
 	public static class HttpRequestExtensions
 	{
-		public static Uri GetUri(this HttpRequest request)
+		[return: NotNullIfNotNull("request")]
+		public static Uri? GetUri(this HttpRequest request)
 		{
 			if (request == null)
 				return null;
@@ -16,7 +24,7 @@ namespace Raider.Extensions
 
 			var hostComponents = request.Host.ToUriComponent().Split(':');
 
-			UriBuilder uriBuilder = new UriBuilder
+			var uriBuilder = new UriBuilder
 			{
 				Scheme = request.Scheme,
 				Host = hostComponents[0],
@@ -30,6 +38,73 @@ namespace Raider.Extensions
 			}
 
 			return uriBuilder.Uri;
+		}
+
+		[return: NotNullIfNotNull("request")]
+		public static RequestMetadata? ToRequestMetadata(
+			this HttpRequest request,
+			bool withQueryList = false,
+			bool withCookies = true,
+			bool withHeaders = true, bool
+			withForm = false,
+			IReadOnlyDictionary<string, IDataProtector>? cookieDataProtectionPurposes = null //Dictionary<cookieName, IDataProtector>
+			)
+		{
+			if (request == null)
+				return null;
+
+			var queryList = withQueryList
+				? request.Query.Select(x => new KeyValuePair<string, List<string>>(x.Key, new List<string>(x.Value))).ToList()
+				: null;
+
+			var cookiesList = withCookies
+				? request.Cookies.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList()
+				: null;
+
+			var headersDict = withHeaders
+				? request.Headers.ToDictionary(k => k.Key, v => new List<string>(v.Value))
+				: null;
+
+			var formList = withForm
+				? (request.HasFormContentType
+					? request.Form.Select(x => new KeyValuePair<string, List<string>>(x.Key, new List<string>(x.Value))).ToList()
+					: new List<KeyValuePair<string, List<string>>>())
+				: null;
+
+			Dictionary<string, Func<string, string>>? cookieUnprotectors = null;
+			if (cookieDataProtectionPurposes != null && 0 < cookieDataProtectionPurposes.Count)
+			{
+				cookieUnprotectors = new Dictionary<string, Func<string, string>>();
+
+				foreach (var kvp in cookieDataProtectionPurposes)
+				{
+					var dataProtector = kvp.Value;
+					cookieUnprotectors.Add(
+						kvp.Key,
+						cookieValue => System.Text.Encoding.UTF8.GetString(dataProtector.Unprotect(WebEncoders.Base64UrlDecode(cookieValue))));
+				}
+			}
+
+			return new RequestMetadata
+			{
+				Query = queryList,
+				ContentType = request.ContentType,
+				ContentLength = request.ContentLength,
+				Cookies = cookiesList,
+				Headers = headersDict,
+				Protocol = request.Protocol,
+				RouteValues = request.RouteValues,
+				Path = request.Path,
+				PathBase = request.PathBase,
+				Host = request.Host.Host,
+				Port = request.Host.Port,
+				Uri = request.GetUri(),
+				Scheme = request.Scheme,
+				Method = request.Method,
+				Form = formList,
+				FilesCount = withForm ? (request.HasFormContentType ? request.Form.Files.Count : 0) : null,
+				CookieUnprotectors = cookieUnprotectors
+			};
 		}
 	}
 }

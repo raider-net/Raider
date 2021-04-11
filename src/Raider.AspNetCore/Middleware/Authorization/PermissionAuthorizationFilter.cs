@@ -11,14 +11,14 @@ namespace Raider.AspNetCore.Middleware.Authorization
 {
 	public class PermissionAuthorizationFilter : Attribute, IAsyncAuthorizationFilter, IAsyncActionFilter
 	{
-        private readonly IAuthorizationService _authService;
-        private readonly PermissionAuthorizationRequirement _requirement;
+		private readonly IAuthorizationService _authService;
+		private readonly PermissionAuthorizationRequirement _requirement;
 
-        public PermissionAuthorizationFilter(IAuthorizationService authService, PermissionAuthorizationRequirement requirement)
-        {
-            _authService = authService;
-            _requirement = requirement;
-        }
+		public PermissionAuthorizationFilter(IAuthorizationService authService, PermissionAuthorizationRequirement requirement)
+		{
+			_authService = authService;
+			_requirement = requirement;
+		}
 
 		public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
@@ -32,7 +32,7 @@ namespace Raider.AspNetCore.Middleware.Authorization
 		}
 
 		public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
-        {
+		{
 			if (context.HttpContext.User is RaiderPrincipal principal)
 			{
 				AuthorizationResult result = await _authService.AuthorizeAsync(principal, null, _requirement);
@@ -48,5 +48,5 @@ namespace Raider.AspNetCore.Middleware.Authorization
 				context.Result = new ChallengeResult(Authentication.AuthenticationDefaults.AuthenticationScheme);
 			}
 		}
-    }
+	}
 }

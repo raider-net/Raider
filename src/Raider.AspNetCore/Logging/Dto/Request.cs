@@ -16,6 +16,7 @@ namespace Raider.AspNetCore.Logging.Dto
 		public string? Protocol { get; set; }
 		public string? Scheme { get; set; }
 		public string? Host { get; set; }
+		public string? RemoteIp { get; set; }
 		public string? Method { get; set; }
 		public string? Path { get; set; }
 		public string? QueryString { get; set; }
@@ -33,6 +34,7 @@ namespace Raider.AspNetCore.Logging.Dto
 
 		public static async Task<Request> Create(
 			HttpRequest httpRequest,
+			string? remoteIp,
 			Guid correlationId,
 			string? externalCorrelationId,
 			bool logRequestHeaders,
@@ -47,7 +49,8 @@ namespace Raider.AspNetCore.Logging.Dto
 			var request = new Request
 			{
 				CorrelationId = correlationId,
-				ExternalCorrelationId = externalCorrelationId
+				ExternalCorrelationId = externalCorrelationId,
+				RemoteIp = remoteIp
 			};
 
 			try { request.Protocol = httpRequest.Protocol; } catch { }
@@ -151,6 +154,9 @@ namespace Raider.AspNetCore.Logging.Dto
 
 			if (!string.IsNullOrWhiteSpace(Host))
 				dict.Add(nameof(Host), Host);
+
+			if (!string.IsNullOrWhiteSpace(RemoteIp))
+				dict.Add(nameof(RemoteIp), RemoteIp);
 
 			if (!string.IsNullOrWhiteSpace(Method))
 				dict.Add(nameof(Method), Method);

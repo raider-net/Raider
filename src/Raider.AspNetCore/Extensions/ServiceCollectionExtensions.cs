@@ -22,7 +22,15 @@ namespace Raider.AspNetCore.Extensions
 		public static IServiceCollection AddTraceContext(this IServiceCollection services)
 			=> services.AddScoped<TraceContext>();
 
-		public static IServiceCollection AddRaiderAuthentication<TAuthMngr>(this IServiceCollection services, Action<AuthenticationOptions>? configureAuthenticationOptions)
+		public static IServiceCollection AddRaiderAuthentication<TAuthMngr, TCookieStore>(this IServiceCollection services, Action<AuthenticationOptions>? configureAuthenticationOptions)
+			where TAuthMngr : class, IAuthenticationManager
+			where TCookieStore : class, ICookieStore
+		{
+			services.TryAddSingleton<ICookieStore, TCookieStore>();
+			return AddRaiderAuthentication<TAuthMngr>(services, configureAuthenticationOptions, null);
+		}
+
+		public static IServiceCollection AddRaiderAuthentication<TAuthMngr>(this IServiceCollection services, Action<AuthenticationOptions>? configureAuthenticationOptions, ICookieStore? cookieStore = null)
 			where TAuthMngr : class, IAuthenticationManager
 		{
 			if (configureAuthenticationOptions == null)
@@ -44,10 +52,12 @@ namespace Raider.AspNetCore.Extensions
 
 			services.AddScoped<IAuthenticationManager, TAuthMngr>();
 			services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
-			services.AddSingleton<IAuthorizationHandler, AuthenticateAuthorizationHandler>();
 
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			services.AddScoped(sp => (sp.GetRequiredService<IHttpContextAccessor>().HttpContext?.User as RaiderPrincipal<int>) ?? new RaiderPrincipal<int>());
+
+			if (cookieStore != null)
+				services.TryAddSingleton(cookieStore);
 
 			return services;
 		}
@@ -80,7 +90,7 @@ namespace Raider.AspNetCore.Extensions
 				services.Configure(configureRequestTracking);
 
 			if (configureAuthenticationOptions != null)
-				AddRaiderAuthentication<TAuth>(services, configureAuthenticationOptions);
+				AddRaiderAuthentication<TAuth>(services, configureAuthenticationOptions, null);
 
 			return services;
 		}

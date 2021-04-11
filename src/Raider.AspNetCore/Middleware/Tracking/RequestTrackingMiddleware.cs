@@ -54,6 +54,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 					var request =
 						await Request.Create(
 							context.Request,
+							context.Connection?.RemoteIpAddress?.ToString(),
 							traceInfo.CorrelationId ?? Guid.Empty,
 							traceInfo.ExternalCorrelationId,
 							_options.LogRequestHeaders,

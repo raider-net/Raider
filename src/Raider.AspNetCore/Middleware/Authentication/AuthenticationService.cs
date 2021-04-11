@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Raider.AspNetCore.Identity;
 using Raider.AspNetCore.Logging;
 using Raider.Extensions;
 using Raider.Identity;
-using Raider.Logging.Extensions;
 using Raider.Trace;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -17,6 +18,68 @@ namespace Raider.AspNetCore.Authentication
 {
 	public static class AuthenticationService
 	{
+		private static Dictionary<string, string>? _cookieDataProtectionPurposes; //Dictionary<cookieName, purpose>
+		private static bool _dataProtectorsCreated = false;
+		private static Dictionary<string, IDataProtector>? _dataProtectors; //Dictionary<cookieName, IDataProtector>
+
+		private static readonly object _initLock = new();
+		private static bool _initialized = false;
+		public static void Initialize(Dictionary<string, string>? cookieDataProtectionPurposes)
+		{
+			if (_initialized)
+				throw new InvalidOperationException("Already initialized");
+
+			lock (_initLock)
+			{
+				if (_initialized)
+					throw new InvalidOperationException("Already initialized");
+
+				_cookieDataProtectionPurposes = cookieDataProtectionPurposes;
+				_initialized = true;
+			}
+		}
+
+		public static IDataProtector? GetDataProtector(HttpContext context, string cookieName)
+		{
+			if (!_dataProtectorsCreated)
+				GetDataProtectors(context);
+
+			return GetDataProtector(cookieName);
+		}
+
+		public static IDataProtector? GetDataProtector(string cookieName)
+		{
+			if (_dataProtectors == null)
+				return null;
+
+			_dataProtectors.TryGetValue(cookieName, out IDataProtector? dataProtector);
+			return dataProtector;
+		}
+
+		private static IReadOnlyDictionary<string, IDataProtector>? GetDataProtectors(HttpContext context)
+		{
+			if (context == null)
+				return null;
+
+			if (_dataProtectorsCreated)
+				return _dataProtectors;
+
+			if (_cookieDataProtectionPurposes == null)
+				return null;
+
+			_dataProtectors = new Dictionary<string, IDataProtector>();
+			var dataProtectionProvider = context.RequestServices.GetRequiredService<IDataProtectionProvider>();
+
+			foreach (var kvp in _cookieDataProtectionPurposes)
+			{
+				var dataProtector = dataProtectionProvider.CreateProtector(kvp.Value);
+				_dataProtectors.Add(kvp.Key, dataProtector);
+			}
+
+			_dataProtectorsCreated = true;
+			return _dataProtectors;
+		}
+
 		private static ILogger GetLogger(HttpContext context)
 		{
 			var loggerFactory = context.RequestServices.GetRequiredService<ILoggerFactory>();
@@ -52,7 +115,7 @@ namespace Raider.AspNetCore.Authentication
 				windowsIdentityName = windowsIdentity.Name.ToLower();
 
 				authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-				user = await authenticationManager.CreateFromWindowsIdentityAsync(logonWithoutDomain, windowsIdentityName);
+				user = await authenticationManager.CreateFromWindowsIdentityAsync(logonWithoutDomain, windowsIdentityName, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
 			}
 
 			if (user == null)
@@ -84,7 +147,7 @@ namespace Raider.AspNetCore.Authentication
 			var identity = claimsIdentity;
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-			var user = await authenticationManager.CreateFromRequestAsync(context.Request.Headers.ToDictionary(x => x.Key, x => (string[])x.Value));
+			var user = await authenticationManager.CreateFromRequestAsync(context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
 			return CreateRaiderPrincipal(identity, user, true, true, logger, authenticationManager);
 		}
 
@@ -107,7 +170,7 @@ namespace Raider.AspNetCore.Authentication
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
 			if (authenticationManager.StaticUserId.HasValue)
-				user = await authenticationManager.CreateFromUserIdAsync(authenticationManager.StaticUserId);
+				user = await authenticationManager.CreateFromUserIdAsync(authenticationManager.StaticUserId, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
 
 			if (user != null && !string.IsNullOrWhiteSpace(user.Login))
 			{
@@ -117,27 +180,6 @@ namespace Raider.AspNetCore.Authentication
 			}
 
 			return CreateRaiderPrincipal(identity, user, true, true, logger, authenticationManager);
-		}
-
-		public static async Task<RaiderPrincipal?> RecreateCookieIdentityAsync(HttpContext context, string? userName, string authenticationSchemeType, ILogger? logger)
-		{
-			if (string.IsNullOrWhiteSpace(userName))
-				return null;
-
-			if (context == null)
-				throw new ArgumentNullException(nameof(context));
-
-			if (string.IsNullOrWhiteSpace(authenticationSchemeType))
-				throw new ArgumentNullException(nameof(authenticationSchemeType));
-
-			if (logger == null)
-				logger = GetLogger(context);
-
-			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-			var user = await authenticationManager.CreateFromLoginAsync(userName.ToLower());
-			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
-			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, userName));
-			return CreateRaiderPrincipal(claimsIdentity, user, true, true, logger, authenticationManager);
 		}
 
 		public static async Task<RaiderPrincipal?> RenewTokenIdentityAsync(HttpContext context, ClaimsPrincipal? principal, ILogger? logger)
@@ -200,7 +242,7 @@ namespace Raider.AspNetCore.Authentication
 			};
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-			user = await authenticationManager.SetUserDataAsync(user);
+			user = await authenticationManager.SetUserDataAsync(user, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
 			return CreateRaiderPrincipal(principal.Identity, user, true, true, logger, authenticationManager);
 		}
 
@@ -233,12 +275,37 @@ namespace Raider.AspNetCore.Authentication
 				//error = user.Error;
 				//passwordTemporaryUrlSlug = user.PasswordTemporaryUrlSlug;
 
-				user = await authenticationManager.SetRolesAndPremissions(user);
+				user = await authenticationManager.SetUserDataRolesPremissions(user, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
+			}
+			else
+			{
+				user.UserData = null;
 			}
 
 			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
 			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, login));
 			return CreateRaiderPrincipal(claimsIdentity, user, false, false, logger, authenticationManager);
+		}
+
+		public static async Task<RaiderPrincipal?> RecreateCookieIdentityAsync(HttpContext context, string? userName, string authenticationSchemeType, ILogger? logger)
+		{
+			if (string.IsNullOrWhiteSpace(userName))
+				return null;
+
+			if (context == null)
+				throw new ArgumentNullException(nameof(context));
+
+			if (string.IsNullOrWhiteSpace(authenticationSchemeType))
+				throw new ArgumentNullException(nameof(authenticationSchemeType));
+
+			if (logger == null)
+				logger = GetLogger(context);
+
+			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
+			var user = await authenticationManager.CreateFromLoginAsync(userName.ToLower(), context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
+			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
+			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, userName));
+			return CreateRaiderPrincipal(claimsIdentity, user, true, true, logger, authenticationManager);
 		}
 
 		#region withhout HttpContext
@@ -311,25 +378,25 @@ namespace Raider.AspNetCore.Authentication
 
 		private static RaiderPrincipal? CreateRaiderPrincipal(
 			IIdentity? identity,
-			AuthenticatedUser? userRolePermissions,
+			AuthenticatedUser? authenticatedUser,
 			bool rolesToClams,
 			bool permissionsToClaims,
 			ILogger logger,
 			IAuthenticationManager? authenticationManager)
 		{
-			if (identity == null || userRolePermissions == null)
+			if (identity == null || authenticatedUser == null)
 				return null;
 
 			var raiderIdentity = new RaiderIdentity<int>(
 				identity,
-				userRolePermissions.UserId,
-				userRolePermissions.Login,
-				userRolePermissions.DisplayName,
-				userRolePermissions.UserData,
-				userRolePermissions.Roles,
-				userRolePermissions.RoleIds,
-				userRolePermissions.Permissions,
-				userRolePermissions.PermissionIds,
+				authenticatedUser.UserId,
+				authenticatedUser.Login,
+				authenticatedUser.DisplayName,
+				authenticatedUser.UserData,
+				authenticatedUser.Roles,
+				authenticatedUser.RoleIds,
+				authenticatedUser.Permissions,
+				authenticatedUser.PermissionIds,
 				rolesToClams,
 				permissionsToClaims);
 
@@ -337,8 +404,8 @@ namespace Raider.AspNetCore.Authentication
 			{
 				AspNetLogWriter.Instance.WriteRequestAuthentication(new Logging.Dto.RequestAuthentication
 				{
-					CorrelationId = userRolePermissions.TraceInfo?.CorrelationId,
-					ExternalCorrelationId = userRolePermissions.TraceInfo?.ExternalCorrelationId,
+					CorrelationId = authenticatedUser.TraceInfo?.CorrelationId,
+					ExternalCorrelationId = authenticatedUser.TraceInfo?.ExternalCorrelationId,
 					IdUser = raiderIdentity.UserId,
 					Roles = authenticationManager.LogRoles
 					? ((0 < raiderIdentity.RoleIds?.Count)

@@ -15,10 +15,10 @@ namespace Raider.AspNetCore.Middleware.Authorization
 			_options = options?.Value;
 		}
 
-        protected override Task HandleRequirementAsync(
-            AuthorizationHandlerContext context,
-            PermissionAuthorizationRequirement requirement)
-        {
+		protected override Task HandleRequirementAsync(
+			AuthorizationHandlerContext context,
+			PermissionAuthorizationRequirement requirement)
+		{
 			if (context.User is RaiderPrincipal principal)
 			{
 				if (principal.HasAnyPermissionClaim(
@@ -39,16 +39,16 @@ namespace Raider.AspNetCore.Middleware.Authorization
 					}
 				}
 				else if (_options != null)
+				{
+					try
 					{
-						try
-						{
-							_options.OnFail?.Invoke(context.User, requirement, this.GetType());
-						}
-						catch { }
+						_options.OnFail?.Invoke(context.User, requirement, this.GetType());
 					}
+					catch { }
+				}
 			}
 
 			return Task.CompletedTask;
-        }
-    }
+		}
+	}
 }
