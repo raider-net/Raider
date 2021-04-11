@@ -15,6 +15,7 @@ namespace Raider.Trace
 		private int? _userId;
 
 		public bool Initialized => _lastTraceInfo != null;
+		public Guid? CorrelationId => _lastTraceInfo?.CorrelationId;
 
 		private readonly object _lockInit = new();
 		public TraceContext Initialize(string key, ITraceInfo traceInfo)

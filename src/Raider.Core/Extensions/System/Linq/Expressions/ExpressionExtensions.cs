@@ -30,7 +30,7 @@ namespace Raider.Extensions
 			{
 				if (node.Member.DeclaringType == typeof(TSource))
 				{
-					return Expression.Property(Visit(node.Expression), node.Member.Name);
+					return Expression.Property(Visit(node.Expression)!, node.Member.Name);
 				}
 				return base.VisitMember(node);
 			}
@@ -55,16 +55,26 @@ namespace Raider.Extensions
 			}
 		}
 
+		public static Expression<Func<T1, T3>> Combine<T1, T2, T3>(this Expression<Func<T1, T2>> first, Expression<Func<T2, T3>> second)
+		{
+			var param = Expression.Parameter(typeof(T1), "param");
+
+			var newFirst = new ReplaceExpressionVisitor(first.Parameters.First(), param)
+				.Visit(first.Body);
+
+			var newSecond = new ReplaceExpressionVisitor(second.Parameters.First(), newFirst!)
+				.Visit(second.Body);
+
+			return Expression.Lambda<Func<T1, T3>>(newSecond!, param);
+		}
+
 		public static Expression<Func<T, bool>> AndAlso<T>(this Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2)
 		{
 			if (expr1 == null)
-			{
 				return expr2;
-			}
+
 			if (expr2 == null)
-			{
 				return expr1;
-			}
 
 			var parameter = Expression.Parameter(typeof(T));
 
@@ -74,19 +84,16 @@ namespace Raider.Extensions
 			var rightVisitor = new ReplaceExpressionVisitor(expr2.Parameters[0], parameter);
 			var right = rightVisitor.Visit(expr2.Body);
 
-			return Expression.Lambda<Func<T, bool>>(Expression.AndAlso(left, right), parameter);
+			return Expression.Lambda<Func<T, bool>>(Expression.AndAlso(left!, right!), parameter);
 		}
 
 		public static Expression<Func<T, bool>> OrElse<T>(this Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2)
 		{
 			if (expr1 == null)
-			{
 				return expr2;
-			}
+
 			if (expr2 == null)
-			{
 				return expr1;
-			}
 
 			var parameter = Expression.Parameter(typeof(T));
 
@@ -96,7 +103,7 @@ namespace Raider.Extensions
 			var rightVisitor = new ReplaceExpressionVisitor(expr2.Parameters[0], parameter);
 			var right = rightVisitor.Visit(expr2.Body);
 
-			return Expression.Lambda<Func<T, bool>>(Expression.OrElse(left, right), parameter);
+			return Expression.Lambda<Func<T, bool>>(Expression.OrElse(left!, right!), parameter);
 		}
 
 		public static Expression<Func<TTarget, bool>> Convert<TSource, TTarget>(this Expression<Func<TSource, bool>> root)
