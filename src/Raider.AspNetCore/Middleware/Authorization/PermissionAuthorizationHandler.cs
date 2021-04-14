@@ -12,7 +12,7 @@ namespace Raider.AspNetCore.Middleware.Authorization
 
 		public PermissionAuthorizationHandler(IOptions<PermissionAuthorizationOptions> options)
 		{
-			_options = options?.Value;
+			_options = options?.Value ?? new PermissionAuthorizationOptions();
 		}
 
 		protected override Task HandleRequirementAsync(
@@ -21,28 +21,38 @@ namespace Raider.AspNetCore.Middleware.Authorization
 		{
 			if (context.User is RaiderPrincipal principal)
 			{
-				if (principal.HasAnyPermissionClaim(
-						requirement
-							.Tokens
-							.Where(x => x != null)
-							.Select(x => x.ToString())
-							.ToArray()))
+				var hasPermission = _options.UseIntPermissions
+					? principal.HasAnyPermissionClaim(
+							requirement
+								.Tokens
+								.Where(x => x != null)
+								.Select(x => (int)x)
+								.ToArray())
+					: principal.HasAnyPermissionClaim(
+							requirement
+								.Tokens
+								.Where(x => x != null)
+								.Select(x => x.ToString())
+								.Cast<string>()
+								.ToArray());
+
+				if (hasPermission)
 				{
 					context.Succeed(requirement);
-					if (_options != null)
+					if (_options.OnSuccess != null)
 					{
 						try
 						{
-							_options.OnSuccess?.Invoke(context.User, requirement, this.GetType());
+							_options.OnSuccess.Invoke(context.User, requirement, this.GetType());
 						}
 						catch { }
 					}
 				}
-				else if (_options != null)
+				else if (_options.OnFail != null)
 				{
 					try
 					{
-						_options.OnFail?.Invoke(context.User, requirement, this.GetType());
+						_options.OnFail.Invoke(context.User, requirement, this.GetType());
 					}
 					catch { }
 				}

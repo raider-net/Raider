@@ -193,43 +193,51 @@ namespace Raider.AspNetCore.Authentication
 			if (logger == null)
 				logger = GetLogger(context);
 
-			var userIdClaim = principal
-							.Claims
-							.FirstOrDefault(c => RaiderIdentity.IsRaiderClaim(c)
-												&& string.Equals(c.Type, RaiderIdentity.USER_ID_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+			var userIdClaim =
+				principal
+					.Claims
+					.FirstOrDefault(c => RaiderIdentity.IsRaiderClaim(c)
+						&& string.Equals(c.Type, RaiderIdentity.USER_ID_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
 
 			int userId = -1;
 			if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out userId))
 				return null;
 
-			var loginClaim = principal
-							.Claims
-							.FirstOrDefault(c => RaiderIdentity.IsRaiderClaim(c)
-												&& string.Equals(c.Type, RaiderIdentity.LOGIN_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+			var loginClaim =
+				principal
+					.Claims
+					.FirstOrDefault(c => RaiderIdentity.IsRaiderClaim(c)
+						&& string.Equals(c.Type, RaiderIdentity.LOGIN_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+
 			if (loginClaim == null)
 				return null;
 
-			var displayNameClaim = principal
-							.Claims
-							.FirstOrDefault(c => RaiderIdentity.IsRaiderClaim(c)
-												&& string.Equals(c.Type, RaiderIdentity.DISPLAYNAME_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+			var displayNameClaim =
+				principal
+					.Claims
+					.FirstOrDefault(c => RaiderIdentity.IsRaiderClaim(c)
+						&& string.Equals(c.Type, RaiderIdentity.DISPLAYNAME_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+
 			if (displayNameClaim == null)
 				return null;
 
-			var roleClaims = principal
-							.Claims
-							.Where(c => RaiderIdentity.IsRaiderClaim(c)
-												&& string.Equals(c.Type, RaiderIdentity.ROLE_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+			var roleClaims =
+				principal
+					.Claims
+					.Where(c => RaiderIdentity.IsRaiderClaim(c)
+						&& string.Equals(c.Type, RaiderIdentity.ROLE_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
 
-			var roleIdClaims = principal
-							.Claims
-							.Where(c => RaiderIdentity.IsRaiderClaim(c)
-												&& string.Equals(c.Type, RaiderIdentity.ROLE_ID_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+			var roleIdClaims =
+				principal
+					.Claims
+					.Where(c => RaiderIdentity.IsRaiderClaim(c)
+						&& string.Equals(c.Type, RaiderIdentity.ROLE_ID_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
 
-			var premissionClaims = principal
-							.Claims
-							.Where(c => RaiderIdentity.IsRaiderClaim(c)
-												&& string.Equals(c.Type, RaiderIdentity.PERMISSION_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
+			var premissionClaims =
+				principal
+					.Claims
+					.Where(c => RaiderIdentity.IsRaiderClaim(c)
+						&& string.Equals(c.Type, RaiderIdentity.PERMISSION_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
 
 			var tc = context.RequestServices.GetRequiredService<TraceContext>();
 
@@ -420,8 +428,8 @@ namespace Raider.AspNetCore.Authentication
 				});
 			}
 
-			var RaiderPrincipal = new RaiderPrincipal<int>(raiderIdentity);
-			return RaiderPrincipal;
+			var raiderPrincipal = new RaiderPrincipal<int>(raiderIdentity);
+			return raiderPrincipal;
 		}
 	}
 }
