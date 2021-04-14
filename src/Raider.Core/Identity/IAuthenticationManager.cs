@@ -1,6 +1,5 @@
 ﻿using Raider.Identity;
 using Raider.Web;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Raider.AspNetCore.Authentication

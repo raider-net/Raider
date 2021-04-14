@@ -70,12 +70,27 @@ namespace Raider.Identity
 			return IdentityBase != null && IdentityBase.HasPermission(permission);
 		}
 
+		public bool HasPermission(int permission)
+		{
+			return IdentityBase != null && IdentityBase.HasPermission(permission);
+		}
+
 		public bool HasAllPermissions(params string[] permissions)
 		{
 			return IdentityBase != null && IdentityBase.HasAllPermissions(permissions);
 		}
 
+		public bool HasAllPermissions(params int[] permissions)
+		{
+			return IdentityBase != null && IdentityBase.HasAllPermissions(permissions);
+		}
+
 		public bool HasAnyPermission(params string[] permissions)
+		{
+			return IdentityBase != null && IdentityBase.HasAnyPermission(permissions);
+		}
+
+		public bool HasAnyPermission(params int[] permissions)
 		{
 			return IdentityBase != null && IdentityBase.HasAnyPermission(permissions);
 		}
@@ -91,6 +106,21 @@ namespace Raider.Identity
 		}
 
 		public bool HasAnyPermissionClaim(params string[] permissions)
+		{
+			return IdentityBase != null && IdentityBase.HasAnyPermissionClaim(permissions);
+		}
+
+		public bool HasPermissionClaim(int permission)
+		{
+			return IdentityBase != null && IdentityBase.HasPermissionClaim(permission);
+		}
+
+		public bool HasAllPermissionClaims(params int[] permissions)
+		{
+			return IdentityBase != null && IdentityBase.HasAllPermissionClaims(permissions);
+		}
+
+		public bool HasAnyPermissionClaim(params int[] permissions)
 		{
 			return IdentityBase != null && IdentityBase.HasAnyPermissionClaim(permissions);
 		}
@@ -190,6 +220,45 @@ namespace Raider.Identity
 		public RaiderPrincipal(IPrincipal principal)
 			: base(principal)
 		{
+		}
+
+		public static RaiderPrincipal<int>? Create(string authenticationSchemeType, AuthenticatedUser authenticatedUser)
+		{
+			if (string.IsNullOrWhiteSpace(authenticationSchemeType))
+				throw new ArgumentNullException(nameof(authenticationSchemeType));
+
+			if (authenticatedUser == null)
+				throw new ArgumentNullException(nameof(authenticatedUser));
+
+			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
+			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, authenticatedUser.Login));
+			return Create(claimsIdentity, authenticatedUser, true, true);
+		}
+
+		public static RaiderPrincipal<int>? Create(
+			IIdentity? identity,
+			AuthenticatedUser? authenticatedUser,
+			bool rolesToClams,
+			bool permissionsToClaims)
+		{
+			if (identity == null || authenticatedUser == null)
+				return null;
+
+			var raiderIdentity = new RaiderIdentity<int>(
+				identity,
+				authenticatedUser.UserId,
+				authenticatedUser.Login,
+				authenticatedUser.DisplayName,
+				authenticatedUser.UserData,
+				authenticatedUser.Roles,
+				authenticatedUser.RoleIds,
+				authenticatedUser.Permissions,
+				authenticatedUser.PermissionIds,
+				rolesToClams,
+				permissionsToClaims);
+
+			var raiderPrincipal = new RaiderPrincipal<int>(raiderIdentity);
+			return raiderPrincipal;
 		}
 	}
 }
