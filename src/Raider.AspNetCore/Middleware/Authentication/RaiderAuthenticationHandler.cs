@@ -25,6 +25,7 @@ using Raider.Trace;
 using Raider.Logging.Extensions;
 using Raider.Extensions;
 using Raider.AspNetCore.Identity;
+using Raider.AspNetCore.Middleware.Authentication.RequestAuth;
 
 namespace Raider.AspNetCore.Middleware.Authentication
 {
@@ -570,6 +571,27 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		#endregion Token
 
+		private static Task Redirect<TOptions>(RedirectContext<TOptions> context)
+			where TOptions : AuthenticationSchemeOptions
+		{
+			if (IsAjaxRequest(context.Request))
+			{
+				context.Response.Headers[HeaderNames.Location] = context.RedirectUri;
+				context.Response.StatusCode = 401;
+			}
+			else
+			{
+				context.Response.Redirect(context.RedirectUri);
+			}
+			return Task.CompletedTask;
+		}
+
+		private static bool IsAjaxRequest(HttpRequest request)
+		{
+			return string.Equals(request.Query[HeaderNames.XRequestedWith], "XMLHttpRequest", StringComparison.Ordinal) ||
+				string.Equals(request.Headers[HeaderNames.XRequestedWith], "XMLHttpRequest", StringComparison.Ordinal);
+		}
+
 		protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
 		{
 			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
@@ -930,6 +952,25 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleForbiddenAsync(properties);
 			else
 				throw new InvalidOperationException("WindowsAuthentication is not allowed.");
+
+			if (!string.IsNullOrWhiteSpace(Options.WindowsAuthenticationOptions.AccessDeniedPath))
+			{
+				if (Options.UseWindowsAuthentication)
+				{
+					var returnUrl = properties.RedirectUri;
+					if (string.IsNullOrEmpty(returnUrl))
+					{
+						returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
+					}
+					var accessDeniedUri = $"{Options.WindowsAuthenticationOptions.AccessDeniedPath}{(string.IsNullOrWhiteSpace(Options.WindowsAuthenticationOptions.ReturnUrlParameter) ? "" : QueryString.Create(Options.WindowsAuthenticationOptions.ReturnUrlParameter, returnUrl))}";
+					var redirectContext = new RedirectContext<WindowsAuthenticationOptions>(Context, Scheme, Options.WindowsAuthenticationOptions, properties, BuildRedirectUri(accessDeniedUri));
+					await Redirect(redirectContext);
+				}
+				else
+				{
+					throw new InvalidOperationException("WindowsAuthentication is not allowed.");
+				}
+			}
 		}
 
 		protected async Task HandleCookieForbiddenAsync(AuthenticationProperties properties)
@@ -941,21 +982,24 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			else
 				throw new InvalidOperationException("CookieAuthentication is not allowed.");
 
-			//if (Options.UseCookieAuthentication)
-			//{
-			//	var returnUrl = properties.RedirectUri;
-			//	if (string.IsNullOrEmpty(returnUrl))
-			//	{
-			//		returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
-			//	}
-			//	var accessDeniedUri = Options.CookieAuthenticationOptions.AccessDeniedPath + QueryString.Create(Options.CookieAuthenticationOptions.ReturnUrlParameter, returnUrl);
-			//	var redirectContext = new RedirectContext<CookieAuthenticationOptions>(Context, Scheme, Options.CookieAuthenticationOptions, properties, BuildRedirectUri(accessDeniedUri));
-			//	await Events.CookieEvents.RedirectToAccessDenied(redirectContext);
-			//}
-			//else
-			//{
-			//	throw new InvalidOperationException("CookieAuthentication is not allowed.");
-			//}
+			if (!string.IsNullOrWhiteSpace(Options.CookieAuthenticationOptions.AccessDeniedPath))
+			{
+				if (Options.UseCookieAuthentication)
+				{
+					var returnUrl = properties.RedirectUri;
+					if (string.IsNullOrEmpty(returnUrl))
+					{
+						returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
+					}
+					var accessDeniedUri = $"{Options.CookieAuthenticationOptions.AccessDeniedPath}{(string.IsNullOrWhiteSpace(Options.CookieAuthenticationOptions.ReturnUrlParameter) ? "" : QueryString.Create(Options.CookieAuthenticationOptions.ReturnUrlParameter, returnUrl))}";
+					var redirectContext = new RedirectContext<CookieAuthenticationOptions>(Context, Scheme, Options.CookieAuthenticationOptions, properties, BuildRedirectUri(accessDeniedUri));
+					await Events.CookieEvents.RedirectToAccessDenied(redirectContext);
+				}
+				else
+				{
+					throw new InvalidOperationException("CookieAuthentication is not allowed.");
+				}
+			}
 		}
 
 		protected async Task HandleTokenForbiddenAsync(AuthenticationProperties properties)
@@ -966,6 +1010,25 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleForbiddenAsync(properties);
 			else
 				throw new InvalidOperationException("TokenAuthentication is not allowed.");
+
+			//if (!string.IsNullOrWhiteSpace(Options.TokenAuthenticationOptions.AccessDeniedPath))
+			//{
+			//	if (Options.UseTokenAuthentication)
+			//	{
+			//		var returnUrl = properties.RedirectUri;
+			//		if (string.IsNullOrEmpty(returnUrl))
+			//		{
+			//			returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
+			//		}
+			//		var accessDeniedUri = $"{Options.TokenAuthenticationOptions.AccessDeniedPath}{(string.IsNullOrWhiteSpace(Options.TokenAuthenticationOptions.ReturnUrlParameter) ? "" : QueryString.Create(Options.TokenAuthenticationOptions.ReturnUrlParameter, returnUrl))}";
+			//		var redirectContext = new RedirectContext<JwtBearerOptions>(Context, Scheme, Options.TokenAuthenticationOptions, properties, BuildRedirectUri(accessDeniedUri));
+			//		await Redirect(redirectContext);
+			//	}
+			//	else
+			//	{
+			//		throw new InvalidOperationException("TokenAuthentication is not allowed.");
+			//	}
+			//}
 		}
 
 		protected async Task HandleRequestForbiddenAsync(AuthenticationProperties properties)
@@ -976,6 +1039,25 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleForbiddenAsync(properties);
 			else
 				throw new InvalidOperationException("RequestAuthentication is not allowed.");
+
+			if (!string.IsNullOrWhiteSpace(Options.RequestAuthenticationOptions.AccessDeniedPath))
+			{
+				if (Options.UseRequestAuthentication)
+				{
+					var returnUrl = properties.RedirectUri;
+					if (string.IsNullOrEmpty(returnUrl))
+					{
+						returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
+					}
+					var accessDeniedUri = $"{Options.RequestAuthenticationOptions.AccessDeniedPath}{(string.IsNullOrWhiteSpace(Options.RequestAuthenticationOptions.ReturnUrlParameter) ? "" : QueryString.Create(Options.RequestAuthenticationOptions.ReturnUrlParameter, returnUrl))}";
+					var redirectContext = new RedirectContext<RequestAuthenticationOptions>(Context, Scheme, Options.RequestAuthenticationOptions, properties, BuildRedirectUri(accessDeniedUri));
+					await Redirect(redirectContext);
+				}
+				else
+				{
+					throw new InvalidOperationException("RequestAuthentication is not allowed.");
+				}
+			}
 		}
 
 		/// <summary>
@@ -1018,6 +1100,25 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleChallengeAsync(properties);
 			else
 				throw new InvalidOperationException("WindowsAuthentication is not allowed.");
+
+			if (!string.IsNullOrWhiteSpace(Options.WindowsAuthenticationOptions.UnauthorizedPath))
+			{
+				if (Options.UseWindowsAuthentication)
+				{
+					var returnUrl = properties.RedirectUri;
+					if (string.IsNullOrEmpty(returnUrl))
+					{
+						returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
+					}
+					var accessDeniedUri = $"{Options.WindowsAuthenticationOptions.UnauthorizedPath}{(string.IsNullOrWhiteSpace(Options.WindowsAuthenticationOptions.ReturnUrlParameter) ? "" : QueryString.Create(Options.WindowsAuthenticationOptions.ReturnUrlParameter, returnUrl))}";
+					var redirectContext = new RedirectContext<WindowsAuthenticationOptions>(Context, Scheme, Options.WindowsAuthenticationOptions, properties, BuildRedirectUri(accessDeniedUri));
+					await Redirect(redirectContext);
+				}
+				else
+				{
+					throw new InvalidOperationException("WindowsAuthentication is not allowed.");
+				}
+			}
 		}
 
 		protected async Task HandleCookieChallengeAsync(AuthenticationProperties properties)
@@ -1132,6 +1233,25 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleChallengeAsync(properties);
 			else
 				throw new InvalidOperationException("RequestAuthentication is not allowed.");
+
+			if (!string.IsNullOrWhiteSpace(Options.RequestAuthenticationOptions.UnauthorizedPath))
+			{
+				if (Options.UseRequestAuthentication)
+				{
+					var returnUrl = properties.RedirectUri;
+					if (string.IsNullOrEmpty(returnUrl))
+					{
+						returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
+					}
+					var accessDeniedUri = $"{Options.RequestAuthenticationOptions.UnauthorizedPath}{(string.IsNullOrWhiteSpace(Options.RequestAuthenticationOptions.ReturnUrlParameter) ? "" : QueryString.Create(Options.RequestAuthenticationOptions.ReturnUrlParameter, returnUrl))}";
+					var redirectContext = new RedirectContext<RequestAuthenticationOptions>(Context, Scheme, Options.RequestAuthenticationOptions, properties, BuildRedirectUri(accessDeniedUri));
+					await Redirect(redirectContext);
+				}
+				else
+				{
+					throw new InvalidOperationException("RequestAuthentication is not allowed.");
+				}
+			}
 		}
 
 		private static void ThrowAccessDenied401Unauthorized(HttpContext context, Exception? ex = null)

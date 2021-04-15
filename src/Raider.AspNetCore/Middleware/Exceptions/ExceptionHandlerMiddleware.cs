@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using Raider.AspNetCore.Logging;
-using Raider.Localization;
 using Raider.Logging.Extensions;
 using Raider.Trace;
 using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace Raider.AspNetCore.Middleware.Exceptions
@@ -18,6 +18,7 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 		private readonly RequestDelegate _next;
 		private readonly ExceptionHandlerOptions _options;
 		private readonly ILogger _logger;
+		private readonly Func<object, Task> _clearCacheHeadersDelegate;
 
 		public ExceptionHandlerMiddleware(
 			RequestDelegate next,
@@ -27,43 +28,68 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 			_next = next ?? throw new ArgumentNullException(nameof(next));
 			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_clearCacheHeadersDelegate = ClearCacheHeaders;
+			if (_options.ExceptionHandler == null)
+			{
+				if (_options.DefaultExceptionPath == null)
+					throw new InvalidOperationException("An error occurred when configuring the exception handler middleware. Either the 'DefaultExceptionPath' or the 'ExceptionHandler' property must be set.");
+
+				_options.ExceptionHandler = _next;
+			}
 		}
 
-		public async Task Invoke(HttpContext context)
+		public Task Invoke(HttpContext context)
 		{
+			ExceptionDispatchInfo? edi = null;
 			var tc = context.RequestServices.GetRequiredService<TraceContext>();
 			var traceInfo = tc.AddTraceFrame(nameof(ExceptionHandlerMiddleware), TraceFrame.Create());
 			
-			string? redirectPath = null;
-
 			try
 			{
-				await _next(context);
-
-				if (_options.MinimalStatusCodeToRedirect <= context.Response.StatusCode)
+				var task = _next(context);
+				if (!task.IsCompletedSuccessfully)
 				{
-					if (Handle(traceInfo, context, null, out redirectPath))
-					{
-						await InternalRedirectAsync(traceInfo, redirectPath, null, context);
-					}
+					return Awaited(this, traceInfo, context, task);
 				}
+
+				if (context.Response.StatusCode != StatusCodes.Status404NotFound)
+					return Task.CompletedTask;
 			}
 			catch (Exception ex)
-				when(Handle(traceInfo, context, ex, out redirectPath))
 			{
-				await InternalRedirectAsync(traceInfo, redirectPath, ex, context);
+				edi = ExceptionDispatchInfo.Capture(ex);
+			}
+
+			return HandleException(traceInfo, context, edi);
+
+			static async Task Awaited(ExceptionHandlerMiddleware middleware, ITraceInfo traceInfo, HttpContext context, Task task)
+			{
+				ExceptionDispatchInfo? edi = null;
+				try
+				{
+					await task;
+				}
+				catch (Exception exception)
+				{
+					edi = ExceptionDispatchInfo.Capture(exception);
+				}
+
+				if (edi != null || context.Response.StatusCode == StatusCodes.Status404NotFound)
+					await middleware.HandleException(traceInfo, context, edi);
 			}
 		}
 
-		private bool Handle(ITraceInfo traceInfo, HttpContext context, Exception? ex, [NotNullWhen(true)] out string? redirectPath)
+		private async Task HandleException(ITraceInfo traceInfo, HttpContext context, ExceptionDispatchInfo? edi)
 		{
-			var error = _logger.LogErrorMessage(traceInfo, x => x.ExceptionInfo(ex));
+			var statusCode = context.Response.StatusCode;
+			var ex = edi?.SourceException;
+			var error = _logger.LogErrorMessage(traceInfo, x => x.ExceptionInfo(ex).Detail($"StatusCode = {statusCode}"));
 
 			if (_options.OnErrorOccurs != null)
 			{
 				try
 				{
-					_options.OnErrorOccurs.Invoke(error, context, false);
+					_options.OnErrorOccurs.Invoke(error, context);
 				}
 				catch (Exception onErroreEx)
 				{
@@ -71,83 +97,78 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 				}
 			}
 
-			var res = context.RequestServices.GetRequiredService<IApplicationResources>();
-			var clientError = context.Response.StatusCode == StatusCodes.Status404NotFound
-				? res.DataNotFoundException
-				: ((context.Response.StatusCode == StatusCodes.Status401Unauthorized || context.Response.StatusCode == StatusCodes.Status403Forbidden)
-					? res.DataForbiddenException
-					: res.GlobalExceptionMessage);
-
-			redirectPath = _options.DefaultExceptionPath;
-			_options.StatusCodeRedirectPaths?.TryGetValue(context.Response.StatusCode, out redirectPath);
-			return !string.IsNullOrWhiteSpace(redirectPath);
-		}
-
-		private async Task InternalRedirectAsync(ITraceInfo traceInfo, string redirectPath, Exception? ex, HttpContext context)
-		{
-			int statusCode = (400 <= context.Response.StatusCode && context.Response.StatusCode < 600)
-				? context.Response.StatusCode
-				: StatusCodes.Status500InternalServerError;
+			if (context.Response.HasStarted)
+			{
+				_logger.LogErrorMessage(traceInfo, x => x.InternalMessage("The response has already started, the error handler will not be executed."));
+				edi?.Throw();
+			}
 
 			PathString originalPath = context.Request.Path;
-			context.Request.Path = redirectPath;
-			context.Request.ContentLength = null;
-			context.Request.ContentType = null;
-			context.Request.Method = Microsoft.AspNetCore.Http.HttpMethods.Get;
+			if (statusCode == StatusCodes.Status404NotFound)
+			{
+				if (string.IsNullOrWhiteSpace(_options.NotFoundExceptionPath))
+				{
+					if (!string.IsNullOrWhiteSpace(_options.DefaultExceptionPath))
+						context.Request.Path = _options.DefaultExceptionPath;
+				}
+				else
+				{
+					context.Request.Path = _options.NotFoundExceptionPath;
+				}
+			}
+			else
+			{
+				if (!string.IsNullOrWhiteSpace(_options.DefaultExceptionPath))
+					context.Request.Path = _options.DefaultExceptionPath;
+			}
+
 			try
 			{
-				context.Response.Clear();
-				context.Features.Set(new Microsoft.AspNetCore.Diagnostics.ExceptionHandlerFeature()
+				ClearHttpContext(context);
+
+				var exceptionHandlerFeature = new ExceptionHandlerFeature()
 				{
 					Error = ex,
 					Path = originalPath.Value,
-				});
-				context.Response.StatusCode = statusCode;
-				context.Response.OnStarting(ClearCacheHeaders, context.Response);
+				};
+				context.Features.Set<IExceptionHandlerFeature>(exceptionHandlerFeature);
+				context.Features.Set<IExceptionHandlerPathFeature>(exceptionHandlerFeature);
+				context.Response.StatusCode = statusCode == StatusCodes.Status404NotFound ? statusCode : StatusCodes.Status500InternalServerError;
+				context.Response.OnStarting(_clearCacheHeadersDelegate, context.Response);
 
-				_logger
-					.LogWarningMessage(traceInfo, x => x
-						.LogCode(AspNetLogCode.Req_IntRedir.ToString())
-						.InternalMessage("Internal redirect")
-						.Detail($"{nameof(InternalRedirectAsync)}{Environment.NewLine}Original path: {originalPath.Value}{Environment.NewLine}New path: {redirectPath}"));
+				if (_options.ExceptionHandler != null)
+					await _options.ExceptionHandler(context);
 
-				await _next(context);
+				return;
 			}
-			catch (Exception redirectEx)
+			catch (Exception ex2)
 			{
-				var error =
-					_logger.LogErrorMessage(traceInfo, x => x
-						.LogCode(AspNetLogCode.Req_IntRedir.ToString())
-						.ExceptionInfo(redirectEx)
-						.Detail($"{nameof(InternalRedirectAsync)}{Environment.NewLine}Original path: {originalPath.Value}{Environment.NewLine}New path: {redirectPath}"));
-
-				if (_options.OnErrorOccurs != null)
-				{
-					try
-					{
-						_options.OnErrorOccurs.Invoke(error, context, true);
-					}
-					catch (Exception onErroreEx)
-					{
-						_logger.LogErrorMessage(traceInfo, x => x.ExceptionInfo(onErroreEx).Detail(nameof(_options.OnErrorOccurs)));
-					}
-				}
-
-				throw; //if the redirected path throws exception, throw it to FE
+				_logger.LogErrorMessage(traceInfo, x => x.ExceptionInfo(ex2).Detail("An exception was thrown attempting to execute the error handler."));
 			}
 			finally
 			{
 				context.Request.Path = originalPath;
 			}
+
+			edi?.Throw(); // Re-throw the original if we couldn't handle it
 		}
 
-		private Task ClearCacheHeaders(object state)
+		private static void ClearHttpContext(HttpContext context)
 		{
-			var response = (HttpResponse)state;
-			response.Headers[HeaderNames.CacheControl] = "no-cache";
-			response.Headers[HeaderNames.Pragma] = "no-cache";
-			response.Headers[HeaderNames.Expires] = "-1";
-			response.Headers.Remove(HeaderNames.ETag);
+			context.Response.Clear();
+
+			context.SetEndpoint(endpoint: null);
+			var routeValuesFeature = context.Features.Get<IRouteValuesFeature>();
+			routeValuesFeature?.RouteValues?.Clear();
+		}
+
+		private static Task ClearCacheHeaders(object state)
+		{
+			var headers = ((HttpResponse)state).Headers;
+			headers[HeaderNames.CacheControl] = "no-cache,no-store";
+			headers[HeaderNames.Pragma] = "no-cache";
+			headers[HeaderNames.Expires] = "-1";
+			headers.Remove(HeaderNames.ETag);
 			return Task.CompletedTask;
 		}
 	}

@@ -64,42 +64,42 @@ namespace Raider.AspNetCore.Extensions
 		/// 7. UseAuthentication
 		/// </summary>
 		/// <returns></returns>
-		public static IApplicationBuilder UseRaiderAspNetCore(
-			this IApplicationBuilder app,
-			bool useForwardedHeaders,
-			ForwardedHeadersOptions forwardedHeadersOptions,
-			bool useStaticFiles,
-			StaticFileOptions staticFileOptions,
-			bool useHostNormalizer)
-		{
-			app.UseRaiderAspNetCore();
+		//public static IApplicationBuilder UseRaiderAspNetCore(
+		//	this IApplicationBuilder app,
+		//	bool useForwardedHeaders,
+		//	ForwardedHeadersOptions forwardedHeadersOptions,
+		//	bool useStaticFiles,
+		//	StaticFileOptions staticFileOptions,
+		//	bool useHostNormalizer)
+		//{
+		//	app.UseRaiderAspNetCore();
 
-			if (useForwardedHeaders)
-			{
-				if (forwardedHeadersOptions == null)
-					app.UseForwardedHeaders();
-				else
-					app.UseForwardedHeaders(forwardedHeadersOptions);
-			}
+		//	if (useForwardedHeaders)
+		//	{
+		//		if (forwardedHeadersOptions == null)
+		//			app.UseForwardedHeaders();
+		//		else
+		//			app.UseForwardedHeaders(forwardedHeadersOptions);
+		//	}
 
-			if (useStaticFiles)
-			{
-				if (staticFileOptions == null)
-					app.UseStaticFiles();
-				else
-					app.UseStaticFiles(staticFileOptions);
-			}
+		//	if (useStaticFiles)
+		//	{
+		//		if (staticFileOptions == null)
+		//			app.UseStaticFiles();
+		//		else
+		//			app.UseStaticFiles(staticFileOptions);
+		//	}
 
-			app.UseRaiderExceptionHandler();
+		//	app.UseRaiderExceptionHandler();
 
-			if (useHostNormalizer)
-				app.UseRaiderHostNormalizer();
+		//	if (useHostNormalizer)
+		//		app.UseRaiderHostNormalizer();
 
-			app.UseRaiderRequestTracking();
+		//	app.UseRaiderRequestTracking();
 
-			app.UseAuthentication();
+		//	app.UseAuthentication();
 
-			return app;
-		}
+		//	return app;
+		//}
 	}
 }
