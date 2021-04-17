@@ -16,7 +16,7 @@
 		<Authors>Tomas Pilat</Authors>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
-		<Version>1.1.0</Version>
+		<Version>1.1.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,10 +27,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Npgsql" Version="5.0.4" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Raider.Localization\Raider.Localization.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="Permissions_InsertScriptGenerator.tt">
+			<Generator>TextTemplatingFilePreprocessor</Generator>
+			<LastGenOutput>Permissions_InsertScriptGenerator.cs</LastGenOutput>
+		</None>
 	  <None Update="ResourceKeysGenerator.tt">
 	    <Generator>TextTemplatingFilePreprocessor</Generator>
 	    <LastGenOutput>ResourceKeysGenerator.cs</LastGenOutput>
@@ -46,6 +54,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="Permissions_InsertScriptGenerator.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Permissions_InsertScriptGenerator.tt</DependentUpon>
+		</Compile>
 	  <Compile Update="ResourceKeysGenerator.cs">
 	    <DesignTime>True</DesignTime>
 	    <AutoGen>True</AutoGen>

@@ -1,4 +1,5 @@
-﻿using Raider.Localization;
+﻿using Npgsql;
+using Raider.Localization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,6 +11,8 @@ namespace Raider.Generator.Compilation
 {
 	public class Generator
 	{
+		private static string? _permissionsSqlScript;
+
 		public static void UpdateResource(
 			IEnumerable<string> keys,
 			IEnumerable<string> keyFormatters,
@@ -28,12 +31,12 @@ namespace Raider.Generator.Compilation
 						throw new InvalidOperationException($"Empty key at index = {j}. {keysList[j]}");
 
 					if (keysList[i].Equals(keysList[j], StringComparison.OrdinalIgnoreCase))
-						throw new InvalidOperationException($"Not UNIQUE key {keysList[i].ToString()} on {i} and {j}");
+						throw new InvalidOperationException($"Not UNIQUE key {keysList[i]} on {i} and {j}");
 				}
 			}
 
 			var resxBuilder = new ResxBuilder(resxFilePath);
-			List<ResxData> dataList = new List<ResxData>();
+			var dataList = new List<ResxData>();
 
 			foreach (var key in keysList)
 			{
@@ -83,7 +86,7 @@ namespace Raider.Generator.Compilation
 
 			var resFiles = ResourceLoader.LoadResources(targetProject, assembly, defaultCulture, ResourceLoadOptions.LoadResxAllResources, SearchOption.AllDirectories);
 
-			ResourcesGenerator resourcesGenerator = new ResourcesGenerator
+			var resourcesGenerator = new ResourcesGenerator
 			{
 				WriteMode = GeneratorBase.WriteModes.Overwritte
 			};
@@ -113,7 +116,7 @@ namespace Raider.Generator.Compilation
 
 			var resFiles = ResourceLoader.LoadResources(targetProject, assembly, defaultCulture, ResourceLoadOptions.LoadResxAllResources, SearchOption.AllDirectories);
 
-			ResourceKeysGenerator resourcesGenerator = new ResourceKeysGenerator
+			var resourcesGenerator = new ResourceKeysGenerator
 			{
 				WriteMode = GeneratorBase.WriteModes.Overwritte
 			};
@@ -124,6 +127,42 @@ namespace Raider.Generator.Compilation
 			var errors = resourcesGenerator.ErrorString();
 			if (!string.IsNullOrWhiteSpace(errors))
 				throw new Exception(errors);
+		}
+
+		public static void GeneratePermissionsSql(
+			List<IPermission> permissions,
+			string targetSqlFolder,
+			Dictionary<int, List<int>> rolePermissions,
+			bool withDescription,
+			string? permissionsVersionFileName)
+		{
+			var permissionsSqlInsertScriptGenerator = new Permissions_InsertScriptGenerator
+			{
+				WriteMode = GeneratorBase.WriteModes.Overwritte
+			};
+			permissionsSqlInsertScriptGenerator.SetParam("TargetFolder", targetSqlFolder);
+			permissionsSqlInsertScriptGenerator.SetParam("Permissions", permissions);
+			permissionsSqlInsertScriptGenerator.SetParam("RolePermissions", rolePermissions);
+			permissionsSqlInsertScriptGenerator.SetParam("WithDescription", withDescription);
+			permissionsSqlInsertScriptGenerator.SetParam("PermissionsVersionFileName", permissionsVersionFileName);
+			permissionsSqlInsertScriptGenerator.TransformText();
+			string? errors = permissionsSqlInsertScriptGenerator.ErrorString();
+			if (!string.IsNullOrWhiteSpace(errors))
+				throw new Exception(errors);
+			_permissionsSqlScript = permissionsSqlInsertScriptGenerator.GeneratedFiles.FirstOrDefault().Value;
+		}
+
+		public static void DeployPermissionsToSql(string connectionString)
+		{
+			if (string.IsNullOrWhiteSpace(_permissionsSqlScript))
+				throw new InvalidOperationException("No permission sql script was created.");
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			var sql = _permissionsSqlScript.Replace("--ON CONFLICT", "ON CONFLICT");
+
+			using var command = new NpgsqlCommand(sql, connection);
+			command.ExecuteNonQuery();
 		}
 	}
 }

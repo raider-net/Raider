@@ -1,0 +1,103 @@
+﻿<#@ template language="C#" inherits="GeneratorBase" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="Raider.Extensions" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="System.Resources" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+<#
+	SetGenerationEnvironment(this.GenerationEnvironment);
+	
+	string targetFolder = GetParam("TargetFolder");
+	var permissions = GetParam<List<Raider.Generator.Compilation.IPermission>>("Permissions");
+	var rolePermissions = GetParam<Dictionary<int, List<int>>>("RolePermissions");
+	var withDescription = GetParam<bool>("WithDescription");
+	
+	string permissionsVersionFileName = GetParam("PermissionsVersionFileName");
+	bool onlyInsert = !string.IsNullOrWhiteSpace(permissionsVersionFileName);
+
+	var fileName = onlyInsert
+		? permissionsVersionFileName + ".sql"
+		: "Permissions_InsertScript.sql";
+
+	if (onlyInsert)
+		targetFolder = Path.Combine(targetFolder, "DBPatch");
+
+	StartNewFile(targetFolder, fileName);
+
+	if (!onlyInsert)
+	{
+#>
+DELETE FROM mbs."RolePermission";
+
+DELETE FROM mbs."Permission";
+
+<#	 
+	}
+	else
+	{
+#>
+--Add new permissions
+
+<#
+	}
+#>
+INSERT INTO mbs."Permission"
+	("IdPermission", "Name"<#= withDescription ? ", \"Description\"" : "" #>)
+VALUES
+<#
+	int idx = 0;
+	foreach (var permisison in permissions.OrderBy(x => x.IdPermission))
+	{
+		idx++;
+		if (withDescription)
+		{
+#>
+	 (<#= permisison.IdPermission #>, '<#= permisison.Value #>', '<#= permisison.Description #>')<#= permissions.Count == idx ? "" : "," #>
+<#
+		}
+		else
+		{
+#>
+	 (<#= permisison.IdPermission #>, '<#= permisison.Value #>')<#= permissions.Count == idx ? "" : "," #>
+<#
+		}
+	}
+#>
+--ON CONFLICT ("IdPermission") DO NOTHING
+;
+<#
+	if (0 < rolePermissions.Count)
+	{
+		var now = DateTime.Now;
+#>
+
+
+INSERT INTO mbs."RolePermission"
+(
+	"IdRole", "IdPermission", "AuditCreatedTime", "ConcurrencyToken"
+)
+VALUES
+<#
+	int i = 0;
+	foreach (var kvp in rolePermissions)
+	{
+		foreach (var idPermission in kvp.Value)
+		{
+#>
+	 <#= i == 0 ? "" : "," #>(<#= kvp.Key #>, <#= idPermission.ToString() #>, '<#= now.ToString("yyyy-MM-dd") #>', '<#= Guid.NewGuid().ToString("D") #>')
+<#
+			i++;
+		}
+	}
+#>
+--ON CONFLICT ("IdRole", "IdPermission") DO NOTHING
+;
+
+<#
+	}
+	Process();
+#>
