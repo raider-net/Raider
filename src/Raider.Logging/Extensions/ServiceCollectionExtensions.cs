@@ -9,7 +9,7 @@ namespace Raider.Logging.Extensions
 	{
 		public static IServiceCollection AddRaiderLogger(
 			this IServiceCollection services,
-			Action<LoggerConfiguration> configurator,
+			Action<LoggerConfiguration>? configurator,
 			Action<LogWriterConfiguration>? logWriterConfigurator = null,
 			Action<ILoggingBuilder>? configureLoggingBuilder = null)
 			=> AddRaiderLogger(services, LogLevel.None, configurator, logWriterConfigurator, configureLoggingBuilder);
@@ -17,7 +17,7 @@ namespace Raider.Logging.Extensions
 		public static IServiceCollection AddRaiderLogger(
 			this IServiceCollection services,
 			LogLevel logEventMinimumLevel,
-			Action<LoggerConfiguration> configurator,
+			Action<LoggerConfiguration>? configurator,
 			Action<LogWriterConfiguration>? logWriterConfigurator = null,
 			Action<ILoggingBuilder>? configureLoggingBuilder = null)
 		{
