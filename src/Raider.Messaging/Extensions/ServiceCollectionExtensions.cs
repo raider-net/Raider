@@ -10,8 +10,9 @@ namespace Raider.Messaging.Extensions
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddRaiderMessaging<TStorage>(this IServiceCollection services, Action<ServiceBusConfig> configuration)
+		public static IServiceCollection AddRaiderMessaging<TStorage, TAuthMngr>(this IServiceCollection services, Action<ServiceBusConfig> configuration)
 			where TStorage : class, IServiceBusStorage
+			where TAuthMngr : class, IServiceBusAuthenticationManager
 		{
 			if (configuration == null)
 				throw new ArgumentNullException(nameof(configuration));
@@ -44,6 +45,7 @@ namespace Raider.Messaging.Extensions
 			});
 
 			services.TryAddSingleton<IServiceBusStorage, TStorage>();
+			services.TryAddSingleton<IServiceBusAuthenticationManager, TAuthMngr>();
 			services.TryAddSingleton<IMessageBox>(sp => sp.GetRequiredService<IServiceBusStorage>());
 
 			return services;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Raider.Identity;
+using System;
 
 namespace Raider.Messaging
 {
@@ -11,5 +12,7 @@ namespace Raider.Messaging
 		string? Description { get; }
 		DateTime StartedUtc { get; }
 		int? IdUser { get; }
+		RaiderIdentity<int>? User { get; }
+		RaiderPrincipal<int>? Principal { get; }
 	}
 }

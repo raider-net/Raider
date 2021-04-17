@@ -87,7 +87,10 @@ namespace Raider.Messaging.Internal
 			var added = _scenarios.TryAdd(scenario.IdScenario, scenario);
 
 			if (!added)
-				throw new InvalidOperationException($"{nameof(idScenario)} = {idScenario} already registered");
+			{
+				if (_scenarios[scenario.IdScenario].Name != name)
+					throw new InvalidOperationException($"{nameof(idScenario)} = {idScenario} already registered with {nameof(name)} = {name}");
+			}
 
 			return this;
 		}
@@ -115,7 +118,10 @@ namespace Raider.Messaging.Internal
 			var added = _publishers.TryAdd(publisher.IdComponent, publisher);
 
 			if (!added)
-				throw new InvalidOperationException($"{nameof(idPublisher)} = {idPublisher} already registered");
+			{
+				if (_publishers[publisher.IdComponent].Name != name)
+					throw new InvalidOperationException($"{nameof(idPublisher)} = {idPublisher} already registered with {nameof(name)} = {name}");
+			}
 
 			return this;
 		}

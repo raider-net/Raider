@@ -13,7 +13,7 @@ namespace Raider.Messaging
 	internal class ServiceBusHostService : BackgroundService
 	{
 		private readonly int _startMaxRetryCount;
-		private readonly IServiceBusHost _serviceBusHost;
+		private readonly ServiceBusHost _serviceBusHost;
 		private readonly IServiceProvider _serviceProvider;
 		private readonly IServiceBusStorage _storage;
 		private readonly IMessageBox _messageBox;
@@ -148,6 +148,8 @@ namespace Raider.Messaging
 				{
 					await _storage.SetServiceBusHost(ctx, _serviceBusHost, cancellationToken);
 					await _storage.WriteServiceBusHostStartAsync(ctx, cancellationToken);
+					
+					await _serviceBusHost.Login(_serviceProvider);
 				}
 				catch (Exception ex)
 				{
