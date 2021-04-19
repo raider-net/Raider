@@ -9,7 +9,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 
 <#
-	SetGenerationEnvironment(this.GenerationEnvironment);
+	SetGenerationEnvironment(this.GenerationEnvironment, false);
 	
 	string targetFolder = GetParam("TargetFolder");
 	var permissions = GetParam<List<Raider.Generator.Compilation.IPermission>>("Permissions");
@@ -56,7 +56,7 @@ VALUES
 		if (withDescription)
 		{
 #>
-	 (<#= permisison.IdPermission #>, '<#= permisison.Value #>', '<#= permisison.Description #>')<#= permissions.Count == idx ? "" : "," #>
+	 (<#= permisison.IdPermission #>, '<#= permisison.Value #>', <#= string.IsNullOrWhiteSpace(permisison.Description) ? "null" : ("'" + permisison.Description + "'") #>)<#= permissions.Count == idx ? "" : "," #>
 <#
 		}
 		else
