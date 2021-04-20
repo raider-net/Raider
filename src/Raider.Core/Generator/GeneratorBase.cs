@@ -29,7 +29,7 @@ namespace Raider.Generator
 		private List<int>? _indentLengths;
 		private string _currentIndent = "";
 		private bool _endsWithNewline;
-		private IDictionary<string, object>? _session;
+		private IDictionary<string, object?>? _session;
 
 		private ToStringInstanceHelper _toStringHelper = new ToStringInstanceHelper();
 
@@ -262,7 +262,7 @@ namespace Raider.Generator
 		/// <summary>
 		/// Current transformation session
 		/// </summary>
-		protected virtual IDictionary<string, object> Session
+		protected virtual IDictionary<string, object?> Session
 		{
 			get
 			{
@@ -279,10 +279,10 @@ namespace Raider.Generator
 			return Session?.ContainsKey(key) ?? false;
 		}
 
-		internal void SetParamAndValue(string key, object value)
+		internal void SetParamAndValue(string key, object? value)
 		{
 			if (_session == null)
-				_session = new Dictionary<string, object>();
+				_session = new Dictionary<string, object?>();
 
 			Session[key] = value;
 		}
@@ -478,7 +478,7 @@ namespace Raider.Generator
 
 	public static class GeneratorBaseExtensions
 	{
-		public static T SetParam<T>(this T generator, string key, object value)
+		public static T SetParam<T>(this T generator, string key, object? value)
 			where T : GeneratorBase
 		{
 			generator.SetParamAndValue(key, value);

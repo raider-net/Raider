@@ -24,12 +24,14 @@ namespace Raider.Trace
 				throw new ArgumentNullException(nameof(key));
 
 			if (_lastTraceInfo != null)
-				throw new NotSupportedException($"{nameof(TraceContext)} already initialized");
+				//throw new NotSupportedException($"{nameof(TraceContext)} already initialized");
+				return this;
 
 			lock (_lockInit)
 			{
 				if (_lastTraceInfo != null)
-					throw new NotSupportedException($"{nameof(TraceContext)} already initialized");
+					//throw new NotSupportedException($"{nameof(TraceContext)} already initialized");
+					return this;
 
 				_lastTraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 				_traces.Add(new KeyValuePair<string, ITraceInfo>(key, _lastTraceInfo));
