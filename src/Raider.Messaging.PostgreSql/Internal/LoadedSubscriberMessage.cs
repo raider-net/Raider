@@ -1,5 +1,6 @@
 ﻿using Raider.Messaging.Messages;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Raider.Messaging.PostgreSql
 {
@@ -19,6 +20,7 @@ namespace Raider.Messaging.PostgreSql
 		public int IdSubscriber { get; set; }
 		public DateTimeOffset? LastAccessUtc { get; set; }
 		public MessageState State { get; set; }
+		public string? Snapshot { get; set; }
 		public int RetryCount { get; set; }
 		public DateTimeOffset? DelayedToUtc { get; set; }
 		public Guid OriginalConcurrencyToken { get; set; }
@@ -27,6 +29,25 @@ namespace Raider.Messaging.PostgreSql
 		public LoadedSubscriberMessage()
 		{
 			NewConcurrencyToken = Guid.NewGuid();
+		}
+
+		public bool TryGetSnapshotData<T>([NotNullWhen(true)] out T? snapshot)
+		{
+			snapshot = default;
+
+			if (string.IsNullOrWhiteSpace(Snapshot))
+				return false;
+
+			snapshot = System.Text.Json.JsonSerializer.Deserialize<T>(Snapshot);
+			return snapshot != null;
+		}
+
+		public void SetSnapshotData<T>(T data)
+		{
+			if (data == null)
+				Snapshot = null;
+
+			Snapshot = System.Text.Json.JsonSerializer.Serialize(data);
 		}
 	}
 }

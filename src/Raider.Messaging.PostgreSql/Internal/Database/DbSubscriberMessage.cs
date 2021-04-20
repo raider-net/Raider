@@ -24,6 +24,7 @@ namespace Raider.Messaging.PostgreSql.Database
 		public Guid? IdSubscriberInstance { get; }
 		public DateTime? LastAccessUtc { get; }
 		public int? IdMessageState { get; }
+		public string? Snapshot { get; }
 		public int? RetryCount { get; }
 		public DateTime? DelayedToUtc { get; }
 		public Guid? ConcurrencyToken { get; }
@@ -42,6 +43,7 @@ namespace Raider.Messaging.PostgreSql.Database
 					nameof(IdSubscriberInstance),
 					nameof(LastAccessUtc),
 					nameof(IdMessageState),
+					nameof(Snapshot),
 					nameof(RetryCount),
 					nameof(DelayedToUtc),
 					nameof(ConcurrencyToken)
@@ -62,9 +64,10 @@ namespace Raider.Messaging.PostgreSql.Database
 			//var idSubscriber = reader.GetValueOrDefault<int>(7);
 			//var lastAccessUtc = reader.GetValueOrDefault<DateTime?>(8);
 			//var idMessageState = reader.GetValueOrDefault<int>(9);
-			//var retryCount = reader.GetValueOrDefault<int>(10);
-			//var delayedToUtc = reader.GetValueOrDefault<DateTime?>(11);
-			//var concurrencyToken = reader.GetValueOrDefault<Guid>(12);
+			//var snapshot = reader.GetValueOrDefault<int>(10);
+			//var retryCount = reader.GetValueOrDefault<int>(11);
+			//var delayedToUtc = reader.GetValueOrDefault<DateTime?>(12);
+			//var concurrencyToken = reader.GetValueOrDefault<Guid>(13);
 
 			var subscriberMessage = new LoadedSubscriberMessage<TData>
 			{
@@ -78,9 +81,10 @@ namespace Raider.Messaging.PostgreSql.Database
 				IdSubscriber = reader.GetValueOrDefault<int>(7),
 				LastAccessUtc = reader.GetValueOrDefault<DateTime?>(8),
 				State = EnumHelper.ConvertIntToEnum<MessageState>(reader.GetValueOrDefault<int>(9)),
-				RetryCount = reader.GetValueOrDefault<int>(10),
-				DelayedToUtc = reader.GetValueOrDefault<DateTime?>(11),
-				OriginalConcurrencyToken = reader.GetValueOrDefault<Guid>(12),
+				Snapshot = reader.GetValueOrDefault<string>(10),
+				RetryCount = reader.GetValueOrDefault<int>(11),
+				DelayedToUtc = reader.GetValueOrDefault<DateTime?>(12),
+				OriginalConcurrencyToken = reader.GetValueOrDefault<Guid>(13),
 				//NewConcurrencyToken = Guid.NewGuid(), also in ctor
 				Data = default
 			};
@@ -142,6 +146,7 @@ SELECT
 	sm.""{nameof(IdSubscriber)}"",
 	sm.""{nameof(LastAccessUtc)}"",
 	sm.""{nameof(IdMessageState)}"",
+	sm.""{nameof(Snapshot)}"",
 	sm.""{nameof(RetryCount)}"",
 	sm.""{nameof(DelayedToUtc)}"",
 	sm.""{nameof(ConcurrencyToken)}""
@@ -207,6 +212,7 @@ SELECT
 	sm.""{nameof(IdSubscriber)}"",
 	sm.""{nameof(LastAccessUtc)}"",
 	sm.""{nameof(IdMessageState)}"",
+	sm.""{nameof(Snapshot)}"",
 	sm.""{nameof(RetryCount)}"",
 	sm.""{nameof(DelayedToUtc)}"",
 	sm.""{nameof(ConcurrencyToken)}""
@@ -280,6 +286,7 @@ LIMIT 1";
 					{ nameof(IdSubscriberInstance), null },
 					{ nameof(LastAccessUtc), message.CreatedUtc },
 					{ nameof(IdMessageState), (int)state },
+					{ nameof(Snapshot), null },
 					{ nameof(RetryCount), 0 },
 					{ nameof(DelayedToUtc), null },
 					{ nameof(ConcurrencyToken), guid },
@@ -301,6 +308,7 @@ LIMIT 1";
 					nameof(IdSubscriberInstance),
 					nameof(LastAccessUtc),
 					nameof(IdMessageState),
+					nameof(Snapshot),
 					nameof(RetryCount),
 					nameof(DelayedToUtc),
 					nameof(ConcurrencyToken),
@@ -316,6 +324,7 @@ LIMIT 1";
 					{ nameof(IdSubscriberInstance), idSubscriberInstance },
 					{ nameof(LastAccessUtc), messageResult.CreatedUtc },
 					{ nameof(IdMessageState), (int)messageResult.State },
+					{ nameof(Snapshot), messageResult.Snapshot },
 					{ nameof(RetryCount), messageResult.RetryCount },
 					{ nameof(DelayedToUtc), messageResult.DelayedToUtc },
 					{ nameof(ConcurrencyToken), messageResult.NewConcurrencyToken },

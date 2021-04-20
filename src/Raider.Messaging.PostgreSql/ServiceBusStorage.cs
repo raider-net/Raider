@@ -91,7 +91,7 @@ namespace Raider.Messaging.PostgreSql
 			return new ServiceBusStorageContext(connection);
 		}
 
-		private readonly AsyncLock _setServiceBusHostLock = new AsyncLock();
+		private readonly AsyncLock _setServiceBusHostLock = new();
 		public async Task SetServiceBusHost(IServiceBusStorageContext context, IServiceBusHost serviceBusHost, CancellationToken cancellationToken = default)
 		{
 			if (context == null)
@@ -135,9 +135,8 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				await _dbServiceBusHostRuntime.UpdateAsync(connection, null, ServiceBusHost, endedUtc, cancellationToken);
-			}
+
+			await _dbServiceBusHostRuntime.UpdateAsync(connection, null, ServiceBusHost, endedUtc, cancellationToken);
 		}
 
 		public async Task WriteServiceBusLogAsync(LogBase log, CancellationToken cancellationToken = default)
@@ -149,9 +148,8 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				await _dbServiceBusLog.InsertAsync(connection, null, ServiceBusHost, log, cancellationToken);
-			}
+
+			await _dbServiceBusLog.InsertAsync(connection, null, ServiceBusHost, log, cancellationToken);
 		}
 
 
@@ -208,20 +206,17 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				using (var tran = await connection.BeginTransactionAsync(cancellationToken))
-				{
-					await _dbJobInstance.UpdateAsync(connection, tran, job, cancellationToken);
+			using var tran = await connection.BeginTransactionAsync(cancellationToken);
 
-					//if (messageResult != null)
-					//	await _dbSnapshot.InsertOrUpdate(connection, tran, idSubscriberInstance, messageResult, cancellationToken); //TODO
+			await _dbJobInstance.UpdateAsync(connection, tran, job, cancellationToken);
 
-					if (log != null)
-						await _dbJobInstanceLog.InsertAsync(connection, tran, job, log, cancellationToken);
-					
-					tran.Commit();
-				}
-			}
+			//if (messageResult != null)
+			//	await _dbSnapshot.InsertOrUpdate(connection, tran, idSubscriberInstance, messageResult, cancellationToken); //TODO
+
+			if (log != null)
+				await _dbJobInstanceLog.InsertAsync(connection, tran, job, log, cancellationToken);
+
+			tran.Commit();
 		}
 
 		public async Task WriteJobLogAsync(IJob job, LogBase log, CancellationToken cancellationToken = default)
@@ -236,9 +231,8 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				await _dbJobInstanceLog.InsertAsync(connection, null, job, log, cancellationToken);
-			}
+
+			await _dbJobInstanceLog.InsertAsync(connection, null, job, log, cancellationToken);
 		}
 
 
@@ -318,17 +312,14 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				using (var tran = await connection.BeginTransactionAsync(cancellationToken))
-				{
-					await _dbPublisherInstance.UpdateAsync(connection, tran, publisher, cancellationToken);
+			using var tran = await connection.BeginTransactionAsync(cancellationToken);
 
-					if (log != null)
-						await _dbPublisherInstanceLog.InsertAsync(connection, tran, publisher, log, cancellationToken);
+			await _dbPublisherInstance.UpdateAsync(connection, tran, publisher, cancellationToken);
 
-					tran.Commit();
-				}
-			}
+			if (log != null)
+				await _dbPublisherInstanceLog.InsertAsync(connection, tran, publisher, log, cancellationToken);
+
+			tran.Commit();
 		}
 
 		public async Task WritePublisherLogAsync(IPublisher publisher, LogBase log, CancellationToken cancellationToken = default)
@@ -343,9 +334,8 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				await _dbPublisherInstanceLog.InsertAsync(connection, null, publisher, log, cancellationToken);
-			}
+
+			await _dbPublisherInstanceLog.InsertAsync(connection, null, publisher, log, cancellationToken);
 		}
 
 
@@ -380,20 +370,17 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				using (var tran = await connection.BeginTransactionAsync(cancellationToken))
-				{
-					await _dbSubscriberInstance.UpdateAsync(connection, tran, subscriber, cancellationToken);
+			using var tran = await connection.BeginTransactionAsync(cancellationToken);
 
-					if (messageResult != null)
-						await _dbSubscriberMessage.UpdateAsync(connection, tran, subscriber.IdInstance, messageResult, cancellationToken);
+			await _dbSubscriberInstance.UpdateAsync(connection, tran, subscriber, cancellationToken);
 
-					if (log != null)
-						await _dbSubscriberInstanceLog.InsertAsync(connection, tran, subscriber, log, cancellationToken);
+			if (messageResult != null)
+				await _dbSubscriberMessage.UpdateAsync(connection, tran, subscriber.IdInstance, messageResult, cancellationToken);
 
-					tran.Commit();
-				}
-			}
+			if (log != null)
+				await _dbSubscriberInstanceLog.InsertAsync(connection, tran, subscriber, log, cancellationToken);
+
+			tran.Commit();
 		}
 
 		public async Task WriteSubscriberLogAsync(ISubscriber subscriber, LogBase log, CancellationToken cancellationToken = default)
@@ -408,9 +395,8 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				await _dbSubscriberInstanceLog.InsertAsync(connection, null, subscriber, log, cancellationToken);
-			}
+
+			await _dbSubscriberInstanceLog.InsertAsync(connection, null, subscriber, log, cancellationToken);
 		}
 
 
@@ -427,9 +413,8 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				await _dbSubscriberMessage.UpdateAsync(connection, null, subscriber.IdInstance, messageResult, cancellationToken);
-			}
+
+			await _dbSubscriberMessage.UpdateAsync(connection, null, subscriber.IdInstance, messageResult, cancellationToken);
 		}
 
 
@@ -450,10 +435,8 @@ namespace Raider.Messaging.PostgreSql
 
 			ISubscriberMessage<TData>? result;
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				result = await _dbSubscriberMessage.GetSubscriberMessageFromFIFOAsync(connection, null, subscriber, readMessageStates, utcNow, cancellationToken);
-			}
 
+			result = await _dbSubscriberMessage.GetSubscriberMessageFromFIFOAsync(connection, null, subscriber, readMessageStates, utcNow, cancellationToken);
 			return result;
 		}
 
@@ -472,10 +455,8 @@ namespace Raider.Messaging.PostgreSql
 
 			ISubscriberMessage<TData>? result;
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				result = await _dbSubscriberMessage.GetSubscriberMessageFromNonFIFOAsync(connection, null, subscriber, readMessageStates, utcNow, cancellationToken);
-			}
 
+			result = await _dbSubscriberMessage.GetSubscriberMessageFromNonFIFOAsync(connection, null, subscriber, readMessageStates, utcNow, cancellationToken);
 			return result;
 		}
 
@@ -493,23 +474,21 @@ namespace Raider.Messaging.PostgreSql
 
 			var idMessageType = GetMessageTypeId<TData>();
 			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
-			{
-				if (dbTransaction == null)
-				{
-					using (var tran = await connection.BeginTransactionAsync(cancellationToken))
-					{
-						await _dbMessage.InsertAsync(connection, null, message, idMessageType, cancellationToken);
-						await _dbSubscriberMessage.InsertAsync(connection, tran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
-					}
-				}
-				else
-				{
-					if (dbTransaction is not NpgsqlTransaction npgsqlTran)
-						throw new ArgumentException($"{nameof(dbTransaction)} must be {nameof(NpgsqlTransaction)}", nameof(dbTransaction));
 
-					await _dbMessage.InsertAsync(connection, npgsqlTran, message, idMessageType, cancellationToken);
-					await _dbSubscriberMessage.InsertAsync(connection, npgsqlTran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
-				}
+			if (dbTransaction == null)
+			{
+				using var tran = await connection.BeginTransactionAsync(cancellationToken);
+
+				await _dbMessage.InsertAsync(connection, null, message, idMessageType, cancellationToken);
+				await _dbSubscriberMessage.InsertAsync(connection, tran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
+			}
+			else
+			{
+				if (dbTransaction is not NpgsqlTransaction npgsqlTran)
+					throw new ArgumentException($"{nameof(dbTransaction)} must be {nameof(NpgsqlTransaction)}", nameof(dbTransaction));
+
+				await _dbMessage.InsertAsync(connection, npgsqlTran, message, idMessageType, cancellationToken);
+				await _dbSubscriberMessage.InsertAsync(connection, npgsqlTran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
 			}
 		}
 	}
