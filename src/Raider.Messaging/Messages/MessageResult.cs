@@ -9,6 +9,7 @@ namespace Raider.Messaging.Messages
 		public DateTime CreatedUtc { get; }
 		public Guid IdSubscriberMessage { get; internal set; }
 		public MessageState State { get; internal set; }
+		public string? Snapshot { get; internal set; }
 		public int RetryCount { get; internal set; }
 		public DateTimeOffset? DelayedToUtc { get; internal set; }
 		public Guid OriginalConcurrencyToken { get; internal set; }
@@ -19,57 +20,62 @@ namespace Raider.Messaging.Messages
 			CreatedUtc = DateTime.UtcNow;
 		}
 
-		public static MessageResult Consume(ISubscriberMessage message)
-			=> new MessageResult
+		public static MessageResult Consume(ISubscriberMessage message, string? snapshot = null)
+			=> new()
 			{
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Consumed,
+				Snapshot = snapshot ?? message.Snapshot,
 				RetryCount = message.RetryCount,
 				DelayedToUtc = message.DelayedToUtc,
 				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
 				NewConcurrencyToken = message.NewConcurrencyToken
 			};
 
-		public static MessageResult Error(ISubscriberMessage message, TimeSpan delay)
-			=> new MessageResult
+		public static MessageResult Error(ISubscriberMessage message, TimeSpan delay, string? snapshot = null)
+			=> new()
 			{
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Error,
+				Snapshot = snapshot ?? message.Snapshot,
 				RetryCount = message.RetryCount + 1,
 				DelayedToUtc = DateTimeOffset.UtcNow.Add(delay),
 				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
 				NewConcurrencyToken = message.NewConcurrencyToken
 			};
 
-		public static MessageResult Error(ISubscriberMessage message, Dictionary<int, TimeSpan>? delayTable, TimeSpan defaultTimeSpan)
+		public static MessageResult Error(ISubscriberMessage message, Dictionary<int, TimeSpan>? delayTable, TimeSpan defaultTimeSpan, string? snapshot = null)
 			=> (delayTable == null || delayTable.Count == 0 || delayTable.All(x => x.Key < 0))
 			? throw new ArgumentNullException(nameof(delayTable))
 			: new MessageResult
-			{
-				IdSubscriberMessage = message.IdSubscriberMessage,
-				State = MessageState.Error,
-				RetryCount = message.RetryCount + 1,
-				DelayedToUtc = DateTimeOffset.UtcNow.Add(FindDelay(message.RetryCount, delayTable, defaultTimeSpan)),
-				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
-				NewConcurrencyToken = message.NewConcurrencyToken
-			};
+				{
+					IdSubscriberMessage = message.IdSubscriberMessage,
+					State = MessageState.Error,
+					Snapshot = snapshot ?? message.Snapshot,
+					RetryCount = message.RetryCount + 1,
+					DelayedToUtc = DateTimeOffset.UtcNow.Add(FindDelay(message.RetryCount, delayTable, defaultTimeSpan)),
+					OriginalConcurrencyToken = message.OriginalConcurrencyToken,
+					NewConcurrencyToken = message.NewConcurrencyToken
+				};
 
-		public static MessageResult Suspended(ISubscriberMessage message)
-			=> new MessageResult
+		public static MessageResult Suspended(ISubscriberMessage message, string? snapshot = null)
+			=> new()
 			{
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Suspended,
+				Snapshot = snapshot ?? message.Snapshot,
 				RetryCount = message.RetryCount + 1,
 				DelayedToUtc = null,
 				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
 				NewConcurrencyToken = message.NewConcurrencyToken
 			};
 
-		public static MessageResult Corrupted(ISubscriberMessage message)
-			=> new MessageResult
+		public static MessageResult Corrupted(ISubscriberMessage message, string? snapshot = null)
+			=> new()
 			{
 				IdSubscriberMessage = message.IdSubscriberMessage,
 				State = MessageState.Corrupted,
+				Snapshot = snapshot ?? message.Snapshot,
 				RetryCount = message.RetryCount,
 				DelayedToUtc = null,
 				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
