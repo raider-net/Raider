@@ -56,13 +56,13 @@ VALUES
 		if (withDescription)
 		{
 #>
-	 (<#= permisison.IdPermission #>, '<#= permisison.Value #>', <#= string.IsNullOrWhiteSpace(permisison.Description) ? "null" : ("'" + permisison.Description + "'") #>)<#= permissions.Count == idx ? "" : "," #>
+	 (<#= permisison.IdPermission #>, '<#= permisison.Name #>', <#= string.IsNullOrWhiteSpace(permisison.Description) ? "null" : ("'" + permisison.Description + "'") #>)<#= permissions.Count == idx ? "" : "," #>
 <#
 		}
 		else
 		{
 #>
-	 (<#= permisison.IdPermission #>, '<#= permisison.Value #>')<#= permissions.Count == idx ? "" : "," #>
+	 (<#= permisison.IdPermission #>, '<#= permisison.Name #>')<#= permissions.Count == idx ? "" : "," #>
 <#
 		}
 	}
@@ -88,7 +88,7 @@ VALUES
 		foreach (var idPermission in kvp.Value)
 		{
 #>
-	 <#= i == 0 ? "" : "," #>(<#= kvp.Key #>, <#= idPermission.ToString() #>, '<#= now.ToString("yyyy-MM-dd") #>', '<#= Guid.NewGuid().ToString("D") #>')
+	 <#= i == 0 ? "" : "," #>(<#= kvp.Key #>, <#= idPermission.ToString() #>, '<#= now.ToString("yyyy-MM-dd") #>', '<#= Guid.Empty.ToString("D") #>')
 <#
 			i++;
 		}

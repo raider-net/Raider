@@ -112,7 +112,7 @@ namespace Raider.Generator.Compilation
             this.Write(", \'");
             
             #line 59 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(permisison.Value));
+            this.Write(this.ToStringHelper.ToStringWithCulture(permisison.Name));
             
             #line default
             #line hidden
@@ -151,7 +151,7 @@ namespace Raider.Generator.Compilation
             this.Write(", \'");
             
             #line 65 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(permisison.Value));
+            this.Write(this.ToStringHelper.ToStringWithCulture(permisison.Name));
             
             #line default
             #line hidden
@@ -228,7 +228,7 @@ namespace Raider.Generator.Compilation
             this.Write("\', \'");
             
             #line 91 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(Guid.NewGuid().ToString("D")));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Guid.Empty.ToString("D")));
             
             #line default
             #line hidden
