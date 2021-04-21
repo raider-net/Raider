@@ -18,7 +18,6 @@ namespace Raider.Commands.Internal
 	{
 		private readonly ServiceFactory _serviceFactory;
 		private readonly IApplicationContext _applicationContext;
-		private readonly IApplicationResources _applicationResources;
 		private readonly ILogger<CommandDispatcher> _logger;
 		private readonly ICommandHandlerRegistry _handlerRegistry;
 		private readonly ICommandHandlerFactory _handlerFactory;
@@ -39,7 +38,6 @@ namespace Raider.Commands.Internal
 			_logger = logger;
 			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
 			_applicationContext = _serviceFactory.GetRequiredInstance<IApplicationContext>();
-			_applicationResources = _serviceFactory.GetRequiredInstance<IApplicationResources>();
 		}
 
 		public ICommandResult<bool> CanExecute<TResult>(ICommand<TResult> command, ICommandInterceptorOptions? options = default)
@@ -69,7 +67,7 @@ namespace Raider.Commands.Internal
 
 				handler = commandProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = commandProcessor.CanExecute(traceInfo, handler, command, options, _applicationContext, _applicationResources);
+				var result = commandProcessor.CanExecute(traceInfo, handler, command, options, _applicationContext);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -87,7 +85,7 @@ namespace Raider.Commands.Internal
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(CanExecute)}<{nameof(TResult)}> error - Command = {command?.GetType().FullName ?? "NULL"}")
 							.LogCode(CommandLogCode.Ex_CmdDisp.ToString())
-							.ClientMessage(_applicationResources.GlobalExceptionMessage)
+							.ClientMessage(_applicationContext.ApplicationResources?.GlobalExceptionMessage)
 							.CommandQueryName(commandType?.FullName));
 
 				var result = new CommandResultInternal<bool>();
@@ -133,7 +131,7 @@ namespace Raider.Commands.Internal
 
 				handler = commandProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = await commandProcessor.CanExecuteAsync(traceInfo, handler, command, options, _applicationContext, _applicationResources, cancellationToken);
+				var result = await commandProcessor.CanExecuteAsync(traceInfo, handler, command, options, _applicationContext, cancellationToken);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -151,7 +149,7 @@ namespace Raider.Commands.Internal
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(CanExecuteAsync)}<{nameof(TResult)}> error - Command = {command?.GetType().FullName ?? "NULL"}")
 							.LogCode(CommandLogCode.Ex_CmdDisp.ToString())
-							.ClientMessage(_applicationResources.GlobalExceptionMessage)
+							.ClientMessage(_applicationContext.ApplicationResources?.GlobalExceptionMessage)
 							.CommandQueryName(commandType?.FullName));
 
 				var result = new CommandResultInternal<bool>();
@@ -197,7 +195,7 @@ namespace Raider.Commands.Internal
 
 				handler = commandProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = commandProcessor.Execute(traceInfo, handler, command, options, _applicationContext, _applicationResources);
+				var result = commandProcessor.Execute(traceInfo, handler, command, options, _applicationContext);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -215,7 +213,7 @@ namespace Raider.Commands.Internal
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(Execute)}<{nameof(TResult)}> error - Command = {command?.GetType().FullName ?? "NULL"}")
 							.LogCode(CommandLogCode.Ex_CmdDisp.ToString())
-							.ClientMessage(_applicationResources.GlobalExceptionMessage)
+							.ClientMessage(_applicationContext.ApplicationResources?.GlobalExceptionMessage)
 							.CommandQueryName(commandType?.FullName));
 
 				var result = new CommandResultInternal<TResult>();
@@ -261,7 +259,7 @@ namespace Raider.Commands.Internal
 
 				handler = commandProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = await commandProcessor.ExecuteAsync(traceInfo, handler, command, options, _applicationContext, _applicationResources, cancellationToken);
+				var result = await commandProcessor.ExecuteAsync(traceInfo, handler, command, options, _applicationContext, cancellationToken);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -279,7 +277,7 @@ namespace Raider.Commands.Internal
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(ExecuteAsync)}<{nameof(TResult)}> error - Command = {command?.GetType().FullName ?? "NULL"}")
 							.LogCode(CommandLogCode.Ex_CmdDisp.ToString())
-							.ClientMessage(_applicationResources.GlobalExceptionMessage)
+							.ClientMessage(_applicationContext.ApplicationResources?.GlobalExceptionMessage)
 							.CommandQueryName(commandType?.FullName));
 
 				var result = new CommandResultInternal<TResult>();
@@ -330,7 +328,7 @@ namespace Raider.Commands.Internal
 
 				handler = commandProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = commandProcessor.CanExecute(traceInfo, handler, command, options, _applicationContext, _applicationResources);
+				var result = commandProcessor.CanExecute(traceInfo, handler, command, options, _applicationContext);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -348,7 +346,7 @@ namespace Raider.Commands.Internal
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(CanExecute)} error - Command = {command?.GetType().FullName ?? "NULL"}")
 							.LogCode(CommandLogCode.Ex_CmdDisp.ToString())
-							.ClientMessage(_applicationResources.GlobalExceptionMessage)
+							.ClientMessage(_applicationContext.ApplicationResources?.GlobalExceptionMessage)
 							.CommandQueryName(commandType?.FullName));
 
 				var result = new CommandResultInternal<bool>();
@@ -394,7 +392,7 @@ namespace Raider.Commands.Internal
 
 				handler = commandProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = await commandProcessor.CanExecuteAsync(traceInfo, handler, command, options, _applicationContext, _applicationResources, cancellationToken);
+				var result = await commandProcessor.CanExecuteAsync(traceInfo, handler, command, options, _applicationContext, cancellationToken);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -412,7 +410,7 @@ namespace Raider.Commands.Internal
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(CanExecuteAsync)} error - Command = {command?.GetType().FullName ?? "NULL"}")
 							.LogCode(CommandLogCode.Ex_CmdDisp.ToString())
-							.ClientMessage(_applicationResources.GlobalExceptionMessage)
+							.ClientMessage(_applicationContext.ApplicationResources?.GlobalExceptionMessage)
 							.CommandQueryName(commandType?.FullName));
 
 				var result = new CommandResultInternal<bool>();
@@ -458,7 +456,7 @@ namespace Raider.Commands.Internal
 
 				handler = commandProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = commandProcessor.Execute(traceInfo, handler, command, options, _applicationContext, _applicationResources);
+				var result = commandProcessor.Execute(traceInfo, handler, command, options, _applicationContext);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -476,7 +474,7 @@ namespace Raider.Commands.Internal
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(Execute)} error - Command = {command?.GetType().FullName ?? "NULL"}")
 							.LogCode(CommandLogCode.Ex_CmdDisp.ToString())
-							.ClientMessage(_applicationResources.GlobalExceptionMessage)
+							.ClientMessage(_applicationContext.ApplicationResources?.GlobalExceptionMessage)
 							.CommandQueryName(commandType?.FullName));
 
 				var result = new CommandResultInternal();
@@ -522,7 +520,7 @@ namespace Raider.Commands.Internal
 
 				handler = commandProcessor.CreateHandler(_handlerFactory);
 				handler.Dispatcher = this;
-				var result = await commandProcessor.ExecuteAsync(traceInfo, handler, command, options, _applicationContext, _applicationResources, cancellationToken);
+				var result = await commandProcessor.ExecuteAsync(traceInfo, handler, command, options, _applicationContext, cancellationToken);
 
 				callEndTicks = StaticWatch.CurrentTicks;
 				methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
@@ -540,7 +538,7 @@ namespace Raider.Commands.Internal
 						x => x.ExceptionInfo(ex)
 							.Detail($"{nameof(ExecuteAsync)} error - Command = {command?.GetType().FullName ?? "NULL"}")
 							.LogCode(CommandLogCode.Ex_CmdDisp.ToString())
-							.ClientMessage(_applicationResources.GlobalExceptionMessage)
+							.ClientMessage(_applicationContext.ApplicationResources?.GlobalExceptionMessage)
 							.CommandQueryName(commandType?.FullName));
 
 				var result = new CommandResultInternal();

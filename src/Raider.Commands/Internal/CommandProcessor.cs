@@ -19,16 +19,14 @@ namespace Raider.Commands.Internal
 			ICommandHandler handler,
 			ICommand<TResult> command,
 			ICommandInterceptorOptions? options,
-			IApplicationContext applicationContext,
-			IApplicationResources applicationResources);
+			IApplicationContext applicationContext);
 
 		public abstract ICommandResult<TResult> Execute(
 			ITraceInfo traceInfo,
 			ICommandHandler handler,
 			ICommand<TResult> command,
 			ICommandInterceptorOptions? options,
-			IApplicationContext applicationContext,
-			IApplicationResources applicationResources);
+			IApplicationContext applicationContext);
 	}
 
 	internal class CommandProcessor<TCommand, TResult> : CommandProcessor<TResult>
@@ -64,8 +62,7 @@ namespace Raider.Commands.Internal
 			ICommandHandler handler,
 			ICommand<TResult> command,
 			ICommandInterceptorOptions? options,
-			IApplicationContext applicationContext,
-			IApplicationResources applicationResources)
+			IApplicationContext applicationContext)
 		{
 			var hnd = (ICommandHandler<TCommand, TResult>)handler;
 
@@ -79,7 +76,7 @@ namespace Raider.Commands.Internal
 			}
 
 			return interceptor == null
-				? hnd.CanExecute((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext, applicationResources))
+				? hnd.CanExecute((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext))
 				: interceptor.InterceptCanExecute(traceInfo, hnd, (TCommand)command, options);
 		}
 
@@ -88,8 +85,7 @@ namespace Raider.Commands.Internal
 			ICommandHandler handler,
 			ICommand<TResult> command,
 			ICommandInterceptorOptions? options,
-			IApplicationContext applicationContext,
-			IApplicationResources applicationResources)
+			IApplicationContext applicationContext)
 		{
 			var hnd = (ICommandHandler<TCommand, TResult>)handler;
 
@@ -103,7 +99,7 @@ namespace Raider.Commands.Internal
 			}
 
 			return interceptor == null
-				? hnd.Execute((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext, applicationResources))
+				? hnd.Execute((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext))
 				: interceptor.InterceptExecute(traceInfo, hnd, (TCommand)command, options);
 		}
 

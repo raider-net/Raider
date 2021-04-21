@@ -22,7 +22,6 @@ namespace Raider.Commands.Internal
 			ICommand<TResult> command,
 			ICommandInterceptorOptions? options,
 			IApplicationContext applicationContext,
-			IApplicationResources applicationResources,
 			CancellationToken cancellationToken);
 
 		public abstract Task<ICommandResult<TResult>> ExecuteAsync(
@@ -31,7 +30,6 @@ namespace Raider.Commands.Internal
 			ICommand<TResult> command,
 			ICommandInterceptorOptions? options,
 			IApplicationContext applicationContext,
-			IApplicationResources applicationResources,
 			CancellationToken cancellationToken);
 	}
 
@@ -68,7 +66,6 @@ namespace Raider.Commands.Internal
 			ICommand<TResult> command,
 			ICommandInterceptorOptions? options,
 			IApplicationContext applicationContext,
-			IApplicationResources applicationResources,
 			CancellationToken cancellationToken)
 		{
 			var hnd = (IAsyncCommandHandler<TCommand, TResult>)handler;
@@ -83,7 +80,7 @@ namespace Raider.Commands.Internal
 			}
 
 			return interceptor == null
-				? hnd.CanExecuteAsync((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext, applicationResources), cancellationToken)
+				? hnd.CanExecuteAsync((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext), cancellationToken)
 				: interceptor.InterceptCanExecuteAsync(traceInfo, hnd, (TCommand)command, options, cancellationToken);
 		}
 
@@ -93,7 +90,6 @@ namespace Raider.Commands.Internal
 			ICommand<TResult> command,
 			ICommandInterceptorOptions? options,
 			IApplicationContext applicationContext,
-			IApplicationResources applicationResources,
 			CancellationToken cancellationToken)
 		{
 			var hnd = (IAsyncCommandHandler<TCommand, TResult>)handler;
@@ -108,7 +104,7 @@ namespace Raider.Commands.Internal
 			}
 
 			return interceptor == null
-				? hnd.ExecuteAsync((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext, applicationResources), cancellationToken)
+				? hnd.ExecuteAsync((TCommand)command, CreateCommandHandlerContext(traceInfo, applicationContext), cancellationToken)
 				: interceptor.InterceptExecuteAsync(traceInfo, hnd, (TCommand)command, options, cancellationToken);
 		}
 
