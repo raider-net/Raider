@@ -93,7 +93,7 @@ namespace Raider.Extensions
 				Cookies = cookiesList,
 				Headers = headersDict,
 				Protocol = request.Protocol,
-				RouteValues = request.RouteValues,
+				RouteValues = request.RouteValues.ToDictionary(x => x.Key, x => x.Value),
 				Path = request.Path,
 				PathBase = request.PathBase,
 				Host = request.Host.Host,
