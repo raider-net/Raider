@@ -300,7 +300,6 @@ namespace Raider.Messaging
 						var subscriberContext = scope.ServiceProvider.GetRequiredService<SubscriberContext>();
 						subscriberContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create(), tc?.Next()).Build();
 						subscriberContext.Logger = _fallbackLogger ?? scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
-						subscriberContext.ApplicationResources = scope.ServiceProvider.GetRequiredService<IApplicationResources>();
 
 						messageResult = await ProcessMessageAsync(subscriberContext, message, _stoppingCts?.Token ?? default);
 					}

@@ -5,32 +5,31 @@ using Raider.Localization;
 using Raider.Logging;
 using Raider.Logging.Extensions;
 using Raider.Trace;
+using Raider.Web;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Raider.Messaging
 {
-	public class SubscriberContext
+	public class SubscriberContext : IApplicationContext
 	{
 		private readonly string _commandName = $"{nameof(Raider)}.{nameof(Messaging)}";
 
 		public ServiceFactory ServiceFactory { get; }
-		public ITraceInfo TraceInfo { get; internal set; }
 		public ILogger Logger { get; internal set; }
-		public IApplicationResources ApplicationResources { get; internal set; }
-		public RaiderIdentity<int>? User { get; }
-		public RaiderPrincipal<int>? Principal { get; }
+		public ITraceInfo TraceInfo { get; internal set; }
+		public IApplicationContext ApplicationContext { get; }
+		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
+		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
+		public RequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
+		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		public SubscriberContext(ServiceFactory serviceFactory, IServiceBusAuthenticationManager authenticationManager)
+		public SubscriberContext(ServiceFactory serviceFactory, IApplicationContext applicationContext)
 		{
 			ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
-			if (authenticationManager == null)
-				return;
-
-			User = authenticationManager.User;
-			Principal = authenticationManager.Principal;
+			ApplicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -43,7 +42,7 @@ namespace Raider.Messaging
 		{
 			var traceInfo =
 				new TraceInfoBuilder(
-					new TraceFrameBuilder(TraceInfo?.TraceFrame)
+					new TraceFrameBuilder(TraceInfo.TraceFrame)
 						.CallerMemberName(memberName)
 						.CallerFilePath(sourceFilePath)
 						.CallerLineNumber(sourceLineNumber == 0 ? (int?)null : sourceLineNumber)
@@ -55,9 +54,7 @@ namespace Raider.Messaging
 
 			var disposable = Logger.BeginScope(new Dictionary<string, Guid>
 			{
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
 				[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = traceInfo.TraceFrame.MethodCallId
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
 			});
 
 			var scope = new MethodLogScope(traceInfo, disposable);
