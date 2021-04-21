@@ -16,13 +16,13 @@ namespace Raider.EntityFrameworkCore
 	{
 		public DbSet<TAuditEntry> AuditEntry { get; set; }
 
-		public AuditableDbContext(DbContextOptions options, ILogger logger, IApplicationContext appContext, bool allowAnonymousUser/*, disabledEtitiesFromAudit, disabledEtityPropertiesFromAudit*/)
-			: base(options, logger, appContext, allowAnonymousUser)
+		public AuditableDbContext(DbContextOptions options, ILogger logger, IApplicationContext appContext/*, disabledEtitiesFromAudit, disabledEtityPropertiesFromAudit*/)
+			: base(options, logger, appContext)
 		{
 		}
 
-		protected AuditableDbContext(ILogger logger, IApplicationContext appContext, bool allowAnonymousUser)
-			: base(logger, appContext, allowAnonymousUser)
+		protected AuditableDbContext(ILogger logger, IApplicationContext appContext)
+			: base(logger, appContext)
 		{
 		}
 

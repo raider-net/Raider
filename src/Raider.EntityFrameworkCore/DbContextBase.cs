@@ -26,9 +26,8 @@ namespace Raider.EntityFrameworkCore
 			get
 			{
 				if (dbConnection == null)
-				{
 					dbConnection = this.Database.GetDbConnection();
-				}
+
 				return dbConnection;
 			}
 		}
@@ -42,35 +41,26 @@ namespace Raider.EntityFrameworkCore
 			{
 
 				if (_dbConnectionString == null)
-				{
 					_dbConnectionString = DbConnection.ConnectionString;
-				}
+
 				return _dbConnectionString;
 			}
 		}
 
-		public DbContextBase(DbContextOptions options, ILogger logger, IApplicationContext appContext, bool allowAnonymousUser/*, disabledEtitiesFromAudit, disabledEtityPropertiesFromAudit*/)
+		public DbContextBase(DbContextOptions options, ILogger logger, IApplicationContext appContext/*, disabledEtitiesFromAudit, disabledEtityPropertiesFromAudit*/)
 			: base(options)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_applicationContext = appContext ?? throw new ArgumentNullException(nameof(appContext));
-
-			if (allowAnonymousUser)
-				_userId = appContext?.TraceInfo?.IdUser;
-			else
-				_userId = appContext?.TraceInfo?.IdUser ?? throw new ArgumentException(null, $"{nameof(appContext)}.{nameof(appContext.TraceInfo)}.{nameof(appContext.TraceInfo.IdUser)}");
+			_userId = _applicationContext.TraceInfo.IdUser;
 		}
 
-		protected DbContextBase(ILogger logger, IApplicationContext appContext, bool allowAnonymousUser)
+		protected DbContextBase(ILogger logger, IApplicationContext appContext)
 			: base()
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_applicationContext = appContext ?? throw new ArgumentNullException(nameof(appContext));
-
-			if (allowAnonymousUser)
-				_userId = appContext?.TraceInfo?.IdUser;
-			else
-				_userId = appContext?.TraceInfo?.IdUser ?? throw new ArgumentException(null, nameof(appContext));
+			_userId = _applicationContext.TraceInfo.IdUser;
 		}
 
 		public override int SaveChanges(bool acceptAllChangesOnSuccess)
