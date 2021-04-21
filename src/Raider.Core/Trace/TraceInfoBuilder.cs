@@ -22,9 +22,9 @@ namespace Raider.Trace
 
 		TBuilder IdUser(int? idUser, bool force = false);
 
-		TBuilder IdUser(ClaimsPrincipal user, bool force = false);
+		TBuilder IdUser(ClaimsPrincipal? user, bool force = false);
 
-		TBuilder IdUser(IIdentity user, bool force = false);
+		TBuilder IdUser(IIdentity? user, bool force = false);
 
 		TBuilder ExternalCorrelationId(string? externalCorrelationId, bool force = false);
 
@@ -115,7 +115,7 @@ namespace Raider.Trace
 			return _builder;
 		}
 
-		public TBuilder IdUser(ClaimsPrincipal user, bool force = false)
+		public TBuilder IdUser(ClaimsPrincipal? user, bool force = false)
 		{
 			int? idUser = null;
 
@@ -125,7 +125,7 @@ namespace Raider.Trace
 			return IdUser(idUser, force);
 		}
 
-		public TBuilder IdUser(IIdentity identity, bool force = false)
+		public TBuilder IdUser(IIdentity? identity, bool force = false)
 		{
 			int? idUser = null;
 
