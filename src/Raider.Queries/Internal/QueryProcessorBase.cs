@@ -1,6 +1,4 @@
-﻿using Raider.Localization;
-using Raider.Trace;
-using System;
+﻿using Raider.Trace;
 
 namespace Raider.Queries.Internal
 {
@@ -10,18 +8,7 @@ namespace Raider.Queries.Internal
 
 		public abstract void DisposeHandler(IQueryHandlerFactory handlerFactory, IQueryHandler? handler);
 
-		protected IQueryHandlerContext CreateQueryHandlerContext(ITraceInfo traceInfo, IApplicationContext applicationContext, IApplicationResources applicationResources)
-		{
-			if (applicationContext == null)
-				throw new ArgumentNullException(nameof(applicationContext));
-
-			return new QueryHandlerContextInternal
-			{
-				TraceInfo = traceInfo,
-				Principal = applicationContext.Principal,
-				User = applicationContext.User,
-				ApplicationResources = applicationResources ?? throw new ArgumentNullException(nameof(applicationResources))
-			};
-		}
+		protected IQueryHandlerContext CreateQueryHandlerContext(ITraceInfo traceInfo, IApplicationContext applicationContext)
+			=> new QueryHandlerContextInternal(traceInfo, applicationContext);
 	}
 }

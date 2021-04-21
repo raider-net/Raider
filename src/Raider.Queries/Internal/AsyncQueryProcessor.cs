@@ -22,7 +22,6 @@ namespace Raider.Queries.Internal
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
 			IApplicationContext applicationContext,
-			IApplicationResources applicationResources,
 			CancellationToken cancellationToken);
 
 		public abstract Task<IQueryResult<TResult>> ExecuteAsync(
@@ -31,7 +30,6 @@ namespace Raider.Queries.Internal
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
 			IApplicationContext applicationContext,
-			IApplicationResources applicationResources,
 			CancellationToken cancellationToken);
 	}
 
@@ -69,7 +67,6 @@ namespace Raider.Queries.Internal
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
 			IApplicationContext applicationContext,
-			IApplicationResources applicationResources,
 			CancellationToken cancellationToken)
 		{
 			var hnd = (IAsyncQueryHandler<TQuery, TResult>)handler;
@@ -84,7 +81,7 @@ namespace Raider.Queries.Internal
 			}
 
 			return interceptor == null
-				? hnd.CanExecuteAsync((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext, applicationResources), cancellationToken)
+				? hnd.CanExecuteAsync((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext), cancellationToken)
 				: interceptor.InterceptCanExecuteAsync(traceInfo, hnd, (TQuery)query, options, cancellationToken);
 		}
 
@@ -94,7 +91,6 @@ namespace Raider.Queries.Internal
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
 			IApplicationContext applicationContext,
-			IApplicationResources applicationResources,
 			CancellationToken cancellationToken)
 		{
 			var hnd = (IAsyncQueryHandler<TQuery, TResult>)handler;
@@ -109,7 +105,7 @@ namespace Raider.Queries.Internal
 			}
 
 			return interceptor == null
-				? hnd.ExecuteAsync((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext, applicationResources), cancellationToken)
+				? hnd.ExecuteAsync((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext), cancellationToken)
 				: interceptor.InterceptExecuteAsync(traceInfo, hnd, (TQuery)query, options, cancellationToken);
 		}
 

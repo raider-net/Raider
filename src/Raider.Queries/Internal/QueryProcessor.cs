@@ -19,16 +19,14 @@ namespace Raider.Queries.Internal
 			IQueryHandler handler,
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
-			IApplicationContext applicationContext,
-			IApplicationResources applicationResources);
+			IApplicationContext applicationContext);
 
 		public abstract IQueryResult<TResult> Execute(
 			ITraceInfo traceInfo,
 			IQueryHandler handler,
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
-			IApplicationContext applicationContext,
-			IApplicationResources applicationResources);
+			IApplicationContext applicationContext);
 	}
 
 	internal class QueryProcessor<TQuery, TResult> : QueryProcessor<TResult>
@@ -64,8 +62,7 @@ namespace Raider.Queries.Internal
 			IQueryHandler handler,
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
-			IApplicationContext applicationContext,
-			IApplicationResources applicationResources)
+			IApplicationContext applicationContext)
 		{
 			var hnd = (IQueryHandler<TQuery, TResult>)handler;
 
@@ -79,7 +76,7 @@ namespace Raider.Queries.Internal
 			}
 
 			return interceptor == null
-				? hnd.CanExecute((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext, applicationResources))
+				? hnd.CanExecute((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext))
 				: interceptor.InterceptCanExecute(traceInfo, hnd, (TQuery)query, options);
 		}
 
@@ -88,8 +85,7 @@ namespace Raider.Queries.Internal
 			IQueryHandler handler,
 			IQuery<TResult> query,
 			IQueryInterceptorOptions? options,
-			IApplicationContext applicationContext,
-			IApplicationResources applicationResources)
+			IApplicationContext applicationContext)
 		{
 			var hnd = (IQueryHandler<TQuery, TResult>)handler;
 
@@ -103,7 +99,7 @@ namespace Raider.Queries.Internal
 			}
 
 			return interceptor == null
-				? hnd.Execute((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext, applicationResources))
+				? hnd.Execute((TQuery)query, CreateQueryHandlerContext(traceInfo, applicationContext))
 				: interceptor.InterceptExecute(traceInfo, hnd, (TQuery)query, options);
 		}
 
