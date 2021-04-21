@@ -34,7 +34,7 @@ namespace Raider.QueryServices
 				throw new ArgumentNullException(nameof(serviceType));
 
 			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
-			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder, TQueryServiceContext>(serviceType, false);
+			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder, TQueryServiceContext>(serviceType);
 		}
 	}
 }

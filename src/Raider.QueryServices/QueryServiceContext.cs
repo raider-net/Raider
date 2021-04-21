@@ -5,6 +5,7 @@ using Raider.Localization;
 using Raider.Logging;
 using Raider.QueryServices.Queries;
 using Raider.Trace;
+using Raider.Web;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -13,25 +14,24 @@ using System.Threading.Tasks;
 
 namespace Raider.QueryServices
 {
-	public class QueryServiceContext : IServiceContext, IQueryServiceContext
+	public class QueryServiceContext :IServiceContext, IQueryServiceContext
 	{
 		private QueryHandlerContext _queryHandlerContext;
 
 		public ServiceFactory ServiceFactory => _queryHandlerContext.ServiceFactory;
 
 		public ITraceInfo TraceInfo { get; private set; }
-
-		public RaiderIdentity<int>? User => _queryHandlerContext.User;
-
-		public RaiderPrincipal<int>? Principal => _queryHandlerContext.Principal;
+		public IApplicationContext ApplicationContext => _queryHandlerContext.ApplicationContext;
+		public IAuthenticatedPrincipal AuthenticatedPrincipal => _queryHandlerContext.AuthenticatedPrincipal;
+		public IApplicationResources ApplicationResources => _queryHandlerContext.ApplicationResources;
+		public RequestMetadata? RequestMetadata => _queryHandlerContext.RequestMetadata;
+		public RaiderIdentity<int>? User => _queryHandlerContext.AuthenticatedPrincipal.User;
 
 		public string? QueryName => _queryHandlerContext.QueryName;
 
 		public Guid? IdQueryEntry => _queryHandlerContext.IdQueryEntry;
 
 		public ILogger Logger { get; private set; }
-
-		public IApplicationResources ApplicationResources => _queryHandlerContext.ApplicationResources;
 
 		public Dictionary<object, object?> CommandHandlerItems => _queryHandlerContext.CommandHandlerItems;
 		public Type ForServiceType { get; private set; }
@@ -63,7 +63,6 @@ namespace Raider.QueryServices
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
 		//	Logger = serviceLogger;
 		//}
-
 		internal void Init(ITraceFrame currentTraceFrame, QueryHandlerContext queryHandlerContext, Type serviceType)
 		{
 			_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
