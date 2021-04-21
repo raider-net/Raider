@@ -34,7 +34,7 @@ namespace Raider.Services
 				throw new ArgumentNullException(nameof(serviceType));
 
 			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
-			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder, TServiceContext>(serviceType, false);
+			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder, TServiceContext>(serviceType);
 		}
 	}
 }

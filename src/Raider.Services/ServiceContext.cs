@@ -5,6 +5,7 @@ using Raider.Localization;
 using Raider.Logging;
 using Raider.Services.Commands;
 using Raider.Trace;
+using Raider.Web;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -20,18 +21,17 @@ namespace Raider.Services
 		public ServiceFactory ServiceFactory => _commandHandlerContext.ServiceFactory;
 
 		public ITraceInfo TraceInfo { get; private set; }
-
-		public RaiderIdentity<int>? User => _commandHandlerContext.User;
-
-		public RaiderPrincipal<int>? Principal => _commandHandlerContext.Principal;
+		public IApplicationContext ApplicationContext => _commandHandlerContext.ApplicationContext;
+		public IAuthenticatedPrincipal AuthenticatedPrincipal => _commandHandlerContext.AuthenticatedPrincipal;
+		public IApplicationResources ApplicationResources => _commandHandlerContext.ApplicationResources;
+		public RequestMetadata? RequestMetadata => _commandHandlerContext.RequestMetadata;
+		public RaiderIdentity<int>? User => _commandHandlerContext.AuthenticatedPrincipal.User;
 
 		public string? CommandName => _commandHandlerContext.CommandName;
 
 		public Guid? IdCommandEntry => _commandHandlerContext.IdCommandEntry;
 
 		public ILogger Logger { get; private set; }
-
-		public IApplicationResources ApplicationResources => _commandHandlerContext.ApplicationResources;
 
 		public Dictionary<object, object?> CommandHandlerItems => _commandHandlerContext.CommandHandlerItems;
 
@@ -66,7 +66,7 @@ namespace Raider.Services
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
 		//	Logger = serviceLogger;
 		//}
-
+		
 		internal void Init(ITraceFrame currentTraceFrame, CommandHandlerContext commandHandlerContext, Type serviceType)
 		{
 			_commandHandlerContext = commandHandlerContext ?? throw new ArgumentNullException(nameof(commandHandlerContext));

@@ -6,9 +6,9 @@ using Raider.Localization;
 using Raider.Logging;
 using Raider.Logging.Extensions;
 using Raider.Trace;
+using Raider.Web;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,12 +19,14 @@ namespace Raider.Services.Commands
 	{
 		public ServiceFactory ServiceFactory { get; }
 		public ITraceInfo TraceInfo { get; protected set; }
-		public RaiderIdentity<int>? User { get; private set; }
-		public RaiderPrincipal<int>? Principal { get; private set; }
+		public IApplicationContext ApplicationContext { get; private set; }
+		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
+		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
+		public RequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
+		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
 		public string? CommandName { get; private set; }
 		public Guid? IdCommandEntry { get; private set; }
 		public ILogger Logger { get; private set; }
-		public IApplicationResources ApplicationResources { get; private set; }
 		public Dictionary<object, object?> CommandHandlerItems { get; } = new Dictionary<object, object?>();
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -43,7 +45,7 @@ namespace Raider.Services.Commands
 		{
 			var service = ServiceFactory.GetRequiredInstance<TService>();
 
-			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
+			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
 				.CallerMemberName(memberName)
 				.CallerFilePath(sourceFilePath)
 				.CallerLineNumber(sourceLineNumber);
@@ -65,7 +67,7 @@ namespace Raider.Services.Commands
 		{
 			var service = ServiceFactory.GetRequiredInstance<TService>();
 
-			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
+			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
 				.CallerMemberName(memberName)
 				.CallerFilePath(sourceFilePath)
 				.CallerLineNumber(sourceLineNumber);
@@ -84,7 +86,7 @@ namespace Raider.Services.Commands
 			[CallerLineNumber] int sourceLineNumber = 0)
 			where TServiceContext : ServiceContext, new()
 		{
-			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo?.TraceFrame)
+			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
 				.CallerMemberName(memberName)
 				.CallerFilePath(sourceFilePath)
 				.CallerLineNumber(sourceLineNumber);
@@ -102,7 +104,7 @@ namespace Raider.Services.Commands
 		{
 			var traceInfo =
 				new TraceInfoBuilder(
-					new TraceFrameBuilder(TraceInfo?.TraceFrame)
+					new TraceFrameBuilder(TraceInfo.TraceFrame)
 						.CallerMemberName(memberName)
 						.CallerFilePath(sourceFilePath)
 						.CallerLineNumber(sourceLineNumber == 0 ? (int?)null : sourceLineNumber)
@@ -113,9 +115,7 @@ namespace Raider.Services.Commands
 
 			var disposable = Logger.BeginScope(new Dictionary<string, Guid>
 			{
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
 				[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = traceInfo.TraceFrame.MethodCallId
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
 			});
 
 			var scope = new MethodLogScope(traceInfo, disposable);
@@ -323,15 +323,9 @@ namespace Raider.Services.Commands
 				return this;
 			}
 
-			internal Builder<TContext> User(RaiderIdentity<int>? user)
+			internal Builder<TContext> ApplicationContext(IApplicationContext applicationContext)
 			{
-				Context.User = user;
-				return this;
-			}
-
-			internal Builder<TContext> Principal(RaiderPrincipal<int>? principal)
-			{
-				Context.Principal = principal;
+				Context.ApplicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
 				return this;
 			}
 
@@ -350,12 +344,6 @@ namespace Raider.Services.Commands
 			internal Builder<TContext> Logger(ILogger logger)
 			{
 				Context.Logger = logger;
-				return this;
-			}
-
-			internal Builder<TContext> ApplicationResources(IApplicationResources applicationResources)
-			{
-				Context.ApplicationResources = applicationResources;
 				return this;
 			}
 
