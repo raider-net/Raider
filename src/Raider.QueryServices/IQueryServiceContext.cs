@@ -3,20 +3,23 @@ using Raider.DependencyInjection;
 using Raider.Localization;
 using Raider.Logging;
 using Raider.Trace;
+using Raider.Web;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Raider.QueryServices
 {
-	public interface IQueryServiceContext : IApplicationContext
+	public interface IQueryServiceContext
 	{
 		ServiceFactory ServiceFactory { get; }
-		new ITraceInfo TraceInfo { get; }
+		ITraceInfo TraceInfo { get; }
+		IApplicationContext ApplicationContext { get; }
+		IApplicationResources ApplicationResources { get; }
+		IRequestMetadata? RequestMetadata { get; }
 		string? QueryName { get;  }
 		Guid? IdQueryEntry { get;  }
 		ILogger Logger { get;  }
-		new IApplicationResources ApplicationResources { get;  }
 		Dictionary<object, object?> CommandHandlerItems { get; }
 
 		TQueryService GetQueryService<TQueryService, TQueryServiceContext>(

@@ -22,10 +22,9 @@ namespace Raider.QueryServices.Queries
 		public ServiceFactory ServiceFactory { get; }
 		public ITraceInfo TraceInfo { get; protected set; }
 		public IApplicationContext ApplicationContext { get; private set; }
-		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
 		public IRequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
-		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
+		public RaiderIdentity<int>? User => ApplicationContext.TraceInfo.User;
 		public string? QueryName { get; private set; }
 		public Guid? IdQueryEntry { get; private set; }
 		public ILogger Logger { get; private set; }
