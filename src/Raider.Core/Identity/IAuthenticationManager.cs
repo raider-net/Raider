@@ -11,18 +11,18 @@ namespace Raider.AspNetCore.Authentication
 		bool LogPermissions { get; }
 		int? StaticUserId { get; }
 
-		Task<AuthenticatedUser?> CreateFromWindowsIdentityAsync(string? logonWithoutDomain, string? windowsIdentityName, RequestMetadata? requestMetadata = null);
+		Task<AuthenticatedUser?> CreateFromWindowsIdentityAsync(string? logonWithoutDomain, string? windowsIdentityName, IRequestMetadata? requestMetadata = null);
 
 		Task<AuthenticatedUser?> CreateFromLoginPasswordAsync(string? login, string? password);
 
-		Task<AuthenticatedUser?> CreateFromLoginAsync(string? login, RequestMetadata? requestMetadata = null);
+		Task<AuthenticatedUser?> CreateFromLoginAsync(string? login, IRequestMetadata? requestMetadata = null);
 
-		Task<AuthenticatedUser?> CreateFromUserIdAsync(int? idUser, RequestMetadata? requestMetadata = null);
+		Task<AuthenticatedUser?> CreateFromUserIdAsync(int? idUser, IRequestMetadata? requestMetadata = null);
 
-		Task<AuthenticatedUser?> CreateFromRequestAsync(RequestMetadata? requestMetadata = null);
+		Task<AuthenticatedUser?> CreateFromRequestAsync(IRequestMetadata? requestMetadata = null);
 
-		Task<AuthenticatedUser?> SetUserDataRolesPremissions(AuthenticatedUser user, RequestMetadata? requestMetadata = null);
+		Task<AuthenticatedUser?> SetUserDataRolesPremissions(AuthenticatedUser user, IRequestMetadata? requestMetadata = null);
 
-		Task<AuthenticatedUser?> SetUserDataAsync(AuthenticatedUser user, RequestMetadata? requestMetadata = null);
+		Task<AuthenticatedUser?> SetUserDataAsync(AuthenticatedUser user, IRequestMetadata? requestMetadata = null);
 	}
 }

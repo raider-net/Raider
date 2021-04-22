@@ -15,6 +15,7 @@ namespace Raider.Web
 		string? Path { get; }
 		string? PathBase { get; }
 		string? Host { get; }
+		string? RemoteIp { get; }
 		int? Port { get; }
 		Uri? Uri { get; }
 		string? Scheme { get; }

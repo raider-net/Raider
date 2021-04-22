@@ -11,15 +11,15 @@ namespace Raider
 		ITraceInfo TraceInfo { get; }
 		IAuthenticatedPrincipal AuthenticatedPrincipal { get; }
 		IApplicationResources ApplicationResources { get; }
-		RequestMetadata? RequestMetadata { get; }
+		IRequestMetadata? RequestMetadata { get; }
 	}
 
 	public class ApplicationContext : IApplicationContext
 	{
-		public ITraceInfo TraceInfo { get; set; }
+		public ITraceInfo TraceInfo { get; }
 		public IAuthenticatedPrincipal AuthenticatedPrincipal { get; }
-		public IApplicationResources ApplicationResources { get; set; }
-		public RequestMetadata? RequestMetadata { get; set; }
+		public IApplicationResources ApplicationResources { get; }
+		public IRequestMetadata? RequestMetadata { get; set; }
 
 		public ApplicationContext(ITraceInfo traceInfo, IApplicationResources applicationResources)
 		{
