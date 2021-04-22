@@ -24,7 +24,7 @@ namespace Raider.QueryServices.Queries
 		public IApplicationContext ApplicationContext { get; private set; }
 		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
-		public RequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
+		public IRequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
 		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
 		public string? QueryName { get; private set; }
 		public Guid? IdQueryEntry { get; private set; }
