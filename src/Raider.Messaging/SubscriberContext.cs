@@ -22,7 +22,7 @@ namespace Raider.Messaging
 		public IApplicationContext ApplicationContext { get; }
 		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
-		public RequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
+		public IRequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
 		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
