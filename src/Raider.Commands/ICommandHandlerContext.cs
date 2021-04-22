@@ -1,6 +1,6 @@
 ﻿namespace Raider.Commands
 {
-	public interface ICommandHandlerContext : IApplicationContext
+	public interface ICommandHandlerContext
 	{
 	}
 }
