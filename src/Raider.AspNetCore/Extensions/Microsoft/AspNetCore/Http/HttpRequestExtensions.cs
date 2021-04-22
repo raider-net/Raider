@@ -41,7 +41,7 @@ namespace Raider.Extensions
 		}
 
 		[return: NotNullIfNotNull("request")]
-		public static RequestMetadata? ToRequestMetadata(
+		public static IRequestMetadata? ToRequestMetadata(
 			this HttpRequest request,
 			bool withQueryList = false,
 			bool withCookies = true,
@@ -97,6 +97,7 @@ namespace Raider.Extensions
 				Path = request.Path,
 				PathBase = request.PathBase,
 				Host = request.Host.Host,
+				RemoteIp = request.HttpContext.Connection?.RemoteIpAddress?.ToString(),
 				Port = request.Host.Port,
 				Uri = request.GetUri(),
 				Scheme = request.Scheme,
