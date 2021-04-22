@@ -5,7 +5,7 @@ using System.Data;
 
 namespace Raider.QueryServices.EntityFramework
 {
-	public interface IDbQueryServiceContext : Raider.QueryServices.IQueryServiceContext, IApplicationContext
+	public interface IDbQueryServiceContext : Raider.QueryServices.IQueryServiceContext
 	{
 		IDbContextTransaction? DbContextTransaction { get;  }
 
