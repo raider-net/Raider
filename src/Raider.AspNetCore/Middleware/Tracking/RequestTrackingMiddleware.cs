@@ -42,8 +42,8 @@ namespace Raider.AspNetCore.Middleware.Tracking
 				startTicks = StaticWatch.CurrentTicks;
 			}
 
-			var tc = context.RequestServices.GetRequiredService<TraceContext>();
-			var traceInfo = tc.AddTraceFrame(nameof(RequestTrackingMiddleware), TraceFrame.Create());
+			var appCtx = context.RequestServices.GetRequiredService<IApplicationContext>();
+			var traceInfo = appCtx.AddTraceFrame(TraceFrame.Create());
 
 			if (_options.LogRequest)
 			{

@@ -242,9 +242,9 @@ namespace Raider.AspNetCore.Authentication
 					.Where(c => RaiderIdentity.IsRaiderClaim(c)
 						&& string.Equals(c.Type, RaiderIdentity.PERMISSION_CLAIM_NAME, StringComparison.OrdinalIgnoreCase));
 
-			var tc = context.RequestServices.GetRequiredService<TraceContext>();
+			var applicationContext = context.RequestServices.GetRequiredService<IApplicationContext>();
 
-			var user = new AuthenticatedUser(userId, loginClaim.Value, displayNameClaim.Value, tc.Next())
+			var user = new AuthenticatedUser(userId, loginClaim.Value, displayNameClaim.Value, applicationContext.Next())
 			{
 				UserData = null,
 				Roles = roleClaims?.Select(c => c.Value).ToList(),
@@ -254,7 +254,7 @@ namespace Raider.AspNetCore.Authentication
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
 			user = await authenticationManager.SetUserDataAsync(user, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
-			var applicationContext = context.RequestServices.GetService<IApplicationContext>();
+			
 			return CreateRaiderPrincipal(principal.Identity, user, true, true, logger, applicationContext, authenticationManager);
 		}
 
@@ -419,8 +419,8 @@ namespace Raider.AspNetCore.Authentication
 			{
 				AspNetLogWriter.Instance.WriteRequestAuthentication(new Logging.Dto.RequestAuthentication
 				{
-					CorrelationId = authenticatedUser.TraceInfo?.CorrelationId,
-					ExternalCorrelationId = authenticatedUser.TraceInfo?.ExternalCorrelationId,
+					CorrelationId = authenticatedUser.TraceInfo.CorrelationId,
+					ExternalCorrelationId = authenticatedUser.TraceInfo.ExternalCorrelationId,
 					IdUser = raiderIdentity.UserId,
 					Roles = authenticationManager.LogRoles
 					? ((0 < raiderIdentity.RoleIds?.Count)
@@ -437,8 +437,8 @@ namespace Raider.AspNetCore.Authentication
 
 			var raiderPrincipal = new RaiderPrincipal<int>(raiderIdentity);
 
-			if (applicationContext?.AuthenticatedPrincipal != null)
-				applicationContext.AuthenticatedPrincipal.Principal = raiderPrincipal;
+			if (applicationContext != null)
+				applicationContext.AddTraceFrame(TraceInfo.Create(authenticatedUser.TraceInfo).TraceFrame, raiderPrincipal);
 
 			return raiderPrincipal;
 		}

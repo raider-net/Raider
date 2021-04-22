@@ -34,15 +34,8 @@ namespace Raider.AspNetCore.Middleware.Initialization
 				context.TraceIdentifier = externalCorrelationId;
 			}
 
-			var traceFrame = TraceFrame.Create();
-			var traceInfo = new TraceInfoBuilder(traceFrame, null)
-				.CorrelationId(Guid.NewGuid())
-				.ExternalCorrelationId(context.TraceIdentifier)
-				.IdUser(context.User)
-				.Build();
-
-			var tc = context.RequestServices.GetRequiredService<TraceContext>();
-			tc.Initialize(nameof(RequestInitializationMiddleware), traceInfo);
+			var appCtx = context.RequestServices.GetRequiredService<IApplicationContext>();
+			appCtx.AddTraceFrame(TraceFrame.Create());
 
 			if (_options.IncludeInResponse)
 			{

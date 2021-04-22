@@ -41,8 +41,8 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 		public Task Invoke(HttpContext context)
 		{
 			ExceptionDispatchInfo? edi = null;
-			var tc = context.RequestServices.GetRequiredService<TraceContext>();
-			var traceInfo = tc.AddTraceFrame(nameof(ExceptionHandlerMiddleware), TraceFrame.Create());
+			var appCtx = context.RequestServices.GetRequiredService<IApplicationContext>();
+			var traceInfo = appCtx.AddTraceFrame(TraceFrame.Create());
 			
 			try
 			{

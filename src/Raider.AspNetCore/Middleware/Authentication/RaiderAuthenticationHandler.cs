@@ -449,8 +449,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				var shouldRedirect = Options.CookieAuthenticationOptions.LoginPath.HasValue && OriginalPath == Options.CookieAuthenticationOptions.LoginPath;
 				await ApplyHeaders(shouldRedirect, signedInContext.Properties);
 
-				var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-				_logger.LogInformationMessage(tc.Next(), x => x.InternalMessage($"AuthenticationScheme: {Scheme.Name} signed in."));
+				var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+				_logger.LogInformationMessage(appCtx.Next(), x => x.InternalMessage($"AuthenticationScheme: {Scheme.Name} signed in."));
 			}
 			else
 			{
@@ -500,8 +500,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				var shouldRedirect = Options.CookieAuthenticationOptions.LogoutPath.HasValue && OriginalPath == Options.CookieAuthenticationOptions.LogoutPath;
 				await ApplyHeaders(shouldRedirect, context.Properties);
 
-				var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-				_logger.LogInformationMessage(tc.Next(), x => x.InternalMessage($"AuthenticationScheme: {Scheme.Name} signed out."));
+				var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+				_logger.LogInformationMessage(appCtx.Next(), x => x.InternalMessage($"AuthenticationScheme: {Scheme.Name} signed out."));
 			}
 			else
 			{
@@ -594,7 +594,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 
 			if (Options.AuthenticationFlow != null && 0 < Options.AuthenticationFlow.Count)
 			{
@@ -624,11 +624,11 @@ namespace Raider.AspNetCore.Middleware.Authentication
 					}
 				}
 
-				_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{fallbackType}: Authentication failed: {fallback?.Failure?.ToStringTrace()}"));
+				_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{fallbackType}: Authentication failed: {fallback?.Failure?.ToStringTrace()}"));
 				return fallback;
 			}
 
-			_logger.LogErrorMessage(tc.Next(), x => x.InternalMessage($"No authentication configured."));
+			_logger.LogErrorMessage(appCtx.Next(), x => x.InternalMessage($"No authentication configured."));
 
 			ThrowAccessDenied401Unauthorized(Context, null);
 			return AuthenticateResult.Fail("Invalid auth.");
@@ -638,7 +638,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		{
 			if ((Options.UseWindowsAuthentication) && Context != null)
 			{
-				var tc = Context.RequestServices.GetRequiredService<TraceContext>();
+				var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 
 				WindowsValidatePrincipalContext context = null;
 				if (Options.WindowsAuthenticationOptions.AllowStaticLogin || IdentityHelper.IsWindowsAuthentication(Context))
@@ -656,17 +656,17 @@ namespace Raider.AspNetCore.Middleware.Authentication
 					}
 					catch (Exception ex)
 					{
-						_logger.LogErrorMessage(tc.Next(), x => x.ExceptionInfo(ex).Detail($"{nameof(AuthenticationType.WindowsIntegrated)}: Failed to validate windows principal name = {context?.Principal?.Identity?.Name ?? "NULL"}"));
+						_logger.LogErrorMessage(appCtx.Next(), x => x.ExceptionInfo(ex).Detail($"{nameof(AuthenticationType.WindowsIntegrated)}: Failed to validate windows principal name = {context?.Principal?.Identity?.Name ?? "NULL"}"));
 
 						ThrowAccessDenied401Unauthorized(Context, ex);
 					}
 				}
 				else
 				{
-					_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.WindowsIntegrated)}: {nameof(HttpContext)}.{nameof(HttpContext.User)} = {Context.User?.GetType().FullName ?? "NULL"}, {nameof(HttpContext)}.{nameof(HttpContext.User)}.{nameof(HttpContext.User.Identity)} = {Context.User?.Identity?.GetType().FullName ?? "NULL"}, Name = {Context.User?.Identity?.Name} is not {nameof(WindowsIdentity)}"));
+					_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.WindowsIntegrated)}: {nameof(HttpContext)}.{nameof(HttpContext.User)} = {Context.User?.GetType().FullName ?? "NULL"}, {nameof(HttpContext)}.{nameof(HttpContext.User)}.{nameof(HttpContext.User.Identity)} = {Context.User?.Identity?.GetType().FullName ?? "NULL"}, Name = {Context.User?.Identity?.Name} is not {nameof(WindowsIdentity)}"));
 				}
 
-				_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.WindowsIntegrated)}: Principal {context?.Principal?.GetType().FullName ?? "NULL"} is not {nameof(RaiderPrincipal)}"));
+				_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.WindowsIntegrated)}: Principal {context?.Principal?.GetType().FullName ?? "NULL"} is not {nameof(RaiderPrincipal)}"));
 
 				return AuthenticateResult.Fail("Invalid auth.");
 			}
@@ -680,12 +680,12 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		{
 			if (Options.UseCookieAuthentication)
 			{
-				var tc = Context.RequestServices.GetRequiredService<TraceContext>();
+				var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 
 				var result = await EnsureCookieTicket();
 				if (!result.Succeeded)
 				{
-					_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Cookie)}: Cannot create {nameof(AuthenticationTicket)} from the cookie."));
+					_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Cookie)}: Cannot create {nameof(AuthenticationTicket)} from the cookie."));
 
 					return result;
 				}
@@ -695,12 +695,12 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 				if (context.Principal == null)
 				{
-					_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Cookie)}: {nameof(context.Principal)} NULL is not {nameof(RaiderPrincipal)}"));
+					_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Cookie)}: {nameof(context.Principal)} NULL is not {nameof(RaiderPrincipal)}"));
 					return AuthenticateResult.Fail("No principal.");
 				}
 				else if (!(context.Principal is RaiderPrincipal))
 				{
-					_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Cookie)}: {nameof(context.Principal)} {context?.Principal?.GetType().FullName ?? "NULL"} is not {nameof(RaiderPrincipal)}"));
+					_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Cookie)}: {nameof(context.Principal)} {context?.Principal?.GetType().FullName ?? "NULL"} is not {nameof(RaiderPrincipal)}"));
 				}
 
 				if (context.ShouldRenew)
@@ -720,7 +720,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		{
 			if (Options.UseTokenAuthentication)
 			{
-				var tc = Context.RequestServices.GetRequiredService<TraceContext>();
+				var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 
 				string token = null;
 				try
@@ -745,7 +745,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 						// If no authorization header found, nothing to process further
 						if (string.IsNullOrEmpty(authorization))
 						{
-							_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Token)}: Authorization http header is not provided."));
+							_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Token)}: Authorization http header is not provided."));
 							return AuthenticateResult.NoResult();
 						}
 
@@ -757,7 +757,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 						// If no token found, no further work possible
 						if (string.IsNullOrEmpty(token))
 						{
-							_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Token)}: Authorization http header is not a 'Bearer' token."));
+							_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Token)}: Authorization http header is not a 'Bearer' token."));
 							return AuthenticateResult.NoResult();
 						}
 					}
@@ -790,7 +790,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 							}
 							catch (Exception ex)
 							{
-								_logger.LogErrorMessage(tc.Next(), x => x.ExceptionInfo(ex).Detail($"Failed to validate the token {token}."));
+								_logger.LogErrorMessage(appCtx.Next(), x => x.ExceptionInfo(ex).Detail($"Failed to validate the token {token}."));
 
 								// Refresh the configuration for exceptions that may be caused by key rollovers. The user can also request a refresh in the event.
 								if (Options.TokenAuthenticationOptions.RefreshOnIssuerKeyNotFound && Options.TokenAuthenticationOptions.ConfigurationManager != null
@@ -807,7 +807,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 								continue;
 							}
 
-							_logger.LogInformationMessage(tc.Next(), x => x.InternalMessage("Successfully validated the token."));
+							_logger.LogInformationMessage(appCtx.Next(), x => x.InternalMessage("Successfully validated the token."));
 
 							var tokenValidatedContext = new TokenValidatedContext(Context, Scheme, Options.TokenAuthenticationOptions)
 							{
@@ -847,16 +847,16 @@ namespace Raider.AspNetCore.Middleware.Authentication
 							return authenticationFailedContext.Result;
 						}
 
-						_logger.LogWarningMessage(tc.Next(), x => x.ExceptionInfo(authenticationFailedContext.Exception).Detail($"{nameof(AuthenticationType.Token)}: Token authentication failed."));
+						_logger.LogWarningMessage(appCtx.Next(), x => x.ExceptionInfo(authenticationFailedContext.Exception).Detail($"{nameof(AuthenticationType.Token)}: Token authentication failed."));
 						return AuthenticateResult.Fail(authenticationFailedContext.Exception);
 					}
 
-					_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Token)}: No SecurityTokenValidator available for token: {token ?? "NULL"}"));
+					_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Token)}: No SecurityTokenValidator available for token: {token ?? "NULL"}"));
 					return AuthenticateResult.Fail("No SecurityTokenValidator available for token: " + token ?? "NULL");
 				}
 				catch (Exception ex)
 				{
-					_logger.LogErrorMessage(tc.Next(), x => x.ExceptionInfo(ex).Detail("Exception occurred while processing token message."));
+					_logger.LogErrorMessage(appCtx.Next(), x => x.ExceptionInfo(ex).Detail("Exception occurred while processing token message."));
 
 					var authenticationFailedContext = new AuthenticationFailedContext(Context, Scheme, Options.TokenAuthenticationOptions)
 					{
@@ -884,7 +884,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			if ((Options.UseRequestAuthentication) && Context != null)
 			{
 				RequestValidatePrincipalContext context = null;
-				var tc = Context.RequestServices.GetRequiredService<TraceContext>();
+				var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 
 				try
 				{
@@ -899,11 +899,11 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				}
 				catch (Exception ex)
 				{
-					_logger.LogErrorMessage(tc.Next(), x => x.ExceptionInfo(ex).Detail($"{nameof(AuthenticationType.Request)}: Failed to validate request principal name = {context?.Principal?.Identity?.Name ?? "NULL"}"));
+					_logger.LogErrorMessage(appCtx.Next(), x => x.ExceptionInfo(ex).Detail($"{nameof(AuthenticationType.Request)}: Failed to validate request principal name = {context?.Principal?.Identity?.Name ?? "NULL"}"));
 					ThrowAccessDenied401Unauthorized(Context, ex);
 				}
 
-				_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Request)}: Principal {context?.Principal?.GetType().FullName ?? "NULL"} is not {nameof(RaiderPrincipal)}"));
+				_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(AuthenticationType.Request)}: Principal {context?.Principal?.GetType().FullName ?? "NULL"} is not {nameof(RaiderPrincipal)}"));
 				return AuthenticateResult.Fail("Invalid auth.");
 			}
 			else
@@ -946,8 +946,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleWindowsForbiddenAsync(AuthenticationProperties properties)
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-			_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(HandleWindowsForbiddenAsync)} occured."));
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleWindowsForbiddenAsync)} occured."));
 			if (Options.UseWindowsAuthentication)
 				await base.HandleForbiddenAsync(properties);
 			else
@@ -975,8 +975,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleCookieForbiddenAsync(AuthenticationProperties properties)
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-			_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(HandleCookieForbiddenAsync)} occured."));
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleCookieForbiddenAsync)} occured."));
 			if (Options.UseCookieAuthentication)
 				await base.HandleForbiddenAsync(properties);
 			else
@@ -1004,8 +1004,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleTokenForbiddenAsync(AuthenticationProperties properties)
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-			_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(HandleTokenForbiddenAsync)} occured."));
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleTokenForbiddenAsync)} occured."));
 			if (Options.UseTokenAuthentication)
 				await base.HandleForbiddenAsync(properties);
 			else
@@ -1033,8 +1033,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleRequestForbiddenAsync(AuthenticationProperties properties)
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-			_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(HandleRequestForbiddenAsync)} occured."));
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleRequestForbiddenAsync)} occured."));
 			if (Options.UseRequestAuthentication)
 				await base.HandleForbiddenAsync(properties);
 			else
@@ -1094,8 +1094,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleWindowsChallengeAsync(AuthenticationProperties properties)
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-			_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(HandleWindowsChallengeAsync)} occured."));
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleWindowsChallengeAsync)} occured."));
 			if (Options.UseWindowsAuthentication)
 				await base.HandleChallengeAsync(properties);
 			else
@@ -1123,8 +1123,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleCookieChallengeAsync(AuthenticationProperties properties)
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-			_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(HandleCookieChallengeAsync)} occured."));
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleCookieChallengeAsync)} occured."));
 			if (Options.UseCookieAuthentication)
 			{
 				var redirectUri = properties.RedirectUri;
@@ -1145,8 +1145,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleTokenChallengeAsync(AuthenticationProperties properties)
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-			_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(HandleTokenChallengeAsync)} occured."));
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleTokenChallengeAsync)} occured."));
 			if (Options.UseTokenAuthentication)
 			{
 				var authResult = await HandleAuthenticateOnceSafeAsync();
@@ -1227,8 +1227,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleRequestChallengeAsync(AuthenticationProperties properties)
 		{
-			var tc = Context.RequestServices.GetRequiredService<TraceContext>();
-			_logger.LogWarningMessage(tc.Next(), x => x.InternalMessage($"{nameof(HandleRequestChallengeAsync)} occured."));
+			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
+			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleRequestChallengeAsync)} occured."));
 			if (Options.UseRequestAuthentication)
 				await base.HandleChallengeAsync(properties);
 			else

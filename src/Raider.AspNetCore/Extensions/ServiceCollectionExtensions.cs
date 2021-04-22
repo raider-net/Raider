@@ -6,12 +6,13 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Raider.AspNetCore.Authentication;
 using Raider.AspNetCore.Middleware.Authentication;
-using Raider.AspNetCore.Middleware.Authentication.Authenticate;
 using Raider.AspNetCore.Middleware.Authorization;
 using Raider.AspNetCore.Middleware.HostNormalizer;
 using Raider.AspNetCore.Middleware.Initialization;
 using Raider.AspNetCore.Middleware.Tracking;
+using Raider.Extensions;
 using Raider.Identity;
+using Raider.Localization;
 using Raider.Trace;
 using System;
 
@@ -19,8 +20,35 @@ namespace Raider.AspNetCore.Extensions
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddTraceContext(this IServiceCollection services)
-			=> services.AddScoped<TraceContext>();
+		public static IServiceCollection AddApplicationContext(this IServiceCollection services)
+			=> services.AddScoped<IApplicationContext>(sp =>
+			{
+				var httpContext = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;
+
+				var traceFrame = TraceFrame.Create();
+				ITraceInfo traceInfo;
+
+				if (httpContext == null)
+				{
+					traceInfo = new TraceInfoBuilder(traceFrame, null)
+						.CorrelationId(Guid.NewGuid())
+						.ExternalCorrelationId(Guid.NewGuid().ToString("D"))
+						.Build();
+				}
+				else
+				{
+					traceInfo = new TraceInfoBuilder(traceFrame, null)
+						.CorrelationId(Guid.NewGuid())
+						.ExternalCorrelationId(httpContext.TraceIdentifier)
+						.Principal(httpContext.User)
+						.Build();
+				}
+
+				var appResources = sp.GetRequiredService<IApplicationResources>();
+				var requsetMetadata = httpContext?.Request.ToRequestMetadata();
+				var appCtx = new ApplicationContext(traceInfo, appResources, requsetMetadata);
+				return appCtx;
+			});
 
 		public static IServiceCollection AddRaiderAuthentication<TAuthMngr, TCookieStore>(this IServiceCollection services, Action<AuthenticationOptions>? configureAuthenticationOptions)
 			where TAuthMngr : class, IAuthenticationManager
@@ -72,7 +100,7 @@ namespace Raider.AspNetCore.Extensions
 			Action<AuthenticationOptions>? configureAuthenticationOptions = null)
 			where TAuth : class, IAuthenticationManager
 		{
-			AddTraceContext(services);
+			AddApplicationContext(services);
 
 			if (configureRequestInitializationOptions != null)
 				services.Configure(configureRequestInitializationOptions);

@@ -28,8 +28,8 @@ namespace Raider.AspNetCore.Middleware.HostNormalizer
 
 		public async Task Invoke(HttpContext context)
 		{
-			var tc = context.RequestServices.GetRequiredService<TraceContext>();
-			var traceInfo = tc.AddTraceFrame(nameof(HostNormalizerMiddleware), TraceFrame.Create());
+			var ac = context.RequestServices.GetRequiredService<IApplicationContext>();
+			var traceInfo = ac.AddTraceFrame(TraceFrame.Create());
 
 			try
 			{
