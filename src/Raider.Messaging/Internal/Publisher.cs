@@ -60,7 +60,8 @@ namespace Raider.Messaging
 		private readonly AsyncLock _initLock = new AsyncLock();
 		async Task IPublisher.InitializeAsync(IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 		{
-			var traceInfo = TraceInfo.Create(storage?.ServiceBusHost?.IdUser, storage?.ServiceBusHost?.IdServiceBusHostRuntime);
+			var appCtxTraceInfo = storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
 
 			if (Initialized)
 			{
@@ -133,7 +134,8 @@ namespace Raider.Messaging
 
 		async Task IComponent.StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
 		{
-			var traceInfo = TraceInfo.Create(Storage?.ServiceBusHost?.IdUser, Storage?.ServiceBusHost?.IdServiceBusHostRuntime);
+			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
 			LastActivityUtc = DateTime.UtcNow;
 
 			if (Storage == null || !Initialized)
@@ -163,7 +165,8 @@ namespace Raider.Messaging
 
 		public async Task<IMessage<TData>> PublishMessageAsync(TData data, IMessage? previousMessage = null, DateTimeOffset? validToUtc = null, bool isRecovery = false, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default)
 		{
-			var traceInfo = TraceInfo.Create(Storage?.ServiceBusHost?.IdUser, Storage?.ServiceBusHost?.IdServiceBusHostRuntime);
+			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
 			LastActivityUtc = DateTime.UtcNow;
 
 			if (!Started)

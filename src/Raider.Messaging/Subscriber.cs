@@ -79,7 +79,8 @@ namespace Raider.Messaging
 		private readonly AsyncLock _initLock = new AsyncLock();
 		async Task ISubscriber.InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 		{
-			var traceInfo = TraceInfo.Create(storage?.ServiceBusHost?.IdUser, storage?.ServiceBusHost?.IdServiceBusHostRuntime);
+			var appCtxTraceInfo = storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
 
 			if (Initialized)
 			{
@@ -151,7 +152,8 @@ namespace Raider.Messaging
 
 		async Task IComponent.StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
 		{
-			var traceInfo = TraceInfo.Create(Storage?.ServiceBusHost?.IdUser, Storage?.ServiceBusHost?.IdServiceBusHostRuntime);
+			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
 			LastActivityUtc = DateTime.UtcNow;
 
 			if (Storage == null || !Initialized)
@@ -190,7 +192,8 @@ namespace Raider.Messaging
 			if (State == ComponentState.Suspended)
 				return;
 
-			var traceInfo = TraceInfo.Create(Storage?.ServiceBusHost?.IdUser, Storage?.ServiceBusHost?.IdServiceBusHostRuntime);
+			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
 			var nowUtc = DateTime.UtcNow;
 			LastActivityUtc = nowUtc;
 
@@ -295,10 +298,10 @@ namespace Raider.Messaging
 					MessageResult messageResult;
 					using (var scope = _serviceProvider.CreateScope())
 					{
-						var tc = scope.ServiceProvider.GetService<TraceContext>();
+						var appCtx = scope.ServiceProvider.GetRequiredService<IApplicationContext>();
 
 						var subscriberContext = scope.ServiceProvider.GetRequiredService<SubscriberContext>();
-						subscriberContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create(), tc?.Next()).Build();
+						subscriberContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create(), appCtx.Next()).Build();
 						subscriberContext.Logger = _fallbackLogger ?? scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
 
 						messageResult = await ProcessMessageAsync(subscriberContext, message, _stoppingCts?.Token ?? default);
@@ -456,7 +459,8 @@ namespace Raider.Messaging
 
 		public async Task<bool> Resume(CancellationToken cancellationToken = default)
 		{
-			var traceInfo = TraceInfo.Create(Storage?.ServiceBusHost?.IdUser, Storage?.ServiceBusHost?.IdServiceBusHostRuntime);
+			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
 			LastActivityUtc = DateTime.UtcNow;
 
 			await LogActivityAsync(traceInfo, ComponentState.Idle, null, null, _stoppingCts?.Token ?? default);

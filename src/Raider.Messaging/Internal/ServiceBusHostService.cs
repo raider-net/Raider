@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raider.Extensions;
@@ -14,6 +15,7 @@ namespace Raider.Messaging
 	{
 		private readonly int _startMaxRetryCount;
 		private readonly ServiceBusHost _serviceBusHost;
+		private readonly IServiceScope _serviceScope;
 		private readonly IServiceProvider _serviceProvider;
 		private readonly IServiceBusStorage _storage;
 		private readonly IMessageBox _messageBox;
@@ -32,7 +34,7 @@ namespace Raider.Messaging
 			IServiceBusRegister register,
 			ILoggerFactory loggerFactory)
 		{
-			var traceInfo = TraceInfo.Create(storage?.ServiceBusHost?.IdUser, storage?.ServiceBusHost?.IdServiceBusHostRuntime);
+			var traceInfo = TraceInfo.Create(storage?.ServiceBusHost?.ApplicationContext.TraceInfo.IdUser, storage?.ServiceBusHost?.ApplicationContext.TraceInfo.RuntimeUniqueKey);
 
 			if (loggerFactory == null)
 			{
@@ -62,9 +64,17 @@ namespace Raider.Messaging
 			if (_startMaxRetryCount < 0)
 				_startMaxRetryCount = 0;
 
+			if (serviceProvider == null)
+			{
+				ServiceBusLogger.SeriLogError(_fallbackLogger, traceInfo, $"{nameof(serviceProvider)} == null", null);
+				throw new ArgumentNullException(nameof(serviceProvider));
+			}
+			_serviceScope = serviceProvider.CreateScope();
+			_serviceProvider = _serviceScope.ServiceProvider;
+
 			try
 			{
-				_serviceBusHost = new ServiceBusHost(opt)
+				_serviceBusHost = new ServiceBusHost(opt, _serviceProvider)
 				{
 					Description = opt.Description
 				};
@@ -74,13 +84,6 @@ namespace Raider.Messaging
 				ServiceBusLogger.SeriLogError(_fallbackLogger, traceInfo, $"new {nameof(ServiceBusHost)}.ctor(...)", ex);
 				throw;
 			}
-
-			if (serviceProvider == null)
-			{
-				ServiceBusLogger.SeriLogError(_fallbackLogger, traceInfo, $"{nameof(serviceProvider)} == null", null);
-				throw new ArgumentNullException(nameof(serviceProvider));
-			}
-			_serviceProvider = serviceProvider;
 
 			if (storage == null)
 			{
@@ -114,7 +117,7 @@ namespace Raider.Messaging
 		private readonly AsyncLock _initLock = new AsyncLock();
 		private async Task InitializeAsync(int startRetryCount, CancellationToken cancellationToken)
 		{
-			var traceInfo = TraceInfo.Create(_storage.ServiceBusHost?.IdUser, _storage.ServiceBusHost?.IdServiceBusHostRuntime);
+			var traceInfo = TraceInfo.Create(_serviceBusHost.Principal, _serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey);
 
 			if (_initialized)
 			{
@@ -148,8 +151,6 @@ namespace Raider.Messaging
 				{
 					await _storage.SetServiceBusHost(ctx, _serviceBusHost, cancellationToken);
 					await _storage.WriteServiceBusHostStartAsync(ctx, cancellationToken);
-					
-					await _serviceBusHost.Login(_serviceProvider);
 				}
 				catch (Exception ex)
 				{
@@ -202,11 +203,13 @@ namespace Raider.Messaging
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
 			var startRetryCount = 0;
+			stoppingToken.Register(ShutDown);
 
 			while (!_started)
 			{
 				try
 				{
+					await _serviceBusHost.Login(_serviceProvider);
 					await InitializeAsync(startRetryCount, stoppingToken);
 				}
 				catch
@@ -216,6 +219,11 @@ namespace Raider.Messaging
 				}
 				startRetryCount++;
 			}
+		}
+
+		private void ShutDown()
+		{
+			_serviceScope?.Dispose();
 		}
 	}
 }

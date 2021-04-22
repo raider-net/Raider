@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Raider.Identity;
+using Raider.Trace;
 using System;
 using System.Threading.Tasks;
 
@@ -7,57 +8,63 @@ namespace Raider.Messaging
 {
 	internal class ServiceBusHost : IServiceBusHost
 	{
+		private readonly int? _idUser;
+
 		public string? ConnectionString { get; }
 		public Guid IdServiceBusHost { get; }
-		public Guid IdServiceBusHostRuntime { get; }
+		public IApplicationContext ApplicationContext { get; }
+		public RaiderPrincipal<int>? Principal => ApplicationContext.TraceInfo.Principal;
 		public string Name { get; }
 		public string? Description { get; set; }
 		public DateTime StartedUtc { get; }
-		public int? IdUser { get; }
-		public RaiderIdentity<int>? User { get; private set; }
-		public RaiderPrincipal<int>? Principal { get; private set; }
 
-		public ServiceBusHost(ServiceBusHostOptions options)
+		public ServiceBusHost(ServiceBusHostOptions options, IServiceProvider serviceProvider)
 		{
 			if (options == null)
 				throw new ArgumentNullException(nameof(options));
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
 
 			ConnectionString = string.IsNullOrWhiteSpace(options.ConncetionString)
 				? throw new ArgumentException($"{nameof(options.ConncetionString)} == null", nameof(options))
 				: options.ConncetionString;
 
 			IdServiceBusHost = options.IdServiceBusHost;
-			IdServiceBusHostRuntime = Guid.NewGuid();
 
 			Name = string.IsNullOrWhiteSpace(options.Name)
 				? throw new ArgumentException($"{nameof(options.Name)} == null", nameof(options))
 				: options.Name;
 
 			StartedUtc = DateTime.UtcNow;
-			IdUser = options.IdUser;
+			_idUser = options.IdUser;
+			ApplicationContext = serviceProvider.GetRequiredService<IApplicationContext>();
 		}
 
 		public async Task Login(IServiceProvider serviceProvider)
 		{
-			if (!IdUser.HasValue)
+			if (!_idUser.HasValue)
 				return;
 
 			if (serviceProvider == null)
 				throw new ArgumentNullException(nameof(serviceProvider));
 
+			using (var spScope = serviceProvider.CreateScope())
+			{
+				var appCtx = spScope.ServiceProvider.GetRequiredService<IApplicationContext>();
+				var ti = appCtx.TraceInfo;
+			}
+
 			var authenticationManager = serviceProvider.GetService<IServiceBusAuthenticationManager>();
 			if (authenticationManager == null)
 				return;
 
-			var authenticatedUser = await authenticationManager.CreateFromUserIdAsync(IdUser.Value);
+			var authenticatedUser = await authenticationManager.CreateFromUserIdAsync(_idUser.Value, serviceProvider);
 			if (authenticatedUser == null)
-				throw new InvalidOperationException($"401 Unauthorized - {nameof(IdUser)} = {IdUser}");
+				throw new InvalidOperationException($"401 Unauthorized - {nameof(_idUser)} = {_idUser}");
 
-			Principal = RaiderPrincipal<int>.Create("ServiceBusAuth", authenticatedUser);
-			User = Principal?.IdentityBase;
+			var principal = RaiderPrincipal<int>.Create("ServiceBusAuth", authenticatedUser);
 
-			authenticationManager.Principal = Principal;
-			authenticationManager.User = User;
+			ApplicationContext.AddTraceFrame(TraceFrame.Create(), principal);
 		}
 	}
 }

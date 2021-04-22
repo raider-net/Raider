@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace Raider.Messaging
 {
-	public class SubscriberContext : IApplicationContext
+	public class SubscriberContext
 	{
 		private readonly string _commandName = $"{nameof(Raider)}.{nameof(Messaging)}";
 
@@ -20,10 +20,10 @@ namespace Raider.Messaging
 		public ILogger Logger { get; internal set; }
 		public ITraceInfo TraceInfo { get; internal set; }
 		public IApplicationContext ApplicationContext { get; }
-		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
 		public IRequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
-		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
+		public RaiderPrincipal<int>? Principal => ApplicationContext.TraceInfo.Principal;
+		public RaiderIdentity<int>? User => ApplicationContext.TraceInfo.User;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 		public SubscriberContext(ServiceFactory serviceFactory, IApplicationContext applicationContext)
@@ -34,7 +34,7 @@ namespace Raider.Messaging
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 		public MethodLogScope CreateScope(
-			int? idUser = null,
+			RaiderPrincipal<int>? principal,
 			IEnumerable<MethodParameter>? methodParameters = null,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
@@ -49,7 +49,7 @@ namespace Raider.Messaging
 						.MethodParameters(methodParameters)
 						.Build(),
 					TraceInfo)
-					.IdUser(idUser)
+					.Principal(principal)
 					.Build();
 
 			var disposable = Logger.BeginScope(new Dictionary<string, Guid>
