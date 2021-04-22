@@ -178,7 +178,6 @@ namespace Raider.Generator.Compilation
 
 	if (0 < rolePermissions.Count)
 	{
-		var now = DateTime.Now;
 
             
             #line default
@@ -186,7 +185,7 @@ namespace Raider.Generator.Compilation
             this.Write("\r\n\r\nINSERT INTO mbs.\"RolePermission\"\r\n(\r\n\t\"IdRole\", \"IdPermission\", \"AuditCreated" +
                     "Time\", \"ConcurrencyToken\"\r\n)\r\nVALUES\r\n");
             
-            #line 84 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            #line 83 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
 
 	int i = 0;
 	foreach (var kvp in rolePermissions)
@@ -199,42 +198,35 @@ namespace Raider.Generator.Compilation
             #line hidden
             this.Write("\t ");
             
-            #line 91 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            #line 90 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(i == 0 ? "" : ","));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 91 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            #line 90 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(kvp.Key));
             
             #line default
             #line hidden
             this.Write(", ");
             
-            #line 91 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            #line 90 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(idPermission.ToString()));
             
             #line default
             #line hidden
-            this.Write(", \'");
+            this.Write(", \'2021-01-01\', \'");
             
-            #line 91 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(now.ToString("yyyy-MM-dd")));
-            
-            #line default
-            #line hidden
-            this.Write("\', \'");
-            
-            #line 91 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            #line 90 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Guid.Empty.ToString("D")));
             
             #line default
             #line hidden
             this.Write("\')\r\n");
             
-            #line 92 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            #line 91 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
 
 			i++;
 		}
@@ -245,7 +237,7 @@ namespace Raider.Generator.Compilation
             #line hidden
             this.Write("--ON CONFLICT (\"IdRole\", \"IdPermission\") DO NOTHING\r\n;\r\n\r\n");
             
-            #line 100 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            #line 99 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
 
 	}
 	Process();

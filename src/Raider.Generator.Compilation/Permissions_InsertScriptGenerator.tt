@@ -72,7 +72,6 @@ VALUES
 <#
 	if (0 < rolePermissions.Count)
 	{
-		var now = DateTime.Now;
 #>
 
 
@@ -88,7 +87,7 @@ VALUES
 		foreach (var idPermission in kvp.Value)
 		{
 #>
-	 <#= i == 0 ? "" : "," #>(<#= kvp.Key #>, <#= idPermission.ToString() #>, '<#= now.ToString("yyyy-MM-dd") #>', '<#= Guid.Empty.ToString("D") #>')
+	 <#= i == 0 ? "" : "," #>(<#= kvp.Key #>, <#= idPermission.ToString() #>, '2021-01-01', '<#= Guid.Empty.ToString("D") #>')
 <#
 			i++;
 		}
