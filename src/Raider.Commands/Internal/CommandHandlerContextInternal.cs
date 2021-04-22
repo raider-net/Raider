@@ -12,7 +12,7 @@ namespace Raider.Commands.Internal
 		public IApplicationContext ApplicationContext { get; }
 		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
-		public RequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
+		public IRequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
 		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
 
 		public CommandHandlerContextInternal(ITraceInfo traceInfo, IApplicationContext applicationContext)
