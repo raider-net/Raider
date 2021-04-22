@@ -5,7 +5,7 @@ using System.Data;
 
 namespace Raider.Services.EntityFramework
 {
-	public interface IDbCommandServiceContext : Raider.Services.ICommandServiceContext, IApplicationContext
+	public interface IDbCommandServiceContext : Raider.Services.ICommandServiceContext
 	{
 		IDbContextTransaction? DbContextTransaction { get; }
 

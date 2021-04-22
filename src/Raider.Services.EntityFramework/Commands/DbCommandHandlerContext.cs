@@ -96,5 +96,12 @@ namespace Raider.Services.EntityFramework.Commands
 
 			return ValueTask.CompletedTask;
 		}
+
+		public override string GetDefaultClientErrorMessage(Exception ex)
+		{
+			return ex is DbUpdateConcurrencyException
+				? ApplicationResources.OptimisticConcurrencyException
+				: ApplicationResources.GlobalExceptionMessage;
+		}
 	}
 }
