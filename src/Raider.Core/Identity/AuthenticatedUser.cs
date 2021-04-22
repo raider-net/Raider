@@ -15,14 +15,14 @@ namespace Raider.Identity
 		public List<int>? RoleIds { get; set; }
 		public List<int>? PermissionIds { get; set; }
 
-		public ITraceInfo? TraceInfo { get; }
+		public ITraceInfo TraceInfo { get; }
 
 		public string? Password { get; set; }
 		public string? Salt { get; set; }
 		public string? Error { get; set; }
 		public string? PasswordTemporaryUrlSlug { get; set; }
 
-		public AuthenticatedUser(int userId, string login, string? displayName, ITraceInfo? traceInfo)
+		public AuthenticatedUser(int userId, string login, string? displayName, ITraceInfo traceInfo)
 		{
 			UserId = userId;
 			Login = string.IsNullOrWhiteSpace(login)
@@ -31,7 +31,7 @@ namespace Raider.Identity
 			DisplayName = string.IsNullOrWhiteSpace(displayName)
 				? Login
 				: displayName;
-			TraceInfo = traceInfo;
+			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
 	}
 }

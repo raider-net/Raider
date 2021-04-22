@@ -1,4 +1,5 @@
-﻿using Raider.Infrastructure;
+﻿using Raider.Identity;
+using Raider.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -10,6 +11,8 @@ namespace Raider.Trace
 		public Guid RuntimeUniqueKey { get; internal set; }
 
 		public ITraceFrame TraceFrame { get; }
+
+		public RaiderPrincipal<int>? Principal { get; internal set; }
 
 		public int? IdUser { get; internal set; }
 
@@ -27,7 +30,46 @@ namespace Raider.Trace
 			=> $"{TraceFrame}: {nameof(RuntimeUniqueKey)} = {RuntimeUniqueKey} | {nameof(CorrelationId)} = {CorrelationId} | {nameof(IdUser)} = {IdUser}";
 
 		public static ITraceInfo Create(
-			int? iduser = null,
+			RaiderPrincipal<int>? principal = null,
+			Guid? correlationId = null,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> new TraceInfoBuilder(
+					new TraceFrameBuilder()
+						.CallerMemberName(memberName)
+						.CallerFilePath(sourceFilePath)
+						.CallerLineNumber(sourceLineNumber == 0 ? (int?)null : sourceLineNumber)
+						.MethodParameters(methodParameters)
+						.Build(),
+					null)
+					.Principal(principal)
+					.CorrelationId(correlationId)
+				.Build();
+
+		public static ITraceInfo Create(
+			ITraceFrame? previousTraceFrame,
+			RaiderPrincipal<int>? principal = null,
+			Guid? correlationId = null,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> new TraceInfoBuilder(
+					new TraceFrameBuilder(previousTraceFrame)
+						.CallerMemberName(memberName)
+						.CallerFilePath(sourceFilePath)
+						.CallerLineNumber(sourceLineNumber == 0 ? (int?)null : sourceLineNumber)
+						.MethodParameters(methodParameters)
+						.Build(),
+					null)
+					.Principal(principal)
+					.CorrelationId(correlationId)
+				.Build();
+
+		public static ITraceInfo Create(
+			int? iduser,
 			Guid? correlationId = null,
 			IEnumerable<MethodParameter>? methodParameters = null,
 			[CallerMemberName] string memberName = "",
@@ -47,7 +89,7 @@ namespace Raider.Trace
 
 		public static ITraceInfo Create(
 			ITraceFrame? previousTraceFrame,
-			int? iduser = null,
+			int? iduser,
 			Guid? correlationId = null,
 			IEnumerable<MethodParameter>? methodParameters = null,
 			[CallerMemberName] string memberName = "",

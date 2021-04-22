@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Raider.Identity;
+using System;
 
 namespace Raider.Trace
 {
@@ -7,6 +8,10 @@ namespace Raider.Trace
 		Guid RuntimeUniqueKey { get; }
 
 		ITraceFrame TraceFrame { get; }
+
+		RaiderPrincipal<int>? Principal { get; }
+
+		RaiderIdentity<int>? User => Principal?.IdentityBase;
 
 		int? IdUser { get; }
 

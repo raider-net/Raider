@@ -22,9 +22,7 @@ namespace Raider.Trace
 
 		TBuilder IdUser(int? idUser, bool force = false);
 
-		TBuilder IdUser(ClaimsPrincipal? user, bool force = false);
-
-		TBuilder IdUser(IIdentity? user, bool force = false);
+		TBuilder Principal(ClaimsPrincipal? user, bool force = false);
 
 		TBuilder ExternalCorrelationId(string? externalCorrelationId, bool force = false);
 
@@ -61,6 +59,7 @@ namespace Raider.Trace
 				{
 					RuntimeUniqueKey = previousTraceInfo.RuntimeUniqueKey,
 					IdUser = previousTraceInfo.IdUser,
+					Principal = previousTraceInfo.Principal,
 					ExternalCorrelationId = previousTraceInfo.ExternalCorrelationId,
 					CorrelationId = previousTraceInfo.CorrelationId
 				};
@@ -68,33 +67,6 @@ namespace Raider.Trace
 
 			_builder = (TBuilder)this;
 		}
-
-		//public virtual TBuilder Clone(
-		//	ITraceFrame currentTraceFrame,
-		//	ITraceInfo traceInfo)
-		//{
-		//	if (currentTraceFrame == null)
-		//		throw new ArgumentNullException(nameof(currentTraceFrame));
-
-		//	if (traceInfo == null)
-		//		throw new ArgumentNullException(nameof(traceInfo));
-
-		//	_traceInfo = new TraceInfo(
-		//		new TraceFrameBuilder(traceInfo.TraceFrame)
-		//			.CallerMemberName(currentTraceFrame.CallerMemberName)
-		//			.CallerFilePath(currentTraceFrame.CallerFilePath)
-		//			.CallerLineNumber(currentTraceFrame.CallerLineNumber)
-		//			.MethodParameters(currentTraceFrame.MethodParameters)
-		//			.Build())
-		//	{
-		//		RuntimeUniqueKey = traceInfo.RuntimeUniqueKey,
-		//		IdUser = traceInfo.IdUser,
-		//		ExternalCorrelationId = traceInfo.ExternalCorrelationId,
-		//		CorrelationId = traceInfo.CorrelationId
-		//	};
-
-		//	return _builder;
-		//}
 
 		public ITraceInfo Build()
 			=> _traceInfo;
@@ -110,29 +82,38 @@ namespace Raider.Trace
 		public TBuilder IdUser(int? idUser, bool force = false)
 		{
 			if (force || !_traceInfo.IdUser.HasValue)
+			{
+				var principalUserId = _traceInfo.Principal?.IdentityBase?.UserId;
+				if (principalUserId.HasValue && principalUserId.Value != idUser)
+					throw new InvalidOperationException($"{nameof(TraceInfo)} has already set {nameof(TraceInfo.Principal)} with {nameof(TraceInfo.IdUser)} == {principalUserId}");
+
 				_traceInfo.IdUser = idUser;
+			}
 
 			return _builder;
 		}
 
-		public TBuilder IdUser(ClaimsPrincipal? user, bool force = false)
+		public TBuilder Principal(ClaimsPrincipal? principal, bool force = false)
 		{
 			int? idUser = null;
 
-			if (user is RaiderPrincipal<int> principal)
-				idUser = principal.IdentityBase?.UserId;
+			if (force || _traceInfo.Principal == null)
+			{
+				if (principal is not RaiderPrincipal<int> raiderPrincipal)
+					return _builder;
 
-			return IdUser(idUser, force);
-		}
+				idUser = raiderPrincipal.IdentityBase?.UserId;
+				if (_traceInfo.IdUser.HasValue)
+				{
+					if (_traceInfo.IdUser.Value != idUser)
+						throw new InvalidOperationException($"{nameof(TraceInfo)} has already set {nameof(TraceInfo.IdUser)} to {_traceInfo.IdUser}");
+				}
 
-		public TBuilder IdUser(IIdentity? identity, bool force = false)
-		{
-			int? idUser = null;
+				_traceInfo.Principal = raiderPrincipal;
+				return IdUser(idUser, force);
+			}
 
-			if (identity is RaiderIdentity<int> identityBase)
-				idUser = identityBase.UserId;
-
-			return IdUser(idUser, force);
+			return _builder;
 		}
 
 		public TBuilder ExternalCorrelationId(string? externalCorrelationId, bool force = false)
