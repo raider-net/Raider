@@ -193,10 +193,13 @@ namespace Raider.Services.Aspects
 					var hasTrans = context.HasTransaction();
 					await context.RollbackAsync(cancellationToken);
 
+					var clientErrorMessage = context.GetDefaultClientErrorMessage(executeEx);
+
 					result = new CommandResultBuilder<TResult>()
 						.WithError(traceInfo,
 							x => x.ExceptionInfo(executeEx)
 									.Detail(hasTrans ? $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded." : $"Unhandled handler ({handler.GetType().FullName}) exception.")
+									.ClientMessage(clientErrorMessage, force: false)
 									.IdCommandQuery(idCommand))
 						.Build();
 				}

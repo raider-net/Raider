@@ -20,10 +20,9 @@ namespace Raider.Services.Commands
 		public ServiceFactory ServiceFactory { get; }
 		public ITraceInfo TraceInfo { get; protected set; }
 		public IApplicationContext ApplicationContext { get; private set; }
-		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
 		public IRequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
-		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
+		public RaiderIdentity<int>? User => ApplicationContext.TraceInfo.User;
 		public string? CommandName { get; private set; }
 		public Guid? IdCommandEntry { get; private set; }
 		public ILogger Logger { get; private set; }
@@ -301,7 +300,7 @@ namespace Raider.Services.Commands
 		public virtual ValueTask DisposeTransactionAsync()
 			=> ValueTask.CompletedTask;
 
-
+		public abstract string GetDefaultClientErrorMessage(Exception ex);
 
 
 		public abstract class Builder<TContext>

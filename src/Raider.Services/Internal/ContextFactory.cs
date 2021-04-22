@@ -97,9 +97,9 @@ namespace Raider.Services
 				.MethodParameters(methodParameters)
 				.Build();
 
-			var tc = _serviceFactory.GetInstance<TraceContext>();
+			var appCtx = _serviceFactory.GetRequiredInstance<IApplicationContext>();
 
-			var traceInfo = new TraceInfoBuilder(traceFrame, tc?.Next()).Build();
+			var traceInfo = new TraceInfoBuilder(traceFrame, appCtx.Next()).Build();
 			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, commandName, handlerType);
 			var commandHandlerContext = commandHandlerContextBuilder.Context;
 
@@ -134,9 +134,9 @@ namespace Raider.Services
 				.MethodParameters(methodParameters)
 				.Build();
 
-			var tc = _serviceFactory.GetInstance<TraceContext>();
+			var appCtx = _serviceFactory.GetRequiredInstance<IApplicationContext>();
 
-			var traceInfo = new TraceInfoBuilder(traceFrame, tc?.Next()).Build();
+			var traceInfo = new TraceInfoBuilder(traceFrame, appCtx.Next()).Build();
 			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, commandName, handlerType);
 			var commandHandlerContext = commandHandlerContextBuilder.Context;
 
