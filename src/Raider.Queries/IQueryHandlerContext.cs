@@ -1,6 +1,6 @@
 ﻿namespace Raider.Queries
 {
-	public interface IQueryHandlerContext : IApplicationContext
+	public interface IQueryHandlerContext
 	{
 	}
 }

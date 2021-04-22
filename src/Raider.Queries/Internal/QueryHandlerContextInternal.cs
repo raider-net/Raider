@@ -10,10 +10,9 @@ namespace Raider.Queries.Internal
 	{
 		public ITraceInfo TraceInfo { get; set; }
 		public IApplicationContext ApplicationContext { get; }
-		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
 		public IRequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
-		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
+		public RaiderIdentity<int>? User => ApplicationContext.TraceInfo.User;
 
 		public QueryHandlerContextInternal(ITraceInfo traceInfo, IApplicationContext applicationContext)
 		{
