@@ -52,7 +52,7 @@ namespace Raider.Messaging.PostgreSql.Database
 			_table.SetParameters(cmd, new Dictionary<string, object?>
 				{
 					{ nameof(IdPublisherInstance), publisher.IdInstance },
-					{ nameof(IdServiceBusHostRuntime), serviceBusHost.IdServiceBusHostRuntime },
+					{ nameof(IdServiceBusHostRuntime), serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey },
 					{ nameof(IdPublisher), publisher.IdComponent },
 					{ nameof(LastActivityUtc), publisher.LastActivityUtc },
 					{ nameof(IdComponentState), (int)publisher.State }

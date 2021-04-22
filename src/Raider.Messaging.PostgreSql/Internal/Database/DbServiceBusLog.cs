@@ -53,7 +53,7 @@ namespace Raider.Messaging.PostgreSql.Database
 
 			_table.SetParameters(cmd, new Dictionary<string, object?>
 				{
-					{ nameof(IdServiceBusHostRuntime), serviceBusHost.IdServiceBusHostRuntime },
+					{ nameof(IdServiceBusHostRuntime), serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey },
 					{ nameof(IdLogLevel), log.IdLogLevel },
 					{ nameof(CreatedUtc), log.CreatedUtc },
 					{ nameof(LogMessageType), log.LogMessageType  },

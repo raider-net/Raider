@@ -106,7 +106,7 @@ namespace Raider.Messaging.PostgreSql.Database
 					{ nameof(Description), subscriber.Description },
 					{ nameof(IdScenario), subscriber.IdScenario },
 					{ nameof(CreatedUtc), subscriber.LastActivityUtc },
-					{ nameof(IdCreatedByServiceBusHostRuntime), serviceBusHost.IdServiceBusHostRuntime },
+					{ nameof(IdCreatedByServiceBusHostRuntime), serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey },
 					{ nameof(IdSubscribingMessageType), idSubscribingMessageType },
 					{ nameof(ReadMessagesFromSequentialFIFO), subscriber.ReadMessagesFromSequentialFIFO },
 					{ nameof(TimeoutForMessageProcessingInSeconds), subscriber.TimeoutForMessageProcessing.TotalSeconds },

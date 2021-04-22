@@ -100,7 +100,7 @@ namespace Raider.Messaging.PostgreSql.Database
 					{ nameof(Description), publisher.Description },
 					{ nameof(IdScenario), publisher.IdScenario },
 					{ nameof(CreatedUtc), publisher.LastActivityUtc },
-					{ nameof(IdCreatedByServiceBusHostRuntime), serviceBusHost.IdServiceBusHostRuntime },
+					{ nameof(IdCreatedByServiceBusHostRuntime), serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey },
 					{ nameof(IdPublishingMessageType), idPublishingMessageType },
 				});
 

@@ -94,7 +94,7 @@ namespace Raider.Messaging.PostgreSql.Database
 					{ nameof(Description), job.Description },
 					{ nameof(IdScenario), job.IdScenario },
 					{ nameof(CreatedUtc), job.LastActivityUtc },
-					{ nameof(IdCreatedByServiceBusHostRuntime), serviceBusHost.IdServiceBusHostRuntime },
+					{ nameof(IdCreatedByServiceBusHostRuntime), serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey },
 				});
 
 			var result = await cmd.ExecuteNonQueryAsync(cancellationToken);

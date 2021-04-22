@@ -58,7 +58,7 @@ namespace Raider.Messaging.PostgreSql.Database
 			_table.SetParameters(cmd, new Dictionary<string, object?>
 				{
 					{ nameof(IdSubscriberInstance), subscriber.IdInstance },
-					{ nameof(IdServiceBusHostRuntime), serviceBusHost.IdServiceBusHostRuntime },
+					{ nameof(IdServiceBusHostRuntime), serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey },
 					{ nameof(IdSubscriber), subscriber.IdComponent },
 					{ nameof(LastActivityUtc), subscriber.LastActivityUtc },
 					{ nameof(ReadMessagesFromSequentialFIFO), subscriber.ReadMessagesFromSequentialFIFO },

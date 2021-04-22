@@ -91,7 +91,7 @@ namespace Raider.Messaging.PostgreSql.Database
 					{ nameof(Type), type.Name },
 					{ nameof(FullName), type.ToFriendlyFullName() },
 					{ nameof(CreatedUtc), serviceBusHost.StartedUtc },
-					{ nameof(IdCreatedByServiceBusHostRuntime), serviceBusHost.IdServiceBusHostRuntime },
+					{ nameof(IdCreatedByServiceBusHostRuntime), serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey },
 				});
 
 			var result = await cmd.ExecuteScalarAsync(cancellationToken);

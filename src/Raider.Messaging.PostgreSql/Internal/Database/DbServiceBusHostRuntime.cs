@@ -49,11 +49,11 @@ namespace Raider.Messaging.PostgreSql.Database
 
 			_table.SetParameters(cmd, new Dictionary<string, object?>
 				{
-					{ nameof(IdServiceBusHostRuntime), serviceBusHost.IdServiceBusHostRuntime },
+					{ nameof(IdServiceBusHostRuntime), serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey },
 					{ nameof(IdServiceBusHost), serviceBusHost.IdServiceBusHost },
 					{ nameof(StartedUtc), serviceBusHost.StartedUtc },
 					{ nameof(EndedUtc), null },
-					{ nameof(IdUser), serviceBusHost.IdUser },
+					{ nameof(IdUser), serviceBusHost.ApplicationContext.TraceInfo.IdUser },
 				});
 
 			var result = await cmd.ExecuteNonQueryAsync(cancellationToken);
@@ -76,7 +76,7 @@ namespace Raider.Messaging.PostgreSql.Database
 			_table.SetParameters(cmd, new Dictionary<string, object?>
 				{
 					{ nameof(EndedUtc),  endedUtc },
-					{ "@id", serviceBusHost.IdServiceBusHostRuntime }
+					{ "@id", serviceBusHost.ApplicationContext.TraceInfo.RuntimeUniqueKey }
 				});
 
 			var result = await cmd.ExecuteNonQueryAsync(cancellationToken);
