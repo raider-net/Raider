@@ -24,7 +24,7 @@ namespace Raider.Services
 		public IApplicationContext ApplicationContext => _commandHandlerContext.ApplicationContext;
 		public IAuthenticatedPrincipal AuthenticatedPrincipal => _commandHandlerContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => _commandHandlerContext.ApplicationResources;
-		public RequestMetadata? RequestMetadata => _commandHandlerContext.RequestMetadata;
+		public IRequestMetadata? RequestMetadata => _commandHandlerContext.RequestMetadata;
 		public RaiderIdentity<int>? User => _commandHandlerContext.AuthenticatedPrincipal.User;
 
 		public string? CommandName => _commandHandlerContext.CommandName;

@@ -22,7 +22,7 @@ namespace Raider.Services.Commands
 		public IApplicationContext ApplicationContext { get; private set; }
 		public IAuthenticatedPrincipal AuthenticatedPrincipal => ApplicationContext.AuthenticatedPrincipal;
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
-		public RequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
+		public IRequestMetadata? RequestMetadata => ApplicationContext.RequestMetadata;
 		public RaiderIdentity<int>? User => ApplicationContext.AuthenticatedPrincipal.User;
 		public string? CommandName { get; private set; }
 		public Guid? IdCommandEntry { get; private set; }
