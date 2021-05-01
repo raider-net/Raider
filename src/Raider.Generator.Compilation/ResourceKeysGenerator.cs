@@ -111,7 +111,7 @@ namespace ");
 
 			ident++;
 		}
-		string className = resFile.Name.ToCSharpClassNameConvention(removeUnderscores: false);
+		string className = resFile.Name.ToCammelCase(removeUnderscores: false);
 
             
             #line default
@@ -195,7 +195,7 @@ namespace ");
             this.Write("public const string ");
             
             #line 73 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCSharpClassNameConvention(removeUnderscores: false)));
+            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCammelCase(removeUnderscores: false)));
             
             #line default
             #line hidden

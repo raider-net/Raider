@@ -22,7 +22,7 @@ namespace Raider.Generator.Compilation
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+    #line 1 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class ResourcesGenerator : GeneratorBase
     {
@@ -34,7 +34,7 @@ namespace Raider.Generator.Compilation
         {
             this.Write("\r\n");
             
-            #line 11 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 11 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 	SetGenerationEnvironment(this.GenerationEnvironment);
 	
@@ -59,7 +59,7 @@ namespace Raider.Generator.Compilation
 
 namespace ");
             
-            #line 30 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 30 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(nmspace));
             
             #line default
@@ -68,21 +68,21 @@ namespace ");
                     "r _resMan;\r\n\t\tpublic static ResourcesManager ResourcesManager\r\n\t\t{\r\n\t\t\tget\r\n\t\t\t{" +
                     "\r\n\t\t\t\treturn _resMan ?? (_resMan = new ResourcesManager(typeof(");
             
-            #line 39 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 39 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(nmspace));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 39 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 39 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resourcesClassName));
             
             #line default
             #line hidden
             this.Write(").Assembly));\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n");
             
-            #line 44 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 44 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 	
 	foreach (var resFile in resFiles)
@@ -108,14 +108,14 @@ namespace ");
 
 namespace ");
             
-            #line 64 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 64 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(nmspace));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
             
-            #line 66 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 66 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 		foreach (var parentClass in resStructure)
 		{
@@ -125,60 +125,60 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 70 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 70 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
             
             #line default
             #line hidden
             this.Write("public static partial class ");
             
-            #line 70 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 70 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(parentClass));
             
             #line default
             #line hidden
             this.Write("\r\n\t");
             
-            #line 71 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 71 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
             
             #line default
             #line hidden
             this.Write("{\r\n");
             
-            #line 72 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 72 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 			ident++;
 		}
-		string className = resFile.Name.ToCSharpClassNameConvention(removeUnderscores: false);
+		string className = resFile.Name.ToCammelCase(removeUnderscores: false);
 
             
             #line default
             #line hidden
             this.Write("\t");
             
-            #line 77 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 77 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
             
             #line default
             #line hidden
             this.Write("public static partial class ");
             
-            #line 77 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 77 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(className));
             
             #line default
             #line hidden
             this.Write("\r\n\t");
             
-            #line 78 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 78 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
             
             #line default
             #line hidden
             this.Write("{\r\n\t");
             
-            #line 79 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 79 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
@@ -187,14 +187,14 @@ namespace ");
                     "tem.Func<string>> Dictionary = new System.Collections.Generic.Dictionary<string," +
                     " System.Func<string>>\r\n\t");
             
-            #line 80 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 80 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("{\r\n");
             
-            #line 81 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 81 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 				int resCount = 0;
                 foreach (var resource in resFile)
@@ -207,28 +207,28 @@ namespace ");
             #line hidden
             this.Write("\t\t");
             
-            #line 88 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 88 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("{ nameof(");
             
-            #line 88 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCSharpClassNameConvention(removeUnderscores: false)));
+            #line 88 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCammelCase(removeUnderscores: false)));
             
             #line default
             #line hidden
             this.Write("), () => ");
             
-            #line 88 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCSharpClassNameConvention(removeUnderscores: false)));
+            #line 88 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCammelCase(removeUnderscores: false)));
             
             #line default
             #line hidden
             this.Write(" },\r\n");
             
-            #line 89 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 89 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					}
 					else
@@ -239,28 +239,28 @@ namespace ");
             #line hidden
             this.Write("\t\t");
             
-            #line 94 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 94 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("{ nameof(");
             
-            #line 94 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCSharpClassNameConvention(removeUnderscores: false)));
+            #line 94 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCammelCase(removeUnderscores: false)));
             
             #line default
             #line hidden
             this.Write("), () => ");
             
-            #line 94 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCSharpClassNameConvention(removeUnderscores: false)));
+            #line 94 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCammelCase(removeUnderscores: false)));
             
             #line default
             #line hidden
             this.Write("_Message },\r\n");
             
-            #line 95 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 95 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					}
 				}
@@ -270,14 +270,14 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 99 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 99 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("};\r\n\r\n");
             
-            #line 101 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 101 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
                 foreach (var resource in resFile)
                 {
@@ -294,7 +294,7 @@ namespace ");
             #line hidden
             this.Write("\r\n");
             
-            #line 113 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 113 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
                     }
 
@@ -303,14 +303,14 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 116 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 116 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("/// <summary>\r\n");
             
-            #line 117 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 117 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					var valueLines = Lines(resource.Value);
 					foreach (var line in valueLines)
@@ -321,21 +321,21 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 122 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 122 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("/// ");
             
-            #line 122 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 122 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Xml(line)));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 123 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 123 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					}
 
@@ -344,14 +344,14 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 126 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 126 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("/// </summary>\r\n");
             
-            #line 127 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 127 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					if (resource.Parameters.Any())
 					{
@@ -361,56 +361,56 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 131 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 131 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("public static string ");
             
-            #line 131 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCSharpClassNameConvention(removeUnderscores: false)));
+            #line 131 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCammelCase(removeUnderscores: false)));
             
             #line default
             #line hidden
             this.Write("_Message\r\n\t");
             
-            #line 132 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 132 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 2)));
             
             #line default
             #line hidden
             this.Write("=> ResourcesManager.GetString(\"");
             
-            #line 132 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 132 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resFile.GetResourceRelativeName(resourcesClassName)));
             
             #line default
             #line hidden
             this.Write("\", \"");
             
-            #line 132 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 132 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name));
             
             #line default
             #line hidden
             this.Write("\", \"");
             
-            #line 132 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 132 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(" ", valueLines)));
             
             #line default
             #line hidden
             this.Write("\");\r\n\t\r\n\t");
             
-            #line 134 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 134 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("/// <summary>\r\n");
             
-            #line 135 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 135 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					valueLines = Lines(resource.Value);
 					foreach (var line in valueLines)
@@ -421,21 +421,21 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 140 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 140 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("/// ");
             
-            #line 140 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 140 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Xml(line)));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 141 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 141 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					}
 
@@ -444,83 +444,83 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 144 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 144 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("/// </summary>\r\n\t");
             
-            #line 145 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 145 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("public static string ");
             
-            #line 145 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCSharpClassNameConvention(removeUnderscores: false)));
+            #line 145 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCammelCase(removeUnderscores: false)));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 145 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 145 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(List("object p", resource.Parameters)));
             
             #line default
             #line hidden
             this.Write(", string defaultValue = \"");
             
-            #line 145 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 145 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(" ", valueLines)));
             
             #line default
             #line hidden
             this.Write("\")\r\n\t");
             
-            #line 146 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 146 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 2)));
             
             #line default
             #line hidden
             this.Write("=> string.Format(\r\n\t");
             
-            #line 147 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 147 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 3)));
             
             #line default
             #line hidden
             this.Write("ResourcesManager.GetString(\"");
             
-            #line 147 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 147 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resFile.GetResourceRelativeName(resourcesClassName)));
             
             #line default
             #line hidden
             this.Write("\", \"");
             
-            #line 147 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 147 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name));
             
             #line default
             #line hidden
             this.Write("\", defaultValue),\r\n\t");
             
-            #line 148 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 148 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 3)));
             
             #line default
             #line hidden
             
-            #line 148 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 148 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(List("p", resource.Parameters)));
             
             #line default
             #line hidden
             this.Write(");\r\n");
             
-            #line 149 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 149 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					}
 					else
@@ -531,49 +531,49 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 154 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 154 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 1)));
             
             #line default
             #line hidden
             this.Write("public static string ");
             
-            #line 154 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCSharpClassNameConvention(removeUnderscores: false)));
+            #line 154 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name.ToCammelCase(removeUnderscores: false)));
             
             #line default
             #line hidden
             this.Write("\r\n\t");
             
-            #line 155 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 155 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident + 2)));
             
             #line default
             #line hidden
             this.Write("=> ResourcesManager.GetString(\"");
             
-            #line 155 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 155 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resFile.GetResourceRelativeName(resourcesClassName)));
             
             #line default
             #line hidden
             this.Write("\", \"");
             
-            #line 155 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 155 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(resource.Name));
             
             #line default
             #line hidden
             this.Write("\", \"");
             
-            #line 155 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 155 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(" ", valueLines)));
             
             #line default
             #line hidden
             this.Write("\");\r\n");
             
-            #line 156 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 156 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 					}
 					resCount++;
@@ -584,14 +584,14 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 161 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 161 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 162 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 162 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 
 		for (int i = resStructure.Count - 1; 0 <= i; i--)
@@ -602,14 +602,14 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 167 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 167 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(i)));
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 168 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 168 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 		}
 
@@ -618,7 +618,7 @@ namespace ");
             #line hidden
             this.Write("}\r\n");
             
-            #line 172 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+            #line 172 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 	}
 	Process();
@@ -629,7 +629,7 @@ namespace ");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 176 "c:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
+        #line 176 "C:\Code\GitLab\H\FWK\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
 	private string GetIdent(int count)
 	{

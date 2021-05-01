@@ -48,7 +48,7 @@ namespace <#= nmspace #>
 <#
 			ident++;
 		}
-		string className = resFile.Name.ToCSharpClassNameConvention(removeUnderscores: false);
+		string className = resFile.Name.ToCammelCase(removeUnderscores: false);
 #>
 	<#= GetIdent(ident) #>public partial class <#= className #>Keys
 	<#= GetIdent(ident) #>{
@@ -70,7 +70,7 @@ namespace <#= nmspace #>
 <#
 					}
 #>
-	<#= GetIdent(ident + 1) #>public const string <#= resource.Name.ToCSharpClassNameConvention(removeUnderscores: false) #> = "<#= resource.Name #>";
+	<#= GetIdent(ident + 1) #>public const string <#= resource.Name.ToCammelCase(removeUnderscores: false) #> = "<#= resource.Name #>";
 <#
 					resCount++;
 				}

@@ -72,7 +72,7 @@ namespace <#= nmspace #>
 <#
 			ident++;
 		}
-		string className = resFile.Name.ToCSharpClassNameConvention(removeUnderscores: false);
+		string className = resFile.Name.ToCammelCase(removeUnderscores: false);
 #>
 	<#= GetIdent(ident) #>public static partial class <#= className #>
 	<#= GetIdent(ident) #>{
@@ -85,13 +85,13 @@ namespace <#= nmspace #>
 					if (resource.Parameters.Count == 0)
 					{
 #>
-		<#= GetIdent(ident + 1) #>{ nameof(<#= resource.Name.ToCSharpClassNameConvention(removeUnderscores: false) #>), () => <#= resource.Name.ToCSharpClassNameConvention(removeUnderscores: false) #> },
+		<#= GetIdent(ident + 1) #>{ nameof(<#= resource.Name.ToCammelCase(removeUnderscores: false) #>), () => <#= resource.Name.ToCammelCase(removeUnderscores: false) #> },
 <#
 					}
 					else
 					{
 #>
-		<#= GetIdent(ident + 1) #>{ nameof(<#= resource.Name.ToCSharpClassNameConvention(removeUnderscores: false) #>), () => <#= resource.Name.ToCSharpClassNameConvention(removeUnderscores: false) #>_Message },
+		<#= GetIdent(ident + 1) #>{ nameof(<#= resource.Name.ToCammelCase(removeUnderscores: false) #>), () => <#= resource.Name.ToCammelCase(removeUnderscores: false) #>_Message },
 <#
 					}
 				}
@@ -128,7 +128,7 @@ namespace <#= nmspace #>
 					if (resource.Parameters.Any())
 					{
 #>
-	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCSharpClassNameConvention(removeUnderscores: false) #>_Message
+	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCammelCase(removeUnderscores: false) #>_Message
 	<#= GetIdent(ident + 2) #>=> ResourcesManager.GetString("<#= resFile.GetResourceRelativeName(resourcesClassName) #>", "<#= resource.Name #>", "<#= string.Join(" ", valueLines) #>");
 	
 	<#= GetIdent(ident + 1) #>/// <summary>
@@ -142,7 +142,7 @@ namespace <#= nmspace #>
 					}
 #>
 	<#= GetIdent(ident + 1) #>/// </summary>
-	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCSharpClassNameConvention(removeUnderscores: false) #>(<#= List("object p", resource.Parameters) #>, string defaultValue = "<#= string.Join(" ", valueLines) #>")
+	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCammelCase(removeUnderscores: false) #>(<#= List("object p", resource.Parameters) #>, string defaultValue = "<#= string.Join(" ", valueLines) #>")
 	<#= GetIdent(ident + 2) #>=> string.Format(
 	<#= GetIdent(ident + 3) #>ResourcesManager.GetString("<#= resFile.GetResourceRelativeName(resourcesClassName) #>", "<#= resource.Name #>", defaultValue),
 	<#= GetIdent(ident + 3) #><#= List("p", resource.Parameters) #>);
@@ -151,7 +151,7 @@ namespace <#= nmspace #>
 					else
 					{
 #>
-	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCSharpClassNameConvention(removeUnderscores: false) #>
+	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCammelCase(removeUnderscores: false) #>
 	<#= GetIdent(ident + 2) #>=> ResourcesManager.GetString("<#= resFile.GetResourceRelativeName(resourcesClassName) #>", "<#= resource.Name #>", "<#= string.Join(" ", valueLines) #>");
 <#
 					}
