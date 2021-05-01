@@ -842,9 +842,9 @@ namespace Raider.Extensions
 			return StringHelper.TrimLength(text, maxLength, postfix);
 		}
 
-		public static string ToCSharpClassNameConvention(this string text, bool strictCammelCase = false, bool removeUnderscores = true, bool throwIfEmpty = true)
+		public static string ToCammelCase(this string text, bool strictCammelCase = false, bool removeUnderscores = true, bool throwIfEmpty = true)
 		{
-			return StringHelper.ToCSharpClassNameConvention(text, strictCammelCase, removeUnderscores, throwIfEmpty);
+			return StringHelper.ToCammelCase(text, strictCammelCase, removeUnderscores, throwIfEmpty);
 		}
 
 		public static MemoryStream ToMemoryStream(this string text, Encoding encoding = null)

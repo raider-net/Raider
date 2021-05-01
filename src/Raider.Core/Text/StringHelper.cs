@@ -45,19 +45,19 @@ namespace Raider.Text
 
 	public static class StringHelper
 	{
+		public const string DIGITS = @"0123456789";
+		public const string AVAILABLE_FIRST_CHARS = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ_";
+		public const string AVAILABLE_CHARS = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
+		public const string AVAILABLE_CHARS_NoUnderscore = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-		public static readonly string DIGITS = @"0123456789";
-		public static string AVAILABLE_FIRST_CHARS = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ_";
-		public static string AVAILABLE_CHARS = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
-		public static string AVAILABLE_CHARS_NoUnderscore = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		public static string ToCSharpClassNameConvention(string text, bool strictCammelCase = false, bool removeUnderscores = true, bool throwIfEmpty = true)
+		public static string ToCammelCase(string text, bool strictCammelCase = false, bool removeUnderscores = true, bool throwIfEmpty = true)
 		{
 			if (string.IsNullOrWhiteSpace(text)) return text;
 
-			List<char> digits = new List<char>(DIGITS.ToCharArray());
-			List<char> firstChars = new List<char>(AVAILABLE_FIRST_CHARS.ToCharArray());
+			var digits = new List<char>(DIGITS.ToCharArray());
+			var firstChars = new List<char>(AVAILABLE_FIRST_CHARS.ToCharArray());
 			firstChars.AddRange(AVAILABLE_FIRST_CHARS.ToLower().ToCharArray());
-			List<char> allChars = null;
+			List<char> allChars;
 			if (removeUnderscores)
 			{
 				allChars = new List<char>(AVAILABLE_CHARS_NoUnderscore.ToCharArray());
@@ -66,9 +66,9 @@ namespace Raider.Text
 			else
 			{
 				allChars = new List<char>(AVAILABLE_CHARS.ToCharArray());
-				allChars.AddRange(AVAILABLE_CHARS.ToLower().ToCharArray());
+				allChars.AddRange(AVAILABLE_CHARS_NoUnderscore.ToLower().ToCharArray());
 			}
-			string normalizedText = "";
+			var normalizedTextBuilder = new StringBuilder();
 			bool isFirst = true;
 			bool toUpper = false;
 			text = RemoveAccents(text);
@@ -78,57 +78,50 @@ namespace Raider.Text
 				{
 					if (firstChars.Contains(ch))
 					{
-						normalizedText += Char.ToUpper(ch);
+						normalizedTextBuilder.Append(char.ToUpper(ch));
 						isFirst = false;
 					}
 					else if (digits.Contains(ch))
 					{
-						normalizedText += $"_{ch}";
+						normalizedTextBuilder.Append($"_{ch}");
 						isFirst = false;
 					}
 				}
 				else
 				{
-					if (char.IsWhiteSpace(ch))
-					{
-						toUpper = true;
-					}
-					else if (allChars.Contains(ch))
+					if (allChars.Contains(ch))
 					{
 						if (toUpper)
 						{
-							normalizedText += Char.ToUpper(ch);
+							normalizedTextBuilder.Append(char.ToUpper(ch));
 							toUpper = false;
 						}
 						else
 						{
-							normalizedText += ch;
+							normalizedTextBuilder.Append(ch);
 						}
+					}
+					else
+					{
+						toUpper = true;
 					}
 				}
 			}
 
-			//string[] textWords = System.Text.RegularExpressions.Regex.Split(normalizedText, @"\s+");
+			string normalizedText = normalizedTextBuilder.ToString();
 
-			//if (1 < textWords.Count())
-			//{
-			//    normalizedText = textWords.Aggregate((x, y) =>
-			//    {
-			//        return string.Format("{0}{1}", x, y.FirstToUpper());
-			//    });
-			//}
 			if (string.IsNullOrWhiteSpace(normalizedText))
 			{
 				if (throwIfEmpty || removeUnderscores)
-					throw new System.Exception("Text '" + text + "' cannot be normalized.");
+					throw new Exception("Text '" + text + "' cannot be normalized.");
 				else
 					normalizedText = "_";
 			}
 
-			var result = normalizedText;
+			string result;
 			if (strictCammelCase)
 			{
-				result = "";
+				var resultBuilder = new StringBuilder();
 				bool previousWasUpper = false;
 				foreach (var ch in normalizedText)
 				{
@@ -138,22 +131,27 @@ namespace Raider.Text
 					if (char.IsUpper(ch))
 					{
 						if (previousWasUpper)
-							result += char.ToLower(ch);
+							resultBuilder.Append(char.ToLower(ch));
 						else
-							result += ch;
+							resultBuilder.Append(ch);
 
 						previousWasUpper = true;
 					}
 					else
 					{
-						result += ch;
+						resultBuilder.Append(ch);
 						previousWasUpper = false;
 					}
 				}
+				result = resultBuilder.ToString();
+			}
+			else
+			{
+				result = normalizedText;
 			}
 
 			if (string.IsNullOrWhiteSpace(result))
-				result = "_";
+				return "_";
 
 			return result;
 		}
