@@ -47,6 +47,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Services.EntityFrame
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.QueryServices.EntityFramework", "src\Raider.QueryServices.EntityFramework\Raider.QueryServices.EntityFramework.csproj", "{94C34C27-2DFD-4893-8018-0F81F2077669}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Metrics", "src\Raider.Metrics\Raider.Metrics.csproj", "{03901BF6-1981-46B8-A94F-6A8698B3EF7E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Metrics.PostgreSql", "src\Raider.Metrics.PostgreSql\Raider.Metrics.PostgreSql.csproj", "{4BD9498A-5A57-423B-BA01-EC9676D8B680}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,6 +137,14 @@ Global
 		{94C34C27-2DFD-4893-8018-0F81F2077669}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94C34C27-2DFD-4893-8018-0F81F2077669}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94C34C27-2DFD-4893-8018-0F81F2077669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03901BF6-1981-46B8-A94F-6A8698B3EF7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03901BF6-1981-46B8-A94F-6A8698B3EF7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03901BF6-1981-46B8-A94F-6A8698B3EF7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03901BF6-1981-46B8-A94F-6A8698B3EF7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BD9498A-5A57-423B-BA01-EC9676D8B680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BD9498A-5A57-423B-BA01-EC9676D8B680}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BD9498A-5A57-423B-BA01-EC9676D8B680}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BD9498A-5A57-423B-BA01-EC9676D8B680}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -158,6 +170,8 @@ Global
 		{C925BD06-FC75-4DE2-99BE-7628455987FC} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 		{79FA24C2-AFBA-4C70-9EB9-546ACE2125C0} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 		{94C34C27-2DFD-4893-8018-0F81F2077669} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
+		{03901BF6-1981-46B8-A94F-6A8698B3EF7E} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
+		{4BD9498A-5A57-423B-BA01-EC9676D8B680} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4CE87C92-BF04-4D94-B102-15AC816005FB}

@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<Description>Raider.Metrics</Description>
+		<PackageTags></PackageTags>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<PackageReleaseNotes>Raider.Metrics</PackageReleaseNotes>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/raider-net/Raider</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/raider-net/Raider</RepositoryUrl>
+		<PackageIcon>raider_icon.png</PackageIcon>
+		<NeutralLanguage>en</NeutralLanguage>
+		<Copyright>Copyright Raider</Copyright>
+		<Authors>Tomas Pilat</Authors>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
+		<Version>1.0.0</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\raider_icon.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>
