@@ -205,6 +205,9 @@ namespace Raider.Messaging
 			var startRetryCount = 0;
 			stoppingToken.Register(ShutDown);
 
+			// Without this line we can encounter a blocking issue such as: https://github.com/dotnet/extensions/issues/2816
+			await Task.Yield();
+
 			while (!_started)
 			{
 				try

@@ -10,7 +10,6 @@ namespace Raider.Messaging.Internal
 {
 	internal class ServiceBusRegister : IServiceBusRegister
 	{
-		private readonly ServiceBusMode _mode;
 		private readonly bool _allowedPublishers;
 		private readonly bool _allowedSubscribers;
 		private readonly bool _allowedJobs;
@@ -21,23 +20,24 @@ namespace Raider.Messaging.Internal
 		private readonly Dictionary<int, IJob> _jobs = new Dictionary<int, IJob>();
 		private readonly Dictionary<Type, List<ISubscriber>> _messageTypeSubscribers = new Dictionary<Type, List<ISubscriber>>();
 
+		public ServiceBusMode Mode { get; }
 		public bool RegistrationFinished { get; private set; }
 
 		public ServiceBusRegister(ServiceBusMode mode, bool allowJobs)
 		{
-			_mode = mode;
-			_allowedPublishers = _mode == ServiceBusMode.OnlyMessagePublishing || mode == ServiceBusMode.PublishingAndSubscribing;
-			_allowedSubscribers = _mode == ServiceBusMode.OnlyMessageSubscribing || mode == ServiceBusMode.PublishingAndSubscribing;
+			Mode = mode;
+			_allowedPublishers = Mode == ServiceBusMode.OnlyMessagePublishing || mode == ServiceBusMode.PublishingAndSubscribing;
+			_allowedSubscribers = Mode == ServiceBusMode.OnlyMessageSubscribing || mode == ServiceBusMode.PublishingAndSubscribing;
 			_allowedJobs = allowJobs;
 
 			RegisterScenario(0, "DEFAULT");
 		}
 
 		ServiceBusMode IServiceBusRegister.GetMode()
-			=> _mode;
+			=> Mode;
 
 
-		public void FinalizeRegistration(out List<Type> notSubscribed, out List<Type> notPublished)
+		public void FinalizeRegistration()
 		{
 			if (_allowedPublishers && _publishers.Count == 0)
 				throw new InvalidOperationException("No publisher registered");
@@ -48,7 +48,7 @@ namespace Raider.Messaging.Internal
 			if (_allowedJobs && _jobs.Count == 0)
 				throw new InvalidOperationException("No job registered");
 
-			if (_mode == ServiceBusMode.PublishingAndSubscribing)
+			if (Mode == ServiceBusMode.PublishingAndSubscribing)
 			{
 				var publishMessageDataTypes = _publishers.Values.Select(x => x.PublishingMessageDataType).Distinct().ToDictionary(x => x, y => 0);
 				var notPublishedMessageDataTypes = new List<Type>();
@@ -65,13 +65,15 @@ namespace Raider.Messaging.Internal
 					}
 				}
 
-				notSubscribed = publishMessageDataTypes.Where(kvp => kvp.Value == 0).Select(kvp => kvp.Key).ToList();
-				notPublished = notPublishedMessageDataTypes.Distinct().ToList();
-			}
-			else
-			{
-				notSubscribed = new List<Type>();
-				notPublished = new List<Type>();
+				var notSubscribed = publishMessageDataTypes.Where(kvp => kvp.Value == 0).Select(kvp => kvp.Key).ToList();
+				var notPublished = notPublishedMessageDataTypes.Distinct().ToList();
+
+
+				if (Mode == ServiceBusMode.PublishingAndSubscribing && 0 < notSubscribed.Count)
+					throw new InvalidOperationException($"Not subscribed message data types:{Environment.NewLine}{string.Join(Environment.NewLine, notSubscribed.Select(x => x.FullName))}");
+
+				if (Mode == ServiceBusMode.PublishingAndSubscribing && 0 < notPublished.Count)
+					throw new InvalidOperationException($"Not published message data types:{Environment.NewLine}{string.Join(Environment.NewLine, notPublished.Select(x => x.FullName))}");
 			}
 
 			RegistrationFinished = true;
