@@ -13,7 +13,7 @@ namespace Raider.Metrics
 		public List<string>? AllowedCounters { get; set; }
 		public IDictionary<string, int>? EventSourceAdapterAllowedCounters { get; set; }
 		public IDictionary<string, Func<string, int>>? EventSourceAdapterAllowedCounterGetters { get; set; }
-		public Func<string, int> EventSourceAdapterIdEventCounterGetter { get; set; }
+		public Func<string, int>? EventSourceAdapterIdEventCounterGetter { get; set; }
 		public bool AutoEnable { get; set; } = true;
 
 		public EventSourceOptions(string eventSourceName)
