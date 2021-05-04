@@ -9,6 +9,7 @@ namespace Serilog
 {
 	public static class SerilogExtensions
 	{
+		[System.Diagnostics.DebuggerStepThrough]
 		public static LoggerConfiguration LogMessageSinkToPostgreSql(
 			this LoggerSinkConfiguration loggerConfiguration,
 			DBLogMessageSinkOptions options,
@@ -24,6 +25,7 @@ namespace Serilog
 						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
 		}
 
+		[System.Diagnostics.DebuggerStepThrough]
 		public static LoggerConfiguration LogSinkToPostgreSql(
 			this LoggerSinkConfiguration loggerConfiguration,
 			DBLogSinkOptions options,

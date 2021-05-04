@@ -2,6 +2,7 @@
 using Raider.Data;
 using Raider.Database.PostgreSql;
 using Raider.Extensions;
+using Raider.Logging.SerilogEx;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 using System;
@@ -25,7 +26,10 @@ namespace Raider.Logging.Database.PostgreSql
 				nameof(LogEvent.Properties),
 				nameof(LogEvent.Exception),
 				nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId),
-				Serilog.Core.Constants.SourceContextPropertyName
+				Serilog.Core.Constants.SourceContextPropertyName,
+				nameof(ILogMessage.TraceInfo.CorrelationId),
+				nameof(ILogMessage.TraceInfo.RuntimeUniqueKey),
+				LogEventHelper.IS_DB_LOG
 			};
 
 			PropertyTypeMapping = new Dictionary<string, NpgsqlDbType>
@@ -37,6 +41,9 @@ namespace Raider.Logging.Database.PostgreSql
 				{ nameof(LogEvent.Exception), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId), NpgsqlDbType.Uuid },
 				{ Serilog.Core.Constants.SourceContextPropertyName, NpgsqlDbType.Varchar },
+				{ nameof(ILogMessage.TraceInfo.CorrelationId), NpgsqlDbType.Uuid },
+				{ nameof(ILogMessage.TraceInfo.RuntimeUniqueKey), NpgsqlDbType.Uuid },
+				{ LogEventHelper.IS_DB_LOG, NpgsqlDbType.Boolean },
 			};
 
 			PropertyColumnMapping = new Dictionary<string, string>

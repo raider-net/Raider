@@ -11,6 +11,7 @@ namespace Raider.Logging.Database.PostgreSql
 		{
 			PropertyNames = new List<string>
 			{
+				nameof(ILogMessage.IdLogMessage),
 				nameof(ILogMessage.IdLogLevel),
 				nameof(ILogMessage.Created),
 				nameof(ILogMessage.TraceInfo.RuntimeUniqueKey),
@@ -35,6 +36,7 @@ namespace Raider.Logging.Database.PostgreSql
 
 			PropertyTypeMapping = new Dictionary<string, NpgsqlDbType>
 			{
+				{ nameof(ILogMessage.IdLogMessage), NpgsqlDbType.Uuid },
 				{ nameof(ILogMessage.IdLogLevel), NpgsqlDbType.Integer },
 				{ nameof(ILogMessage.Created), NpgsqlDbType.TimestampTz },
 				{ nameof(ILogMessage.TraceInfo.RuntimeUniqueKey), NpgsqlDbType.Uuid },

@@ -29,6 +29,7 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 		public override IDictionary<string, object?>? ToDictionary(LogEvent logEvent)
 			=> LogEventHelper.ConvertLogToDictionary(logEvent);
 
+		[System.Diagnostics.DebuggerStepThrough]
 		public void Emit(LogEvent logEvent)
 			=> Write(logEvent);
 	}
