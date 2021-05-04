@@ -169,12 +169,22 @@ namespace Raider.Services.Aspects
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.ExecuteAsync)} returned null. Expected {typeof(ICommandResult).FullName}");
 
-						//TODO kto zaloguje reuslt message a kto tam prida ComamndName a IdSavedCommandu ???
 						resultBuilder.CopyAllHasError(executeResult);
 					}
 
 					if (result.HasError)
 					{
+						foreach (var errMsg in result.ErrorMessages)
+						{
+							if (string.IsNullOrWhiteSpace(errMsg.ClientMessage))
+								errMsg.ClientMessage = context.ApplicationResources?.GlobalExceptionMessage;
+
+							if (!errMsg.IdCommandQuery.HasValue)
+								errMsg.IdCommandQuery = idCommand;
+
+							_logger.LogErrorMessage(errMsg);
+						}
+
 						await context.RollbackAsync(cancellationToken);
 					}
 					else
@@ -202,6 +212,17 @@ namespace Raider.Services.Aspects
 									.ClientMessage(clientErrorMessage, force: false)
 									.IdCommandQuery(idCommand))
 						.Build();
+
+					foreach (var errMsg in result.ErrorMessages)
+					{
+						if (string.IsNullOrWhiteSpace(errMsg.ClientMessage))
+							errMsg.ClientMessage = context.ApplicationResources?.GlobalExceptionMessage;
+
+						if (!errMsg.IdCommandQuery.HasValue)
+							errMsg.IdCommandQuery = idCommand;
+
+						_logger.LogErrorMessage(errMsg);
+					}
 				}
 				finally
 				{
@@ -224,6 +245,17 @@ namespace Raider.Services.Aspects
 								.Detail($"Unhandled interceptor ({this.GetType().FullName}) exception.")
 								.IdCommandQuery(idCommand))
 					.Build();
+
+				foreach (var errMsg in result.ErrorMessages)
+				{
+					if (string.IsNullOrWhiteSpace(errMsg.ClientMessage))
+						errMsg.ClientMessage = context?.ApplicationResources?.GlobalExceptionMessage;
+
+					if (!errMsg.IdCommandQuery.HasValue)
+						errMsg.IdCommandQuery = idCommand;
+
+					_logger.LogErrorMessage(errMsg);
+				}
 			}
 			finally
 			{
