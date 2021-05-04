@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Audit;
+using Raider.Trace;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,44 +28,64 @@ namespace Raider.EntityFrameworkCore
 		{
 		}
 
-		public override int SaveChanges(bool acceptAllChangesOnSuccess)
+		public override int SaveChanges(
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			using (_logger.BeginScope(new Dictionary<string, object> { { "EF LOGGER SCOPE BY TOM", "VALUE TOM TOM" } })) //TODO
-			{
-				var auditCorrelationId = Guid.NewGuid();
-				var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId);
-
-				var result = base.SaveChanges(acceptAllChangesOnSuccess);
-
-				if (0 < auditEntriesWithTempProperty.Count)
-				{
-					OnAfterSaveChanges(auditCorrelationId, auditEntriesWithTempProperty);
-					var tmpResult = base.SaveChanges(acceptAllChangesOnSuccess);
-					result += tmpResult;
-				}
-
-				return result;
-			}
+			return SaveChanges(true, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+		public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			using (_logger.BeginScope(new Dictionary<string, object> { { "EF LOGGER SCOPE BY TOM", "VALUE TOM TOM ASYNC" } })) //TODO
+			return SaveChangesAsync(true, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+		}
+
+		public override int SaveChanges(bool acceptAllChangesOnSuccess,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
+
+			var auditCorrelationId = Guid.NewGuid();
+			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId);
+
+			var result = base.SaveChangesWithoutScope(acceptAllChangesOnSuccess);
+
+			if (0 < auditEntriesWithTempProperty.Count)
 			{
-				var auditCorrelationId = Guid.NewGuid();
-				var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId);
-
-				var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-
-				if (0 < auditEntriesWithTempProperty.Count)
-				{
-					OnAfterSaveChanges(auditCorrelationId, auditEntriesWithTempProperty);
-					var tmpResult = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-					result += tmpResult;
-				}
-
-				return result;
+				OnAfterSaveChanges(auditCorrelationId, auditEntriesWithTempProperty);
+				var tmpResult = base.SaveChangesWithoutScope(acceptAllChangesOnSuccess);
+				result += tmpResult;
 			}
+
+			return result;
+		}
+
+		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
+
+			var auditCorrelationId = Guid.NewGuid();
+			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId);
+
+			var result = await base.SaveChangesWithoutScopeAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+			if (0 < auditEntriesWithTempProperty.Count)
+			{
+				OnAfterSaveChanges(auditCorrelationId, auditEntriesWithTempProperty);
+				var tmpResult = await base.SaveChangesWithoutScopeAsync(acceptAllChangesOnSuccess, cancellationToken);
+				result += tmpResult;
+			}
+
+			return result;
 		}
 
 		private List<AuditEntryInternal> OnBeforeSaveChanges(Guid auditCorrelationId)
@@ -72,6 +94,7 @@ namespace Raider.EntityFrameworkCore
 
 			var auditEntries = new List<AuditEntryInternal>();
 
+			var _userId = _applicationContext.TraceInfo.IdUser;
 			var now = DateTime.Now;
 			foreach (var entry in ChangeTracker.Entries())
 			{
