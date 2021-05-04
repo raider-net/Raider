@@ -4,8 +4,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Raider.Extensions;
+using Raider.Logging;
 using Raider.Trace;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Raider.AspNetCore.Middleware.Initialization
@@ -48,6 +50,11 @@ namespace Raider.AspNetCore.Middleware.Initialization
 					return Task.CompletedTask;
 				});
 			}
+
+			using var disposable = _logger.BeginScope(new Dictionary<string, Guid?>
+			{
+				[nameof(ILogMessage.TraceInfo.CorrelationId)] = appCtx.TraceInfo.CorrelationId
+			});
 
 			await _next(context);
 		}
