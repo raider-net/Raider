@@ -8,7 +8,7 @@ namespace Raider.Logging
 {
 	public class LogMessage : ILogMessage
 	{
-		public long? IdLogMessage { get; set; }
+		public Guid IdLogMessage { get; set; }
 		public LogLevel LogLevel { get; set; }
 		public int IdLogLevel => (int)LogLevel;
 		public DateTimeOffset Created { get; set; }
@@ -32,6 +32,7 @@ namespace Raider.Logging
 
 		internal LogMessage(ITraceInfo traceInfo)
 		{
+			IdLogMessage = Guid.NewGuid();
 			Created = DateTimeOffset.Now;
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
@@ -40,6 +41,7 @@ namespace Raider.Logging
 		{
 			var dict = new Dictionary<string, object?>
 			{
+				{ nameof(IdLogMessage), IdLogMessage },
 				//{ nameof(LogLevel), LogLevel },
 				{ nameof(IdLogLevel), IdLogLevel },
 				{ nameof(Created), Created },
@@ -123,7 +125,7 @@ namespace Raider.Logging
 				}
 			}
 
-			if (withId && IdLogMessage.HasValue)
+			if (withId)
 			{
 				if (empty)
 					sb.Append($"ID: {IdLogMessage}");

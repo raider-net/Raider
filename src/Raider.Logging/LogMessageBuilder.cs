@@ -14,8 +14,6 @@ namespace Raider.Logging
 
 		TObject Build();
 
-		TBuilder IdLogMessage(long? idLogMessage, bool force = false);
-
 		TBuilder LogLevel(LogLevel logLevel, bool force = false);
 
 		TBuilder Created(DateTime created, bool force = false);
@@ -78,14 +76,6 @@ namespace Raider.Logging
 
 		public TObject Build()
 			=> _logMessage;
-
-		public TBuilder IdLogMessage(long? idLogMessage, bool force = false)
-		{
-			if (force || !_logMessage.IdLogMessage.HasValue)
-				_logMessage.IdLogMessage = idLogMessage;
-
-			return _builder;
-		}
 
 		public virtual TBuilder LogLevel(LogLevel logLevel, bool force = false)
 		{

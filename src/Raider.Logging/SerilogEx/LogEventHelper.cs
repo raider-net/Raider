@@ -1,4 +1,5 @@
-﻿using Serilog.Events;
+﻿using Raider.Infrastructure;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,8 @@ namespace Raider.Logging.SerilogEx
 {
 	public static class LogEventHelper
 	{
+		public const string IS_DB_LOG = "IsDbLog";
+
 		public static bool IsLogType(string logType, LogEvent logEvent)
 		=> logEvent != null
 			&& logEvent.Properties.TryGetValue(logType, out LogEventPropertyValue? value)
@@ -71,23 +74,89 @@ namespace Raider.Logging.SerilogEx
 				{ nameof(logEvent.Timestamp), logEvent.Timestamp },
 				{ nameof(logEvent.MessageTemplate), logEvent.RenderMessage(null) },
 				{ nameof(logEvent.Properties), logEvent.Properties },
-				{ nameof(logEvent.Exception), logEvent.Exception }
+				{ nameof(logEvent.Exception), logEvent.Exception },
+				{ nameof(ILogMessage.TraceInfo.RuntimeUniqueKey), EnvironmentInfo.RUNTIME_UNIQUE_KEY },
+				{ IS_DB_LOG, false }
 			};
 
+			var isDBLogIsSet = false;
+			if (logEvent.Properties.TryGetValue(IS_DB_LOG, out LogEventPropertyValue? isDBLogValue))
+			{
+				if (isDBLogValue is ScalarValue scalarValue)
+				{
+					if (scalarValue.Value is bool isDBLog && isDBLog)
+					{
+						result[IS_DB_LOG] = isDBLog;
+						isDBLogIsSet = true;
+					}
+				}
+			}
 			if (logEvent.Properties.TryGetValue("Scope", out LogEventPropertyValue? scopeValue))
 			{
 				if (scopeValue is SequenceValue sequenceValue)
 				{
-					var last = sequenceValue.Elements.LastOrDefault();
-					if (last is DictionaryValue dict && dict.Elements != null)
-						if (dict.Elements.TryGetValue(new ScalarValue(nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)), out LogEventPropertyValue? scopeMmethodCallIdValue))
-							if (scopeMmethodCallIdValue is ScalarValue scalarValue)
+					//var last = sequenceValue.Elements.LastOrDefault();
+					//if (last is DictionaryValue lastDict && lastDict.Elements != null)
+					//{
+					//	if (lastDict.Elements.TryGetValue(new ScalarValue(IS_DB_LOG), out LogEventPropertyValue? scopeIsDBLogValue))
+					//	{
+					//		if (scopeIsDBLogValue is ScalarValue scalarValue)
+					//		{
+					//			if (scalarValue.Value is bool isDBLog && isDBLog)
+					//			{
+					//				result[IS_DB_LOG] = isDBLog;
+					//			}
+					//		}
+					//	}
+					//}
+
+					var elements = sequenceValue.Elements.Reverse();
+					var methodCallIdIsSet = false;
+					var correlationIdIsSet = false;
+					foreach (var element in elements)
+					{
+						if (element is DictionaryValue dict && dict.Elements != null)
+						{
+							if (!methodCallIdIsSet && dict.Elements.TryGetValue(new ScalarValue(nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)), out LogEventPropertyValue? scopeMethodCallIdValue))
 							{
-								if (scalarValue.Value is Guid methodCallId)
+								if (scopeMethodCallIdValue is ScalarValue scalarValue)
 								{
-									result[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = methodCallId;
+									if (scalarValue.Value is Guid methodCallId)
+									{
+										result[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = methodCallId;
+										methodCallIdIsSet = true;
+									}
 								}
 							}
+
+							if (!correlationIdIsSet && dict.Elements.TryGetValue(new ScalarValue(nameof(ILogMessage.TraceInfo.CorrelationId)), out LogEventPropertyValue? scopeCorrelationIdValue))
+							{
+								if (scopeCorrelationIdValue is ScalarValue scalarValue)
+								{
+									if (scalarValue.Value is Guid correlationId)
+									{
+										result[nameof(ILogMessage.TraceInfo.CorrelationId)] = correlationId;
+										correlationIdIsSet = true;
+									}
+								}
+							}
+
+							if (!isDBLogIsSet && dict.Elements.TryGetValue(new ScalarValue(IS_DB_LOG), out LogEventPropertyValue? scopeIsDBLogValue))
+							{
+								if (scopeIsDBLogValue is ScalarValue scalarValue)
+								{
+									if (scalarValue.Value is bool isDBLog && isDBLog)
+									{
+										result[IS_DB_LOG] = isDBLog;
+										isDBLogIsSet = true;
+									}
+								}
+							}
+						}
+
+						if (methodCallIdIsSet && correlationIdIsSet && isDBLogIsSet)
+							break;
+					}
 				}
 			}
 
@@ -98,6 +167,17 @@ namespace Raider.Logging.SerilogEx
 					if (scalarValue.Value is Guid methodCallId)
 					{
 						result[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = methodCallId;
+					}
+				}
+			}
+
+			if (logEvent.Properties.TryGetValue(nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId), out LogEventPropertyValue? correlationIdValue))
+			{
+				if (correlationIdValue is ScalarValue scalarValue)
+				{
+					if (scalarValue.Value is Guid correlationId)
+					{
+						result[nameof(ILogMessage.TraceInfo.CorrelationId)] = correlationId;
 					}
 				}
 			}

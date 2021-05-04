@@ -59,9 +59,10 @@ namespace Raider.Logging
 					null)
 					.Build();
 
-			var disposable = logger.BeginScope(new Dictionary<string, Guid>
+			var disposable = logger.BeginScope(new Dictionary<string, Guid?>
 			{
-				[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = traceInfo.TraceFrame.MethodCallId
+				[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = traceInfo.TraceFrame.MethodCallId,
+				[nameof(ILogMessage.TraceInfo.CorrelationId)] = traceInfo.CorrelationId
 			});
 
 			var scope = new MethodLogScope(traceInfo, disposable);

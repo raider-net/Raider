@@ -10,10 +10,11 @@ namespace Raider.Logging.Extensions
 		public static IDisposable BeginMethodCallScope(this ILogger logger, ITraceInfo traceInfo)
 			=> traceInfo?.TraceFrame == null
 				? throw new ArgumentNullException(nameof(traceInfo))
-				: logger.BeginScope(new Dictionary<string, Guid>
-					{
-						[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = traceInfo.TraceFrame.MethodCallId
-					});
+				: logger.BeginScope(new Dictionary<string, Guid?>
+				{
+					[nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)] = traceInfo.TraceFrame.MethodCallId,
+					[nameof(ILogMessage.TraceInfo.CorrelationId)] = traceInfo.CorrelationId
+				});
 
 		public static IDisposable BeginMethodCallScope(this ILogger logger, ITraceFrame traceFrame)
 			=> traceFrame == null

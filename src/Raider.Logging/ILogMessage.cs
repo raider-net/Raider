@@ -6,7 +6,7 @@ namespace Raider.Logging
 {
 	public interface ILogMessage : Serializer.IDictionaryObject
 	{
-		long? IdLogMessage { get; set; }
+		Guid IdLogMessage { get; set; }
 
 		LogLevel LogLevel { get; set; }
 
