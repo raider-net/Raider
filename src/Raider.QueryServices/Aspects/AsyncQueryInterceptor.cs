@@ -168,12 +168,22 @@ namespace Raider.QueryServices.Aspects
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.ExecuteAsync)} returned null. Expected {typeof(IQueryResult<TResult>).FullName}");
 
-						//TODO kto zaloguje reuslt message a kto tam prida ComamndName a IdSavedCommandu ???
 						resultBuilder.CopyAllHasError(executeResult);
 					}
 
 					if (result.HasError)
 					{
+						foreach (var errMsg in result.ErrorMessages)
+						{
+							if (string.IsNullOrWhiteSpace(errMsg.ClientMessage))
+								errMsg.ClientMessage = context.ApplicationResources?.GlobalExceptionMessage;
+
+							if (!errMsg.IdCommandQuery.HasValue)
+								errMsg.IdCommandQuery = idQuery;
+
+							_logger.LogErrorMessage(errMsg);
+						}
+
 						await context.RollbackAsync(cancellationToken);
 					}
 					else
@@ -198,6 +208,17 @@ namespace Raider.QueryServices.Aspects
 									.Detail(hasTrans ? $"Unhandled handler ({handler.GetType().FullName}) exception. DbTransaction.Rollback() succeeded." : $"Unhandled handler ({handler.GetType().FullName}) exception.")
 									.IdCommandQuery(idQuery))
 						.Build();
+
+					foreach (var errMsg in result.ErrorMessages)
+					{
+						if (string.IsNullOrWhiteSpace(errMsg.ClientMessage))
+							errMsg.ClientMessage = context.ApplicationResources?.GlobalExceptionMessage;
+
+						if (!errMsg.IdCommandQuery.HasValue)
+							errMsg.IdCommandQuery = idQuery;
+
+						_logger.LogErrorMessage(errMsg);
+					}
 				}
 				finally
 				{
@@ -220,6 +241,17 @@ namespace Raider.QueryServices.Aspects
 								.Detail($"Unhandled interceptor ({this.GetType().FullName}) exception.")
 								.IdCommandQuery(idQuery))
 					.Build();
+
+				foreach (var errMsg in result.ErrorMessages)
+				{
+					if (string.IsNullOrWhiteSpace(errMsg.ClientMessage))
+						errMsg.ClientMessage = context?.ApplicationResources?.GlobalExceptionMessage;
+
+					if (!errMsg.IdCommandQuery.HasValue)
+						errMsg.IdCommandQuery = idQuery;
+
+					_logger.LogErrorMessage(errMsg);
+				}
 			}
 			finally
 			{
