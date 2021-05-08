@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Raider.DependencyInjection;
 using Raider.Messaging.Internal;
 using System;
 
@@ -45,7 +44,6 @@ namespace Raider.Messaging.Extensions
 
 		private static IServiceCollection AddServices(IServiceCollection services, ServiceBusMode mode, bool allowJobs, Action<IServiceBusRegister> registerConfiguration)
 		{
-			services.TryAddTransient<ServiceFactory>(p => p.GetService);
 			services.AddTransient<SubscriberContext>();
 
 			var register = new ServiceBusRegister(mode, allowJobs);

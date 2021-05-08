@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Raider.DependencyInjection;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
@@ -16,7 +15,7 @@ namespace Raider.Messaging
 	{
 		private readonly string _commandName = $"{nameof(Raider)}.{nameof(Messaging)}";
 
-		public ServiceFactory ServiceFactory { get; }
+		public IServiceProvider ServiceProvider { get; }
 		public ILogger Logger { get; internal set; }
 		public ITraceInfo TraceInfo { get; internal set; }
 		public IApplicationContext ApplicationContext { get; }
@@ -26,9 +25,9 @@ namespace Raider.Messaging
 		public RaiderIdentity<int>? User => ApplicationContext.TraceInfo.User;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		public SubscriberContext(ServiceFactory serviceFactory, IApplicationContext applicationContext)
+		public SubscriberContext(IServiceProvider serviceProvider, IApplicationContext applicationContext)
 		{
-			ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+			ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			ApplicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
