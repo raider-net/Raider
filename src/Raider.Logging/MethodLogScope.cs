@@ -44,6 +44,24 @@ namespace Raider.Logging
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
+			=> Create(logger, (ITraceInfo?)null, methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
+		public static MethodLogScope Create(
+			ILogger logger,
+			MethodLogScope? methodLogScope,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> Create(logger, methodLogScope?.TraceInfo, methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
+		public static MethodLogScope Create(
+			ILogger logger,
+			ITraceInfo? previousTraceInfo,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			if (logger == null)
 				throw new ArgumentNullException(nameof(logger));
@@ -56,7 +74,7 @@ namespace Raider.Logging
 						.CallerLineNumber(sourceLineNumber == 0 ? (int?)null : sourceLineNumber)
 						.MethodParameters(methodParameters)
 						.Build(),
-					null)
+					previousTraceInfo)
 					.Build();
 
 			var disposable = logger.BeginScope(new Dictionary<string, Guid?>
