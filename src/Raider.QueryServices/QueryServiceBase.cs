@@ -1,4 +1,4 @@
-﻿using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Raider.QueryServices.Queries;
 using System;
 using System.Threading;
@@ -23,17 +23,17 @@ namespace Raider.QueryServices
 			QueryServiceContext = serviceContext ?? throw new ArgumentNullException(nameof(serviceContext));
 		}
 
-		protected void SetQueryServiceContext<THandlerContext, TBuilder>(ServiceFactory serviceFactory, Type serviceType)
+		protected void SetQueryServiceContext<THandlerContext, TBuilder>(IServiceProvider serviceProvider, Type serviceType)
 			where THandlerContext : QueryHandlerContext
 			where TBuilder : QueryHandlerContext.Builder<THandlerContext>
 		{
-			if (serviceFactory == null)
-				throw new ArgumentNullException(nameof(serviceFactory));
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
 
 			if (serviceType == null)
 				throw new ArgumentNullException(nameof(serviceType));
 
-			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
+			var contextFactory = serviceProvider.GetRequiredService<ContextFactory>();
 			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder, TQueryServiceContext>(serviceType);
 		}
 	}

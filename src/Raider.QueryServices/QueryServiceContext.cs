@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
@@ -18,7 +18,7 @@ namespace Raider.QueryServices
 	{
 		private QueryHandlerContext _queryHandlerContext;
 
-		public ServiceFactory ServiceFactory => _queryHandlerContext.ServiceFactory;
+		public IServiceProvider ServiceProvider => _queryHandlerContext.ServiceProvider;
 
 		public ITraceInfo TraceInfo { get; private set; }
 		public IApplicationContext ApplicationContext => _queryHandlerContext.ApplicationContext;
@@ -69,7 +69,7 @@ namespace Raider.QueryServices
 			TraceInfo = new TraceInfoBuilder(currentTraceFrame, queryHandlerContext.TraceInfo).Build();
 			ForServiceType = serviceType;
 
-			var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 			var serviceLogger = loggerFactory.CreateLogger(serviceType);
 			Logger = serviceLogger;
 		}
@@ -81,7 +81,7 @@ namespace Raider.QueryServices
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 			ForServiceType = serviceType;
 
-			var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 			var serviceLogger = loggerFactory.CreateLogger(serviceType);
 			Logger = serviceLogger;
 		}

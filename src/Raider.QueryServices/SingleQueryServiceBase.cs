@@ -1,4 +1,4 @@
-﻿using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Raider.QueryServices.Queries;
 using System;
 
@@ -9,12 +9,12 @@ namespace Raider.QueryServices
 			where THandlerContext : QueryHandlerContext
 			where TBuilder : QueryHandlerContext.Builder<THandlerContext>
 	{
-		public SingleQueryServiceBase(ServiceFactory serviceFactory)
+		public SingleQueryServiceBase(IServiceProvider serviceProvider)
 		{
-			if (serviceFactory == null)
-				throw new ArgumentNullException(nameof(serviceFactory));
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
 
-			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
+			var contextFactory = serviceProvider.GetRequiredService<ContextFactory>();
 			QueryServiceContext = contextFactory.CreateQueryServiceContext<THandlerContext, TBuilder, TQueryServiceContext>(this.GetType());
 		}
 	}

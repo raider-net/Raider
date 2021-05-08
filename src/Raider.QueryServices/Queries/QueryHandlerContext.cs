@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
@@ -8,9 +8,7 @@ using Raider.Queries;
 using Raider.Trace;
 using Raider.Web;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +17,7 @@ namespace Raider.QueryServices.Queries
 {
 	public abstract class QueryHandlerContext : IQueryHandlerContext, IQueryServiceContext
 	{
-		public ServiceFactory ServiceFactory { get; }
+		public IServiceProvider ServiceProvider { get; }
 		public ITraceInfo TraceInfo { get; protected set; }
 		public IApplicationContext ApplicationContext { get; private set; }
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
@@ -31,9 +29,9 @@ namespace Raider.QueryServices.Queries
 		public Dictionary<object, object?> CommandHandlerItems { get; } = new Dictionary<object, object?>();
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		public QueryHandlerContext(ServiceFactory serviceFactory)
+		public QueryHandlerContext(IServiceProvider serviceProvider)
 		{
-			ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+			ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -47,7 +45,7 @@ namespace Raider.QueryServices.Queries
 			//if (typeof(IQueryableBase).IsAssignableFrom(typeof(TService)))
 			//	throw new NotSupportedException($"For {nameof(IQueryableBase)} use Constructor {nameof(IQueryableBase)}({nameof(QueryHandlerContext)}) or {nameof(IQueryableBase)}({nameof(QueryServiceContext)}) isntead");
 
-			var service = ServiceFactory.GetRequiredInstance<TQueryService>();
+			var service = ServiceProvider.GetRequiredService<TQueryService>();
 
 			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
 				.CallerMemberName(memberName)
@@ -72,7 +70,7 @@ namespace Raider.QueryServices.Queries
 			//if (typeof(IQueryableBase).IsAssignableFrom(typeof(TService)))
 			//	throw new NotSupportedException($"For {nameof(IQueryableBase)} use Constructor {nameof(IQueryableBase)}({nameof(QueryHandlerContext)}) or {nameof(IQueryableBase)}({nameof(QueryServiceContext)}) isntead");
 
-			var service = ServiceFactory.GetRequiredInstance<TQueryService>();
+			var service = ServiceProvider.GetRequiredService<TQueryService>();
 
 			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
 				.CallerMemberName(memberName)
@@ -316,11 +314,11 @@ namespace Raider.QueryServices.Queries
 		{
 			public TContext Context { get; }
 
-			public ServiceFactory ServiceFactory { get; }
+			public IServiceProvider ServiceProvider { get; }
 
-			public Builder(ServiceFactory serviceFactory)
+			public Builder(IServiceProvider serviceProvider)
 			{
-				ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+				ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 				Context = Create();
 			}
 

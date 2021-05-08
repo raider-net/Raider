@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Diagnostics;
 using Raider.Extensions;
 using Raider.Logging;
@@ -22,8 +22,8 @@ namespace Raider.QueryServices.Aspects
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly ILogger _logger;
 
-		public AsyncQueryInterceptor(ServiceFactory serviceFactory, ILoggerFactory loggerFactory, ILogger<AsyncQueryInterceptor<TQuery, TResult, TContext, TBuilder>> logger)
-			: base(serviceFactory)
+		public AsyncQueryInterceptor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ILogger<AsyncQueryInterceptor<TQuery, TResult, TContext, TBuilder>> logger)
+			: base(serviceProvider)
 		{
 			_loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -141,7 +141,7 @@ namespace Raider.QueryServices.Aspects
 				if (handlerOptions.LogQueryEntry)
 				{
 					startTicks = StaticWatch.CurrentTicks;
-					queryEntryLogger = ServiceFactory.GetInstance<IQueryLogger>();
+					queryEntryLogger = ServiceProvider.GetService<IQueryLogger>();
 					if (queryEntryLogger == null)
 						throw new InvalidOperationException($"{nameof(IQueryLogger)} is not configured");
 
