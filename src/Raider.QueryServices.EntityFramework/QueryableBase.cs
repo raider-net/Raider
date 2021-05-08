@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using Raider.DependencyInjection;
 using Raider.EntityFrameworkCore;
 using Raider.QueryServices.EntityFramework.Queries;
 using System;
@@ -17,15 +16,15 @@ namespace Raider.QueryServices.EntityFramework
 	public abstract class QueryableBase<T, TDbContext> : QueryServiceBase<DbQueryServiceContext>, IQueryableBase
 		where TDbContext : DbContext
 	{
-		private readonly ServiceFactory _serviceFactory;
+		private readonly IServiceProvider _serviceProvider;
 		protected TDbContext DbContext { get; private set; }
 
 		public abstract IQueryable<T> Queryable { get; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		public QueryableBase(ServiceFactory serviceFactory)
+		public QueryableBase(IServiceProvider serviceProvider)
 		{
-			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
 		public QueryableBase(DbQueryServiceContext serviceContext,
@@ -65,7 +64,7 @@ namespace Raider.QueryServices.EntityFramework
 			where THandlerContext : DbQueryHandlerContext
 			where TBuilder : DbQueryHandlerContext.Builder<THandlerContext>
 		{
-			SetQueryServiceContext<THandlerContext, TBuilder>(_serviceFactory, this.GetType());
+			SetQueryServiceContext<THandlerContext, TBuilder>(_serviceProvider, this.GetType());
 			SetDbContext(QueryServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
 		}
 
