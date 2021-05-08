@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using Raider.DependencyInjection;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -11,19 +10,6 @@ namespace Raider.EntityFrameworkCore
 	public static class DbContextFactory
 	{
 		public static TContext CreateNewDbContext<TContext>(
-			ServiceFactory serviceFactory,
-			IDbContextTransaction? existingDbContextTransaction,
-			out IDbContextTransaction? newDbContextTransaction,
-			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
-			IsolationLevel? transactionIsolationLevel = null)
-			where TContext : DbContext
-		{
-			var dbContext = serviceFactory.GetRequiredInstance<TContext>();
-
-			return SetDbTransaction(dbContext, existingDbContextTransaction, out newDbContextTransaction, transactionUsage, transactionIsolationLevel);
-		}
-
-		public static TContext CreateNewDbContext<TContext>(
 			IServiceProvider serviceProvider,
 			IDbContextTransaction? existingDbContextTransaction,
 			out IDbContextTransaction? newDbContextTransaction,
@@ -31,8 +17,10 @@ namespace Raider.EntityFrameworkCore
 			IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext
 		{
-			var dbContext = serviceProvider.GetRequiredService<TContext>();
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
 
+			var dbContext = serviceProvider.GetRequiredService<TContext>();
 			return SetDbTransaction(dbContext, existingDbContextTransaction, out newDbContextTransaction, transactionUsage, transactionIsolationLevel);
 		}
 
