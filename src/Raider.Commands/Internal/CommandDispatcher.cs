@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Commands.Aspects;
 using Raider.Commands.Logging;
-using Raider.DependencyInjection;
 using Raider.Diagnostics;
-using Raider.Localization;
 using Raider.Logging;
 using Raider.Logging.Extensions;
 using Raider.Trace;
@@ -16,7 +15,7 @@ namespace Raider.Commands.Internal
 {
 	internal class CommandDispatcher : ICommandDispatcher
 	{
-		private readonly ServiceFactory _serviceFactory;
+		private readonly IServiceProvider _serviceProvider;
 		private readonly IApplicationContext _applicationContext;
 		private readonly ILogger<CommandDispatcher> _logger;
 		private readonly ICommandHandlerRegistry _handlerRegistry;
@@ -28,7 +27,7 @@ namespace Raider.Commands.Internal
 		private static readonly ConcurrentDictionary<Type, CommandProcessorBase> _asyncCommandProcessors = new ConcurrentDictionary<Type, CommandProcessorBase>();
 
 		public CommandDispatcher(
-			ServiceFactory serviceFactory,
+			IServiceProvider serviceProvider,
 			ICommandHandlerRegistry handlerRegistry,
 			ICommandHandlerFactory handlerFactory,
 			ILogger<CommandDispatcher> logger)
@@ -36,8 +35,8 @@ namespace Raider.Commands.Internal
 			_handlerRegistry = handlerRegistry ?? throw new ArgumentNullException(nameof(handlerRegistry));
 			_handlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
 			_logger = logger;
-			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
-			_applicationContext = _serviceFactory.GetRequiredInstance<IApplicationContext>();
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_applicationContext = _serviceProvider.GetRequiredService<IApplicationContext>();
 		}
 
 		public ICommandResult<bool> CanExecute<TResult>(ICommand<TResult> command, ICommandInterceptorOptions? options = default)

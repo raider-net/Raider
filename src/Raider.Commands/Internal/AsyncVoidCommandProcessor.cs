@@ -1,7 +1,6 @@
-﻿using Raider.Commands.Aspects;
-using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Raider.Commands.Aspects;
 using Raider.Exceptions;
-using Raider.Localization;
 using Raider.Trace;
 using System;
 using System.Threading;
@@ -77,7 +76,7 @@ namespace Raider.Commands.Internal
 				if (!typeof(IAsyncCommandInterceptor<TCommand>).IsAssignableFrom(hnd.InterceptorType))
 					throw new InvalidOperationException($"Handler {hnd.GetType().FullName} has invalid {nameof(hnd.InterceptorType)}. {hnd.InterceptorType.FullName} must implement {typeof(IAsyncCommandInterceptor<TCommand>).FullName}");
 
-				interceptor = (IAsyncCommandInterceptor<TCommand>?)hnd.ServiceFactory.GetRequiredInstance(hnd.InterceptorType);
+				interceptor = (IAsyncCommandInterceptor<TCommand>?)hnd.ServiceProvider.GetRequiredService(hnd.InterceptorType);
 			}
 
 			return interceptor == null
@@ -101,7 +100,7 @@ namespace Raider.Commands.Internal
 				if (!typeof(IAsyncCommandInterceptor<TCommand>).IsAssignableFrom(hnd.InterceptorType))
 					throw new InvalidOperationException($"Handler {hnd.GetType().FullName} has invalid {nameof(hnd.InterceptorType)}. {hnd.InterceptorType.FullName} must implement {typeof(IAsyncCommandInterceptor<TCommand>).FullName}");
 
-				interceptor = (IAsyncCommandInterceptor<TCommand>?)hnd.ServiceFactory.GetRequiredInstance(hnd.InterceptorType);
+				interceptor = (IAsyncCommandInterceptor<TCommand>?)hnd.ServiceProvider.GetRequiredService(hnd.InterceptorType);
 			}
 
 			return interceptor == null

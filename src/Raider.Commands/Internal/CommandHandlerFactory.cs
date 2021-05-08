@@ -1,23 +1,23 @@
-﻿using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Raider.Commands.Internal
 {
 	public class CommandHandlerFactory : ICommandHandlerFactory
 	{
-		private readonly ServiceFactory _serviceFactory;
+		private readonly IServiceProvider _serviceProvider;
 
-		public CommandHandlerFactory(ServiceFactory serviceFactory)
+		public CommandHandlerFactory(IServiceProvider serviceProvider)
 		{
-			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
 		public ICommandHandler<TCommand>? CreateVoidCommandHandler<TCommand>()
 			where TCommand : ICommand
 		{
-			var handler = _serviceFactory.GetInstance<ICommandHandler<TCommand>>();
+			var handler = _serviceProvider.GetService<ICommandHandler<TCommand>>();
 			if (handler != null)
-				handler.ServiceFactory = _serviceFactory.GetRequiredInstance<ServiceFactory>();
+				handler.ServiceProvider = _serviceProvider;
 
 			return handler;
 		}
@@ -25,9 +25,9 @@ namespace Raider.Commands.Internal
 		public IAsyncCommandHandler<TCommand>? CreateAsyncVoidCommandHandler<TCommand>()
 			where TCommand : ICommand
 		{
-			var handler = _serviceFactory.GetInstance<IAsyncCommandHandler<TCommand>>();
+			var handler = _serviceProvider.GetService<IAsyncCommandHandler<TCommand>>();
 			if (handler != null)
-				handler.ServiceFactory = _serviceFactory.GetRequiredInstance<ServiceFactory>();
+				handler.ServiceProvider = _serviceProvider;
 
 			return handler;
 		}
@@ -35,9 +35,9 @@ namespace Raider.Commands.Internal
 		public ICommandHandler<TCommand, TResult>? CreateCommandHandler<TCommand, TResult>()
 			where TCommand : ICommand<TResult>
 		{
-			var handler = _serviceFactory.GetInstance<ICommandHandler<TCommand, TResult>>();
+			var handler = _serviceProvider.GetService<ICommandHandler<TCommand, TResult>>();
 			if (handler != null)
-				handler.ServiceFactory = _serviceFactory.GetRequiredInstance<ServiceFactory>();
+				handler.ServiceProvider = _serviceProvider;
 
 			return handler;
 		}
@@ -45,9 +45,9 @@ namespace Raider.Commands.Internal
 		public IAsyncCommandHandler<TCommand, TResult>? CreateAsyncCommandHandler<TCommand, TResult>()
 			where TCommand : ICommand<TResult>
 		{
-			var handler = _serviceFactory.GetInstance<IAsyncCommandHandler<TCommand, TResult>>();
+			var handler = _serviceProvider.GetService<IAsyncCommandHandler<TCommand, TResult>>();
 			if (handler != null)
-				handler.ServiceFactory = _serviceFactory.GetRequiredInstance<ServiceFactory>();
+				handler.ServiceProvider = _serviceProvider;
 
 			return handler;
 		}

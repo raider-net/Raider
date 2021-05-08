@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Raider.Commands.Internal;
-using Raider.DependencyInjection;
-using Raider.Exceptions;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -18,8 +16,6 @@ namespace Raider.Commands.Extensions
 		{
 			if (!assemblies.Any())
 				throw new ArgumentNullException(nameof(assemblies), "At least one assembly is requred to scan for handlers.");
-
-			services.TryAddTransient<ServiceFactory>(p => p.GetService);
 
 			var registry = new CommandHandlerRegistry(services);
 

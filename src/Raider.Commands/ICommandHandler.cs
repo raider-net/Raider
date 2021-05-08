@@ -1,5 +1,4 @@
-﻿using Raider.DependencyInjection;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,7 +7,7 @@ namespace Raider.Commands
 	public interface ICommandHandler
 	{
 		ICommandDispatcher Dispatcher { get; set; }
-		ServiceFactory ServiceFactory { get; set; }
+		IServiceProvider ServiceProvider { get; set; }
 		Type? InterceptorType { get; }
 
 		ICommandHandlerOptions? GetOptions();
