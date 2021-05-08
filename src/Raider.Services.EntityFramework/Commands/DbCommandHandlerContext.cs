@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Raider.Commands;
-using Raider.DependencyInjection;
 using Raider.EntityFrameworkCore;
 using System;
 using System.Collections.Concurrent;
@@ -18,15 +17,15 @@ namespace Raider.Services.EntityFramework.Commands
 
 		public IDbContextTransaction? DbContextTransaction { get; private set; }
 
-		public DbCommandHandlerContext(ServiceFactory serviceFactory)
-			: base(serviceFactory)
+		public DbCommandHandlerContext(IServiceProvider serviceProvider)
+			: base(serviceProvider)
 		{
 		}
 
 		public TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext
 		{
-			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(ServiceFactory, DbContextTransaction, out IDbContextTransaction? newDbContextTransaction, transactionUsage, transactionIsolationLevel);
+			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(ServiceProvider, DbContextTransaction, out IDbContextTransaction? newDbContextTransaction, transactionUsage, transactionIsolationLevel);
 			DbContextTransaction = newDbContextTransaction;
 			return dbContext;
 		}
