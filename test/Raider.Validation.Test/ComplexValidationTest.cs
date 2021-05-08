@@ -1219,7 +1219,7 @@ namespace Raider.Validation.Test
 					.LessThan(6))
 				.ForProperty(x => x.CDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
 				.ForProperty(x => x.CDecimalNullable, x => x.PrecisionScale(4, 2, false))
-				.ForEach(x => x.CItemsNullable, x => new BarProfileItemValidator().Configure(condition).BuildRules(x));
+				.ForEach(x => x.CItemsNullable, x => new BarProfileItemValidator().Configure(condition).BuildRules(null, x));
 
 
 

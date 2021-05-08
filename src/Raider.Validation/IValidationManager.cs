@@ -5,12 +5,14 @@ namespace Raider.Validation
 {
 	public interface IValidationManager
 	{
-		Dictionary<Type, IValidationDescriptor>? GetValidationDescriptorFor<T>();
+		Dictionary<Type, IValidationDescriptorBuilder>? GetValidationDescriptorBuilderFor<T>();
 
-		Dictionary<Type, IValidationDescriptor>? GetValidationDescriptorFor(Type objectType);
+		Dictionary<Type, IValidationDescriptorBuilder>? GetValidationDescriptorBuilderFor(Type objectType);
 
-		IValidationDescriptor? GetValidationDescriptorFor<T, TCommand>();
+		IValidationDescriptorBuilder? GetValidationDescriptorBuilderFor<T, TCommand>();
 
-		IValidationDescriptor? GetValidationDescriptorFor(Type objectType, Type commandType);
+		IValidationDescriptorBuilder? GetValidationDescriptorBuilderFor(Type objectType, Type commandType);
+
+		IValidationDescriptor? GetValidationDescriptorFor(Type objectType, Type commandType, IServiceProvider serviceProvider);
 	}
 }

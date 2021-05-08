@@ -1,9 +1,11 @@
-﻿namespace Raider.Validation
+﻿using System;
+
+namespace Raider.Validation
 {
 	public interface IValidationBuilder<T> : IValidationDescriptorBuilder
 	{
-		Validator<T> BuildRules();
+		Validator<T> BuildRules(IServiceProvider serviceProvider);
 
-		Validator<T> BuildRules(Validator<T> parent);
+		Validator<T> BuildRules(IServiceProvider serviceProvider, Validator<T> parent);
 	}
 }

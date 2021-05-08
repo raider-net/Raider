@@ -7,6 +7,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using Microsoft.Extensions.Localization;
+using Raider.Localization;
+using System;
+
 namespace Raider.Validation
 {
 	public partial class Resources
@@ -94,6 +98,16 @@ namespace Raider.Validation
 			public const string RegEx = "RegEx";
 
 			public const string RegEx_WithProperty = "RegEx_WithProperty";
+		}
+
+		public partial class ValidationLocalizerFactory : ResourceLocalizer<Resources.ValidationKeys>
+		{
+			public ValidationLocalizerFactory(IServiceProvider serviceProvider)
+				: base(serviceProvider,
+					ValidationKeys.__BaseName,
+					new System.Reflection.AssemblyName(typeof(ValidationLocalizerFactory).Assembly.FullName).Name)
+			{
+			}
 		}
 	}
 }

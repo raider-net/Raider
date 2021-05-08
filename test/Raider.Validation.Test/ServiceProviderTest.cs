@@ -19,7 +19,7 @@ namespace Raider.Validation.Test
 
 			var validationManager = serviceProvider.GetRequiredService<IValidationManager>();
 
-			var descriptor = validationManager.GetValidationDescriptorFor(typeof(CItem), commandType);
+			var descriptor = validationManager.GetValidationDescriptorBuilderFor(typeof(CItem), commandType);
 
 			if (valid)
 				Assert.NotNull(descriptor);

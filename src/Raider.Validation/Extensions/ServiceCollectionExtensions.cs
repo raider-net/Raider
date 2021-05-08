@@ -55,20 +55,7 @@ namespace Raider.Validation.Extensions
 								throw new InvalidOperationException($"Cannot create instance of {descriptorBuilderTypeInfo}");
 						}
 
-						IValidationDescriptor? descriptor = null;
-						try
-						{
-							descriptor = validationDescriptorBuilder.ToDescriptor();
-						}
-						catch (Exception ex)
-						{
-							throw new ConfigurationException($"Cannot create {nameof(IValidationDescriptor)}. Call {nameof(validationDescriptorBuilder.ToDescriptor)} on instance of {descriptorBuilderTypeInfo.FullName} created with {(defaultCtor == null ? "uninitialized object." : "default constructor.")}", ex);
-						}
-
-						if (descriptor == null)
-							throw new InvalidOperationException($"{nameof(validationDescriptorBuilder.ToDescriptor)} on instance of {descriptorBuilderTypeInfo.FullName} returns null.");
-
-						found = validationManager.RegisterValidationDescriptorFor(descriptor.ObjectType, commandType, descriptor) || found;
+						found = validationManager.RegisterValidationDescriptorFor(validationDescriptorBuilder.ObjectType, commandType, validationDescriptorBuilder) || found;
 					}
 				}
 			}

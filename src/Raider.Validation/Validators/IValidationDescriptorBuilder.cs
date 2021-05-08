@@ -1,7 +1,11 @@
-﻿namespace Raider.Validation
+﻿using System;
+
+namespace Raider.Validation
 {
 	public interface IValidationDescriptorBuilder
 	{
-		IValidationDescriptor ToDescriptor();
+		Type ObjectType { get; }
+
+		IValidationDescriptor ToDescriptor(IServiceProvider serviceProvider);
 	}
 }

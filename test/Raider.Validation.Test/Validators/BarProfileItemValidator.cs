@@ -1,4 +1,5 @@
 ﻿using Raider.Validation.Test.Model;
+using System;
 
 namespace Raider.Validation.Test.Validators
 {
@@ -13,7 +14,7 @@ namespace Raider.Validation.Test.Validators
 			return this;
 		}
 
-		public override Validator<CItem> BuildRules()
+		public override Validator<CItem> BuildRules(IServiceProvider serviceProvider)
 			=> Validator<CItem>.Rules()
 				.ForProperty(x => x.CItemStringNullable, x => x.NotDefaultOrEmpty().NotNull())
 				.ForProperty(x => x.CItemIntNullable, x => x

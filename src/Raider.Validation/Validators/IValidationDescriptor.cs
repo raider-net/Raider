@@ -8,13 +8,13 @@ namespace Raider.Validation
 {
 	public interface IValidationDescriptor
 	{
-		public Type ObjectType { get; }
+		Type ObjectType { get; }
 
 		IValidationFrame ValidationFrame { get; }
 
 		ValidatorType ValidatorType { get; }
 
-		public string ValidatorTypeInfo { get; }
+		string ValidatorTypeInfo { get; }
 
 		bool Conditional { get; }
 
@@ -29,7 +29,7 @@ namespace Raider.Validation
 		IComparable? ValueToCompare { get; }
 
 		//MultiEqual, MultiNotEqual
-		public IEnumerable<IComparable?>? ValuesToCompare { get; }
+		IEnumerable<IComparable?>? ValuesToCompare { get; }
 
 		//Equal, NotEqual
 		IEqualityComparer? Comparer { get; }
@@ -58,9 +58,9 @@ namespace Raider.Validation
 		//RegEx
 		string? Pattern { get; }
 
-		public string Message { get; }
+		string Message { get; }
 
-		public string MessageWithPropertyName { get; }
+		string MessageWithPropertyName { get; }
 
 		bool IsEqualTo(IValidationDescriptor other);
 

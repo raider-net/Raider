@@ -4,12 +4,14 @@ namespace Raider.Validation
 {
 	public abstract class ValidationBuilder<T> : IValidationBuilder<T>, IValidationDescriptorBuilder
 	{
-		public abstract Validator<T> BuildRules();
+		public Type ObjectType { get; } = typeof(T);
 
-		public Validator<T> BuildRules(Validator<T> parent)
-			=> BuildRules().AttachTo(parent);
+		public abstract Validator<T> BuildRules(IServiceProvider serviceProvider);
 
-		public IValidationDescriptor ToDescriptor()
-			=> BuildRules()?.ToDescriptor() ?? throw new InvalidOperationException($"{nameof(BuildRules)}() returns null.");
+		public Validator<T> BuildRules(IServiceProvider serviceProvider, Validator<T> parent)
+			=> BuildRules(serviceProvider).AttachTo(parent);
+
+		public IValidationDescriptor ToDescriptor(IServiceProvider serviceProvider)
+			=> BuildRules(serviceProvider)?.ToDescriptor() ?? throw new InvalidOperationException($"{nameof(BuildRules)}() returns null.");
 	}
 }
