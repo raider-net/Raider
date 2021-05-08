@@ -33,8 +33,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Raider.Localization;
 using System;
 
 namespace <#= nmspace #>
@@ -77,32 +77,13 @@ namespace <#= nmspace #>
 #>
 	<#= GetIdent(ident) #>}
 
-	<#= GetIdent(ident) #>public partial class <#= className #>LocalizerFactory : IResourceLocalizerFactory
+	<#= GetIdent(ident) #>public partial class <#= className #>LocalizerFactory : ResourceLocalizer<<#= resPath.TrimPrefix(targetProject).Replace(System.IO.Path.DirectorySeparatorChar, '.') #>.<#= resFile.Name #>Keys>
 	<#= GetIdent(ident) #>{
-	<#= GetIdent(ident) #>	public IStringLocalizer Localizer { get; }
-
-	<#= GetIdent(ident) #>	public static IStringLocalizer Create(IStringLocalizerFactory stringLocalizerFactory)
-	<#= GetIdent(ident) #>	{
-	<#= GetIdent(ident) #>		if (stringLocalizerFactory == null)
-	<#= GetIdent(ident) #>			throw new ArgumentNullException(nameof(stringLocalizerFactory));
-
-	<#= GetIdent(ident) #>		var assemblyName = new System.Reflection.AssemblyName(typeof(<#= className #>LocalizerFactory).Assembly.FullName).Name;
-	<#= GetIdent(ident) #>		return stringLocalizerFactory.Create(<#= className #>Keys.__BaseName, assemblyName);
-	<#= GetIdent(ident) #>	}
-
-	<#= GetIdent(ident) #>	public static IStringLocalizer Create(IServiceProvider serviceProvider)
-	<#= GetIdent(ident) #>	{
-	<#= GetIdent(ident) #>		if (serviceProvider == null)
-	<#= GetIdent(ident) #>			throw new ArgumentNullException(nameof(serviceProvider));
-
-	<#= GetIdent(ident) #>		var stringLocalizerFactory = serviceProvider.GetRequiredService<IStringLocalizerFactory>();
-
-	<#= GetIdent(ident) #>		return Create(stringLocalizerFactory);
-	<#= GetIdent(ident) #>	}
-
 	<#= GetIdent(ident) #>	public <#= className #>LocalizerFactory(IServiceProvider serviceProvider)
+	<#= GetIdent(ident) #>		: base(serviceProvider,
+	<#= GetIdent(ident) #>			<#= className #>Keys.__BaseName,
+	<#= GetIdent(ident) #>			new System.Reflection.AssemblyName(typeof(<#= className #>LocalizerFactory).Assembly.FullName).Name)
 	<#= GetIdent(ident) #>	{
-	<#= GetIdent(ident) #>		Localizer = Create(serviceProvider);
 	<#= GetIdent(ident) #>	}
 	<#= GetIdent(ident) #>}
 <#

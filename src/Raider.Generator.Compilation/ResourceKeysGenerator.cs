@@ -63,8 +63,8 @@ namespace Raider.Generator.Compilation
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Raider.Localization;
 using System;
 
 namespace ");
@@ -237,7 +237,21 @@ namespace ");
             
             #line default
             #line hidden
-            this.Write("LocalizerFactory : IResourceLocalizerFactory\r\n\t");
+            this.Write("LocalizerFactory : ResourceLocalizer<");
+            
+            #line 80 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resPath.TrimPrefix(targetProject).Replace(System.IO.Path.DirectorySeparatorChar, '.')));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 80 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(resFile.Name));
+            
+            #line default
+            #line hidden
+            this.Write("Keys>\r\n\t");
             
             #line 81 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
@@ -251,165 +265,72 @@ namespace ");
             
             #line default
             #line hidden
-            this.Write("\tpublic IStringLocalizer Localizer { get; }\r\n\r\n\t");
-            
-            #line 84 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\tpublic static IStringLocalizer Create(IStringLocalizerFactory stringLocalizerFac" +
-                    "tory)\r\n\t");
-            
-            #line 85 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t{\r\n\t");
-            
-            #line 86 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\tif (stringLocalizerFactory == null)\r\n\t");
-            
-            #line 87 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\t\tthrow new ArgumentNullException(nameof(stringLocalizerFactory));\r\n\r\n\t");
-            
-            #line 89 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\tvar assemblyName = new System.Reflection.AssemblyName(typeof(");
-            
-            #line 89 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(className));
-            
-            #line default
-            #line hidden
-            this.Write("LocalizerFactory).Assembly.FullName).Name;\r\n\t");
-            
-            #line 90 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\treturn stringLocalizerFactory.Create(");
-            
-            #line 90 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(className));
-            
-            #line default
-            #line hidden
-            this.Write("Keys.__BaseName, assemblyName);\r\n\t");
-            
-            #line 91 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t}\r\n\r\n\t");
-            
-            #line 93 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\tpublic static IStringLocalizer Create(IServiceProvider serviceProvider)\r\n\t");
-            
-            #line 94 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t{\r\n\t");
-            
-            #line 95 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\tif (serviceProvider == null)\r\n\t");
-            
-            #line 96 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\t\tthrow new ArgumentNullException(nameof(serviceProvider));\r\n\r\n\t");
-            
-            #line 98 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\tvar stringLocalizerFactory = serviceProvider.GetRequiredService<IStringLocalize" +
-                    "rFactory>();\r\n\r\n\t");
-            
-            #line 100 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\treturn Create(stringLocalizerFactory);\r\n\t");
-            
-            #line 101 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t}\r\n\r\n\t");
-            
-            #line 103 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
             this.Write("\tpublic ");
             
-            #line 103 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            #line 82 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(className));
             
             #line default
             #line hidden
             this.Write("LocalizerFactory(IServiceProvider serviceProvider)\r\n\t");
             
-            #line 104 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            #line 83 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
+            
+            #line default
+            #line hidden
+            this.Write("\t\t: base(serviceProvider,\r\n\t");
+            
+            #line 84 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\t");
+            
+            #line 84 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(className));
+            
+            #line default
+            #line hidden
+            this.Write("Keys.__BaseName,\r\n\t");
+            
+            #line 85 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
+            
+            #line default
+            #line hidden
+            this.Write("\t\t\tnew System.Reflection.AssemblyName(typeof(");
+            
+            #line 85 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(className));
+            
+            #line default
+            #line hidden
+            this.Write("LocalizerFactory).Assembly.FullName).Name)\r\n\t");
+            
+            #line 86 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
             
             #line default
             #line hidden
             this.Write("\t{\r\n\t");
             
-            #line 105 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
-            
-            #line default
-            #line hidden
-            this.Write("\t\tLocalizer = Create(serviceProvider);\r\n\t");
-            
-            #line 106 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            #line 87 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
             
             #line default
             #line hidden
             this.Write("\t}\r\n\t");
             
-            #line 107 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            #line 88 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(ident)));
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 108 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            #line 89 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
 
 
 		for (int i = resStructure.Count - 1; 0 <= i; i--)
@@ -420,14 +341,14 @@ namespace ");
             #line hidden
             this.Write("\t");
             
-            #line 113 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            #line 94 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GetIdent(i)));
             
             #line default
             #line hidden
             this.Write("}\r\n");
             
-            #line 114 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            #line 95 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
 
 		}
 
@@ -436,7 +357,7 @@ namespace ");
             #line hidden
             this.Write("}\r\n");
             
-            #line 118 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+            #line 99 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
 
 	}
 	Process();
@@ -447,7 +368,7 @@ namespace ");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 122 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
+        #line 103 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourceKeysGenerator.tt"
 
 	private string GetIdent(int count)
 	{
