@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Services.Commands;
 using Raider.Trace;
 using System;
@@ -10,14 +10,14 @@ namespace Raider.Services
 {
 	internal class ContextFactory
 	{
-		private readonly ServiceFactory _serviceFactory;
+		private readonly IServiceProvider _serviceProvider;
 		private readonly ILoggerFactory _loggerFactory;
 
 		public ContextFactory(
-			ServiceFactory serviceFactory,
+			IServiceProvider serviceProvider,
 			ILoggerFactory loggerFactory)
 		{
-			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 			_loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 		}
 
@@ -65,9 +65,9 @@ namespace Raider.Services
 			if (traceInfo == null)
 				throw new ArgumentNullException(nameof(traceInfo));
 
-			var commandHandlerContextBuilder = _serviceFactory.GetRequiredInstance<TBuilder>();
+			var commandHandlerContextBuilder = _serviceProvider.GetRequiredService<TBuilder>();
 
-			var applicationContext = _serviceFactory.GetRequiredInstance<IApplicationContext>();
+			var applicationContext = _serviceProvider.GetRequiredService<IApplicationContext>();
 
 			commandHandlerContextBuilder
 				.TraceInfo(traceInfo)
@@ -97,7 +97,7 @@ namespace Raider.Services
 				.MethodParameters(methodParameters)
 				.Build();
 
-			var appCtx = _serviceFactory.GetRequiredInstance<IApplicationContext>();
+			var appCtx = _serviceProvider.GetRequiredService<IApplicationContext>();
 
 			var traceInfo = new TraceInfoBuilder(traceFrame, appCtx.Next()).Build();
 			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, commandName, handlerType);
@@ -134,7 +134,7 @@ namespace Raider.Services
 				.MethodParameters(methodParameters)
 				.Build();
 
-			var appCtx = _serviceFactory.GetRequiredInstance<IApplicationContext>();
+			var appCtx = _serviceProvider.GetRequiredService<IApplicationContext>();
 
 			var traceInfo = new TraceInfoBuilder(traceFrame, appCtx.Next()).Build();
 			var commandHandlerContextBuilder = CreateCommandHandlerContextBuilder<THandlerContext, TBuilder>(traceInfo, commandName, handlerType);

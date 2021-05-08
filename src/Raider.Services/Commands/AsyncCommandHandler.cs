@@ -1,5 +1,4 @@
 ﻿using Raider.Commands;
-using Raider.DependencyInjection;
 using Raider.Services.Aspects;
 using System;
 using System.Threading;
@@ -14,7 +13,7 @@ namespace Raider.Services.Commands
 	{
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 		public ICommandDispatcher Dispatcher { get; set; }
-		public ServiceFactory ServiceFactory { get; set; }
+		public IServiceProvider ServiceProvider { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 		public Type? InterceptorType { get; } = typeof(AsyncCommandInterceptor<TCommand, TResult, TContext, TBuilder>);

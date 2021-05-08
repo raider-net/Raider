@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Raider.DependencyInjection;
 using Raider.Localization;
 using Raider.Logging;
 using Raider.Trace;
@@ -12,7 +11,7 @@ namespace Raider.Services
 {
 	public interface ICommandServiceContext
 	{
-		ServiceFactory ServiceFactory { get; }
+		IServiceProvider ServiceProvider { get; }
 		ITraceInfo TraceInfo { get; }
 		IApplicationContext ApplicationContext { get; }
 		IApplicationResources ApplicationResources { get; }

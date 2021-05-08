@@ -1,4 +1,4 @@
-﻿using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Raider.Services.Commands;
 using System;
 
@@ -9,12 +9,12 @@ namespace Raider.Services
 			where THandlerContext : CommandHandlerContext
 			where TBuilder : CommandHandlerContext.Builder<THandlerContext>
 	{
-		public SingleServiceBase(ServiceFactory serviceFactory)
+		public SingleServiceBase(IServiceProvider serviceProvider)
 		{
-			if (serviceFactory == null)
-				throw new ArgumentNullException(nameof(serviceFactory));
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
 
-			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
+			var contextFactory = serviceProvider.GetRequiredService<ContextFactory>();
 			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder, TServiceContext>(this.GetType());
 		}
 	}

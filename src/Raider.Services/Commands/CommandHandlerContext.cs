@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Commands;
-using Raider.DependencyInjection;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
@@ -17,7 +17,7 @@ namespace Raider.Services.Commands
 {
 	public abstract class CommandHandlerContext : ICommandHandlerContext, ICommandServiceContext
 	{
-		public ServiceFactory ServiceFactory { get; }
+		public IServiceProvider ServiceProvider { get; }
 		public ITraceInfo TraceInfo { get; protected set; }
 		public IApplicationContext ApplicationContext { get; private set; }
 		public IApplicationResources ApplicationResources => ApplicationContext.ApplicationResources;
@@ -29,9 +29,9 @@ namespace Raider.Services.Commands
 		public Dictionary<object, object?> CommandHandlerItems { get; } = new Dictionary<object, object?>();
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		public CommandHandlerContext(ServiceFactory serviceFactory)
+		public CommandHandlerContext(IServiceProvider serviceProvider)
 		{
-			ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+			ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -42,7 +42,7 @@ namespace Raider.Services.Commands
 			where TServiceContext : ServiceContext, new()
 			where TService : ServiceBase<TServiceContext>
 		{
-			var service = ServiceFactory.GetRequiredInstance<TService>();
+			var service = ServiceProvider.GetRequiredService<TService>();
 
 			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
 				.CallerMemberName(memberName)
@@ -64,7 +64,7 @@ namespace Raider.Services.Commands
 			where TServiceContext : ServiceContext, new()
 			where TService : ServiceBase<TServiceContext>
 		{
-			var service = ServiceFactory.GetRequiredInstance<TService>();
+			var service = ServiceProvider.GetRequiredService<TService>();
 
 			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
 				.CallerMemberName(memberName)
@@ -309,11 +309,11 @@ namespace Raider.Services.Commands
 		{
 			public TContext Context { get; }
 
-			public ServiceFactory ServiceFactory { get; }
+			public IServiceProvider ServiceProvider { get; }
 
-			public Builder(ServiceFactory serviceFactory)
+			public Builder(IServiceProvider serviceProvider)
 			{
-				ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+				ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 				Context = Create();
 			}
 

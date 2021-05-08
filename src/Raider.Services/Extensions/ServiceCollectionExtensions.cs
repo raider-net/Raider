@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Raider.Commands.Aspects;
 using Raider.Commands.Extensions;
-using Raider.DependencyInjection;
 using Raider.Services.Aspects;
 using System.Reflection;
 
@@ -15,7 +14,6 @@ namespace Raider.Services.Extensions
 
 		public static IServiceCollection AddRaiderServices(this IServiceCollection services, params Assembly[] assemblies)
 		{
-			services.TryAddTransient<ServiceFactory>(p => p.GetService);
 			services.AddRaiderCommands(assemblies);
 
 			services.TryAddTransient<ContextFactory>();

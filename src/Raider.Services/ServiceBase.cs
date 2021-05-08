@@ -1,4 +1,4 @@
-﻿using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Raider.Services.Commands;
 using System;
 using System.Threading;
@@ -23,17 +23,17 @@ namespace Raider.Services
 			ServiceContext = serviceContext ?? throw new ArgumentNullException(nameof(serviceContext));
 		}
 
-		protected void SetServiceContext<THandlerContext, TBuilder>(ServiceFactory serviceFactory, Type serviceType)
+		protected void SetServiceContext<THandlerContext, TBuilder>(IServiceProvider serviceProvider, Type serviceType)
 			where THandlerContext : CommandHandlerContext
 			where TBuilder : CommandHandlerContext.Builder<THandlerContext>
 		{
-			if (serviceFactory == null)
-				throw new ArgumentNullException(nameof(serviceFactory));
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
 
 			if (serviceType == null)
 				throw new ArgumentNullException(nameof(serviceType));
 
-			var contextFactory = serviceFactory.GetRequiredInstance<ContextFactory>();
+			var contextFactory = serviceProvider.GetRequiredService<ContextFactory>();
 			ServiceContext = contextFactory.CreateServiceContext<THandlerContext, TBuilder, TServiceContext>(serviceType);
 		}
 	}

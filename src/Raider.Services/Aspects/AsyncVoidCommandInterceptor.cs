@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Commands;
 using Raider.Commands.Aspects;
-using Raider.DependencyInjection;
 using Raider.Diagnostics;
 using Raider.Extensions;
 using Raider.Logging;
@@ -9,7 +9,6 @@ using Raider.Logging.Extensions;
 using Raider.Services.Commands;
 using Raider.Trace;
 using System;
-using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,8 +22,8 @@ namespace Raider.Services.Aspects
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly ILogger _logger;
 
-		public AsyncCommandInterceptor(ServiceFactory serviceFactory, ILoggerFactory loggerFactory, ILogger<AsyncCommandInterceptor<TCommand, TContext, TBuilder>> logger)
-			: base(serviceFactory)
+		public AsyncCommandInterceptor(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, ILogger<AsyncCommandInterceptor<TCommand, TContext, TBuilder>> logger)
+			: base(serviceProvider)
 		{
 			_loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -142,7 +141,7 @@ namespace Raider.Services.Aspects
 				if (handlerOptions.LogCommandEntry)
 				{
 					startTicks = StaticWatch.CurrentTicks;
-					commandEntryLogger = ServiceFactory.GetInstance<ICommandLogger>();
+					commandEntryLogger = ServiceProvider.GetService<ICommandLogger>();
 					if (commandEntryLogger == null)
 						throw new InvalidOperationException($"{nameof(ICommandLogger)} is not configured");
 

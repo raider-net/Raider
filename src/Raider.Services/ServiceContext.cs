@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Identity;
 using Raider.Localization;
 using Raider.Logging;
@@ -18,7 +18,7 @@ namespace Raider.Services
 	{
 		private CommandHandlerContext _commandHandlerContext;
 
-		public ServiceFactory ServiceFactory => _commandHandlerContext.ServiceFactory;
+		public IServiceProvider ServiceProvider => _commandHandlerContext.ServiceProvider;
 
 		public ITraceInfo TraceInfo { get; private set; }
 		public IApplicationContext ApplicationContext => _commandHandlerContext.ApplicationContext;
@@ -49,7 +49,7 @@ namespace Raider.Services
 		//	TraceInfo = new TraceInfoBuilder(currentTraceFrame, commandHandlerContext.TraceInfo).Build();
 		//	ForServiceType = serviceType;
 
-		//	var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+		//	var loggerFactory = ServiceProvider.GetRequiredInstance<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
 		//	Logger = serviceLogger;
 		//}
@@ -61,11 +61,11 @@ namespace Raider.Services
 		//	TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		//	ForServiceType = serviceType;
 
-		//	var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+		//	var loggerFactory = ServiceProvider.GetRequiredInstance<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
 		//	Logger = serviceLogger;
 		//}
-		
+
 		internal void Init(ITraceFrame currentTraceFrame, CommandHandlerContext commandHandlerContext, Type serviceType)
 		{
 			_commandHandlerContext = commandHandlerContext ?? throw new ArgumentNullException(nameof(commandHandlerContext));
@@ -73,7 +73,7 @@ namespace Raider.Services
 			TraceInfo = new TraceInfoBuilder(currentTraceFrame, commandHandlerContext.TraceInfo).Build();
 			ForServiceType = serviceType;
 
-			var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 			var serviceLogger = loggerFactory.CreateLogger(serviceType);
 			Logger = serviceLogger;
 		}
@@ -85,7 +85,7 @@ namespace Raider.Services
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 			ForServiceType = serviceType;
 
-			var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 			var serviceLogger = loggerFactory.CreateLogger(serviceType);
 			Logger = serviceLogger;
 		}

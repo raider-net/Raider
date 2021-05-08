@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Services.Commands;
 using Raider.Trace;
 using System;
@@ -10,20 +10,20 @@ namespace Raider.Services.Aspects
 		where TContext : CommandHandlerContext
 		where TBuilder : CommandHandlerContext.Builder<TContext>
 	{
-		protected ServiceFactory ServiceFactory { get; }
+		protected IServiceProvider ServiceProvider { get; }
 		protected IApplicationContext ApplicationContext { get; }
 
-		public InterceptorBase(ServiceFactory serviceFactory)
+		public InterceptorBase(IServiceProvider serviceProvider)
 			: base()
 		{
-			ServiceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
-			ApplicationContext = ServiceFactory.GetRequiredInstance<IApplicationContext>();
+			ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			ApplicationContext = ServiceProvider.GetRequiredService<IApplicationContext>();
 		}
 
 		protected TBuilder CreateCommandHandlerContext(ITraceInfo traceInfo, ILogger logger)
 		{
-			var commandHandlerContextBuilder = ServiceFactory.GetRequiredInstance<TBuilder>();
-			var applicationContext = ServiceFactory.GetRequiredInstance<IApplicationContext>();
+			var commandHandlerContextBuilder = ServiceProvider.GetRequiredService<TBuilder>();
+			var applicationContext = ServiceProvider.GetRequiredService<IApplicationContext>();
 
 			commandHandlerContextBuilder
 				.TraceInfo(traceInfo)
