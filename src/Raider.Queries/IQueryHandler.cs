@@ -1,5 +1,4 @@
-﻿using Raider.DependencyInjection;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,7 +7,7 @@ namespace Raider.Queries
 	public interface IQueryHandler
 	{
 		IQueryDispatcher Dispatcher { get; set; }
-		ServiceFactory ServiceFactory { get; set; }
+		IServiceProvider ServiceProvider { get; set; }
 		Type? InterceptorType { get; }
 
 		IQueryHandlerOptions? GetOptions();

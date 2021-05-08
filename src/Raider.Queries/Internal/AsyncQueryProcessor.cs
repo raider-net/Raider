@@ -1,6 +1,5 @@
-﻿using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Raider.Exceptions;
-using Raider.Localization;
 using Raider.Queries.Aspects;
 using Raider.Trace;
 using System;
@@ -77,7 +76,7 @@ namespace Raider.Queries.Internal
 				if (!typeof(IAsyncQueryInterceptor<TQuery, TResult>).IsAssignableFrom(hnd.InterceptorType))
 					throw new InvalidOperationException($"Handler {hnd.GetType().FullName} has invalid {nameof(hnd.InterceptorType)}. {hnd.InterceptorType.FullName} must implement {typeof(IAsyncQueryInterceptor<TQuery, TResult>).FullName}");
 
-				interceptor = (IAsyncQueryInterceptor<TQuery, TResult>?)hnd.ServiceFactory.GetRequiredInstance(hnd.InterceptorType);
+				interceptor = (IAsyncQueryInterceptor<TQuery, TResult>?)hnd.ServiceProvider.GetRequiredService(hnd.InterceptorType);
 			}
 
 			return interceptor == null
@@ -101,7 +100,7 @@ namespace Raider.Queries.Internal
 				if (!typeof(IAsyncQueryInterceptor<TQuery, TResult>).IsAssignableFrom(hnd.InterceptorType))
 					throw new InvalidOperationException($"Handler {hnd.GetType().FullName} has invalid {nameof(hnd.InterceptorType)}. {hnd.InterceptorType.FullName} must implement {typeof(IAsyncQueryInterceptor<TQuery, TResult>).FullName}");
 
-				interceptor = (IAsyncQueryInterceptor<TQuery, TResult>?)hnd.ServiceFactory.GetRequiredInstance(hnd.InterceptorType);
+				interceptor = (IAsyncQueryInterceptor<TQuery, TResult>?)hnd.ServiceProvider.GetRequiredService(hnd.InterceptorType);
 			}
 
 			return interceptor == null

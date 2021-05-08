@@ -1,23 +1,23 @@
-﻿using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Raider.Queries.Internal
 {
 	public class QueryHandlerFactory : IQueryHandlerFactory
 	{
-		private readonly ServiceFactory _serviceFactory;
+		private readonly IServiceProvider _serviceProvider;
 
-		public QueryHandlerFactory(ServiceFactory serviceFactory)
+		public QueryHandlerFactory(IServiceProvider serviceProvider)
 		{
-			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 		}
 
 		public IQueryHandler<TQuery, TResult>? CreateQueryHandler<TQuery, TResult>()
 			where TQuery : IQuery<TResult>
 		{
-			var handler = _serviceFactory.GetInstance<IQueryHandler<TQuery, TResult>>();
+			var handler = _serviceProvider.GetService<IQueryHandler<TQuery, TResult>>();
 			if (handler != null)
-				handler.ServiceFactory = _serviceFactory.GetRequiredInstance<ServiceFactory>();
+				handler.ServiceProvider = _serviceProvider;
 
 			return handler;
 		}
@@ -25,9 +25,9 @@ namespace Raider.Queries.Internal
 		public IAsyncQueryHandler<TQuery, TResult>? CreateAsyncQueryHandler<TQuery, TResult>()
 			where TQuery : IQuery<TResult>
 		{
-			var handler = _serviceFactory.GetInstance<IAsyncQueryHandler<TQuery, TResult>>();
+			var handler = _serviceProvider.GetService<IAsyncQueryHandler<TQuery, TResult>>();
 			if (handler != null)
-				handler.ServiceFactory = _serviceFactory.GetRequiredInstance<ServiceFactory>();
+				handler.ServiceProvider = _serviceProvider;
 
 			return handler;
 		}

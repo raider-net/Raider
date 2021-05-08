@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using Raider.Queries.Aspects;
-using Raider.Queries.Logging;
-using Raider.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Raider.Diagnostics;
-using Raider.Localization;
 using Raider.Logging;
 using Raider.Logging.Extensions;
+using Raider.Queries.Aspects;
+using Raider.Queries.Logging;
 using Raider.Trace;
 using System;
 using System.Collections.Concurrent;
@@ -16,7 +15,7 @@ namespace Raider.Queries.Internal
 {
 	internal class QueryDispatcher : IQueryDispatcher
 	{
-		private readonly ServiceFactory _serviceFactory;
+		private readonly IServiceProvider _serviceProvider;
 		private readonly IApplicationContext _applicationContext;
 		private readonly ILogger<QueryDispatcher> _logger;
 		private readonly IQueryHandlerRegistry _handlerRegistry;
@@ -26,7 +25,7 @@ namespace Raider.Queries.Internal
 		private static readonly ConcurrentDictionary<Type, QueryProcessorBase> _asyncQueryProcessors = new ConcurrentDictionary<Type, QueryProcessorBase>();
 
 		public QueryDispatcher(
-			ServiceFactory serviceFactory,
+			IServiceProvider serviceProvider,
 			IQueryHandlerRegistry handlerRegistry,
 			IQueryHandlerFactory handlerFactory,
 			ILogger<QueryDispatcher> logger)
@@ -34,8 +33,8 @@ namespace Raider.Queries.Internal
 			_handlerRegistry = handlerRegistry ?? throw new ArgumentNullException(nameof(handlerRegistry));
 			_handlerFactory = handlerFactory ?? throw new ArgumentNullException(nameof(handlerFactory));
 			_logger = logger;
-			_serviceFactory = serviceFactory ?? throw new ArgumentNullException(nameof(serviceFactory));
-			_applicationContext = _serviceFactory.GetRequiredInstance<IApplicationContext>();
+			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+			_applicationContext = _serviceProvider.GetRequiredService<IApplicationContext>();
 		}
 
 		public IQueryResult<bool> CanExecute<TResult>(IQuery<TResult> query, IQueryInterceptorOptions? options = default)
