@@ -19,5 +19,11 @@ namespace Raider.Extensions
 			var result = fi.GetCustomAttributes(typeof(T), inherit);
 			return result != null ? result as T[] : null;
 		}
+
+		public static bool IsConst(this FieldInfo fi)
+		{
+			if (fi == null) return false;
+			return fi.IsLiteral && !fi.IsInitOnly;
+		}
 	}
 }
