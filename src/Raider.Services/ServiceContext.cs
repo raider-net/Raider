@@ -49,7 +49,7 @@ namespace Raider.Services
 		//	TraceInfo = new TraceInfoBuilder(currentTraceFrame, commandHandlerContext.TraceInfo).Build();
 		//	ForServiceType = serviceType;
 
-		//	var loggerFactory = ServiceProvider.GetRequiredInstance<ILoggerFactory>();
+		//	var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
 		//	Logger = serviceLogger;
 		//}
@@ -61,7 +61,7 @@ namespace Raider.Services
 		//	TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		//	ForServiceType = serviceType;
 
-		//	var loggerFactory = ServiceProvider.GetRequiredInstance<ILoggerFactory>();
+		//	var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
 		//	Logger = serviceLogger;
 		//}
@@ -117,6 +117,22 @@ namespace Raider.Services
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 			=> _commandHandlerContext.CreateScope(methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
+		public MethodLogScope CreateScope(
+			MethodLogScope? methodLogScope,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> _commandHandlerContext.CreateScope(methodLogScope, methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
+		public MethodLogScope CreateScope(
+			ITraceInfo? previousTraceInfo,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> _commandHandlerContext.CreateScope(previousTraceInfo, methodParameters, memberName, sourceFilePath, sourceLineNumber);
 
 		public bool TryGetCommandHandlerItem<TKey, TValue>(TKey key, out TValue? value)
 			=> _commandHandlerContext.TryGetCommandHandlerItem(key, out value);

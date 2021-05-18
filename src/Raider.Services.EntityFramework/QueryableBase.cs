@@ -68,7 +68,7 @@ namespace Raider.Services.EntityFramework
 			SetDbContext(ServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
 		}
 
-		protected virtual IQueryable<T> DefaultInternal<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
+		protected IQueryable<T> DefaultInternal<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
 			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
 
 		protected virtual IQueryable<T> DefaultInternal<T1, T2>(

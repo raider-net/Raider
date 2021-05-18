@@ -16,7 +16,9 @@ namespace Raider.Services.Commands
 
 		public Type? InterceptorType { get; } = typeof(CommandInterceptor<TCommand, TContext, TBuilder>);
 		
-		public abstract ICommandResult<bool> CanExecute(TCommand command, TContext context);
+		public virtual ICommandResult<bool> CanExecute(TCommand command, TContext context)
+			=> new CommandResultBuilder<bool>().WithResult(true).Build();
+
 		public abstract ICommandResult Execute(TCommand command, TContext context);
 
 		protected virtual void Dispose(bool disposing)

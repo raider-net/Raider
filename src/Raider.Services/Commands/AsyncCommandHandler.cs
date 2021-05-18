@@ -18,7 +18,9 @@ namespace Raider.Services.Commands
 
 		public Type? InterceptorType { get; } = typeof(AsyncCommandInterceptor<TCommand, TResult, TContext, TBuilder>);
 		
-		public abstract Task<ICommandResult<bool>> CanExecuteAsync(TCommand command, TContext context, CancellationToken cancellationToken);
+		public virtual Task<ICommandResult<bool>> CanExecuteAsync(TCommand command, TContext context, CancellationToken cancellationToken)
+			=> Task.FromResult(new CommandResultBuilder<bool>().WithResult(true).Build());
+
 		public abstract Task<ICommandResult<TResult>> ExecuteAsync(TCommand command, TContext context, CancellationToken cancellationToken);
 
 		protected virtual void Dispose(bool disposing)
