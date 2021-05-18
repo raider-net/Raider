@@ -415,6 +415,18 @@ namespace Raider.Extensions
 			}
 		}
 
+		public static object? GetDefaultNullableValue(this Type type)
+		{
+			if (type.IsValueType)
+			{
+				return Activator.CreateInstance(GetUnderlyingNullableType(type));
+			}
+			else
+			{
+				return null;
+			}
+		}
+
 		public static ConstructorInfo? GetDefaultConstructor(this Type type)
 			=> type.GetConstructors().FirstOrDefault(t => t.GetParameters().Count() == 0);
 	}
