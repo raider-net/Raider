@@ -30,6 +30,7 @@ namespace Raider.Messaging.PostgreSql
 		private readonly DbMessageType _dbMessageType;
 		private readonly DbMessage _dbMessage;
 		private readonly DbSubscriberMessage _dbSubscriberMessage;
+		private readonly DbMessageTempQueue _dbMessageTempQueue;
 		private readonly DbSnapshot _dbSnapshot;
 
 		public IServiceBusHost? ServiceBusHost { get; private set; }
@@ -54,6 +55,7 @@ namespace Raider.Messaging.PostgreSql
 			_dbMessage = new DbMessage();
 			_dbMessageType = new DbMessageType();
 			_dbSubscriberMessage = new DbSubscriberMessage();
+			_dbMessageTempQueue = new DbMessageTempQueue();
 			_dbSnapshot = new DbSnapshot();
 		}
 
@@ -466,9 +468,6 @@ namespace Raider.Messaging.PostgreSql
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
 
-			if (subscribers == null)
-				throw new ArgumentNullException(nameof(subscribers));
-
 			if (ServiceBusHost == null)
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
@@ -480,7 +479,15 @@ namespace Raider.Messaging.PostgreSql
 				using var tran = await connection.BeginTransactionAsync(cancellationToken);
 
 				await _dbMessage.InsertAsync(connection, null, message, idMessageType, cancellationToken);
-				await _dbSubscriberMessage.InsertAsync(connection, tran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
+
+				if (subscribers == null || subscribers.Count == 0)
+				{
+					await _dbMessageTempQueue.InsertAsync(connection, tran, message, MessageState.Pending, cancellationToken);
+				}
+				else
+				{
+					await _dbSubscriberMessage.InsertAsync(connection, tran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
+				}
 			}
 			else
 			{
@@ -488,7 +495,15 @@ namespace Raider.Messaging.PostgreSql
 					throw new ArgumentException($"{nameof(dbTransaction)} must be {nameof(NpgsqlTransaction)}", nameof(dbTransaction));
 
 				await _dbMessage.InsertAsync(connection, npgsqlTran, message, idMessageType, cancellationToken);
-				await _dbSubscriberMessage.InsertAsync(connection, npgsqlTran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
+
+				if (subscribers == null || subscribers.Count == 0)
+				{
+					await _dbMessageTempQueue.InsertAsync(connection, npgsqlTran, message, MessageState.Pending, cancellationToken);
+				}
+				else
+				{
+					await _dbSubscriberMessage.InsertAsync(connection, npgsqlTran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
+				}
 			}
 		}
 	}
