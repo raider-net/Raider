@@ -14,7 +14,7 @@ namespace Raider.Validation.Test.Validators
 			return this;
 		}
 
-		public override Validator<CItem> BuildRules(IServiceProvider serviceProvider)
+		public override Validator<CItem> BuildRules(IServiceProvider serviceProvider, object? state = null)
 			=> Validator<CItem>.Rules()
 				.ForProperty(x => x.CItemStringNullable, x => x.NotDefaultOrEmpty().NotNull())
 				.ForProperty(x => x.CItemIntNullable, x => x
@@ -26,7 +26,7 @@ namespace Raider.Validation.Test.Validators
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6), c => Condition)
-				.ForProperty(x => x.CItemDateTimeNullable, x => x.NotDefaultOrEmptyNullable(), c => Condition)
+				.ForProperty(x => x.CItemDateTimeNullable, x => x.NotDefaultOrEmpty(), c => Condition)
 				.ForProperty(x => x.CItemDecimalNullable, x => x.PrecisionScale(4, 2, false), c => Condition);
 	}
 }

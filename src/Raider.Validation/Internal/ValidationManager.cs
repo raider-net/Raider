@@ -53,7 +53,7 @@ namespace Raider.Validation
 			return true;
 		}
 
-		public IValidationDescriptor? GetValidationDescriptorFor(Type objectType, Type commandType, IServiceProvider serviceProvider)
+		public IValidationDescriptor? GetValidationDescriptorFor(Type objectType, Type commandType, IServiceProvider serviceProvider, object? state = null)
 		{
 			var validationDescriptorBuilder = GetValidationDescriptorBuilderFor(objectType, commandType);
 			if (validationDescriptorBuilder == null)

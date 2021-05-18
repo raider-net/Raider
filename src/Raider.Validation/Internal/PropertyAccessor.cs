@@ -16,25 +16,29 @@ namespace Raider.Validation.Internal
 				throw new ArgumentNullException(nameof(expression));
 
 			var memberInfo = expression.GetMemberInfo();
-			var key = new Key(memberInfo, typeof(TProperty));
+			var key = new Key(typeof(T), typeof(TProperty), memberInfo);
 
 			return (Func<T, TProperty>)_cache.GetOrAdd(key, k => expression.Compile());
 		}
 
 		private class Key
 		{
-			private readonly MemberInfo _memberInfo;
+			private readonly Type _reflectedType;
 			private readonly Type _expressionPropertyType;
+			private readonly MemberInfo _memberInfo;
 
-			public Key(MemberInfo member, Type expressionPropertyType)
+			public Key(Type reflectedType, Type expressionPropertyType, MemberInfo member)
 			{
-				_memberInfo = member;
+				_reflectedType = reflectedType;
 				_expressionPropertyType = expressionPropertyType;
+				_memberInfo = member;
 			}
 
 			protected bool Equals(Key other)
 			{
-				return Equals(_memberInfo, other._memberInfo) && string.Equals(_expressionPropertyType, other._expressionPropertyType);
+				return Equals(_memberInfo, other._memberInfo)
+					&& Equals(_reflectedType, other._reflectedType)
+					&& Equals(_expressionPropertyType, other._expressionPropertyType);
 			}
 
 			public override bool Equals(object? obj)
@@ -46,12 +50,7 @@ namespace Raider.Validation.Internal
 			}
 
 			public override int GetHashCode()
-			{
-				unchecked
-				{
-					return ((_memberInfo != null ? _memberInfo.GetHashCode() : 0) * 397) ^ (_expressionPropertyType != null ? _expressionPropertyType.GetHashCode() : 0);
-				}
-			}
+				=> HashCode.Combine(_reflectedType, _expressionPropertyType, _memberInfo);
 		}
 	}
 }

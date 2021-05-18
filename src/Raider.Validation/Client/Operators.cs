@@ -12,7 +12,12 @@ namespace Raider.Validation.Client
 		GreaterThanOrEqualTo,
 		StartsWith,
 		EndsWith,
-		Contains
+		Contains,
+		NotStartsWith,
+		NotEndsWith,
+		NotContains,
+		IsNull,
+		IsNotNull
 	}
 
 	public enum LogicalOperators
@@ -33,7 +38,12 @@ namespace Raider.Validation.Client
 			{ Client.Operators.GreaterThanOrEqualTo, ">="},
 			{ Client.Operators.StartsWith, nameof(Client.Operators.StartsWith) },
 			{ Client.Operators.EndsWith, nameof(Client.Operators.EndsWith) },
-			{ Client.Operators.Contains, nameof(Client.Operators.Contains) }
+			{ Client.Operators.Contains, nameof(Client.Operators.Contains) },
+			{ Client.Operators.NotStartsWith, nameof(Client.Operators.NotStartsWith) },
+			{ Client.Operators.NotEndsWith, nameof(Client.Operators.NotEndsWith) },
+			{ Client.Operators.NotContains, nameof(Client.Operators.NotContains) },
+			{ Client.Operators.IsNull, nameof(Client.Operators.IsNull) },
+			{ Client.Operators.IsNotNull, nameof(Client.Operators.IsNotNull) }
 		};
 
 		public static Dictionary<LogicalOperators, string> LogicalOperators = new Dictionary<LogicalOperators, string>

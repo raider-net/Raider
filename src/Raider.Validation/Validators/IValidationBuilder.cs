@@ -7,5 +7,9 @@ namespace Raider.Validation
 		Validator<T> BuildRules(IServiceProvider serviceProvider);
 
 		Validator<T> BuildRules(IServiceProvider serviceProvider, Validator<T> parent);
+
+		Validator<T> BuildRules(IServiceProvider serviceProvider, object? state = null);
+
+		Validator<T> BuildRules(IServiceProvider serviceProvider, Validator<T> parent, object? state = null);
 	}
 }

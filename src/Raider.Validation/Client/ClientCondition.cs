@@ -88,6 +88,16 @@ namespace Raider.Validation.Client
 					return propertyValue?.ToString()?.EndsWithSafe(valueToCompare?.ToString()) ?? false;
 				case Operators.Contains:
 					return propertyValue?.ToString()?.ContainsSafe(valueToCompare?.ToString()) ?? false;
+				case Operators.NotStartsWith:
+					return !(propertyValue?.ToString()?.StartsWithSafe(valueToCompare?.ToString()) ?? false);
+				case Operators.NotEndsWith:
+					return !(propertyValue?.ToString()?.EndsWithSafe(valueToCompare?.ToString()) ?? false);
+				case Operators.NotContains:
+					return !(propertyValue?.ToString()?.ContainsSafe(valueToCompare?.ToString()) ?? false);
+				case Operators.IsNull:
+					return propertyValue == null;
+				case Operators.IsNotNull:
+					return propertyValue != null;
 				default:
 					break;
 			}

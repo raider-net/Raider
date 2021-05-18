@@ -156,6 +156,30 @@ namespace Raider.Validation
 		public static IClientConditionDefinition Contains<T>(this ClientCondition<T> clientCondition, Expression<Func<T, string?>> property, Expression<Func<T, string?>> expression)
 			=> SetClientCondition(clientCondition, Operators.Contains, property, expression);
 
+		public static IClientConditionDefinition NotStartsWith<T>(this ClientCondition<T> clientCondition, Expression<Func<T, string?>> property, string value)
+			=> SetClientCondition(clientCondition, Operators.NotStartsWith, property, value);
+
+		public static IClientConditionDefinition NotStartsWith<T>(this ClientCondition<T> clientCondition, Expression<Func<T, string?>> property, Expression<Func<T, string?>> expression)
+			=> SetClientCondition(clientCondition, Operators.NotStartsWith, property, expression);
+
+		public static IClientConditionDefinition NotEndsWith<T>(this ClientCondition<T> clientCondition, Expression<Func<T, string?>> property, string value)
+			=> SetClientCondition(clientCondition, Operators.NotEndsWith, property, value);
+
+		public static IClientConditionDefinition NotEndsWith<T>(this ClientCondition<T> clientCondition, Expression<Func<T, string?>> property, Expression<Func<T, string?>> expression)
+			=> SetClientCondition(clientCondition, Operators.NotEndsWith, property, expression);
+
+		public static IClientConditionDefinition NotContains<T>(this ClientCondition<T> clientCondition, Expression<Func<T, string?>> property, string value)
+			=> SetClientCondition(clientCondition, Operators.NotContains, property, value);
+
+		public static IClientConditionDefinition NotContains<T>(this ClientCondition<T> clientCondition, Expression<Func<T, string?>> property, Expression<Func<T, string?>> expression)
+			=> SetClientCondition(clientCondition, Operators.NotContains, property, expression);
+
+		public static IClientConditionDefinition IsNull<T, TProperty>(this ClientCondition<T> clientCondition, Expression<Func<T, TProperty?>> property)
+			=> SetClientCondition(clientCondition, Operators.IsNull, property, (TProperty?)default);
+
+		public static IClientConditionDefinition IsNotNull<T, TProperty>(this ClientCondition<T> clientCondition, Expression<Func<T, TProperty?>> property)
+			=> SetClientCondition(clientCondition, Operators.IsNotNull, property, (TProperty?)default);
+
 		public static IClientConditionDefinition And<T>(this ClientCondition<T> clientCondition, Action<ClientCondition<T>> leftCondition, Action<ClientCondition<T>> rightCondition)
 		{
 			if (leftCondition == null)

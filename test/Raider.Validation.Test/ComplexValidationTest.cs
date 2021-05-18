@@ -67,10 +67,10 @@ namespace Raider.Validation.Test
 					.ForProperty(x => x.MyIntNullable, x => x.GreaterThan(4))
 					.ForProperty(x => x.MyIntNullable, x => x.LessThanOrEqual(5))
 					.ForProperty(x => x.MyIntNullable, x => x.LessThan(6))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable())
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty())
 					.ForProperty(x => x.MyIntNullable, x => x.NotNull())
 
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 
@@ -92,10 +92,10 @@ namespace Raider.Validation.Test
 						.ForProperty(x => x.AIntNullable, x => x.GreaterThan(4))
 						.ForProperty(x => x.AIntNullable, x => x.LessThanOrEqual(5))
 						.ForProperty(x => x.AIntNullable, x => x.LessThan(6))
-						.ForProperty(x => x.AIntNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AIntNullable, x => x.NotDefaultOrEmpty())
 						.ForProperty(x => x.AIntNullable, x => x.NotNull())
 
-						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false)))
 
@@ -116,10 +116,10 @@ namespace Raider.Validation.Test
 						.ForProperty(x => x.AddIntNullable, x => x.GreaterThan(4))
 						.ForProperty(x => x.AddIntNullable, x => x.LessThanOrEqual(5))
 						.ForProperty(x => x.AddIntNullable, x => x.LessThan(6))
-						.ForProperty(x => x.AddIntNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AddIntNullable, x => x.NotDefaultOrEmpty())
 						.ForProperty(x => x.AddIntNullable, x => x.NotNull())
 
-						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.AddDecimalNullable, x => x.PrecisionScale(4, 2, false)))
 					;
@@ -182,10 +182,10 @@ namespace Raider.Validation.Test
 						.GreaterThan(4)
 						.LessThanOrEqual(5)
 						.LessThan(6)
-						.NotDefaultOrEmptyNullable()
+						.NotDefaultOrEmpty()
 						.NotNull())
 
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 
@@ -209,10 +209,10 @@ namespace Raider.Validation.Test
 							.GreaterThan(4)
 							.LessThanOrEqual(5)
 							.LessThan(6)
-							.NotDefaultOrEmptyNullable()
+							.NotDefaultOrEmpty()
 							.NotNull())
 
-						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false)))
 
@@ -235,10 +235,10 @@ namespace Raider.Validation.Test
 							.GreaterThan(4)
 							.LessThanOrEqual(5)
 							.LessThan(6)
-							.NotDefaultOrEmptyNullable()
+							.NotDefaultOrEmpty()
 							.NotNull())
 
-						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.AddDecimalNullable, x => x.PrecisionScale(4, 2, false)))
 					;
@@ -288,7 +288,7 @@ namespace Raider.Validation.Test
 					.ForProperty(x => x.MyIntNullable, x => x.LessThanOrEqual(5))
 					.ForProperty(x => x.MyIntNullable, x => x.LessThan(6))
 
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 
@@ -308,7 +308,7 @@ namespace Raider.Validation.Test
 						.ForProperty(x => x.AIntNullable, x => x.LessThanOrEqual(5))
 						.ForProperty(x => x.AIntNullable, x => x.LessThan(6))
 
-						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false)))
 
@@ -327,7 +327,7 @@ namespace Raider.Validation.Test
 						.ForProperty(x => x.AddIntNullable, x => x.LessThanOrEqual(5))
 						.ForProperty(x => x.AddIntNullable, x => x.LessThan(6))
 
-						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.AddDecimalNullable, x => x.PrecisionScale(4, 2, false)))
 					;
@@ -378,7 +378,7 @@ namespace Raider.Validation.Test
 						.LessThanOrEqual(5)
 						.LessThan(6))
 
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 
@@ -398,7 +398,7 @@ namespace Raider.Validation.Test
 							.LessThanOrEqual(5)
 							.LessThan(6))
 
-						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false)))
 
@@ -417,7 +417,7 @@ namespace Raider.Validation.Test
 							.LessThanOrEqual(5)
 							.LessThan(6))
 
-						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.AddDecimalNullable, x => x.PrecisionScale(4, 2, false)))
 					;
@@ -481,11 +481,11 @@ namespace Raider.Validation.Test
 						.GreaterThan(4)
 						.LessThanOrEqual(5)
 						.LessThan(6)
-						.NotDefaultOrEmptyNullable()
+						.NotDefaultOrEmpty()
 						.NotNull(),
 						c => c.MyBoolNotNull == false)
 
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 
@@ -510,11 +510,11 @@ namespace Raider.Validation.Test
 							.GreaterThan(4)
 							.LessThanOrEqual(5)
 							.LessThan(6)
-							.NotDefaultOrEmptyNullable()
+							.NotDefaultOrEmpty()
 							.NotNull(),
 							c => c.ABoolNotNull == false)
 
-						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false)))
 
@@ -538,11 +538,11 @@ namespace Raider.Validation.Test
 							.GreaterThan(4)
 							.LessThanOrEqual(5)
 							.LessThan(6)
-							.NotDefaultOrEmptyNullable()
+							.NotDefaultOrEmpty()
 							.NotNull(),
 							c => c.AddBoolNotNull == false)
 
-						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.AddDecimalNullable, x => x.PrecisionScale(4, 2, false)))
 					;
@@ -599,7 +599,7 @@ namespace Raider.Validation.Test
 						.LessThan(6),
 						c => c.MyBoolNotNull == false)
 
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable(),
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty(),
 						c => c.MyBoolNotNull == false)
 
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false),
@@ -625,7 +625,7 @@ namespace Raider.Validation.Test
 							.LessThan(6),
 						c => c.ABoolNotNull == false)
 
-						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable(),
+						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty(),
 						c => c.ABoolNotNull == false)
 
 						.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false),
@@ -650,7 +650,7 @@ namespace Raider.Validation.Test
 							.LessThan(6),
 						c => c.AddBoolNotNull == false)
 
-						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmptyNullable(),
+						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmpty(),
 						c => c.AddBoolNotNull == false)
 
 						.ForProperty(x => x.AddDecimalNullable, x => x.PrecisionScale(4, 2, false),
@@ -706,7 +706,7 @@ namespace Raider.Validation.Test
 						.LessThanOrEqual(5)
 						.LessThan(6))
 
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 
@@ -726,7 +726,7 @@ namespace Raider.Validation.Test
 							.LessThanOrEqual(5)
 							.LessThan(6))
 
-						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false)))
 
@@ -745,7 +745,7 @@ namespace Raider.Validation.Test
 							.LessThanOrEqual(5)
 							.LessThan(6))
 
-						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.AddDecimalNullable, x => x.PrecisionScale(4, 2, false))))
 					;
@@ -799,7 +799,7 @@ namespace Raider.Validation.Test
 						.LessThanOrEqual(5)
 						.LessThan(6))
 
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 					.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 
@@ -819,7 +819,7 @@ namespace Raider.Validation.Test
 							.LessThanOrEqual(5)
 							.LessThan(6))
 
-						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false)))
 
@@ -838,7 +838,7 @@ namespace Raider.Validation.Test
 							.LessThanOrEqual(5)
 							.LessThan(6))
 
-						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+						.ForProperty(x => x.AddDateTimeNullable, x => x.NotDefaultOrEmpty())
 
 						.ForProperty(x => x.AddDecimalNullable, x => x.PrecisionScale(4, 2, false))),
 						y => y
@@ -926,7 +926,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.CItemDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.CItemDateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.CItemDecimalNullable, x => x.PrecisionScale(4, 2, false));
 
 
@@ -943,7 +943,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.CDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.CDateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.CDecimalNullable, x => x.PrecisionScale(4, 2, false))
 				.ForEach(x => x.CItemsNullable, x => barProfileItemValidator.AttachTo(x));
 
@@ -961,7 +961,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.BItemDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.BItemDateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.BItemDecimalNullable, x => x.PrecisionScale(4, 2, false));
 
 
@@ -978,7 +978,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.BDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.BDateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.BDecimalNullable, x => x.PrecisionScale(4, 2, false))
 				.ForNavigation(x => x.CNullable, x => barProfileValidator.AttachTo(x))
 				.ForEach(x => x.BItemsNullable, x => fooProfileItemValidator.AttachTo(x));
@@ -997,7 +997,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false))
 				.ForNavigation(x => x.BNullable, x => fooProfileValidator.AttachTo(x));
 
@@ -1015,7 +1015,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 				.ForNavigation(x => x.ANullable, x => profileValidator.AttachTo(x));
 
@@ -1217,7 +1217,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.CDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.CDateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.CDecimalNullable, x => x.PrecisionScale(4, 2, false))
 				.ForEach(x => x.CItemsNullable, x => new BarProfileItemValidator().Configure(condition).BuildRules(null, x));
 
@@ -1235,7 +1235,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.BItemDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.BItemDateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.BItemDecimalNullable, x => x.PrecisionScale(4, 2, false));
 
 
@@ -1252,7 +1252,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.BDateTimeNullable, x => x.NotDefaultOrEmptyNullable(), c => true)
+				.ForProperty(x => x.BDateTimeNullable, x => x.NotDefaultOrEmpty(), c => true)
 				.ForProperty(x => x.BDecimalNullable, x => x.PrecisionScale(4, 2, false))
 				.ForNavigation(x => x.CNullable, x => barProfileValidator.AttachTo(x))
 				.ForEach(x => x.BItemsNullable, x => fooProfileItemValidator.AttachTo(x));
@@ -1271,7 +1271,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.ADateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.ADecimalNullable, x => x.PrecisionScale(4, 2, false))
 				.ForNavigation(x => x.BNullable, x => fooProfileValidator.AttachTo(x));
 
@@ -1289,7 +1289,7 @@ namespace Raider.Validation.Test
 					.GreaterThan(14)
 					.LessThanOrEqual(5)
 					.LessThan(6))
-				.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable())
+				.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty())
 				.ForProperty(x => x.MyDecimalNullable, x => x.PrecisionScale(4, 2, false))
 				.ForNavigation(x => x.ANullable, x => profileValidator.AttachTo(x));
 
@@ -1331,7 +1331,7 @@ namespace Raider.Validation.Test
 						y => y.ENullable,
 						y => y.ForNavigation(
 							z => z.FNullable,
-							z => z.ForProperty(p => p.FIntNullable, c => c.NotDefaultOrEmptyNullable()))));
+							z => z.ForProperty(p => p.FIntNullable, c => c.NotDefaultOrEmpty()))));
 
 			var personValidator = Validator<Person>.Rules()
 				.ForNavigation(
@@ -1365,7 +1365,7 @@ namespace Raider.Validation.Test
 						y => y.ENullable,
 						y => y.ForNavigation(
 							z => z.FNullable,
-							z => z.ForProperty(p => p.FIntNullable, c => c.NotDefaultOrEmptyNullable()),
+							z => z.ForProperty(p => p.FIntNullable, c => c.NotDefaultOrEmpty()),
 							c => true),
 						c => true),
 					c => true);

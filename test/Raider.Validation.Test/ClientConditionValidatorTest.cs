@@ -27,25 +27,25 @@ namespace Raider.Validation.Test
 			};
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.EqualsTo(x => x.MyIntNotNull, default(int)))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.NotEqualsTo(x => x.MyIntNotNull, 1))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThan(x => x.MyIntNotNull, 1))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThanOrEqualTo(x => x.MyIntNotNull, default(int)))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.GreaterThan(x => x.MyIntNotNull, -1))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.GreaterThanOrEqualTo(x => x.MyIntNotNull, default(int)))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.StartsWith(x => x.MyStringNotNull, "b"))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.Contains(x => x.MyStringNotNull, "a"))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.EndsWith(x => x.MyStringNotNull, "r"))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.EqualsTo(x => x.MyIntNotNull, default(int)))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.NotEqualsTo(x => x.MyIntNotNull, 1))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThan(x => x.MyIntNotNull, 1))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThanOrEqualTo(x => x.MyIntNotNull, default(int)))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.GreaterThan(x => x.MyIntNotNull, -1))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.GreaterThanOrEqualTo(x => x.MyIntNotNull, default(int)))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.StartsWith(x => x.MyStringNotNull, "b"))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.Contains(x => x.MyStringNotNull, "a"))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.EndsWith(x => x.MyStringNotNull, "r"))
 
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.EqualsTo(x => x.MyDecimalNotNull, x => x.MyDecimalNotNull))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.NotEqualsTo(x => x.MyDecimalNotNull, x => x.MyDecimalNullable))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThan(x => x.MyDecimalNullable, x => x.MyDecimalNotNull))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThanOrEqualTo(x => x.MyDecimalNullable, x => x.MyDecimalNotNull))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.GreaterThan(x => x.MyDecimalNotNull, x => x.MyDecimalNullable))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.GreaterThanOrEqualTo(x => x.MyDecimalNotNull, x => x.MyDecimalNullable))
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.StartsWith(x => x.MyStringNotNull, x => x.MyStringNullable))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.EqualsTo(x => x.MyDecimalNotNull, x => x.MyDecimalNotNull))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.NotEqualsTo(x => x.MyDecimalNotNull, x => x.MyDecimalNullable))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThan(x => x.MyDecimalNullable, x => x.MyDecimalNotNull))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThanOrEqualTo(x => x.MyDecimalNullable, x => x.MyDecimalNotNull))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.GreaterThan(x => x.MyDecimalNotNull, x => x.MyDecimalNullable))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.GreaterThanOrEqualTo(x => x.MyDecimalNotNull, x => x.MyDecimalNullable))
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.StartsWith(x => x.MyStringNotNull, x => x.MyStringNullable))
 
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null,
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null,
 						x => x.And(
 							y => y.EqualsTo(z => z.MyDecimalNotNull, z => z.MyDecimalNotNull),
 							y => y.Or(
@@ -86,7 +86,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
 
 			var result = validator.Validate(person);
 
@@ -130,7 +130,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyDecimalNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
+					.ForProperty(x => x.MyDecimalNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
 
 			var result = validator.Validate(person);
 
@@ -174,7 +174,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyBoolNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
+					.ForProperty(x => x.MyBoolNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
 
 			var result = validator.Validate(person);
 
@@ -218,7 +218,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
 
 			var result = validator.Validate(person);
 
@@ -262,7 +262,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyGuidNullable, x => x.NotDefaultOrEmptyNullable(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
+					.ForProperty(x => x.MyGuidNullable, x => x.NotDefaultOrEmpty(), null, x => x.LessThan(x => x.MyIntNotNull, condition ? 55 : -55));
 
 			var result = validator.Validate(person);
 

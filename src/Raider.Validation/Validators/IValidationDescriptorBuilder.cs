@@ -7,5 +7,7 @@ namespace Raider.Validation
 		Type ObjectType { get; }
 
 		IValidationDescriptor ToDescriptor(IServiceProvider serviceProvider);
+
+		IValidationDescriptor ToDescriptor(IServiceProvider serviceProvider, object? state = null);
 	}
 }

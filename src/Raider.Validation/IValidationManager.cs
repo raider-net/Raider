@@ -13,6 +13,6 @@ namespace Raider.Validation
 
 		IValidationDescriptorBuilder? GetValidationDescriptorBuilderFor(Type objectType, Type commandType);
 
-		IValidationDescriptor? GetValidationDescriptorFor(Type objectType, Type commandType, IServiceProvider serviceProvider);
+		IValidationDescriptor? GetValidationDescriptorFor(Type objectType, Type commandType, IServiceProvider serviceProvider, object? state = null);
 	}
 }

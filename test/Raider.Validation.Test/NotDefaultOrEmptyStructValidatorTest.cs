@@ -38,7 +38,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmptyNullable());
+					.ForProperty(x => x.MyIntNullable, x => x.NotDefaultOrEmpty());
 
 			var result = validator.Validate(person);
 
@@ -78,7 +78,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyDecimalNullable, x => x.NotDefaultOrEmptyNullable());
+					.ForProperty(x => x.MyDecimalNullable, x => x.NotDefaultOrEmpty());
 
 			var result = validator.Validate(person);
 
@@ -118,7 +118,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyBoolNullable, x => x.NotDefaultOrEmptyNullable());
+					.ForProperty(x => x.MyBoolNullable, x => x.NotDefaultOrEmpty());
 
 			var result = validator.Validate(person);
 
@@ -158,7 +158,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmptyNullable());
+					.ForProperty(x => x.MyDateTimeNullable, x => x.NotDefaultOrEmpty());
 
 			var result = validator.Validate(person);
 
@@ -198,7 +198,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyGuidNullable, x => x.NotDefaultOrEmptyNullable());
+					.ForProperty(x => x.MyGuidNullable, x => x.NotDefaultOrEmpty());
 
 			var result = validator.Validate(person);
 
@@ -238,7 +238,7 @@ namespace Raider.Validation.Test
 			}
 
 			var validator = Validator<Person>.Rules()
-					.ForProperty(x => x.MyEnumNullable, x => x.NotDefaultOrEmptyNullable());
+					.ForProperty(x => x.MyEnumNullable, x => x.NotDefaultOrEmpty());
 
 			var result = validator.Validate(person);
 

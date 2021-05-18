@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Raider.Extensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,29 +14,33 @@ namespace Raider.Validation
 			return validator;
 		}
 
-		public static PropertyValidator<T, TProperty?> DefaultOrEmptyNullable<T, TProperty>(this PropertyValidator<T, TProperty?> validator)
-			where TProperty : struct
-		{
-			validator.AddValidator(new DefaultOrEmptyValidator<T, TProperty?>(validator, default(TProperty)));
-			return validator;
-		}
+		//public static PropertyValidator<T, TProperty?> DefaultOrEmpty<T, TProperty>(this PropertyValidator<T, TProperty?> validator)
+		//	where TProperty : struct
+		//{
+		//	var defaultValue = typeof(TProperty).GetDefaultNullableValue();
+		//	validator.AddValidator(new DefaultOrEmptyValidator<T, TProperty?>(validator, /*default(TProperty)*/defaultValue));
+		//	return validator;
+		//}
 
 		public static PropertyValidator<T, TProperty?> DefaultOrEmpty<T, TProperty>(this PropertyValidator<T, TProperty?> validator)
 		{
-			validator.AddValidator(new DefaultOrEmptyValidator<T, TProperty?>(validator, default(TProperty)));
+			var defaultValue = typeof(TProperty).GetDefaultNullableValue();
+			validator.AddValidator(new DefaultOrEmptyValidator<T, TProperty?>(validator, /*default(TProperty)*/defaultValue));
 			return validator;
 		}
 
-		public static PropertyValidator<T, TProperty?> NotDefaultOrEmptyNullable<T, TProperty>(this PropertyValidator<T, TProperty?> validator)
-			where TProperty : struct
-		{
-			validator.AddValidator(new NotDefaultOrEmptyValidator<T, TProperty?>(validator, default(TProperty)));
-			return validator;
-		}
+		//public static PropertyValidator<T, TProperty?> NotDefaultOrEmpty<T, TProperty>(this PropertyValidator<T, TProperty?> validator)
+		//	where TProperty : struct
+		//{
+		//	var defaultValue = typeof(TProperty).GetDefaultNullableValue();
+		//	validator.AddValidator(new NotDefaultOrEmptyValidator<T, TProperty?>(validator, /*default(TProperty)*/defaultValue));
+		//	return validator;
+		//}
 
 		public static PropertyValidator<T, TProperty?> NotDefaultOrEmpty<T, TProperty>(this PropertyValidator<T, TProperty?> validator)
 		{
-			validator.AddValidator(new NotDefaultOrEmptyValidator<T, TProperty?>(validator, default(TProperty)));
+			var defaultValue = typeof(TProperty).GetDefaultNullableValue();
+			validator.AddValidator(new NotDefaultOrEmptyValidator<T, TProperty?>(validator, /*default(TProperty)*/defaultValue));
 			return validator;
 		}
 
