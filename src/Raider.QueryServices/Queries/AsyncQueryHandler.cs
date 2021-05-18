@@ -18,7 +18,9 @@ namespace Raider.QueryServices.Queries
 
 		public Type? InterceptorType { get; } = typeof(AsyncQueryInterceptor<TQuery, TResult, TContext, TBuilder>);
 		
-		public abstract Task<IQueryResult<bool>> CanExecuteAsync(TQuery query, TContext context, CancellationToken cancellationToken);
+		public virtual Task<IQueryResult<bool>> CanExecuteAsync(TQuery query, TContext context, CancellationToken cancellationToken)
+			=> Task.FromResult(new QueryResultBuilder<bool>().WithResult(true).Build());
+
 		public abstract Task<IQueryResult<TResult>> ExecuteAsync(TQuery query, TContext context, CancellationToken cancellationToken);
 
 		protected virtual void Dispose(bool disposing)

@@ -16,7 +16,9 @@ namespace Raider.QueryServices.Queries
 
 		public Type? InterceptorType { get; } = typeof(QueryInterceptor<TQuery, TResult, TContext, TBuilder>);
 		
-		public abstract IQueryResult<bool> CanExecute(TQuery query, TContext context);
+		public virtual IQueryResult<bool> CanExecute(TQuery query, TContext context)
+			=> new QueryResultBuilder<bool>().WithResult(true).Build();
+
 		public abstract IQueryResult<TResult> Execute(TQuery query, TContext context);
 
 		protected virtual void Dispose(bool disposing)

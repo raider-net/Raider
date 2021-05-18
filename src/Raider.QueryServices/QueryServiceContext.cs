@@ -47,7 +47,7 @@ namespace Raider.QueryServices
 		//	TraceInfo = new TraceInfoBuilder(currentTraceFrame, queryHandlerContext.TraceInfo).Build();
 		//	ForServiceType = serviceType;
 
-		//	var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+		//	var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
 		//	Logger = serviceLogger;
 		//}
@@ -58,7 +58,7 @@ namespace Raider.QueryServices
 		//	TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		//	ForServiceType = serviceType;
 
-		//	var loggerFactory = ServiceFactory.GetRequiredInstance<ILoggerFactory>();
+		//	var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
 		//	Logger = serviceLogger;
 		//}
@@ -113,6 +113,23 @@ namespace Raider.QueryServices
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 			=> _queryHandlerContext.CreateScope(methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
+		public MethodLogScope CreateScope(
+			MethodLogScope? methodLogScope,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> _queryHandlerContext.CreateScope(methodLogScope, methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
+		public MethodLogScope CreateScope(
+			ITraceInfo? previousTraceInfo,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> _queryHandlerContext.CreateScope(previousTraceInfo, methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
 
 		public bool TryGetCommandHandlerItem<TKey, TValue>(TKey key, out TValue? value)
 			=> _queryHandlerContext.TryGetCommandHandlerItem(key, out value);

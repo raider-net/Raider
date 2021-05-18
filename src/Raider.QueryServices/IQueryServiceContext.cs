@@ -34,6 +34,20 @@ namespace Raider.QueryServices
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0);
 
+		MethodLogScope CreateScope(
+			MethodLogScope? methodLogScope,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0);
+
+		MethodLogScope CreateScope(
+			ITraceInfo? previousTraceInfo,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0);
+
 		bool TryGetCommandHandlerItem<TKey, TValue>(TKey key, out TValue? value);
 
 		void LogTraceMessage(ILogMessage message);

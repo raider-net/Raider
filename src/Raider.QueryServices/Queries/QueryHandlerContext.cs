@@ -106,16 +106,32 @@ namespace Raider.QueryServices.Queries
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
+			=> CreateScope(TraceInfo, methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
+		public MethodLogScope CreateScope(
+			MethodLogScope? methodLogScope,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> CreateScope(methodLogScope?.TraceInfo ?? TraceInfo, methodParameters, memberName, sourceFilePath, sourceLineNumber);
+
+		public MethodLogScope CreateScope(
+			ITraceInfo? previousTraceInfo,
+			IEnumerable<MethodParameter>? methodParameters = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			var traceInfo =
 				new TraceInfoBuilder(
-					new TraceFrameBuilder(TraceInfo.TraceFrame)
+					new TraceFrameBuilder(previousTraceInfo?.TraceFrame ?? TraceInfo.TraceFrame)
 						.CallerMemberName(memberName)
 						.CallerFilePath(sourceFilePath)
 						.CallerLineNumber(sourceLineNumber == 0 ? (int?)null : sourceLineNumber)
 						.MethodParameters(methodParameters)
 						.Build(),
-					TraceInfo)
+					previousTraceInfo ?? TraceInfo)
 					.Build();
 
 			var disposable = Logger.BeginScope(new Dictionary<string, Guid?>
