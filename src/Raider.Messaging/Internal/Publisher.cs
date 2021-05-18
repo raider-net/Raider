@@ -188,17 +188,17 @@ namespace Raider.Messaging
 				throw new InvalidOperationException(error);
 			}
 
-			if (Subscribers.Count == 0)
-			{
-				var error = $"Not subscriber registered for message type {typeof(TData).FullName}";
+			//if (Subscribers.Count == 0)
+			//{
+			//	var error = $"Not subscriber registered for message type {typeof(TData).FullName}";
 
-				await LogErrorAsync(
-					traceInfo,
-					nameof(ServiceBusDefaults.LogMessageType.PublishMessage),
-					error, null, true, cancellationToken);
+			//	await LogErrorAsync(
+			//		traceInfo,
+			//		nameof(ServiceBusDefaults.LogMessageType.PublishMessage),
+			//		error, null, true, cancellationToken);
 
-				throw new InvalidOperationException(error);
-			}
+			//	throw new InvalidOperationException(error);
+			//}
 
 			var message = new Message<TData>
 			{
