@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace Raider.Text
@@ -26,7 +27,8 @@ namespace Raider.Text
 		public virtual string? Format(string template, IDictionary<string, object?>? values)
 			=> ReplacePlaceholders(template, values);
 
-		private static string? ReplacePlaceholders(string template, IDictionary<string, object?>? values)
+		[return: NotNullIfNotNull("template")]
+		public static string? ReplacePlaceholders(string template, IDictionary<string, object?>? values)
 		{
 			if (template == null)
 				return null;
