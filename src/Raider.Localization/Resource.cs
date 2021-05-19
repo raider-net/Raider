@@ -10,7 +10,8 @@ namespace Raider.Localization
 	{
 		public string Name { get; }
 		public string Value { get; }
-		public List<string> Parameters { get; }
+		public List<string> NumericParameters { get; }
+		public List<string> StringParameters { get; }
 		public List<string> Errors { get; }
 
 		public Resource(ResxData data)
@@ -27,30 +28,32 @@ namespace Raider.Localization
 
 			if (string.IsNullOrEmpty(Name))
 			{
-				Parameters = new List<string>();
+				NumericParameters = new List<string>();
+				StringParameters = new List<string>();
 				Errors = new List<string> { $"{nameof(Name)} is null" };
 			}
 			else if (!string.IsNullOrWhiteSpace(Value))
 			{
-				List<string> parameters = Regex.Matches(Value, @"\{(\w+)\}")
+				Errors = new List<string>();
+				NumericParameters = new List<string>();
+
+				List<string> numParameters = Regex.Matches(Value, @"\{(\w+)\}")
 					.Cast<Match>()
 					.Select(m => m.Groups[1].Value)
 					.Distinct()
 					.OrderBy(m => m)
 					.ToList();
 
-				Parameters = new List<string>();
-				Errors = new List<string>();
-				for (int i = 0; i < parameters.Count(); i++)
+				for (int i = 0; i < numParameters.Count(); i++)
 				{
 					bool hasError = false;
-					if (!int.TryParse(parameters[i], out int intValue))
+					if (!int.TryParse(numParameters[i], out int intValue))
 					{
-						Errors.Add($"{Name} has invalid formatting parameter {parameters[i]}. Can not cast to int.");
+						Errors.Add($"{Name} has invalid formatting parameter {numParameters[i]}. Can not cast to int.");
 						hasError = true;
 					}
 
-					if (parameters.All(p => p != i.ToString()))
+					if (numParameters.All(p => p != i.ToString()))
 					{
 						Errors.Add($"IndexOutOfRangeException: {Name} has invalid formatting parameters. Index out of range.");
 						hasError = true;
@@ -58,9 +61,18 @@ namespace Raider.Localization
 
 					if (!hasError)
 					{
-						Parameters.Add(parameters[i]);
+						NumericParameters.Add(numParameters[i]);
 					}
 				}
+
+				var strParameters = Regex.Matches(Value, "{([^{}:]+)(?::([^{}]+))?}")
+					.Cast<Match>()
+					.Select(m => m.Groups[1].Value)
+					.Distinct()
+					.OrderBy(m => m)
+					.ToList();
+
+				StringParameters = strParameters.Where(x => !NumericParameters.Contains(x)).ToList();
 			}
 		}
 
