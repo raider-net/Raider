@@ -33,9 +33,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+#nullable enable
+
 using Microsoft.Extensions.Localization;
+using Raider.Extensions;
 using Raider.Localization;
 using System;
+using System.Collections.Generic;
 
 namespace <#= nmspace #>
 {
@@ -49,15 +53,21 @@ namespace <#= nmspace #>
 			ident++;
 		}
 		string className = resFile.Name.ToCammelCase(removeUnderscores: false);
+		var baseName = resPath.TrimPrefix(targetProject).Replace(System.IO.Path.DirectorySeparatorChar, '.') + "." + resFile.Name;
 #>
 	<#= GetIdent(ident) #>public partial class <#= className #>Keys
 	<#= GetIdent(ident) #>{
-	<#= GetIdent(ident + 1) #>public const string __BaseName = "<#= resPath.TrimPrefix(targetProject).Replace(System.IO.Path.DirectorySeparatorChar, '.') #>.<#= resFile.Name #>";
+	<#= GetIdent(ident + 1) #>private static Lazy<IStringLocalizer> _stringLocalizer = new Lazy<IStringLocalizer>(() => Resources.Localizers.GetStringLocalizer<Resources.<#= baseName #>Keys>());
+
+	<#= GetIdent(ident + 1) #>public static IStringLocalizer StringLocalizer => _stringLocalizer.Value;
+
+	<#= GetIdent(ident + 1) #>public const string __BaseName = "<#= baseName #>";
 
 <#
 				int resCount = 0;
 				foreach (var resource in resFile)
 				{
+					var resName = resource.Name.ToCammelCase(removeUnderscores: false);
 					if (string.IsNullOrWhiteSpace(resource.Value))
 					{
 						throw new InvalidOperationException("Resource " + resFile.FullPath + " has invalid value for name " + resource.Name);
@@ -70,8 +80,82 @@ namespace <#= nmspace #>
 <#
 					}
 #>
-	<#= GetIdent(ident + 1) #>public const string <#= resource.Name.ToCammelCase(removeUnderscores: false) #> = "<#= resource.Name #>";
+	<#= GetIdent(ident + 1) #>public const string <#= resName #> = "<#= resource.Name #>";
 <#
+					if (0 < resource.NumericParameters.Count)
+					{
+						foreach (var numParam in resource.NumericParameters)
+						{
+#>
+	<#= GetIdent(ident + 1) #>public const string <#= resName #>_p<#= numParam.ToCammelCase(removeUnderscores: false) #> = "<#= numParam #>";
+<#
+						}
+					}
+
+					if (0 < resource.StringParameters.Count)
+					{
+						foreach (var strParam in resource.StringParameters)
+						{
+#>
+	<#= GetIdent(ident + 1) #>public const string <#= resName #>_p_<#= strParam.ToCammelCase(removeUnderscores: false) #> = "<#= strParam #>";
+<#
+						}
+					}
+					resCount++;
+				}
+		
+				foreach (var resource in resFile)
+				{
+					var resName = resource.Name.ToCammelCase(removeUnderscores: false);
+#>
+
+	<#= GetIdent(ident + 1) #>public static string <#= resName #>__Value()
+	<#= GetIdent(ident + 1) #>	=> StringLocalizer[Resources.<#= baseName #>Keys.<#= resName #>]!;
+<#
+
+					if (0 < resource.NumericParameters.Count)
+					{
+#>
+
+	<#= GetIdent(ident + 1) #>public static string <#= resName #>__Value(object <#= string.Join(", object ", resource.NumericParameters.Select(x => x.ToCammelCase(removeUnderscores: false).FirstToLower())) #>)
+	<#= GetIdent(ident + 1) #>{
+	<#= GetIdent(ident + 1) #>	string res = StringLocalizer[Resources.<#= baseName #>Keys.<#= resName #>]!;
+	<#= GetIdent(ident + 1) #>	return res.ReplacePlaceholders(new Dictionary<string, object?>
+	<#= GetIdent(ident + 1) #>		{
+<#
+						foreach (var numParam in resource.NumericParameters)
+						{
+#>
+	<#= GetIdent(ident + 1) #>			{ Resources.<#= baseName #>Keys.<#= resName #>_p<#= numParam.ToCammelCase(removeUnderscores: false) #>, <#= numParam.ToCammelCase(removeUnderscores: false).FirstToLower() #> },
+<#
+						}
+#>
+	<#= GetIdent(ident + 1) #>		});
+	<#= GetIdent(ident + 1) #>}
+<#
+					}
+
+					if (0 < resource.StringParameters.Count)
+					{
+#>
+
+	<#= GetIdent(ident + 1) #>public static string <#= resName #>__Value(object <#= string.Join(", object ", resource.StringParameters.Select(x => x.ToCammelCase(removeUnderscores: false).FirstToLower())) #>)
+	<#= GetIdent(ident + 1) #>{
+	<#= GetIdent(ident + 1) #>	string res = StringLocalizer[Resources.<#= baseName #>Keys.<#= resName #>]!;
+	<#= GetIdent(ident + 1) #>	return res.ReplacePlaceholders(new Dictionary<string, object?>
+	<#= GetIdent(ident + 1) #>		{
+<#
+						foreach (var strParam in resource.StringParameters)
+						{
+#>
+	<#= GetIdent(ident + 1) #>			{ Resources.<#= baseName #>Keys.<#= resName #>_p_<#= strParam.ToCammelCase(removeUnderscores: false) #>, <#= strParam.ToCammelCase(removeUnderscores: false).FirstToLower() #> },
+<#
+						}
+#>
+	<#= GetIdent(ident + 1) #>		});
+	<#= GetIdent(ident + 1) #>}
+<#
+					}
 					resCount++;
 				}
 #>
@@ -82,7 +166,7 @@ namespace <#= nmspace #>
 	<#= GetIdent(ident) #>	public <#= className #>LocalizerFactory(IServiceProvider serviceProvider)
 	<#= GetIdent(ident) #>		: base(serviceProvider,
 	<#= GetIdent(ident) #>			<#= className #>Keys.__BaseName,
-	<#= GetIdent(ident) #>			new System.Reflection.AssemblyName(typeof(<#= className #>LocalizerFactory).Assembly.FullName).Name)
+	<#= GetIdent(ident) #>			new System.Reflection.AssemblyName(typeof(<#= className #>LocalizerFactory).Assembly.FullName!).Name!)
 	<#= GetIdent(ident) #>	{
 	<#= GetIdent(ident) #>	}
 	<#= GetIdent(ident) #>}

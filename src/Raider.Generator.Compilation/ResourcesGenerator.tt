@@ -82,7 +82,7 @@ namespace <#= nmspace #>
 				int resCount = 0;
                 foreach (var resource in resFile)
 				{
-					if (resource.Parameters.Count == 0)
+					if (resource.NumericParameters.Count == 0)
 					{
 #>
 		<#= GetIdent(ident + 1) #>{ nameof(<#= resource.Name.ToCammelCase(removeUnderscores: false) #>), () => <#= resource.Name.ToCammelCase(removeUnderscores: false) #> },
@@ -125,7 +125,7 @@ namespace <#= nmspace #>
 #>
 	<#= GetIdent(ident + 1) #>/// </summary>
 <#
-					if (resource.Parameters.Any())
+					if (resource.NumericParameters.Any())
 					{
 #>
 	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCammelCase(removeUnderscores: false) #>_Message
@@ -142,10 +142,10 @@ namespace <#= nmspace #>
 					}
 #>
 	<#= GetIdent(ident + 1) #>/// </summary>
-	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCammelCase(removeUnderscores: false) #>(<#= List("object p", resource.Parameters) #>, string defaultValue = "<#= string.Join(" ", valueLines) #>")
+	<#= GetIdent(ident + 1) #>public static string <#= resource.Name.ToCammelCase(removeUnderscores: false) #>(<#= List("object p", resource.NumericParameters) #>, string defaultValue = "<#= string.Join(" ", valueLines) #>")
 	<#= GetIdent(ident + 2) #>=> string.Format(
 	<#= GetIdent(ident + 3) #>ResourcesManager.GetString("<#= resFile.GetResourceRelativeName(resourcesClassName) #>", "<#= resource.Name #>", defaultValue),
-	<#= GetIdent(ident + 3) #><#= List("p", resource.Parameters) #>);
+	<#= GetIdent(ident + 3) #><#= List("p", resource.NumericParameters) #>);
 <#
 					}
 					else

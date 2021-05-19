@@ -199,7 +199,7 @@ namespace ");
 				int resCount = 0;
                 foreach (var resource in resFile)
 				{
-					if (resource.Parameters.Count == 0)
+					if (resource.NumericParameters.Count == 0)
 					{
 
             
@@ -353,7 +353,7 @@ namespace ");
             
             #line 127 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
 
-					if (resource.Parameters.Any())
+					if (resource.NumericParameters.Any())
 					{
 
             
@@ -466,7 +466,7 @@ namespace ");
             this.Write("(");
             
             #line 145 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(List("object p", resource.Parameters)));
+            this.Write(this.ToStringHelper.ToStringWithCulture(List("object p", resource.NumericParameters)));
             
             #line default
             #line hidden
@@ -514,7 +514,7 @@ namespace ");
             #line hidden
             
             #line 148 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\ResourcesGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(List("p", resource.Parameters)));
+            this.Write(this.ToStringHelper.ToStringWithCulture(List("p", resource.NumericParameters)));
             
             #line default
             #line hidden
