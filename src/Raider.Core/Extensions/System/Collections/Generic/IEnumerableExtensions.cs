@@ -248,6 +248,42 @@ namespace Raider.Extensions
 			}
 			return table;
 		}
+
+		public static bool HasDuplicates<T>(this IEnumerable<T> source)
+		{
+			if (source == null)
+				throw new ArgumentNullException(nameof(source));
+
+			var checkBuffer = new HashSet<T>();
+			foreach (var t in source)
+			{
+				if (checkBuffer.Add(t))
+					continue;
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public static bool HasDuplicates<T>(this IEnumerable<T> source, out T? firstDuplicate)
+		{
+			if (source == null)
+				throw new ArgumentNullException(nameof(source));
+
+			var checkBuffer = new HashSet<T>();
+			foreach (var t in source)
+			{
+				if (checkBuffer.Add(t))
+					continue;
+
+				firstDuplicate = t;
+				return true;
+			}
+
+			firstDuplicate = default;
+			return false;
+		}
 	}
 
 	public class IOrderedEnumerableNoOrderWrapper<T> : IOrderedEnumerable<T>
