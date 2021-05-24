@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using Raider.EntityFrameworkCore.Concurrence;
 using Raider.EntityFrameworkCore.Database;
 using Raider.Logging.SerilogEx;
 using Raider.Trace;
@@ -64,46 +65,66 @@ namespace Raider.EntityFrameworkCore
 		}
 
 		public virtual int SaveChanges(
+			bool writeConcurrency = true,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			return SaveChanges(true, memberName, sourceFilePath, sourceLineNumber);
+			return SaveChanges(true, writeConcurrency, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public virtual Task<int> SaveChangesAsync(CancellationToken cancellationToken = default,
+		public virtual Task<int> SaveChangesAsync(
+			bool writeConcurrency = true,
+			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			return SaveChangesAsync(true, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+			return SaveChangesAsync(true, writeConcurrency, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public virtual int SaveChanges(bool acceptAllChangesOnSuccess,
+		public virtual int SaveChanges(
+			bool acceptAllChangesOnSuccess,
+			bool writeConcurrency = true,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
+			if (writeConcurrency)
+				WriteConcurrency();
+
 			return base.SaveChanges(acceptAllChangesOnSuccess);
 		}
 
-		public virtual async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default,
+		public virtual async Task<int> SaveChangesAsync(
+			bool acceptAllChangesOnSuccess,
+			bool writeConcurrency = true,
+			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
+			if (writeConcurrency)
+				WriteConcurrency();
+
 			return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
 		}
 
-		protected int SaveChangesWithoutScope(bool acceptAllChangesOnSuccess)
+		protected int SaveChangesWithoutScope(bool acceptAllChangesOnSuccess, bool writeConcurrency = true)
 		{
+			if (writeConcurrency)
+				WriteConcurrency();
+
 			return base.SaveChanges(acceptAllChangesOnSuccess);
 		}
 
-		protected async Task<int> SaveChangesWithoutScopeAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+		protected async Task<int> SaveChangesWithoutScopeAsync(bool acceptAllChangesOnSuccess, bool writeConcurrency = true, CancellationToken cancellationToken = default)
 		{
+			if (writeConcurrency)
+				WriteConcurrency();
+
 			return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
 		}
 
@@ -133,6 +154,31 @@ namespace Raider.EntityFrameworkCore
 		{
 			modelBuilder
 				.HasDbFunction(() => DbFunc.Unaccent(default));
+		}
+
+		protected virtual void WriteConcurrency()
+		{
+			ChangeTracker.DetectChanges();
+
+			foreach (var entry in ChangeTracker.Entries())
+			{
+				if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+					continue;
+
+				if (entry.Entity is IConcurrent concurrent)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+						case EntityState.Modified:
+							concurrent.ConcurrencyToken = Guid.NewGuid();
+							break;
+
+						default:
+							break;
+					}
+				}
+			}
 		}
 	}
 }

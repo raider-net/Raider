@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Audit;
+using Raider.EntityFrameworkCore.Concurrence;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
@@ -29,22 +30,27 @@ namespace Raider.EntityFrameworkCore
 		}
 
 		public override int SaveChanges(
+			bool writeConcurrency = true,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			return SaveChanges(true, memberName, sourceFilePath, sourceLineNumber);
+			return SaveChanges(true, writeConcurrency, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default,
+		public override Task<int> SaveChangesAsync(
+			bool writeConcurrency = true,
+			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			return SaveChangesAsync(true, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+			return SaveChangesAsync(true, writeConcurrency, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public override int SaveChanges(bool acceptAllChangesOnSuccess,
+		public override int SaveChanges(
+			bool acceptAllChangesOnSuccess,
+			bool writeConcurrency = true,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
@@ -54,19 +60,22 @@ namespace Raider.EntityFrameworkCore
 			var auditCorrelationId = Guid.NewGuid();
 			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId);
 
-			var result = base.SaveChangesWithoutScope(acceptAllChangesOnSuccess);
+			var result = base.SaveChangesWithoutScope(acceptAllChangesOnSuccess, writeConcurrency);
 
 			if (0 < auditEntriesWithTempProperty.Count)
 			{
 				OnAfterSaveChanges(auditCorrelationId, auditEntriesWithTempProperty);
-				var tmpResult = base.SaveChangesWithoutScope(acceptAllChangesOnSuccess);
+				var tmpResult = base.SaveChangesWithoutScope(acceptAllChangesOnSuccess, false /*writeConcurrency*/);
 				result += tmpResult;
 			}
 
 			return result;
 		}
 
-		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default,
+		public override async Task<int> SaveChangesAsync(
+			bool acceptAllChangesOnSuccess,
+			bool writeConcurrency = true,
+			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
@@ -76,12 +85,12 @@ namespace Raider.EntityFrameworkCore
 			var auditCorrelationId = Guid.NewGuid();
 			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId);
 
-			var result = await base.SaveChangesWithoutScopeAsync(acceptAllChangesOnSuccess, cancellationToken);
+			var result = await base.SaveChangesWithoutScopeAsync(acceptAllChangesOnSuccess, writeConcurrency, cancellationToken);
 
 			if (0 < auditEntriesWithTempProperty.Count)
 			{
 				OnAfterSaveChanges(auditCorrelationId, auditEntriesWithTempProperty);
-				var tmpResult = await base.SaveChangesWithoutScopeAsync(acceptAllChangesOnSuccess, cancellationToken);
+				var tmpResult = await base.SaveChangesWithoutScopeAsync(acceptAllChangesOnSuccess, false /*writeConcurrency*/, cancellationToken);
 				result += tmpResult;
 			}
 
@@ -116,6 +125,20 @@ namespace Raider.EntityFrameworkCore
 								auditable.AuditModifiedTime = now;
 								auditable.IdAuditModifiedBy = _userId;
 							}
+							break;
+
+						default:
+							break;
+					}
+				}
+
+				if (entry.Entity is IConcurrent concurrent)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+						case EntityState.Modified:
+							concurrent.ConcurrencyToken = Guid.NewGuid();
 							break;
 
 						default:
@@ -198,6 +221,11 @@ namespace Raider.EntityFrameworkCore
 
 				AuditEntry.Add(auditEntry.ToAudit<TAuditEntry>(auditCorrelationId));
 			}
+		}
+
+		protected override void WriteConcurrency()
+		{
+			//do nothing
 		}
 	}
 }
