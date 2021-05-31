@@ -21,7 +21,8 @@ namespace Raider.EntityFrameworkCore
 		protected readonly IApplicationContext _applicationContext;
 		protected readonly ILogger _logger;
 
-		protected string? connectionString;
+		protected DbConnection? ExternalDbConnection { get; private set; }
+		protected string? ExternalConnectionString { get; private set; }
 
 		private DbConnection dbConnection;
 		public DbConnection DbConnection
@@ -62,6 +63,25 @@ namespace Raider.EntityFrameworkCore
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_applicationContext = appContext ?? throw new ArgumentNullException(nameof(appContext));
+		}
+
+		private bool initialized = false;
+		private readonly object _initLock = new();
+		internal void Initialize(DbConnection? externalDbConnection, string? externalConnectionString)
+		{
+			if (initialized)
+				return;
+
+			lock (_initLock)
+			{
+				if (initialized)
+					return;
+
+				ExternalDbConnection = externalDbConnection;
+				ExternalConnectionString = externalConnectionString;
+
+				initialized = true;
+			}
 		}
 
 		public virtual int SaveChanges(

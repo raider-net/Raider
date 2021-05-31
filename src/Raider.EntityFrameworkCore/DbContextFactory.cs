@@ -21,6 +21,10 @@ namespace Raider.EntityFrameworkCore
 				throw new ArgumentNullException(nameof(serviceProvider));
 
 			var dbContext = serviceProvider.GetRequiredService<TContext>();
+			if (dbContext is DbContextBase dbContextBase)
+			{
+				dbContextBase.Initialize(transactionUsage == TransactionUsage.ReuseOrCreateNew ? existingDbContextTransaction?.GetDbTransaction().Connection : null, null);
+			}
 			return SetDbTransaction(dbContext, existingDbContextTransaction, out newDbContextTransaction, transactionUsage, transactionIsolationLevel);
 		}
 
@@ -60,7 +64,7 @@ namespace Raider.EntityFrameworkCore
 					if (dbContext.Database.CurrentTransaction == null)
 					{
 						newDbContextTransaction = existingDbContextTransaction;
-						dbContext.Database.UseTransaction((DbTransaction)newDbContextTransaction);
+						dbContext.Database.UseTransaction(newDbContextTransaction.GetDbTransaction());
 						return dbContext;
 					}
 					else
