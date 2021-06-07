@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Raider.Web
 {
@@ -23,6 +24,9 @@ namespace Raider.Web
 		public List<KeyValuePair<string, List<string>>>? Form { get; set; }
 		public int? FilesCount { get; set; }
 		public Dictionary<string, Func<string, string>>? CookieUnprotectors { get; set; } //Dictionary<cookieName, Unprotector>
+
+		[JsonIgnore]
+		public IServiceProvider? RequestServiceProvider { get; set; }
 
 		IReadOnlyList<KeyValuePair<string, List<string>>>? IRequestMetadata.Query => Query;
 		IReadOnlyList<KeyValuePair<string, string>>? IRequestMetadata.Cookies => Cookies;

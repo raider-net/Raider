@@ -13,6 +13,7 @@ namespace Raider
 		ITraceInfo TraceInfo { get; }
 		IApplicationResources ApplicationResources { get; }
 		IRequestMetadata? RequestMetadata { get; }
+		IDictionary<string, object?> Items { get; }
 
 		ITraceInfo AddTraceFrame(ITraceFrame traceFrame);
 
@@ -34,12 +35,14 @@ namespace Raider
 		public ITraceInfo TraceInfo { get; private set; }
 		public IApplicationResources ApplicationResources { get; }
 		public IRequestMetadata? RequestMetadata { get; }
+		public IDictionary<string, object?> Items { get; }
 
 		public ApplicationContext(ITraceInfo traceInfo, IApplicationResources applicationResources, IRequestMetadata? requestMetadata)
 		{
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 			ApplicationResources = applicationResources ?? throw new ArgumentNullException(nameof(applicationResources));
 			RequestMetadata = requestMetadata;
+			Items = new Dictionary<string, object?>();
 		}
 
 		private readonly object _lockTrace = new();
