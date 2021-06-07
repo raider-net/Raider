@@ -45,7 +45,7 @@ namespace Raider.AspNetCore.Extensions
 				}
 
 				var appResources = sp.GetRequiredService<IApplicationResources>();
-				var requsetMetadata = httpContext?.Request.ToRequestMetadata();
+				var requsetMetadata = httpContext?.Request.ToRequestMetadata(cookieDataProtectionPurposes: AuthenticationService.GetDataProtectors(httpContext));
 				var appCtx = new ApplicationContext(traceInfo, appResources, requsetMetadata);
 				return appCtx;
 			});

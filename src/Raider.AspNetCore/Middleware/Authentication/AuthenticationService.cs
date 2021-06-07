@@ -56,7 +56,7 @@ namespace Raider.AspNetCore.Authentication
 			return dataProtector;
 		}
 
-		private static IReadOnlyDictionary<string, IDataProtector>? GetDataProtectors(HttpContext context)
+		public static IReadOnlyDictionary<string, IDataProtector>? GetDataProtectors(HttpContext context)
 		{
 			if (context == null)
 				return null;
