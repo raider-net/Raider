@@ -45,8 +45,8 @@ namespace Raider.Extensions
 			this HttpRequest request,
 			bool withQueryList = false,
 			bool withCookies = true,
-			bool withHeaders = true, bool
-			withForm = false,
+			bool withHeaders = true,
+			bool withForm = false,
 			IReadOnlyDictionary<string, IDataProtector>? cookieDataProtectionPurposes = null //Dictionary<cookieName, IDataProtector>
 			)
 		{

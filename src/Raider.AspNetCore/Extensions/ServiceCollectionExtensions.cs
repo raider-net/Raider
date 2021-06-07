@@ -20,7 +20,11 @@ namespace Raider.AspNetCore.Extensions
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddApplicationContext(this IServiceCollection services)
+		public static IServiceCollection AddApplicationContext(this IServiceCollection services,
+			bool withQueryList = false,
+			bool withCookies = true,
+			bool withHeaders = true,
+			bool withForm = false)
 			=> services.AddScoped<IApplicationContext>(sp =>
 			{
 				var httpContext = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;
@@ -45,7 +49,12 @@ namespace Raider.AspNetCore.Extensions
 				}
 
 				var appResources = sp.GetRequiredService<IApplicationResources>();
-				var requsetMetadata = httpContext?.Request.ToRequestMetadata(cookieDataProtectionPurposes: AuthenticationService.GetDataProtectors(httpContext));
+				var requsetMetadata = httpContext?.Request.ToRequestMetadata(
+					withQueryList: withQueryList,
+					withCookies: withCookies,
+					withHeaders: withHeaders,
+					withForm: withForm,
+					cookieDataProtectionPurposes: AuthenticationService.GetDataProtectors(httpContext));
 				var appCtx = new ApplicationContext(traceInfo, appResources, requsetMetadata);
 				return appCtx;
 			});

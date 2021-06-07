@@ -109,13 +109,14 @@ namespace Raider.AspNetCore.Authentication
 			AuthenticatedUser? user = null;
 
 			IAuthenticationManager? authenticationManager = null;
+			var applicationContext = context.RequestServices.GetRequiredService<IApplicationContext>();
 			if (windowsPrincipal?.Identity is WindowsIdentity windowsIdentity)
 			{
 				logonWithoutDomain = windowsIdentity.GetLogonNameWithoutDomain().ToLower();
 				windowsIdentityName = windowsIdentity.Name.ToLower();
 
 				authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-				user = await authenticationManager.CreateFromWindowsIdentityAsync(logonWithoutDomain, windowsIdentityName, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
+				user = await authenticationManager.CreateFromWindowsIdentityAsync(logonWithoutDomain, windowsIdentityName, applicationContext.RequestMetadata);
 			}
 
 			if (user == null)
@@ -128,7 +129,6 @@ namespace Raider.AspNetCore.Authentication
 				identity = claimsIdentity;
 			}
 
-			var applicationContext = context.RequestServices.GetService<IApplicationContext>();
 			return CreateRaiderPrincipal(identity, user, true, true, logger, applicationContext, authenticationManager);
 		}
 
@@ -143,13 +143,19 @@ namespace Raider.AspNetCore.Authentication
 			if (logger == null)
 				logger = GetLogger(context);
 
-			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
-			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, ""));
-			var identity = claimsIdentity;
-
+			IIdentity? identity = null;
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-			var user = await authenticationManager.CreateFromRequestAsync(context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
-			var applicationContext = context.RequestServices.GetService<IApplicationContext>();
+			var applicationContext = context.RequestServices.GetRequiredService<IApplicationContext>();
+
+			var user = await authenticationManager.CreateFromRequestAsync(applicationContext.RequestMetadata);
+
+			if (user != null && !string.IsNullOrWhiteSpace(user.Login))
+			{
+				var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
+				claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, user.Login));
+				identity = claimsIdentity;
+			}
+
 			return CreateRaiderPrincipal(identity, user, true, true, logger, applicationContext, authenticationManager);
 		}
 
@@ -171,8 +177,9 @@ namespace Raider.AspNetCore.Authentication
 			AuthenticatedUser? user = null;
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
+			var applicationContext = context.RequestServices.GetRequiredService<IApplicationContext>();
 			if (authenticationManager.StaticUserId.HasValue)
-				user = await authenticationManager.CreateFromUserIdAsync(authenticationManager.StaticUserId, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
+				user = await authenticationManager.CreateFromUserIdAsync(authenticationManager.StaticUserId, applicationContext.RequestMetadata);
 
 			if (user != null && !string.IsNullOrWhiteSpace(user.Login))
 			{
@@ -181,7 +188,6 @@ namespace Raider.AspNetCore.Authentication
 				identity = claimsIdentity;
 			}
 
-			var applicationContext = context.RequestServices.GetService<IApplicationContext>();
 			return CreateRaiderPrincipal(identity, user, true, true, logger, applicationContext, authenticationManager);
 		}
 
@@ -253,7 +259,7 @@ namespace Raider.AspNetCore.Authentication
 			};
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-			user = await authenticationManager.SetUserDataAsync(user, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
+			user = await authenticationManager.SetUserDataAsync(user, applicationContext.RequestMetadata);
 			
 			return CreateRaiderPrincipal(principal.Identity, user, true, true, logger, applicationContext, authenticationManager);
 		}
@@ -281,22 +287,23 @@ namespace Raider.AspNetCore.Authentication
 				return null;
 
 			var success = PasswordHelper.VerifyHashedPassword(user.Password, user.Salt, password);
+			var applicationContext = context.RequestServices.GetRequiredService<IApplicationContext>();
 
 			if (success)
 			{
 				//error = user.Error;
 				//passwordTemporaryUrlSlug = user.PasswordTemporaryUrlSlug;
 
-				user = await authenticationManager.SetUserDataRolesPremissions(user, context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
+				user = await authenticationManager.SetUserDataRolesPremissions(user, applicationContext.RequestMetadata);
 			}
 			else
 			{
 				user.UserData = null;
+				return null;
 			}
 
 			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
 			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, login));
-			var applicationContext = context.RequestServices.GetService<IApplicationContext>();
 			return CreateRaiderPrincipal(claimsIdentity, user, false, false, logger, applicationContext, authenticationManager);
 		}
 
@@ -315,10 +322,10 @@ namespace Raider.AspNetCore.Authentication
 				logger = GetLogger(context);
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-			var user = await authenticationManager.CreateFromLoginAsync(userName.ToLower(), context.Request.ToRequestMetadata(cookieDataProtectionPurposes: GetDataProtectors(context)));
+			var applicationContext = context.RequestServices.GetRequiredService<IApplicationContext>();
+			var user = await authenticationManager.CreateFromLoginAsync(userName.ToLower(), applicationContext.RequestMetadata);
 			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
 			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, userName));
-			var applicationContext = context.RequestServices.GetService<IApplicationContext>();
 			return CreateRaiderPrincipal(claimsIdentity, user, true, true, logger, applicationContext, authenticationManager);
 		}
 
