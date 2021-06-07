@@ -56,6 +56,9 @@ namespace Raider.AspNetCore.Middleware.Initialization
 				[nameof(ILogMessage.TraceInfo.CorrelationId)] = appCtx.TraceInfo.CorrelationId
 			});
 
+			if (_options.OnRequestInitialized != null)
+				await _options.OnRequestInitialized(appCtx);
+
 			await _next(context);
 		}
 	}

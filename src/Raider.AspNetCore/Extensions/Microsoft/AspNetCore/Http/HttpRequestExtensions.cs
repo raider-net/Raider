@@ -104,7 +104,8 @@ namespace Raider.Extensions
 				Method = request.Method,
 				Form = formList,
 				FilesCount = withForm ? (request.HasFormContentType ? request.Form.Files.Count : 0) : null,
-				CookieUnprotectors = cookieUnprotectors
+				CookieUnprotectors = cookieUnprotectors,
+				RequestServiceProvider = request.HttpContext.RequestServices
 			};
 		}
 	}
