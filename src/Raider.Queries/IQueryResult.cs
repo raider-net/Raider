@@ -11,13 +11,13 @@ namespace Raider.Queries
 
 		List<IErrorMessage> ErrorMessages { get; }
 
-		bool HasSuccessMessage => 0 < SuccessMessages.Count;
+		bool HasSuccessMessage { get; }
 
-		bool HasWarning => 0 < WarningMessages.Count;
+		bool HasWarning { get; }
 
-		bool HasError => 0 < ErrorMessages.Count;
+		bool HasError { get; }
 
-		bool HasAnyMessage => HasSuccessMessage || HasWarning || HasError;
+		bool HasAnyMessage { get; }
 
 		long? ResultCount { get; set; }
 
