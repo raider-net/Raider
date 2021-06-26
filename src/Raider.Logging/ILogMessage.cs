@@ -10,7 +10,7 @@ namespace Raider.Logging
 
 		LogLevel LogLevel { get; set; }
 
-		int IdLogLevel => (int)LogLevel;
+		int IdLogLevel { get; }
 
 		DateTimeOffset Created { get; set; }
 
@@ -26,11 +26,11 @@ namespace Raider.Logging
 
 		string? Detail { get; set; }
 
-		string ClientMessageWithId => ToString(true, false, false);
+		string ClientMessageWithId { get; }
 
-		string ClientMessageWithIdAndPropName => ToString(true, true, false);
+		string ClientMessageWithIdAndPropName { get; }
 
-		string FullMessage => ToString(true, true, true);
+		string FullMessage { get; }
 
 		string? CommandQueryName { get; set; }
 
