@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+using Newtonsoft.Json;
+#elif NET5_0
 using System.Text.Json.Serialization;
+#endif
 
 namespace Raider.Web
 {
@@ -28,20 +32,6 @@ namespace Raider.Web
 		[JsonIgnore]
 		IServiceProvider? RequestServiceProvider { get; }
 
-		string UnprotectCookie(string key, string value)
-		{
-			if (CookieUnprotectors == null || string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
-				return value;
-
-			if (CookieUnprotectors.TryGetValue(key, out Func<string, string>? cookieUnprotector))
-			{
-				if (cookieUnprotector == null)
-					return value;
-
-				return cookieUnprotector.Invoke(value);
-			}
-
-			return value;
-		}
+		string UnprotectCookie(string key, string value);
 	}
 }

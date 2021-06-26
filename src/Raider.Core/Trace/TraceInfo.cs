@@ -14,6 +14,8 @@ namespace Raider.Trace
 
 		public RaiderPrincipal<int>? Principal { get; internal set; }
 
+		public RaiderIdentity<int>? User => Principal?.IdentityBase;
+
 		public int? IdUser { get; internal set; }
 
 		public string? ExternalCorrelationId { get; internal set; }

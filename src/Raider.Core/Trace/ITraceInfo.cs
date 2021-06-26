@@ -11,7 +11,7 @@ namespace Raider.Trace
 
 		RaiderPrincipal<int>? Principal { get; }
 
-		RaiderIdentity<int>? User => Principal?.IdentityBase;
+		RaiderIdentity<int>? User { get; }
 
 		int? IdUser { get; }
 

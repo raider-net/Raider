@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+using Newtonsoft.Json;
+#elif NET5_0
 using System.Text.Json.Serialization;
+#endif
 
 namespace Raider.Web
 {

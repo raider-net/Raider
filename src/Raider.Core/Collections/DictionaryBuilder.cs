@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if NETSTANDARD2_0 || NETSTANDARD2_1
+using Raider.Extensions;
+#endif
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 

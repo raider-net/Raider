@@ -8,6 +8,16 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+
+using Newtonsoft.Json;
+
+#elif NET5_0
+
+using System.Text.Json;
+
+#endif
+
 namespace Raider.Hardware
 {
 	public class HardwareInfo : Serializer.IDictionaryObject, Serializer.ITextSerializer
@@ -40,7 +50,12 @@ namespace Raider.Hardware
 				PercentProcessorTime = (Processors != null && 0 < Processors.Count && Processors[0].PercentProcessorTime.HasValue) ? Convert.ToDouble(Processors[0].PercentProcessorTime.Value) : (double?)null,
 #pragma warning restore CS8629 // Nullable value type may be null.
 				OS = OS?.ToString(),
-				HWJson = System.Text.Json.JsonSerializer.Serialize(this, new System.Text.Json.JsonSerializerOptions { WriteIndented = true })
+
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+				HWJson = JsonConvert.SerializeObject(this, Formatting.Indented)
+#elif NET5_0
+				HWJson = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true })
+#endif
 			};
 
 		public IDictionary<string, object?> ToDictionary()

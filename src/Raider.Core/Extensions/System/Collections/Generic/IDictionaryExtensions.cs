@@ -3,6 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+
+using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
+
+#elif NET5_0
+
+using System.Text.Json;
+
+#endif
+
 namespace Raider.Extensions
 {
 	public static class IDictionaryExtensions
@@ -211,7 +222,14 @@ namespace Raider.Extensions
 
 		public static IDictionary<string, string> ToJson(this IDictionary<string, object> jsonObj)
 		{
-			return jsonObj?.ToDictionary(x => x.Key, y => y.Value as string ?? System.Text.Json.JsonSerializer.Serialize(y.Value))
+			return jsonObj?.ToDictionary(
+				x => x.Key,
+				y => y.Value as string
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+					?? JsonConvert.SerializeObject(y.Value))
+#elif NET5_0
+				?? JsonSerializer.Serialize(y.Value))
+#endif
 				?? new Dictionary<string, string>();
 		}
 
@@ -268,5 +286,54 @@ namespace Raider.Extensions
 
 			return result;
 		}
+
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+		/// <summary>
+		/// Attempts to add the specified key and value to the dictionary.
+		/// </summary>
+		/// <param name="key">The key of the element to add.</param>
+		/// <param name="value">The value of the element to add. It can be null.</param>
+		/// <returns>true if the key/value pair was added to the dictionary successfully; otherwise, false.</returns>
+		/// <exception cref="System.ArgumentNullException">key is null.</exception>
+		public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+		{
+			if (dictionary == null)
+				throw new ArgumentNullException(nameof(dictionary));
+
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
+			if (dictionary.ContainsKey(key))
+				return false;
+
+			dictionary.Add(key, value);
+
+			return true;
+		}
+
+		/// <summary>
+		/// Removes the value with the specified key from the System.Collections.Generic.Dictionary`2, and copies the element to the value parameter.
+		/// </summary>
+		/// <param name="key">The key of the element to remove.</param>
+		/// <param name="value">The removed element.</param>
+		/// <returns>true if the element is successfully found and removed; otherwise, false.</returns>
+		/// <exception cref="System.ArgumentNullException">key is null.</exception>
+		public static bool Remove<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, [MaybeNullWhen(false)] out TValue value)
+		{
+			if (dictionary == null)
+				throw new ArgumentNullException(nameof(dictionary));
+
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
+			if (dictionary.TryGetValue(key, out value))
+			{
+				dictionary.Remove(key);
+				return true;
+			}
+
+			return false;
+		}
+#endif
 	}
 }

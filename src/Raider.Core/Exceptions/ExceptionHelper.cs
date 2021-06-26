@@ -1,6 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+using Newtonsoft.Json;
+#elif NET5_0
+using System.Text.Json;
+#endif
 
 namespace Raider.Exceptions
 {
@@ -39,11 +44,23 @@ namespace Raider.Exceptions
 			{
 				sb.AppendLine();
 				sb.AppendLine("--- DATA ---");
-				var jsonSerializerOptions = new System.Text.Json.JsonSerializerOptions
+
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+				var jsonSerializerSettings = new JsonSerializerSettings
+				{
+					Formatting = Formatting.Indented,
+					ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+					PreserveReferencesHandling = PreserveReferencesHandling.Objects, //PreserveReferencesHandling.All,
+					TypeNameHandling = TypeNameHandling.All
+				};
+#elif NET5_0
+				var jsonSerializerOptions = new JsonSerializerOptions
 				{
 					WriteIndented = true,
 					ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
 				};
+#endif
+
 				foreach (var item in ex.Data.Keys)
 				{
 					var obj = ex.Data[item];
@@ -51,12 +68,20 @@ namespace Raider.Exceptions
 					string value = "";
 					try
 					{
-						key = System.Text.Json.JsonSerializer.Serialize(item, jsonSerializerOptions);
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+						key = JsonConvert.SerializeObject(item, jsonSerializerSettings);
+#elif NET5_0
+						key = JsonSerializer.Serialize(item, jsonSerializerOptions);
+#endif
 					}
 					catch { }
 					try
 					{
-						value = System.Text.Json.JsonSerializer.Serialize(obj, jsonSerializerOptions);
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+						value = JsonConvert.SerializeObject(obj, jsonSerializerSettings);
+#elif NET5_0
+						value = JsonSerializer.Serialize(obj, jsonSerializerOptions);
+#endif
 					}
 					catch { }
 
