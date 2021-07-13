@@ -13,7 +13,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace Raider.EntityFrameworkCore
 {
 	public abstract class DbContextBase : Microsoft.EntityFrameworkCore.DbContext
@@ -24,7 +23,7 @@ namespace Raider.EntityFrameworkCore
 		protected DbConnection? ExternalDbConnection { get; private set; }
 		protected string? ExternalConnectionString { get; private set; }
 
-		private DbConnection dbConnection;
+		private DbConnection? dbConnection;
 		public DbConnection DbConnection
 		{
 			get
@@ -38,7 +37,7 @@ namespace Raider.EntityFrameworkCore
 
 		public IDbTransaction? DbTransaction => Database?.CurrentTransaction?.GetDbTransaction();
 
-		private string _dbConnectionString;
+		private string? _dbConnectionString;
 		public string DBConnectionString
 		{
 			get
@@ -170,10 +169,11 @@ namespace Raider.EntityFrameworkCore
 			return disposable;
 		}
 
-		protected void RegisterUnaccentFunction(ModelBuilder modelBuilder)
+		protected static void RegisterUnaccentFunction(ModelBuilder modelBuilder)
 		{
 			modelBuilder
-				.HasDbFunction(() => DbFunc.Unaccent(default));
+				.HasDbFunction(() => DbFunc.Unaccent(default))
+				.HasName("unaccent");
 		}
 
 		protected virtual void WriteConcurrency()
