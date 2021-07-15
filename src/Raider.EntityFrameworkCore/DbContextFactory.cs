@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Data;
-using System.Data.Common;
 
 namespace Raider.EntityFrameworkCore
 {
@@ -11,10 +10,26 @@ namespace Raider.EntityFrameworkCore
 	{
 		public static TContext CreateNewDbContext<TContext>(
 			IServiceProvider serviceProvider,
+			string? connectionString = null)
+			where TContext : DbContext
+		{
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
+
+			var dbContext = serviceProvider.GetRequiredService<TContext>();
+			if (dbContext is DbContextBase dbContextBase)
+				dbContextBase.Initialize(null, connectionString);
+
+			return dbContext;
+		}
+
+		public static TContext CreateNewDbContext<TContext>(
+			IServiceProvider serviceProvider,
 			IDbContextTransaction? existingDbContextTransaction,
 			out IDbContextTransaction? newDbContextTransaction,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
-			IsolationLevel? transactionIsolationLevel = null)
+			IsolationLevel? transactionIsolationLevel = null,
+			string? connectionString = null)
 			where TContext : DbContext
 		{
 			if (serviceProvider == null)
@@ -23,7 +38,7 @@ namespace Raider.EntityFrameworkCore
 			var dbContext = serviceProvider.GetRequiredService<TContext>();
 			if (dbContext is DbContextBase dbContextBase)
 			{
-				dbContextBase.Initialize(transactionUsage == TransactionUsage.ReuseOrCreateNew ? existingDbContextTransaction?.GetDbTransaction().Connection : null, null);
+				dbContextBase.Initialize(transactionUsage == TransactionUsage.ReuseOrCreateNew ? existingDbContextTransaction?.GetDbTransaction().Connection : null, connectionString);
 			}
 			return SetDbTransaction(dbContext, existingDbContextTransaction, out newDbContextTransaction, transactionUsage, transactionIsolationLevel);
 		}

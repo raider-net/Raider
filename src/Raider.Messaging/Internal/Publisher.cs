@@ -5,13 +5,15 @@ using Raider.Threading;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Raider.Messaging
 {
-	internal class Publisher<TData> : IPublisher<TData>
+	internal class Publisher<TData> : ComponentBase, IPublisher<TData>
 			where TData : IMessageData
 	{
 		private ILogger? _fallbackLogger;
@@ -21,22 +23,23 @@ namespace Raider.Messaging
 		/// <summary>
 		/// IdPublisher
 		/// </summary>
-		public int IdComponent { get; }
+		public override sealed int IdComponent { get; }
 
 		/// <summary>
 		/// IdPublisherInstance
 		/// </summary>
-		public Guid IdInstance { get; } = Guid.NewGuid();
-		public bool Initialized { get; private set; }
-		public bool Started { get; private set; }
-		public string Name { get; }
-		public string? Description { get; set; }
-		public int IdScenario { get; }
-		public DateTime LastActivityUtc { get; private set; }
-		public ComponentState State { get; private set; }
+		public override sealed Guid IdInstance { get; } = Guid.NewGuid();
+		public override sealed bool Initialized { get; protected set; }
+		public override sealed bool Started { get; protected set; }
+		public override sealed string Name { get; }
+		public override sealed string? Description { get; set; }
+		public override sealed int IdScenario { get; }
+		public override sealed DateTime LastActivityUtc { get; protected set; }
+		public override sealed ComponentState State { get; protected set; }
 		public IServiceBusRegister? Register { get; set; }
 		public IServiceBusStorage? Storage { get; set; }
 		public IMessageBox? MessageBox { get; private set; }
+		public override sealed IReadOnlyDictionary<object, object> ServiceBusHostProperties => Storage?.ServiceBusHost?.Properties ?? new ReadOnlyDictionary<object, object>(new Dictionary<object, object>());
 
 		public Type PublishingMessageDataType { get; } = typeof(TData);
 
@@ -57,7 +60,7 @@ namespace Raider.Messaging
 			State = ComponentState.Offline;
 		}
 
-		private readonly AsyncLock _initLock = new AsyncLock();
+		private readonly AsyncLock _initLock = new();
 		async Task IPublisher.InitializeAsync(IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 		{
 			var appCtxTraceInfo = storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
@@ -97,7 +100,7 @@ namespace Raider.Messaging
 
 				try
 				{
-					_fallbackLogger = loggerFactory.CreateLogger<ServiceBusHostService>();
+					_fallbackLogger = loggerFactory.CreateLogger<ServiceBus>();
 				}
 				catch (Exception ex)
 				{
@@ -132,7 +135,7 @@ namespace Raider.Messaging
 			}
 		}
 
-		async Task IComponent.StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
+		protected internal override sealed async Task StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
 		{
 			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
 			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);

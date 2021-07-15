@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Audit;
 using Raider.EntityFrameworkCore.Concurrence;
+using Raider.EntityFrameworkCore.Synchronyzation;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
@@ -9,8 +10,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-
-#nullable disable
 
 namespace Raider.EntityFrameworkCore
 {
@@ -29,28 +28,35 @@ namespace Raider.EntityFrameworkCore
 		{
 		}
 
-		public override int SaveChanges(
-			bool writeConcurrency = true,
+		public override int Save(
+			SaveOptions? options = null,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			return SaveChanges(true, writeConcurrency, memberName, sourceFilePath, sourceLineNumber);
+			return Save(true, options, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public override Task<int> SaveChangesAsync(
-			bool writeConcurrency = true,
+		public override Task<int> SaveAsync(
+			CancellationToken cancellationToken = default,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> SaveAsync(true, null, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+
+		public override Task<int> SaveAsync(
+			SaveOptions? options = null,
 			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			return SaveChangesAsync(true, writeConcurrency, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+			return SaveAsync(true, options, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public override int SaveChanges(
+		public override int Save(
 			bool acceptAllChangesOnSuccess,
-			bool writeConcurrency = true,
+			SaveOptions? options = null,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
@@ -58,23 +64,31 @@ namespace Raider.EntityFrameworkCore
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
 
 			var auditCorrelationId = Guid.NewGuid();
-			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId);
+			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId, options);
 
-			var result = base.SaveChangesWithoutScope(acceptAllChangesOnSuccess, writeConcurrency);
+			var result = base.SaveWithoutScope(acceptAllChangesOnSuccess);
 
 			if (0 < auditEntriesWithTempProperty.Count)
 			{
 				OnAfterSaveChanges(auditCorrelationId, auditEntriesWithTempProperty);
-				var tmpResult = base.SaveChangesWithoutScope(acceptAllChangesOnSuccess, false /*writeConcurrency*/);
+				var tmpResult = base.SaveWithoutScope(acceptAllChangesOnSuccess);
 				result += tmpResult;
 			}
 
 			return result;
 		}
 
-		public override async Task<int> SaveChangesAsync(
+		public override Task<int> SaveAsync(
 			bool acceptAllChangesOnSuccess,
-			bool writeConcurrency = true,
+			CancellationToken cancellationToken = default,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> SaveAsync(acceptAllChangesOnSuccess, null, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+
+		public override async Task<int> SaveAsync(
+			bool acceptAllChangesOnSuccess,
+			SaveOptions? options = null,
 			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
@@ -83,21 +97,21 @@ namespace Raider.EntityFrameworkCore
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
 
 			var auditCorrelationId = Guid.NewGuid();
-			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId);
+			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId, options);
 
-			var result = await base.SaveChangesWithoutScopeAsync(acceptAllChangesOnSuccess, writeConcurrency, cancellationToken);
+			var result = await base.SaveWithoutScopeAsync(acceptAllChangesOnSuccess, options, cancellationToken);
 
 			if (0 < auditEntriesWithTempProperty.Count)
 			{
 				OnAfterSaveChanges(auditCorrelationId, auditEntriesWithTempProperty);
-				var tmpResult = await base.SaveChangesWithoutScopeAsync(acceptAllChangesOnSuccess, false /*writeConcurrency*/, cancellationToken);
+				var tmpResult = await base.SaveWithoutScopeAsync(acceptAllChangesOnSuccess, options, cancellationToken);
 				result += tmpResult;
 			}
 
 			return result;
 		}
 
-		private List<AuditEntryInternal> OnBeforeSaveChanges(Guid auditCorrelationId)
+		private List<AuditEntryInternal> OnBeforeSaveChanges(Guid auditCorrelationId, SaveOptions? options)
 		{
 			ChangeTracker.DetectChanges();
 
@@ -132,13 +146,27 @@ namespace Raider.EntityFrameworkCore
 					}
 				}
 
-				if (entry.Entity is IConcurrent concurrent)
+				if ((options == null || options.SetConcurrencyToken) && entry.Entity is IConcurrent concurrent)
 				{
 					switch (entry.State)
 					{
 						case EntityState.Added:
 						case EntityState.Modified:
 							concurrent.ConcurrencyToken = Guid.NewGuid();
+							break;
+
+						default:
+							break;
+					}
+				}
+
+				if ((options == null || options.SetSyncToken) && entry.Entity is ISynchronizable synchronizable)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+						case EntityState.Modified:
+							synchronizable.SyncToken = Guid.NewGuid();
 							break;
 
 						default:
@@ -223,7 +251,7 @@ namespace Raider.EntityFrameworkCore
 			}
 		}
 
-		protected override void WriteConcurrency()
+		protected override void SetEntities(SaveOptions? options)
 		{
 			//do nothing
 		}

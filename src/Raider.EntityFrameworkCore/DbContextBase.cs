@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Concurrence;
 using Raider.EntityFrameworkCore.Database;
+using Raider.EntityFrameworkCore.Synchronyzation;
 using Raider.Logging.SerilogEx;
 using Raider.Trace;
 using System;
@@ -82,68 +83,103 @@ namespace Raider.EntityFrameworkCore
 				initialized = true;
 			}
 		}
+		
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
+		[Obsolete("Use Save() method instead.", true)]
+		public override int SaveChanges()
+		{
+			throw new NotSupportedException($"Use {nameof(Save)}() method instead.");
+		}
 
-		public virtual int SaveChanges(
-			bool writeConcurrency = true,
+		[Obsolete("Use Save(bool acceptAllChangesOnSuccess) method instead.", true)]
+		public override int SaveChanges(bool acceptAllChangesOnSuccess)
+		{
+			throw new NotSupportedException($"Use {nameof(Save)}(bool {nameof(acceptAllChangesOnSuccess)}) method instead.");
+		}
+
+		[Obsolete("Use SaveAsync(CancellationToken cancellationToken) method instead.", true)]
+		public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException($"Use {nameof(SaveAsync)}({nameof(CancellationToken)} {nameof(cancellationToken)}) method instead.");
+		}
+
+		[Obsolete("Use SaveAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken) method instead.", true)]
+		public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException($"Use {nameof(SaveAsync)}(bool {nameof(acceptAllChangesOnSuccess)}, {nameof(CancellationToken)} {nameof(cancellationToken)}) method instead.");
+		}
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
+
+		public virtual int Save(
+			SaveOptions? options = null,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			return SaveChanges(true, writeConcurrency, memberName, sourceFilePath, sourceLineNumber);
+			return Save(true, options, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public virtual Task<int> SaveChangesAsync(
-			bool writeConcurrency = true,
+		public virtual Task<int> SaveAsync(
+			SaveOptions? options = null,
 			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
-			return SaveChangesAsync(true, writeConcurrency, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+			return SaveAsync(true, options, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
 		}
 
-		public virtual int SaveChanges(
+		public virtual Task<int> SaveAsync(
+			CancellationToken cancellationToken = default,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> SaveAsync(true, null, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+
+		public virtual int Save(
 			bool acceptAllChangesOnSuccess,
-			bool writeConcurrency = true,
+			SaveOptions? options = null,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
-			if (writeConcurrency)
-				WriteConcurrency();
+			SetEntities(options);
 
 			return base.SaveChanges(acceptAllChangesOnSuccess);
 		}
 
-		public virtual async Task<int> SaveChangesAsync(
+		public virtual Task<int> SaveAsync(
 			bool acceptAllChangesOnSuccess,
-			bool writeConcurrency = true,
+			CancellationToken cancellationToken = default,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> SaveAsync(acceptAllChangesOnSuccess, null, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+
+		public virtual async Task<int> SaveAsync(
+			bool acceptAllChangesOnSuccess,
+			SaveOptions? options = null,
 			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
-			if (writeConcurrency)
-				WriteConcurrency();
+			SetEntities(options);
 
 			return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
 		}
 
-		protected int SaveChangesWithoutScope(bool acceptAllChangesOnSuccess, bool writeConcurrency = true)
+		protected int SaveWithoutScope(bool acceptAllChangesOnSuccess, SaveOptions? options = null)
 		{
-			if (writeConcurrency)
-				WriteConcurrency();
-
+			SetEntities(options);
 			return base.SaveChanges(acceptAllChangesOnSuccess);
 		}
 
-		protected async Task<int> SaveChangesWithoutScopeAsync(bool acceptAllChangesOnSuccess, bool writeConcurrency = true, CancellationToken cancellationToken = default)
+		protected async Task<int> SaveWithoutScopeAsync(bool acceptAllChangesOnSuccess, SaveOptions? options = null, CancellationToken cancellationToken = default)
 		{
-			if (writeConcurrency)
-				WriteConcurrency();
-
+			SetEntities(options);
 			return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
 		}
 
@@ -176,8 +212,11 @@ namespace Raider.EntityFrameworkCore
 				.HasName("unaccent");
 		}
 
-		protected virtual void WriteConcurrency()
+		protected virtual void SetEntities(SaveOptions? options)
 		{
+			if (options != null && !options.SetConcurrencyToken && !options.SetSyncToken)
+				return;
+
 			ChangeTracker.DetectChanges();
 
 			foreach (var entry in ChangeTracker.Entries())
@@ -185,13 +224,27 @@ namespace Raider.EntityFrameworkCore
 				if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
 					continue;
 
-				if (entry.Entity is IConcurrent concurrent)
+				if ((options == null || options.SetConcurrencyToken) && entry.Entity is IConcurrent concurrent)
 				{
 					switch (entry.State)
 					{
 						case EntityState.Added:
 						case EntityState.Modified:
 							concurrent.ConcurrencyToken = Guid.NewGuid();
+							break;
+
+						default:
+							break;
+					}
+				}
+
+				if ((options == null || options.SetSyncToken) && entry.Entity is ISynchronizable synchronizable)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+						case EntityState.Modified:
+							synchronizable.SyncToken = Guid.NewGuid();
 							break;
 
 						default:

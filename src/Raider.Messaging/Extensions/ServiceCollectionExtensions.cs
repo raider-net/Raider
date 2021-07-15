@@ -17,22 +17,23 @@ namespace Raider.Messaging.Extensions
 			var cfg = new ServiceBusConfig();
 			configuration?.Invoke(cfg);
 
-			if (cfg.ServiceBusHostOptions == null)
-				throw new InvalidOperationException($"{nameof(configuration)}.{nameof(cfg.ServiceBusHostOptions)} == null");
+			if (cfg.ServiceBusOptions == null)
+				throw new InvalidOperationException($"{nameof(configuration)}.{nameof(cfg.ServiceBusOptions)} == null");
 
 			if (cfg.RegisterConfiguration == null)
 				throw new InvalidOperationException($"{nameof(configuration)}.{nameof(cfg.RegisterConfiguration)} == null");
 
 			AddServices(services, cfg.Mode, cfg.AllowJobs, cfg.RegisterConfiguration);
 
-			services.Configure<ServiceBusHostOptions>(o =>
+			services.Configure<ServiceBusOptions>(o =>
 			{
-				o.ConncetionString = cfg.ServiceBusHostOptions.ConncetionString;
-				o.ServiceHostStartMaxRetryCount = cfg.ServiceBusHostOptions.ServiceHostStartMaxRetryCount;
-				o.IdServiceBusHost = cfg.ServiceBusHostOptions.IdServiceBusHost;
-				o.Name = cfg.ServiceBusHostOptions.Name;
-				o.Description = cfg.ServiceBusHostOptions.Description;
-				o.IdUser = cfg.ServiceBusHostOptions.IdUser;
+				o.ConncetionString = cfg.ServiceBusOptions.ConncetionString;
+				o.ServiceHostStartMaxRetryCount = cfg.ServiceBusOptions.ServiceHostStartMaxRetryCount;
+				o.IdServiceBusHost = cfg.ServiceBusOptions.IdServiceBusHost;
+				o.Name = cfg.ServiceBusOptions.Name;
+				o.Description = cfg.ServiceBusOptions.Description;
+				o.IdUser = cfg.ServiceBusOptions.IdUser;
+				o.AddProperties(cfg.ServiceBusOptions.Properties);
 			});
 
 			services.TryAddSingleton<IServiceBusStorage, TStorage>();
@@ -45,15 +46,18 @@ namespace Raider.Messaging.Extensions
 		private static IServiceCollection AddServices(IServiceCollection services, ServiceBusMode mode, bool allowJobs, Action<IServiceBusRegister> registerConfiguration)
 		{
 			services.AddTransient<SubscriberContext>();
+			
+			if (allowJobs)
+				services.AddTransient<JobContext>();
 
 			var register = new ServiceBusRegister(mode, allowJobs);
 			registerConfiguration?.Invoke(register);
 			register.FinalizeRegistration();
 
 			services.TryAddSingleton<IServiceBusRegister>(register);
-			services.TryAddSingleton<IServiceBus, ServiceBus>();
+			services.TryAddSingleton<IServiceBusPublisher, ServiceBusPublisher>();
 
-			services.AddHostedService<ServiceBusHostService>();
+			services.AddHostedService<ServiceBus>();
 
 			return services;
 		}

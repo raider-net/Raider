@@ -1,5 +1,5 @@
-﻿using Raider.Identity;
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Raider.Messaging
 {
@@ -11,5 +11,6 @@ namespace Raider.Messaging
 		string Name { get; }
 		string? Description { get; }
 		DateTime StartedUtc { get; }
+		IReadOnlyDictionary<object, object> Properties { get; }
 	}
 }

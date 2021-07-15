@@ -8,12 +8,13 @@ using Raider.Threading;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Raider.Messaging
 {
-	public abstract class Job : IJob, IComponent, IDisposable
+	public abstract class Job : ComponentBase, IJob, IComponent, IDisposable
 	{
 		private Timer? _timer;
 		private CancellationTokenSource? _stoppingCts;
@@ -23,19 +24,19 @@ namespace Raider.Messaging
 		/// <summary>
 		/// IdJob
 		/// </summary>
-		public int IdComponent { get; }
+		public override sealed int IdComponent { get; }
 
 		/// <summary>
 		/// IdJobInstance
 		/// </summary>
-		public Guid IdInstance { get; } = Guid.NewGuid();
-		public bool Initialized { get; private set; }
-		public bool Started { get; private set; }
-		public string Name { get; }
-		public string? Description { get; }
-		public int IdScenario { get; }
-		public DateTime LastActivityUtc { get; private set; }
-		public ComponentState State { get; private set; }
+		public override sealed Guid IdInstance { get; } = Guid.NewGuid();
+		public override sealed bool Initialized { get; protected set; }
+		public override sealed bool Started { get; protected set; }
+		public override sealed string Name { get; }
+		public override sealed string? Description { get; set; }
+		public override sealed int IdScenario { get; }
+		public override sealed DateTime LastActivityUtc { get; protected set; }
+		public override sealed ComponentState State { get; protected set; }
 
 		protected abstract Dictionary<int, TimeSpan>? DelayTable { get; set; } //Dictionary<retryCount, Delay>
 		protected abstract TimeSpan DelayedStart { get; }
@@ -45,13 +46,14 @@ namespace Raider.Messaging
 		internal IServiceBusStorage? Storage { get; set; }
 		internal IMessageBox? MessageBox { get; private set; }
 		public IServiceBusRegister? Register { get; set; }
+		public override sealed IReadOnlyDictionary<object, object> ServiceBusHostProperties => Storage?.ServiceBusHost?.Properties ?? new ReadOnlyDictionary<object, object>(new Dictionary<object, object>());
 
 		public Job(int idSubscriber, string name)
 			: this(idSubscriber, name, 0)
 		{
 		}
 
-		public Job(int idSubscriber, string name, int idScenario)
+		public Job(int idJob, string name, int idScenario)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
@@ -61,18 +63,18 @@ namespace Raider.Messaging
 			}
 			Name = name;
 
-			IdComponent = idSubscriber;
+			IdComponent = idJob;
 			IdScenario = idScenario;
 			LastActivityUtc = DateTime.UtcNow;
 			State = ComponentState.Offline;
 		}
 
-		public abstract Task<ComponentState> ExecuteAsync(SubscriberContext context, CancellationToken token = default);
+		public abstract Task<ComponentState> ExecuteAsync(JobContext context, CancellationToken token = default);
 
 		Task IJob.InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 			=> InitializeAsync(serviceProvider, storage, messageBox, loggerFactory, cancellationToken);
 
-		private readonly AsyncLock _initLock = new AsyncLock();
+		private readonly AsyncLock _initLock = new();
 		internal async Task InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 		{
 			var appCtxTraceInfo = storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
@@ -112,7 +114,7 @@ namespace Raider.Messaging
 
 				try
 				{
-					_fallbackLogger = loggerFactory.CreateLogger<ServiceBusHostService>();
+					_fallbackLogger = loggerFactory.CreateLogger<ServiceBus>();
 				}
 				catch (Exception ex)
 				{
@@ -145,7 +147,7 @@ namespace Raider.Messaging
 			}
 		}
 
-		async Task IComponent.StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
+		protected internal override sealed async Task StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
 		{
 			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
 			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
@@ -226,11 +228,11 @@ namespace Raider.Messaging
 					{
 						var appCtx = scope.ServiceProvider.GetRequiredService<IApplicationContext>();
 
-						var subscriberContext = scope.ServiceProvider.GetRequiredService<SubscriberContext>(); //TODO JobContext
-						subscriberContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create(), appCtx.Next()).Build();
-						subscriberContext.Logger = _fallbackLogger ?? scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
+						var jobContext = scope.ServiceProvider.GetRequiredService<JobContext>();
+						jobContext.TraceInfo = new TraceInfoBuilder(TraceFrame.Create(), appCtx.Next()).Build();
+						jobContext.Logger = _fallbackLogger ?? scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
 
-						componentState = await ExecuteAsync(subscriberContext, _stoppingCts?.Token ?? default);
+						componentState = await ExecuteAsync(jobContext, _stoppingCts?.Token ?? default);
 					}
 
 					if (componentState == ComponentState.Suspended)

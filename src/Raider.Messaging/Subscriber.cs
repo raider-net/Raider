@@ -1,18 +1,18 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Raider.Extensions;
-using Raider.Localization;
 using Raider.Messaging.Messages;
 using Raider.Threading;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Raider.Messaging
 {
-	public abstract class Subscriber<TData> : ISubscriber<TData>, IDisposable
+	public abstract class Subscriber<TData> : ComponentBase, ISubscriber<TData>, IDisposable
 			where TData : IMessageData
 	{
 		private Timer? _timer;
@@ -23,19 +23,19 @@ namespace Raider.Messaging
 		/// <summary>
 		/// IdSubscriberInstance
 		/// </summary>
-		public int IdComponent { get; }
+		public override sealed int IdComponent { get; }
 
 		/// <summary>
 		/// IdSubscriberInstance
 		/// </summary>
-		public Guid IdInstance { get; } = Guid.NewGuid();
-		public bool Initialized { get; private set; }
-		public bool Started { get; private set; }
-		public string Name { get; }
-		public string? Description { get; set; }
-		public int IdScenario { get; }
-		public DateTime LastActivityUtc { get; private set; }
-		public ComponentState State { get; private set; }
+		public override sealed Guid IdInstance { get; } = Guid.NewGuid();
+		public override sealed bool Initialized { get; protected set; }
+		public override sealed bool Started { get; protected set; }
+		public override sealed string Name { get; }
+		public override sealed string? Description { get; set; }
+		public override sealed int IdScenario { get; }
+		public override sealed DateTime LastActivityUtc { get; protected set; }
+		public override sealed ComponentState State { get; protected set; }
 		public Type SubscribingMessageDataType { get; } = typeof(TData);
 
 		public abstract bool ReadMessagesFromSequentialFIFO { get; }
@@ -52,6 +52,7 @@ namespace Raider.Messaging
 		internal IServiceBusStorage? Storage { get; set; }
 		internal IMessageBox? MessageBox { get; private set; }
 		public IServiceBusRegister? Register { get; set; }
+		public override sealed IReadOnlyDictionary<object, object> ServiceBusHostProperties => Storage?.ServiceBusHost?.Properties ?? new ReadOnlyDictionary<object, object>(new Dictionary<object, object>());
 
 		public Subscriber(int idSubscriber, string name)
 			: this(idSubscriber, name, 0)
@@ -116,7 +117,7 @@ namespace Raider.Messaging
 
 				try
 				{
-					_fallbackLogger = loggerFactory.CreateLogger<ServiceBusHostService>();
+					_fallbackLogger = loggerFactory.CreateLogger<ServiceBus>();
 				}
 				catch (Exception ex)
 				{
@@ -150,7 +151,7 @@ namespace Raider.Messaging
 
 		}
 
-		async Task IComponent.StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
+		protected internal override sealed async Task StartAsync(IServiceBusStorageContext context, CancellationToken cancellationToken)
 		{
 			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
 			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
@@ -192,8 +193,8 @@ namespace Raider.Messaging
 			if (State == ComponentState.Suspended)
 				return;
 
-			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
-			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
+			var appCtxTraceInfo = Storage!.ServiceBusHost!.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo.Principal, appCtxTraceInfo.RuntimeUniqueKey);
 			var nowUtc = DateTime.UtcNow;
 			LastActivityUtc = nowUtc;
 
@@ -459,8 +460,8 @@ namespace Raider.Messaging
 
 		public async Task<bool> Resume(CancellationToken cancellationToken = default)
 		{
-			var appCtxTraceInfo = Storage?.ServiceBusHost?.ApplicationContext.TraceInfo;
-			var traceInfo = TraceInfo.Create(appCtxTraceInfo?.Principal, appCtxTraceInfo?.RuntimeUniqueKey);
+			var appCtxTraceInfo = Storage!.ServiceBusHost!.ApplicationContext.TraceInfo;
+			var traceInfo = TraceInfo.Create(appCtxTraceInfo.Principal, appCtxTraceInfo.RuntimeUniqueKey);
 			LastActivityUtc = DateTime.UtcNow;
 
 			await LogActivityAsync(traceInfo, ComponentState.Idle, null, null, _stoppingCts?.Token ?? default);

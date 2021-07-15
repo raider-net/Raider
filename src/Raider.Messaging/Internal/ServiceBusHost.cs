@@ -2,6 +2,8 @@
 using Raider.Identity;
 using Raider.Trace;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace Raider.Messaging
@@ -17,8 +19,9 @@ namespace Raider.Messaging
 		public string Name { get; }
 		public string? Description { get; set; }
 		public DateTime StartedUtc { get; }
+		public IReadOnlyDictionary<object, object> Properties { get; }
 
-		public ServiceBusHost(ServiceBusHostOptions options, IServiceProvider serviceProvider)
+		public ServiceBusHost(ServiceBusOptions options, IServiceProvider serviceProvider)
 		{
 			if (options == null)
 				throw new ArgumentNullException(nameof(options));
@@ -37,6 +40,7 @@ namespace Raider.Messaging
 
 			StartedUtc = DateTime.UtcNow;
 			_idUser = options.IdUser;
+			Properties = new ReadOnlyDictionary<object, object>(options.Properties);
 			ApplicationContext = serviceProvider.GetRequiredService<IApplicationContext>();
 		}
 
