@@ -29,34 +29,28 @@ namespace Raider.EntityFrameworkCore
 		}
 
 		public override int Save(
-			SaveOptions? options = null,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-		{
-			return Save(true, options, memberName, sourceFilePath, sourceLineNumber);
-		}
+			=> Save(true, null, memberName, sourceFilePath, sourceLineNumber);
 
-		public override Task<int> SaveAsync(
-			CancellationToken cancellationToken = default,
+		public override int Save(
+			SaveOptions? options,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
-			=> SaveAsync(true, null, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
-
-		public override Task<int> SaveAsync(
-			SaveOptions? options = null,
-			CancellationToken cancellationToken = default,
-			[CallerMemberName] string memberName = "",
-			[CallerFilePath] string sourceFilePath = "",
-			[CallerLineNumber] int sourceLineNumber = 0)
-		{
-			return SaveAsync(true, options, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
-		}
+			=> Save(true, options, memberName, sourceFilePath, sourceLineNumber);
 
 		public override int Save(
 			bool acceptAllChangesOnSuccess,
-			SaveOptions? options = null,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> Save(acceptAllChangesOnSuccess, null, memberName, sourceFilePath, sourceLineNumber);
+
+		public override int Save(
+			bool acceptAllChangesOnSuccess,
+			SaveOptions? options,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",
 			[CallerLineNumber] int sourceLineNumber = 0)
@@ -79,6 +73,21 @@ namespace Raider.EntityFrameworkCore
 		}
 
 		public override Task<int> SaveAsync(
+			CancellationToken cancellationToken = default,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> SaveAsync(true, null, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+
+		public override Task<int> SaveAsync(
+			SaveOptions? options,
+			CancellationToken cancellationToken = default,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> SaveAsync(true, options, cancellationToken, memberName, sourceFilePath, sourceLineNumber);
+
+		public override Task<int> SaveAsync(
 			bool acceptAllChangesOnSuccess,
 			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
@@ -88,7 +97,7 @@ namespace Raider.EntityFrameworkCore
 
 		public override async Task<int> SaveAsync(
 			bool acceptAllChangesOnSuccess,
-			SaveOptions? options = null,
+			SaveOptions? options,
 			CancellationToken cancellationToken = default,
 			[CallerMemberName] string memberName = "",
 			[CallerFilePath] string sourceFilePath = "",

@@ -95,7 +95,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		public static ICollection<TTarget>? MapToList(
 			IEnumerable<TSource>? source,
 			ICollection<TTarget>? target,
-			Dictionary<IFrom, ITo> dict,
+			Dictionary<IFrom, ITo>? dict,
 			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TTarget?>?, TTarget?> map,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
@@ -103,6 +103,9 @@ namespace Raider.EntityFrameworkCore.Mapping
 		{
 			if (map == null)
 				throw new ArgumentNullException(nameof(map));
+
+			if (dict == null)
+				dict = new Dictionary<IFrom, ITo>();
 
 			if (target == null)
 				return MapToList(source, (List<TTarget>?)target, dict, map, referenceModifier, conditions, postMapAction);
@@ -118,7 +121,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		private static List<TTarget>? MapToList(
 			IEnumerable<TSource>? source,
 			List<TTarget>? target,
-			Dictionary<IFrom, ITo> dict,
+			Dictionary<IFrom, ITo>? dict,
 			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TTarget?>?, TTarget?> map,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
@@ -129,6 +132,9 @@ namespace Raider.EntityFrameworkCore.Mapping
 				target?.Clear();
 				return null;
 			}
+
+			if (dict == null)
+				dict = new Dictionary<IFrom, ITo>();
 
 			var targetCount = target?.Count ?? 0;
 
@@ -184,7 +190,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		private static HashSet<TTarget>? MapToList(
 			IEnumerable<TSource>? source,
 			HashSet<TTarget>? target,
-			Dictionary<IFrom, ITo> dict,
+			Dictionary<IFrom, ITo>? dict,
 			Func<TSource, TTarget?, Dictionary<IFrom, ITo>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TTarget?>?, TTarget?> map,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
@@ -195,6 +201,9 @@ namespace Raider.EntityFrameworkCore.Mapping
 				target?.Clear();
 				return null;
 			}
+
+			if (dict == null)
+				dict = new Dictionary<IFrom, ITo>();
 
 			var targetCount = target?.Count ?? 0;
 
@@ -352,7 +361,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		public static ICollection<TSource>? CopyList(
 			IEnumerable<TSource>? source,
 			ICollection<TSource>? target,
-			Dictionary<IFrom, IFrom> dict,
+			Dictionary<IFrom, IFrom>? dict,
 			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TSource?>?, TSource?> copy,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
@@ -360,6 +369,9 @@ namespace Raider.EntityFrameworkCore.Mapping
 		{
 			if (copy == null)
 				throw new ArgumentNullException(nameof(copy));
+
+			if (dict == null)
+				dict = new Dictionary<IFrom, IFrom>();
 
 			if (target == null)
 				return CopyList(source, (List<TSource>?)target, dict, copy, referenceModifier, conditions, postMapAction);
@@ -375,7 +387,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		private static List<TSource>? CopyList(
 			IEnumerable<TSource>? source,
 			List<TSource>? target,
-			Dictionary<IFrom, IFrom> dict,
+			Dictionary<IFrom, IFrom>? dict,
 			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TSource?>?, TSource?> copy,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
@@ -386,6 +398,9 @@ namespace Raider.EntityFrameworkCore.Mapping
 				target?.Clear();
 				return null;
 			}
+
+			if (dict == null)
+				dict = new Dictionary<IFrom, IFrom>();
 
 			var targetCount = target?.Count ?? 0;
 
@@ -441,7 +456,7 @@ namespace Raider.EntityFrameworkCore.Mapping
 		private static HashSet<TSource>? CopyList(
 			IEnumerable<TSource>? source,
 			HashSet<TSource>? target,
-			Dictionary<IFrom, IFrom> dict,
+			Dictionary<IFrom, IFrom>? dict,
 			Func<TSource, TSource?, Dictionary<IFrom, IFrom>, ReferenceModifier, Action<MappingConditions<TSource>>?, Action<TSource?, TSource?>?, TSource?> copy,
 			ReferenceModifier referenceModifier = ReferenceModifier.SkipAllReferences,
 			Action<MappingConditions<TSource>>? conditions = null,
@@ -452,6 +467,9 @@ namespace Raider.EntityFrameworkCore.Mapping
 				target?.Clear();
 				return null;
 			}
+
+			if (dict == null)
+				dict = new Dictionary<IFrom, IFrom>();
 
 			var targetCount = target?.Count ?? 0;
 
