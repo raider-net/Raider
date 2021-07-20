@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Concurrence;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -258,8 +260,11 @@ namespace Raider.EntityFrameworkCore
 					switch (entry.State)
 					{
 						case EntityState.Added:
-						case EntityState.Modified:
 							synchronizable.SyncToken = Guid.NewGuid();
+							break;
+						case EntityState.Modified:
+							if (WasModifiedNotIgnorredProperty(entry, synchronizable))
+								synchronizable.SyncToken = Guid.NewGuid();
 							break;
 
 						default:
@@ -267,6 +272,18 @@ namespace Raider.EntityFrameworkCore
 					}
 				}
 			}
+		}
+
+		protected bool WasModifiedNotIgnorredProperty(EntityEntry entry, ISynchronizable synchronizable)
+		{
+			if (entry == null || synchronizable == null)
+				return false;
+
+			var ignoredProperties = synchronizable.GetIgnoredSynchronizationProperties();
+			if (ignoredProperties == null || ignoredProperties.Count == 0)
+				return true;
+
+			return entry.Properties.Any(prop => prop.IsModified && !ignoredProperties.Contains(prop.Metadata.Name));
 		}
 	}
 }
