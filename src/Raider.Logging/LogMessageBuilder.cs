@@ -267,6 +267,11 @@ namespace Raider.Logging
 
 	public class LogMessageBuilder : LogMessageBuilderBase<LogMessageBuilder, ILogMessage>
 	{
+		public LogMessageBuilder(MethodLogScope methodLogScope)
+			: this(methodLogScope?.TraceInfo!)
+		{
+		}
+
 		public LogMessageBuilder(ITraceInfo traceInfo)
 			: this(new LogMessage(traceInfo))
 		{

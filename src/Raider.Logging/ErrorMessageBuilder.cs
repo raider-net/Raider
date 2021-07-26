@@ -34,6 +34,11 @@ namespace Raider.Logging
 
 	public class ErrorMessageBuilder : ErrorMessageBuilderBase<ErrorMessageBuilder, IErrorMessage>
 	{
+		public ErrorMessageBuilder(MethodLogScope methodLogScope)
+			: this(methodLogScope?.TraceInfo!)
+		{
+		}
+
 		public ErrorMessageBuilder(ITraceInfo traceInfo)
 			: this(new ErrorMessage(traceInfo))
 		{
