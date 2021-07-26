@@ -35,11 +35,31 @@ namespace Raider.Services.Commands
 
 	public class CommandResult<T> : CommandResult, ICommandResult<T>, ICommandResult
 	{
-		public T? Result { get; set; }
+		public bool ResultWasSet { get; private set; }
+
+		private T? _result;
+		public T? Result
+		{
+			get
+			{
+				return _result;
+			}
+			set
+			{
+				_result = value;
+				ResultWasSet = true;
+			}
+		}
 
 		internal CommandResult()
 			: base()
 		{
+		}
+
+		public void ClearResult()
+		{
+			_result = default;
+			ResultWasSet = false;
 		}
 	}
 }

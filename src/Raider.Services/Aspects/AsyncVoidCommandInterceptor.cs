@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Raider.Services.Aspects
 {
-	public class AsyncCommandInterceptor<TCommand, TContext, TBuilder> : InterceptorBase<TContext, TBuilder>, IAsyncCommandInterceptor<TCommand>
+	public class AsyncCommandInterceptor<TCommand, TContext, TBuilder> : ServiceInterceptorBase<TContext, TBuilder>, IAsyncCommandInterceptor<TCommand>
 		where TCommand : ICommand
 		where TContext : CommandHandlerContext
 		where TBuilder : CommandHandlerContext.Builder<TContext>
@@ -168,7 +168,7 @@ namespace Raider.Services.Aspects
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.ExecuteAsync)} returned null. Expected {typeof(ICommandResult).FullName}");
 
-						resultBuilder.CopyAllHasError(executeResult);
+						resultBuilder.MergeAllHasError(executeResult);
 					}
 
 					if (result.HasError)

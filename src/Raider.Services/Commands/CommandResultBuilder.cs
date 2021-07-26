@@ -17,7 +17,7 @@ namespace Raider.Services.Commands
 
 		bool MergeHasError(ICommandResult otherCommandResult);
 
-		bool CopyAllHasError(ICommandResult otherCommandResult);
+		bool MergeAllHasError(ICommandResult otherCommandResult);
 
 
 		bool MergeHasError(MethodLogScope scope, ValidationResult validationResult);
@@ -127,7 +127,7 @@ namespace Raider.Services.Commands
 			return _commandResult.HasError;
 		}
 
-		public bool CopyAllHasError(ICommandResult otherCommandResult)
+		public bool MergeAllHasError(ICommandResult otherCommandResult)
 		{
 			if (otherCommandResult != null)
 			{
@@ -165,12 +165,12 @@ namespace Raider.Services.Commands
 			{
 				if (failure.Severity == ValidationSeverity.Error)
 				{
-					var errorMessage = ValidationFailureToErrorMessage(traceInfo, failure);
+					var errorMessage = CommandResultBuilderBase<TBuilder, TObject>.ValidationFailureToErrorMessage(traceInfo, failure);
 					_commandResult.ErrorMessages.Add(errorMessage);
 				}
 				else
 				{
-					var warnigMessage = ValidationFailureToWarningMessage(traceInfo, failure);
+					var warnigMessage = CommandResultBuilderBase<TBuilder, TObject>.ValidationFailureToWarningMessage(traceInfo, failure);
 					_commandResult.WarningMessages.Add(warnigMessage);
 				}
 			}
@@ -178,7 +178,7 @@ namespace Raider.Services.Commands
 			return _commandResult.HasError;
 		}
 
-		private IErrorMessage ValidationFailureToErrorMessage(ITraceInfo traceInfo, IValidationFailure failure)
+		private static IErrorMessage ValidationFailureToErrorMessage(ITraceInfo traceInfo, IValidationFailure failure)
 		{
 			if (failure == null)
 				throw new ArgumentNullException(nameof(failure));
@@ -193,7 +193,7 @@ namespace Raider.Services.Commands
 			return errorMessageBuilder.Build();
 		}
 
-		private ILogMessage ValidationFailureToWarningMessage(ITraceInfo traceInfo, IValidationFailure failure)
+		private static ILogMessage ValidationFailureToWarningMessage(ITraceInfo traceInfo, IValidationFailure failure)
 		{
 			if (failure == null)
 				throw new ArgumentNullException(nameof(failure));
@@ -243,7 +243,7 @@ namespace Raider.Services.Commands
 		}
 
 		public TBuilder WithSuccess(MethodLogScope scope, Action<LogMessageBuilder>? logMessageConfigurator)
-			=> WithSuccess(scope?.TraceInfo, logMessageConfigurator);
+			=> WithSuccess(scope?.TraceInfo!, logMessageConfigurator);
 
 		public TBuilder WithSuccess(ITraceInfo traceInfo, Action<LogMessageBuilder>? logMessageConfigurator)
 		{
@@ -256,7 +256,7 @@ namespace Raider.Services.Commands
 		}
 
 		public TBuilder WithWarn(MethodLogScope scope, Action<LogMessageBuilder>? logMessageConfigurator)
-			=> WithWarn(scope?.TraceInfo, logMessageConfigurator);
+			=> WithWarn(scope?.TraceInfo!, logMessageConfigurator);
 
 		public TBuilder WithWarn(ITraceInfo traceInfo, Action<LogMessageBuilder>? logMessageConfigurator)
 		{
@@ -269,7 +269,7 @@ namespace Raider.Services.Commands
 		}
 
 		public TBuilder WithError(MethodLogScope scope, Action<ErrorMessageBuilder>? errorMessageConfigurator)
-			=> WithError(scope?.TraceInfo, errorMessageConfigurator);
+			=> WithError(scope?.TraceInfo!, errorMessageConfigurator);
 
 		public TBuilder WithError(ITraceInfo traceInfo, Action<ErrorMessageBuilder>? errorMessageConfigurator)
 		{
@@ -364,6 +364,9 @@ namespace Raider.Services.Commands
 
 			return new CommandResultBuilder(commandResult);
 		}
+
+		public static ICommandResult Empty()
+			=> new CommandResultBuilder().Build();
 	}
 
 	public interface ICommandResultBuilder<TBuilder, T, TObject> : ICommandResultBuilder<TBuilder, TObject>
@@ -372,7 +375,9 @@ namespace Raider.Services.Commands
 	{
 		TBuilder WithResult(T? data);
 
-		bool CopyAllHasError(ICommandResult<T> otherCommandResult);
+		TBuilder ClearResult();
+
+		bool MergeAllHasError(ICommandResult<T> otherCommandResult);
 	}
 
 	public abstract class CommandResultBuilderBase<TBuilder, T, TObject> : CommandResultBuilderBase<TBuilder, TObject>, ICommandResultBuilder<TBuilder, T, TObject>
@@ -395,7 +400,13 @@ namespace Raider.Services.Commands
 			return _builder;
 		}
 
-		public bool CopyAllHasError(ICommandResult<T> otherCommandResult)
+		public TBuilder ClearResult()
+		{
+			_commandResult.ClearResult();
+			return _builder;
+		}
+
+		public bool MergeAllHasError(ICommandResult<T> otherCommandResult)
 		{
 			if (otherCommandResult != null)
 			{
@@ -452,5 +463,11 @@ namespace Raider.Services.Commands
 
 			return new CommandResultBuilder((CommandResult<T>)builder._commandResult);
 		}
+
+		public static ICommandResult<T> Empty()
+			=> new CommandResultBuilder<T>().Build();
+
+		public static ICommandResult<T> FromResult(T result)
+			=> new CommandResultBuilder<T>().WithResult(result).Build();
 	}
 }

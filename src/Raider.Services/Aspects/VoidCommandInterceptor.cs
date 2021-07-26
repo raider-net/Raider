@@ -12,7 +12,7 @@ using System;
 
 namespace Raider.Services.Aspects
 {
-	public class CommandInterceptor<TCommand, TContext, TBuilder> : InterceptorBase<TContext, TBuilder>, ICommandInterceptor<TCommand>
+	public class CommandInterceptor<TCommand, TContext, TBuilder> : ServiceInterceptorBase<TContext, TBuilder>, ICommandInterceptor<TCommand>
 		where TCommand : ICommand
 		where TContext : CommandHandlerContext
 		where TBuilder : CommandHandlerContext.Builder<TContext>
@@ -166,7 +166,7 @@ namespace Raider.Services.Aspects
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.Execute)} returned null. Expected {typeof(ICommandResult).FullName}");
 
-						resultBuilder.CopyAllHasError(executeResult);
+						resultBuilder.MergeAllHasError(executeResult);
 					}
 
 					if (result.HasError)
