@@ -24,7 +24,21 @@ namespace Raider.QueryServices.Queries
 
 		public long? ResultCount { get; set; }
 
-		public T? Result { get; set; }
+		public bool ResultWasSet { get; private set; }
+
+		private T? _result;
+		public T? Result
+		{
+			get
+			{
+				return _result;
+			}
+			set
+			{
+				_result = value;
+				ResultWasSet = true;
+			}
+		}
 
 		internal QueryResult()
 		{
@@ -32,6 +46,12 @@ namespace Raider.QueryServices.Queries
 			SuccessMessages = new List<ILogMessage>();
 			WarningMessages = new List<ILogMessage>();
 			ErrorMessages = new List<IErrorMessage>();
+		}
+
+		public void ClearResult()
+		{
+			_result = default;
+			ResultWasSet = false;
 		}
 	}
 }

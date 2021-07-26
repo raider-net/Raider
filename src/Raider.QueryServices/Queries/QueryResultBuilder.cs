@@ -17,7 +17,7 @@ namespace Raider.QueryServices.Queries
 
 		bool MergeHasError<T>(IQueryResult<T> otherQueryResult);
 
-		bool CopyAllHasError(IQueryResult<TResult> otherQueryResult);
+		bool MergeAllHasError(IQueryResult<TResult> otherQueryResult);
 
 		bool MergeHasError(MethodLogScope scope, ValidationResult validationResult);
 
@@ -60,6 +60,8 @@ namespace Raider.QueryServices.Queries
 
 		TBuilder Merge(IQueryResult<TResult> otherQueryResult);
 		TBuilder WithResult(TResult? result);
+		
+		TBuilder ClearResult();
 	}
 
 	public abstract class QueryResultBuilderBase<TBuilder, TResult, TObject> : IQueryResultBuilder<TBuilder, TResult, TObject>
@@ -126,7 +128,7 @@ namespace Raider.QueryServices.Queries
 			return _queryResult.HasError;
 		}
 
-		public bool CopyAllHasError(IQueryResult<TResult> otherQueryResult)
+		public bool MergeAllHasError(IQueryResult<TResult> otherQueryResult)
 		{
 			if (otherQueryResult != null)
 			{
@@ -166,12 +168,12 @@ namespace Raider.QueryServices.Queries
 			{
 				if (failure.Severity == ValidationSeverity.Error)
 				{
-					var errorMessage = ValidationFailureToErrorMessage(traceInfo, failure);
+					var errorMessage = QueryResultBuilderBase<TBuilder, TResult, TObject>.ValidationFailureToErrorMessage(traceInfo, failure);
 					_queryResult.ErrorMessages.Add(errorMessage);
 				}
 				else
 				{
-					var warnigMessage = ValidationFailureToWarningMessage(traceInfo, failure);
+					var warnigMessage = QueryResultBuilderBase<TBuilder, TResult, TObject>.ValidationFailureToWarningMessage(traceInfo, failure);
 					_queryResult.WarningMessages.Add(warnigMessage);
 				}
 			}
@@ -179,7 +181,7 @@ namespace Raider.QueryServices.Queries
 			return _queryResult.HasError;
 		}
 
-		private IErrorMessage ValidationFailureToErrorMessage(ITraceInfo traceInfo, IValidationFailure failure)
+		private static IErrorMessage ValidationFailureToErrorMessage(ITraceInfo traceInfo, IValidationFailure failure)
 		{
 			if (failure == null)
 				throw new ArgumentNullException(nameof(failure));
@@ -194,7 +196,7 @@ namespace Raider.QueryServices.Queries
 			return errorMessageBuilder.Build();
 		}
 
-		private ILogMessage ValidationFailureToWarningMessage(ITraceInfo traceInfo, IValidationFailure failure)
+		private static ILogMessage ValidationFailureToWarningMessage(ITraceInfo traceInfo, IValidationFailure failure)
 		{
 			if (failure == null)
 				throw new ArgumentNullException(nameof(failure));
@@ -244,7 +246,7 @@ namespace Raider.QueryServices.Queries
 			return _builder;
 		}
 		public TBuilder WithSuccess(MethodLogScope scope, Action<LogMessageBuilder>? logMessageConfigurator)
-			=> WithSuccess(scope?.TraceInfo, logMessageConfigurator);
+			=> WithSuccess(scope?.TraceInfo!, logMessageConfigurator);
 
 		public TBuilder WithSuccess(ITraceInfo traceInfo, Action<LogMessageBuilder>? logMessageConfigurator)
 		{
@@ -256,7 +258,7 @@ namespace Raider.QueryServices.Queries
 			return _builder;
 		}
 		public TBuilder WithWarn(MethodLogScope scope, Action<LogMessageBuilder>? logMessageConfigurator)
-			=> WithWarn(scope?.TraceInfo, logMessageConfigurator);
+			=> WithWarn(scope?.TraceInfo!, logMessageConfigurator);
 
 		public TBuilder WithWarn(ITraceInfo traceInfo, Action<LogMessageBuilder>? logMessageConfigurator)
 		{
@@ -268,7 +270,7 @@ namespace Raider.QueryServices.Queries
 			return _builder;
 		}
 		public TBuilder WithError(MethodLogScope scope, Action<ErrorMessageBuilder>? errorMessageConfigurator)
-			=> WithError(scope?.TraceInfo, errorMessageConfigurator);
+			=> WithError(scope?.TraceInfo!, errorMessageConfigurator);
 
 		public TBuilder WithError(ITraceInfo traceInfo, Action<ErrorMessageBuilder>? errorMessageConfigurator)
 		{
@@ -342,6 +344,12 @@ namespace Raider.QueryServices.Queries
 			return _builder;
 		}
 
+		public TBuilder ClearResult()
+		{
+			_queryResult.ClearResult();
+			return _builder;
+		}
+
 		#endregion API
 	}
 
@@ -372,5 +380,11 @@ namespace Raider.QueryServices.Queries
 
 			return new QueryResultBuilder<TResult>(queryResult);
 		}
+
+		public static IQueryResult<TResult> Empty()
+			=> new QueryResultBuilder<TResult>().Build();
+
+		public static IQueryResult<TResult> FromResult(TResult result)
+			=> new QueryResultBuilder<TResult>().WithResult(result).Build();
 	}
 }

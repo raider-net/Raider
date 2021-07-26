@@ -168,7 +168,7 @@ namespace Raider.QueryServices.Aspects
 						if (executeResult == null)
 							throw new InvalidOperationException($"Handler {handler.GetType().FullName}.{nameof(handler.ExecuteAsync)} returned null. Expected {typeof(IQueryResult<TResult>).FullName}");
 
-						resultBuilder.CopyAllHasError(executeResult);
+						resultBuilder.MergeAllHasError(executeResult);
 					}
 
 					if (result.HasError)
