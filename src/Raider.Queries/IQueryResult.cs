@@ -21,6 +21,10 @@ namespace Raider.Queries
 
 		long? ResultCount { get; set; }
 
+		bool ResultWasSet { get; }
+
 		TResult? Result { get; set; }
+
+		void ClearResult();
 	}
 }

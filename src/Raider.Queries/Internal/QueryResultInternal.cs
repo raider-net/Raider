@@ -28,6 +28,26 @@ namespace Raider.Queries.Internal
 			ErrorMessages = new List<IErrorMessage>();
 		}
 
-		public TResult? Result { get; set; }
+		public bool ResultWasSet { get; private set; }
+
+		private TResult? _result;
+		public TResult? Result
+		{
+			get
+			{
+				return _result;
+			}
+			set
+			{
+				_result = value;
+				ResultWasSet = true;
+			}
+		}
+
+		public void ClearResult()
+		{
+			_result = default;
+			ResultWasSet = false;
+		}
 	}
 }
