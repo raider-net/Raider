@@ -24,6 +24,9 @@ namespace Raider.Commands
 
 	public interface ICommandResult<TResult> : ICommandResult
 	{
+		bool ResultWasSet { get; }
 		TResult? Result { get; set; }
+
+		void ClearResult();
 	}
 }

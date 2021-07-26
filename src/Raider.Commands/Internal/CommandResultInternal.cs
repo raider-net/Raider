@@ -31,11 +31,31 @@ namespace Raider.Commands.Internal
 
 	internal class CommandResultInternal<TResult> : CommandResultInternal, ICommandResult<TResult>
 	{
+		public bool ResultWasSet { get; private set; }
+
+		private TResult? _result;
+		public TResult? Result
+		{
+			get
+			{
+				return _result;
+			}
+			set
+			{
+				_result = value;
+				ResultWasSet = true;
+			}
+		}
+
 		public CommandResultInternal()
 			: base()
 		{
 		}
 
-		public TResult? Result { get; set; }
+		public void ClearResult()
+		{
+			_result = default;
+			ResultWasSet = false;
+		}
 	}
 }
