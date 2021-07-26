@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reflection;
 
-namespace Raider.Reflection
+namespace Raider.Reflection.Internal
 {
-	public interface IDelegateFactory
+	internal interface IDelegateFactory
 	{
 		Func<T?, object?> CreateGet<T>(MemberInfo memberInfo);
 

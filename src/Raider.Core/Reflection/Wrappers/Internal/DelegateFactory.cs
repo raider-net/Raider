@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Raider.Reflection
+namespace Raider.Reflection.Internal
 {
 	public delegate object ObjectConstructor<T>(params object?[] args);
 	public delegate TResult? MethodCall<T, TResult>(T? target, params object?[] args);
 
-	public class DelegateFactory : IDelegateFactory
+	internal class DelegateFactory : IDelegateFactory
 	{
 		private static readonly DelegateFactory _instance = new();
 		public static DelegateFactory Instance => _instance;
