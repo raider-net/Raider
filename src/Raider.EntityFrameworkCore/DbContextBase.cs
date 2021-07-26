@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Concurrence;
 using Raider.EntityFrameworkCore.Database;
+using Raider.EntityFrameworkCore.QueryCache;
 using Raider.EntityFrameworkCore.Synchronyzation;
 using Raider.Logging.SerilogEx;
 using Raider.Trace;
@@ -25,6 +26,7 @@ namespace Raider.EntityFrameworkCore
 
 		protected DbConnection? ExternalDbConnection { get; private set; }
 		protected string? ExternalConnectionString { get; private set; }
+		protected internal QueryCacheManager QueryCacheManager { get; private set; }
 
 		private DbConnection? dbConnection;
 		public DbConnection DbConnection
@@ -58,6 +60,7 @@ namespace Raider.EntityFrameworkCore
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_applicationContext = appContext ?? throw new ArgumentNullException(nameof(appContext));
+			QueryCacheManager = new QueryCacheManager(false);
 		}
 
 		protected DbContextBase(ILogger logger, IApplicationContext appContext)
@@ -65,6 +68,7 @@ namespace Raider.EntityFrameworkCore
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_applicationContext = appContext ?? throw new ArgumentNullException(nameof(appContext));
+			QueryCacheManager = new QueryCacheManager(false);
 		}
 
 		private bool initialized = false;
@@ -284,6 +288,34 @@ namespace Raider.EntityFrameworkCore
 				return true;
 
 			return entry.Properties.Any(prop => prop.IsModified && !ignoredProperties.Contains(prop.Metadata.Name));
+		}
+
+		private readonly object _configureDbContextCacheLock = new();
+		public void ConfigureDbContextCache(Action<QueryCacheManager> configure, bool force)
+		{
+			if (configure == null || (!force && QueryCacheManager.IsEnabled))
+				return;
+
+			lock (_configureDbContextCacheLock)
+			{
+				if (force || !QueryCacheManager.IsEnabled)
+					configure(QueryCacheManager);
+			}
+		}
+
+		public void EnableDbContextCache()
+			=> ConfigureDbContextCache(c => c.IsEnabled = true, false);
+
+		public override void Dispose()
+		{
+			QueryCacheManager.Dispose();
+			base.Dispose();
+		}
+
+		public override ValueTask DisposeAsync()
+		{
+			QueryCacheManager.Dispose();
+			return base.DisposeAsync();
 		}
 	}
 }
