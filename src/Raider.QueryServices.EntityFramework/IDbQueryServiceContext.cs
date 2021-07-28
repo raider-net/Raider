@@ -9,8 +9,12 @@ namespace Raider.QueryServices.EntityFramework
 	{
 		IDbContextTransaction? DbContextTransaction { get;  }
 
-		TContext CreateNewDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
+		TContext CreateNewDbContext<TContext>(
+			IDbContextTransaction? dbContextTransaction = null,
+			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
+			IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext;
+
 		TContext GetOrCreateDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext;
 	}

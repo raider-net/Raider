@@ -38,12 +38,13 @@ namespace Raider.QueryServices.EntityFramework
 		}
 
 		public TContext CreateNewDbContext<TContext>(
+			IDbContextTransaction? dbContextTransaction = null,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null)
 			where TContext : DbContext
 			=> _queryHandlerContext == null
 				? throw new InvalidOperationException($"{nameof(_queryHandlerContext)} == null")
-				: _queryHandlerContext.CreateNewDbContext<TContext>(transactionUsage, transactionIsolationLevel);
+				: _queryHandlerContext.CreateNewDbContext<TContext>(dbContextTransaction, transactionUsage, transactionIsolationLevel);
 
 		public TContext GetOrCreateDbContext<TContext>(
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
