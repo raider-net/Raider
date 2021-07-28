@@ -34,7 +34,6 @@ namespace Raider.Services
 
 		public Dictionary<object, object?> CommandHandlerItems => _commandHandlerContext.CommandHandlerItems;
 
-		public Type ForServiceType { get; private set; }
 		public bool AllowCommit { get; set; }
 		public Dictionary<object, object?> LocalItems { get; } = new Dictionary<object, object?>();
 
@@ -47,7 +46,6 @@ namespace Raider.Services
 		//	_commandHandlerContext = commandHandlerContext ?? throw new ArgumentNullException(nameof(commandHandlerContext));
 		//	OnSetCommandHandlerContext(_commandHandlerContext);
 		//	TraceInfo = new TraceInfoBuilder(currentTraceFrame, commandHandlerContext.TraceInfo).Build();
-		//	ForServiceType = serviceType;
 
 		//	var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
@@ -59,7 +57,6 @@ namespace Raider.Services
 		//	_commandHandlerContext = commandHandlerContext ?? throw new ArgumentNullException(nameof(commandHandlerContext));
 		//	OnSetCommandHandlerContext(_commandHandlerContext);
 		//	TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
-		//	ForServiceType = serviceType;
 
 		//	var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
@@ -71,7 +68,6 @@ namespace Raider.Services
 			_commandHandlerContext = commandHandlerContext ?? throw new ArgumentNullException(nameof(commandHandlerContext));
 			OnSetCommandHandlerContext(_commandHandlerContext);
 			TraceInfo = new TraceInfoBuilder(currentTraceFrame, commandHandlerContext.TraceInfo).Build();
-			ForServiceType = serviceType;
 
 			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 			var serviceLogger = loggerFactory.CreateLogger(serviceType);
@@ -83,11 +79,26 @@ namespace Raider.Services
 			_commandHandlerContext = commandHandlerContext ?? throw new ArgumentNullException(nameof(commandHandlerContext));
 			OnSetCommandHandlerContext(_commandHandlerContext);
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
-			ForServiceType = serviceType;
 
 			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 			var serviceLogger = loggerFactory.CreateLogger(serviceType);
 			Logger = serviceLogger;
+		}
+
+		internal void Init(ITraceFrame currentTraceFrame, CommandHandlerContext commandHandlerContext, ILogger logger)
+		{
+			Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_commandHandlerContext = commandHandlerContext ?? throw new ArgumentNullException(nameof(commandHandlerContext));
+			OnSetCommandHandlerContext(_commandHandlerContext);
+			TraceInfo = new TraceInfoBuilder(currentTraceFrame, commandHandlerContext.TraceInfo).Build();
+		}
+
+		internal void Init(ITraceInfo traceInfo, CommandHandlerContext commandHandlerContext, ILogger logger)
+		{
+			Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_commandHandlerContext = commandHandlerContext ?? throw new ArgumentNullException(nameof(commandHandlerContext));
+			OnSetCommandHandlerContext(_commandHandlerContext);
+			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
 
 		protected virtual void OnSetCommandHandlerContext(CommandHandlerContext commandHandlerContext)

@@ -95,6 +95,25 @@ namespace Raider.Services.Commands
 			return serviceContext;
 		}
 
+		public TServiceContext GetServiceContext<TServiceContext>(
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			where TServiceContext : ServiceContext, new()
+		{
+			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
+				.CallerMemberName(memberName)
+				.CallerFilePath(sourceFilePath)
+				.CallerLineNumber(sourceLineNumber);
+
+			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
+			var logger = loggerFactory.CreateLogger<TServiceContext>();
+
+			var serviceContext = new TServiceContext();
+			serviceContext.Init(traceFrameBuilder.Build(), this, logger);
+			return serviceContext;
+		}
+
 		public MethodLogScope CreateScope(
 			IEnumerable<MethodParameter>? methodParameters = null,
 			[CallerMemberName] string memberName = "",
