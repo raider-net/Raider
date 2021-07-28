@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Storage;
 using Raider.EntityFrameworkCore;
 using Raider.Services.EntityFramework.Commands;
 using System;
@@ -60,12 +61,15 @@ namespace Raider.Services.EntityFramework
 				DbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 		}
 
-		protected void SetDbContext<THandlerContext, TBuilder>()
+		protected void SetDbContext<THandlerContext, TBuilder>(IDbContextTransaction? dbContextTransaction = null)
 			where THandlerContext : DbCommandHandlerContext
 			where TBuilder : DbCommandHandlerContext.Builder<THandlerContext>
 		{
 			SetServiceContext<THandlerContext, TBuilder>(_serviceProvider, this.GetType());
-			SetDbContext(ServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
+			if (dbContextTransaction == null)
+				SetDbContext(ServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
+			else
+				SetDbContext(ServiceContext.CreateNewDbContext<TDbContext>(dbContextTransaction, TransactionUsage.ReuseOrCreateNew), true);
 		}
 
 		protected IQueryable<T> DefaultInternal<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
