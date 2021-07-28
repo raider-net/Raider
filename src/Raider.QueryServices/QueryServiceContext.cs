@@ -33,7 +33,6 @@ namespace Raider.QueryServices
 		public ILogger Logger { get; private set; }
 
 		public Dictionary<object, object?> CommandHandlerItems => _queryHandlerContext.CommandHandlerItems;
-		public Type ForServiceType { get; private set; }
 		public bool AllowCommit { get; set; }
 		public Dictionary<object, object?> LocalItems { get; } = new Dictionary<object, object?>();
 
@@ -45,7 +44,6 @@ namespace Raider.QueryServices
 		//{
 		//	_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
 		//	TraceInfo = new TraceInfoBuilder(currentTraceFrame, queryHandlerContext.TraceInfo).Build();
-		//	ForServiceType = serviceType;
 
 		//	var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
@@ -56,7 +54,6 @@ namespace Raider.QueryServices
 		//{
 		//	_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
 		//	TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
-		//	ForServiceType = serviceType;
 
 		//	var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 		//	var serviceLogger = loggerFactory.CreateLogger(serviceType);
@@ -67,7 +64,6 @@ namespace Raider.QueryServices
 			_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
 			OnSetQueryHandlerContext(_queryHandlerContext);
 			TraceInfo = new TraceInfoBuilder(currentTraceFrame, queryHandlerContext.TraceInfo).Build();
-			ForServiceType = serviceType;
 
 			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 			var serviceLogger = loggerFactory.CreateLogger(serviceType);
@@ -79,11 +75,26 @@ namespace Raider.QueryServices
 			_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
 			OnSetQueryHandlerContext(_queryHandlerContext);
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
-			ForServiceType = serviceType;
 
 			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 			var serviceLogger = loggerFactory.CreateLogger(serviceType);
 			Logger = serviceLogger;
+		}
+
+		internal void Init(ITraceFrame currentTraceFrame, QueryHandlerContext queryHandlerContext, ILogger logger)
+		{
+			Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
+			OnSetQueryHandlerContext(_queryHandlerContext);
+			TraceInfo = new TraceInfoBuilder(currentTraceFrame, queryHandlerContext.TraceInfo).Build();
+		}
+
+		internal void Init(ITraceInfo traceInfo, QueryHandlerContext queryHandlerContext, ILogger logger)
+		{
+			Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_queryHandlerContext = queryHandlerContext ?? throw new ArgumentNullException(nameof(queryHandlerContext));
+			OnSetQueryHandlerContext(_queryHandlerContext);
+			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
 
 		protected virtual void OnSetQueryHandlerContext(QueryHandlerContext queryHandlerContext)

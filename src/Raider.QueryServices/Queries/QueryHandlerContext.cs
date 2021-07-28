@@ -101,6 +101,25 @@ namespace Raider.QueryServices.Queries
 			return queryServiceContext;
 		}
 
+		public TQueryServiceContext GetQueryServiceContext<TQueryServiceContext>(
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			where TQueryServiceContext : QueryServiceContext, new()
+		{
+			var traceFrameBuilder = new TraceFrameBuilder(TraceInfo.TraceFrame)
+				.CallerMemberName(memberName)
+				.CallerFilePath(sourceFilePath)
+				.CallerLineNumber(sourceLineNumber);
+
+			var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
+			var logger = loggerFactory.CreateLogger<TQueryServiceContext>();
+
+			var serviceContext = new TQueryServiceContext();
+			serviceContext.Init(traceFrameBuilder.Build(), this, logger);
+			return serviceContext;
+		}
+
 		public MethodLogScope CreateScope(
 			IEnumerable<MethodParameter>? methodParameters = null,
 			[CallerMemberName] string memberName = "",

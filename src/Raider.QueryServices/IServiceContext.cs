@@ -5,7 +5,6 @@ namespace Raider.QueryServices
 {
 	public interface IServiceContext : IQueryServiceContext
 	{
-		Type ForServiceType { get; }
 		bool AllowCommit { get; set; }
 		Dictionary<object, object?> LocalItems { get; }
 
