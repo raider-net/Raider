@@ -44,23 +44,23 @@ namespace Raider.Messaging
 			ApplicationContext = serviceProvider.GetRequiredService<IApplicationContext>();
 		}
 
-		public async Task Login(IServiceProvider serviceProvider)
+		public async Task<RaiderPrincipal<int>?> Login(IServiceProvider serviceProvider)
 		{
 			if (!_idUser.HasValue)
-				return;
+				return null;
 
 			if (serviceProvider == null)
 				throw new ArgumentNullException(nameof(serviceProvider));
 
-			using (var spScope = serviceProvider.CreateScope())
-			{
-				var appCtx = spScope.ServiceProvider.GetRequiredService<IApplicationContext>();
-				var ti = appCtx.TraceInfo;
-			}
+			//using (var spScope = serviceProvider.CreateScope())
+			//{
+			//	var appCtx = spScope.ServiceProvider.GetRequiredService<IApplicationContext>();
+			//	var ti = appCtx.TraceInfo;
+			//}
 
 			var authenticationManager = serviceProvider.GetService<IServiceBusAuthenticationManager>();
 			if (authenticationManager == null)
-				return;
+				return null;
 
 			var authenticatedUser = await authenticationManager.CreateFromUserIdAsync(_idUser.Value, serviceProvider);
 			if (authenticatedUser == null)
@@ -69,6 +69,8 @@ namespace Raider.Messaging
 			var principal = RaiderPrincipal<int>.Create("ServiceBusAuth", authenticatedUser);
 
 			ApplicationContext.AddTraceFrame(TraceFrame.Create(), principal);
+
+			return principal;
 		}
 	}
 }

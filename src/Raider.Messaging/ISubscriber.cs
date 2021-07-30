@@ -20,6 +20,6 @@ namespace Raider.Messaging
 	public interface ISubscriber<TData> : ISubscriber, IComponent
 			where TData : IMessageData
 	{
-		Task<MessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken token = default);
+		Task<MessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken cancellationToken = default);
 	}
 }

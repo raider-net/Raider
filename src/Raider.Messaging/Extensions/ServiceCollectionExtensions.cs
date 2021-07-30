@@ -56,6 +56,7 @@ namespace Raider.Messaging.Extensions
 
 			services.TryAddSingleton<IServiceBusRegister>(register);
 			services.TryAddSingleton<IServiceBusPublisher, ServiceBusPublisher>();
+			services.TryAddSingleton<IServiceBusAuthentication, ServiceBusAuthentication>();
 
 			services.AddHostedService<ServiceBus>();
 

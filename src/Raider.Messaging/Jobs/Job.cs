@@ -69,7 +69,7 @@ namespace Raider.Messaging
 			State = ComponentState.Offline;
 		}
 
-		public abstract Task<ComponentState> ExecuteAsync(JobContext context, CancellationToken token = default);
+		public abstract Task<ComponentState> ExecuteAsync(JobContext context, CancellationToken cancellationToken = default);
 
 		Task IJob.InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 			=> InitializeAsync(serviceProvider, storage, messageBox, loggerFactory, cancellationToken);

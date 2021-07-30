@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raider.Extensions;
+using Raider.Identity;
 using Raider.Threading;
 using Raider.Trace;
 using System;
@@ -25,6 +26,8 @@ namespace Raider.Messaging
 
 		private bool _initialized;
 		private bool _started;
+
+		internal static RaiderPrincipal<int>? Principal { get; private set; }
 
 		public ServiceBus(
 			IOptions<ServiceBusOptions> options,
@@ -212,7 +215,7 @@ namespace Raider.Messaging
 			{
 				try
 				{
-					await _serviceBusHost.Login(_serviceProvider);
+					Principal = await _serviceBusHost.Login(_serviceProvider);
 					await InitializeAsync(startRetryCount, stoppingToken);
 				}
 				catch

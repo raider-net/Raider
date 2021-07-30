@@ -75,7 +75,7 @@ namespace Raider.Messaging
 			State = ComponentState.Offline;
 		}
 
-		public abstract Task<MessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken token = default);
+		public abstract Task<MessageResult> ProcessMessageAsync(SubscriberContext context, ISubscriberMessage<TData> message, CancellationToken cancellationToken = default);
 
 		private readonly AsyncLock _initLock = new AsyncLock();
 		async Task ISubscriber.InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
