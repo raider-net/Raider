@@ -8,7 +8,7 @@ namespace Raider.Messaging.PostgreSql
 		where TData : IMessageData
 	{
 		public Guid IdMessage { get; set; }
-		public Guid IdPublisherInstance { get; set; }
+		public Guid? IdPublisherInstance { get; set; }
 		public Guid? IdPreviousMessage { get; set; }
 		public DateTimeOffset CreatedUtc { get; set; }
 		public DateTimeOffset? ValidToUtc { get; set; }

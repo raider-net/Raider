@@ -7,7 +7,7 @@ namespace Raider.Messaging.Messages
 	{
 		public Guid IdMessage { get; set; }
 		public Guid? IdPreviousMessage { get; set; }
-		public Guid IdPublisherInstance { get; set; }
+		public Guid? IdPublisherInstance { get; set; }
 		public DateTimeOffset CreatedUtc { get; set; }
 		public DateTimeOffset? ValidToUtc { get; set; }
 		public bool IsRecovery { get; set; }

@@ -72,7 +72,7 @@ namespace Raider.Messaging.PostgreSql.Database
 			var subscriberMessage = new LoadedSubscriberMessage<TData>
 			{
 				IdMessage = reader.GetValueOrDefault<Guid>(0),
-				IdPublisherInstance = reader.GetValueOrDefault<Guid>(1),
+				IdPublisherInstance = reader.GetValueOrDefault<Guid?>(1),
 				IdPreviousMessage = reader.GetValueOrDefault<Guid?>(2),
 				CreatedUtc = reader.GetValueOrDefault<DateTime>(3),
 				ValidToUtc = reader.GetValueOrDefault<DateTime?>(4),
