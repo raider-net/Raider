@@ -31,6 +31,8 @@ namespace Raider.Logging.Database.PostgreSql
 				nameof(ILogMessage.DisplayPropertyName),
 				nameof(ILogMessage.ValidationFailure),
 				nameof(ILogMessage.IsValidationError),
+				nameof(ILogMessage.CustomData),
+				nameof(ILogMessage.Tags),
 				nameof(ILogMessage.TraceInfo.CorrelationId)
 			};
 
@@ -56,6 +58,8 @@ namespace Raider.Logging.Database.PostgreSql
 				{ nameof(ILogMessage.DisplayPropertyName), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.ValidationFailure), NpgsqlDbType.Varchar },
 				{ nameof(ILogMessage.IsValidationError), NpgsqlDbType.Boolean },
+				{ nameof(ILogMessage.CustomData), NpgsqlDbType.Varchar }, //json
+				{ nameof(ILogMessage.Tags), NpgsqlDbType.Varchar }, //json
 				{ nameof(ILogMessage.TraceInfo.CorrelationId), NpgsqlDbType.Uuid }
 			};
 		}

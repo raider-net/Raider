@@ -19,6 +19,8 @@ CREATE TABLE aud."LogMessage" (
 	"DisplayPropertyName" varchar(255)  NULL,
 	"ValidationFailure" text NULL,
 	"IsValidationError" bool  NULL,
+	"CustomData" text NULL,
+	"Tags" text NULL,
 	"CorrelationId" uuid  NULL
 );
 GRANT INSERT, SELECT, UPDATE, DELETE ON TABLE aud."LogMessage" TO postgres;
