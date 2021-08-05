@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using Raider.Extensions;
 using Raider.Logging.Extensions;
 using Raider.Trace;
 using System;
@@ -84,6 +85,9 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 			var statusCode = context.Response.StatusCode;
 			var ex = edi?.SourceException;
 			var error = _logger.LogErrorMessage(traceInfo, x => x.ExceptionInfo(ex).Detail($"StatusCode = {statusCode}"));
+
+			if (ex != null)
+				ex.AppendLogMessage(error);
 
 			if (_options.OnErrorOccurs != null)
 			{
