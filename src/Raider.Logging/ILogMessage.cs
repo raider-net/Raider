@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Raider.Trace;
 using System;
+using System.Collections.Generic;
 
 namespace Raider.Logging
 {
@@ -47,6 +48,10 @@ namespace Raider.Logging
 		string? DisplayPropertyName { get; set; }
 
 		bool? IsValidationError { get; set; }
+
+		Dictionary<string, string>? CustomData { get; set; }
+
+		List<string>? Tags { get; set; }
 
 		string ToString(bool withId, bool withPropertyName, bool withDetail);
 	}

@@ -3,6 +3,11 @@ using Raider.Trace;
 using System;
 using System.Collections.Generic;
 using System.Text;
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+using Newtonsoft.Json;
+#elif NET5_0
+using System.Text.Json;
+#endif
 
 namespace Raider.Logging
 {
@@ -29,6 +34,8 @@ namespace Raider.Logging
 		public object? ValidationFailure { get; set; }
 		public string? DisplayPropertyName { get; set; }
 		public bool? IsValidationError { get; set; }
+		public Dictionary<string, string>? CustomData { get; set; }
+		public List<string>? Tags { get; set; }
 
 		internal LogMessage(ITraceInfo traceInfo)
 		{
@@ -95,6 +102,20 @@ namespace Raider.Logging
 
 			if (TraceInfo.CorrelationId.HasValue)
 				dict.Add(nameof(TraceInfo.CorrelationId), TraceInfo.CorrelationId.Value);
+
+			if (CustomData != null && 0 < CustomData.Count)
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+				dict.Add(nameof(CustomData), JsonConvert.SerializeObject(CustomData));
+#elif NET5_0
+				dict.Add(nameof(CustomData), JsonSerializer.Serialize(CustomData));
+#endif
+
+			if (Tags != null && 0 < Tags.Count)
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+				dict.Add(nameof(Tags), JsonConvert.SerializeObject(Tags));
+#elif NET5_0
+				dict.Add(nameof(Tags), JsonSerializer.Serialize(Tags));
+#endif
 
 			return dict;
 		}

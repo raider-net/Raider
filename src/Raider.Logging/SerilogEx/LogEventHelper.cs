@@ -9,6 +9,10 @@ namespace Raider.Logging.SerilogEx
 	public static class LogEventHelper
 	{
 		public const string IS_DB_LOG = "IsDbLog";
+		public const string SCOPE = "Scope";
+		private static readonly ScalarValue _methodCallId = new ScalarValue(nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId));
+		private static readonly ScalarValue _correlationId = new ScalarValue(nameof(ILogMessage.TraceInfo.CorrelationId));
+		private static readonly ScalarValue _isDbLog = new ScalarValue(IS_DB_LOG);
 
 		public static bool IsLogType(string logType, LogEvent logEvent)
 		=> logEvent != null
@@ -39,6 +43,33 @@ namespace Raider.Logging.SerilogEx
 					{
 						result.Add(Serilog.Core.Constants.SourceContextPropertyName, sourceContext);
 					}
+				}
+			}
+
+			var list = new List<string>();
+			if (logEvent.Properties.TryGetValue(SCOPE, out LogEventPropertyValue? scopeValue))
+			{
+				if (scopeValue is SequenceValue sequenceValue)
+				{
+					var elements = sequenceValue.Elements.Reverse();
+					foreach (var element in elements)
+					{
+						if (element is DictionaryValue dict && dict.Elements != null)
+						{
+							if (dict.Elements != null)
+							{
+								list.AddRange(dict.Elements.Where(x => !x.Key.Equals(_methodCallId) && !x.Key.Equals(_correlationId) && !x.Key.Equals(_isDbLog)).Select(x => x.ToString()));
+							}
+						}
+						else
+						{
+							list.Add(scopeValue.ToString());
+						}
+					}
+				}
+				else
+				{
+					list.Add(scopeValue.ToString());
 				}
 			}
 
@@ -91,7 +122,7 @@ namespace Raider.Logging.SerilogEx
 					}
 				}
 			}
-			if (logEvent.Properties.TryGetValue("Scope", out LogEventPropertyValue? scopeValue))
+			if (logEvent.Properties.TryGetValue(SCOPE, out LogEventPropertyValue? scopeValue))
 			{
 				if (scopeValue is SequenceValue sequenceValue)
 				{
@@ -117,7 +148,7 @@ namespace Raider.Logging.SerilogEx
 					{
 						if (element is DictionaryValue dict && dict.Elements != null)
 						{
-							if (!methodCallIdIsSet && dict.Elements.TryGetValue(new ScalarValue(nameof(ILogMessage.TraceInfo.TraceFrame.MethodCallId)), out LogEventPropertyValue? scopeMethodCallIdValue))
+							if (!methodCallIdIsSet && dict.Elements.TryGetValue(_methodCallId, out LogEventPropertyValue? scopeMethodCallIdValue))
 							{
 								if (scopeMethodCallIdValue is ScalarValue scalarValue)
 								{
@@ -129,7 +160,7 @@ namespace Raider.Logging.SerilogEx
 								}
 							}
 
-							if (!correlationIdIsSet && dict.Elements.TryGetValue(new ScalarValue(nameof(ILogMessage.TraceInfo.CorrelationId)), out LogEventPropertyValue? scopeCorrelationIdValue))
+							if (!correlationIdIsSet && dict.Elements.TryGetValue(_correlationId, out LogEventPropertyValue? scopeCorrelationIdValue))
 							{
 								if (scopeCorrelationIdValue is ScalarValue scalarValue)
 								{
@@ -141,7 +172,7 @@ namespace Raider.Logging.SerilogEx
 								}
 							}
 
-							if (!isDBLogIsSet && dict.Elements.TryGetValue(new ScalarValue(IS_DB_LOG), out LogEventPropertyValue? scopeIsDBLogValue))
+							if (!isDBLogIsSet && dict.Elements.TryGetValue(_isDbLog, out LogEventPropertyValue? scopeIsDBLogValue))
 							{
 								if (scopeIsDBLogValue is ScalarValue scalarValue)
 								{

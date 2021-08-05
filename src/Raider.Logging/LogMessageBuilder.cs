@@ -3,6 +3,7 @@ using Raider.Diagnostics;
 using Raider.Extensions;
 using Raider.Trace;
 using System;
+using System.Collections.Generic;
 
 namespace Raider.Logging
 {
@@ -53,6 +54,14 @@ namespace Raider.Logging
 		TBuilder IsValidationError(bool isValidationError, bool force = false);
 
 		TBuilder ExceptionInfo(Exception? exception, bool force = false);
+
+		TBuilder CustomData(Dictionary<string, string> customData, bool force = false);
+
+		TBuilder Tags(List<string> tags, bool force = false);
+
+		TBuilder AddCustomData(string key, string value, bool force = false);
+
+		TBuilder AddTag(string tag, bool force = false);
 	}
 
 	public abstract class LogMessageBuilderBase<TBuilder, TObject> : ILogMessageBuilder<TBuilder, TObject>
@@ -261,6 +270,48 @@ namespace Raider.Logging
 
 				_logMessage.IsValidationError = false; //TODO TOM: exception is RaiderValidationException;
 			}
+			return _builder;
+		}
+
+		public TBuilder CustomData(Dictionary<string, string> customData, bool force = false)
+		{
+			if (force || _logMessage.CustomData == null || _logMessage.CustomData.Count == 0)
+				_logMessage.CustomData = customData;
+
+			return _builder;
+		}
+
+		public TBuilder Tags(List<string> tags, bool force = false)
+		{
+			if (force || _logMessage.Tags == null || _logMessage.Tags.Count == 0)
+				_logMessage.Tags = tags;
+
+			return _builder;
+		}
+
+		public TBuilder AddCustomData(string key, string value, bool force = false)
+		{
+			if (_logMessage.CustomData == null)
+				_logMessage.CustomData = new Dictionary<string, string>();
+
+			if (force)
+				_logMessage.CustomData[key] = value;
+			else
+				_logMessage.CustomData.TryAdd(key, value);
+
+			return _builder;
+		}
+
+		public TBuilder AddTag(string tag, bool force = false)
+		{
+			if (_logMessage.Tags == null)
+				_logMessage.Tags = new List<string>();
+
+			if (force)
+				_logMessage.Tags.Add(tag);
+			else
+				_logMessage.Tags.AddUniqueItem(tag);
+
 			return _builder;
 		}
 	}
