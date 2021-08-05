@@ -13,6 +13,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 		public bool LogRequestBody { get; set; }
 		public bool LogRequestFiles { get; set; }
 		public bool LogUnknownRequestContentTypes { get; set; }
+		public bool LogAllRequestContentTypes { get; set; }
 		public List<string>? LoggedRequestAsByteArrayContentTypes { get; set; }
 		public List<string>? LoggedRequestAsStringContentTypes { get; set; }
 		public List<string>? NotLoggedRequestPaths { get; set; }
@@ -21,6 +22,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 		public bool LogResponseHeaders { get; set; }
 		public bool LogResponseBody { get; set; }
 		public bool LogUnknownResponseContentTypes { get; set; }
+		public bool LogAllResponseContentTypes { get; set; }
 		public List<string>? LoggedResponseAsByteArrayContentTypes { get; set; }
 		public List<string>? LoggedResponseAsStringContentTypes { get; set; }
 		public List<string>? NotLoggedResponsePaths { get; set; }
@@ -88,10 +90,9 @@ namespace Raider.AspNetCore.Middleware.Tracking
 
 		private bool IsRequestContentTypeAllowed(string contentType, out bool bodyAsString)
 		{
-			bodyAsString = false;
-
 			if (string.IsNullOrWhiteSpace(contentType))
 			{
+				bodyAsString = false;
 				return LogUnknownRequestContentTypes;
 			}
 			else
@@ -108,27 +109,32 @@ namespace Raider.AspNetCore.Middleware.Tracking
 
 					if (0 < LoggedRequestAsByteArrayContentTypes?.Count)
 					{
-						//bodyAsString = false;
-						return LoggedRequestAsByteArrayContentTypes
-							.Any(x => -1 < x.IndexOf(contentType, StringComparison.OrdinalIgnoreCase)
-									|| -1 < contentType.IndexOf(x, StringComparison.OrdinalIgnoreCase));
+						bodyAsString = false;
+						return LogAllRequestContentTypes
+							|| LoggedRequestAsByteArrayContentTypes
+								.Any(x => -1 < x.IndexOf(contentType, StringComparison.OrdinalIgnoreCase)
+										|| -1 < contentType.IndexOf(x, StringComparison.OrdinalIgnoreCase));
 					}
 					else
 					{
-						return false;
+						bodyAsString = false;
+						return LogAllRequestContentTypes;
 					}
 				}
 				else
 				{
 					if (0 < LoggedRequestAsByteArrayContentTypes?.Count)
 					{
-						return LoggedRequestAsByteArrayContentTypes
-							.Any(x => -1 < x.IndexOf(contentType, StringComparison.OrdinalIgnoreCase)
-									|| -1 < contentType.IndexOf(x, StringComparison.OrdinalIgnoreCase));
+						bodyAsString = false;
+						return LogAllRequestContentTypes
+							|| LoggedRequestAsByteArrayContentTypes
+								.Any(x => -1 < x.IndexOf(contentType, StringComparison.OrdinalIgnoreCase)
+										|| -1 < contentType.IndexOf(x, StringComparison.OrdinalIgnoreCase));
 					}
 					else
 					{
-						return false;
+						bodyAsString = false;
+						return LogAllRequestContentTypes;
 					}
 				}
 			}
@@ -136,10 +142,9 @@ namespace Raider.AspNetCore.Middleware.Tracking
 
 		private bool IsResponseContentTypeAllowed(string contentType, out bool bodyAsString)
 		{
-			bodyAsString = false;
-
 			if (string.IsNullOrWhiteSpace(contentType))
 			{
+				bodyAsString = false;
 				return LogUnknownResponseContentTypes;
 			}
 			else
@@ -156,26 +161,32 @@ namespace Raider.AspNetCore.Middleware.Tracking
 
 					if (0 < LoggedResponseAsByteArrayContentTypes?.Count)
 					{
-						return LoggedResponseAsByteArrayContentTypes
-							.Any(x => -1 < x.IndexOf(contentType, StringComparison.OrdinalIgnoreCase)
-									|| -1 < contentType.IndexOf(x, StringComparison.OrdinalIgnoreCase));
+						bodyAsString = false;
+						return LogAllResponseContentTypes
+							|| LoggedResponseAsByteArrayContentTypes
+								.Any(x => -1 < x.IndexOf(contentType, StringComparison.OrdinalIgnoreCase)
+										|| -1 < contentType.IndexOf(x, StringComparison.OrdinalIgnoreCase));
 					}
 					else
 					{
-						return false;
+						bodyAsString = false;
+						return LogAllResponseContentTypes;
 					}
 				}
 				else
 				{
 					if (0 < LoggedResponseAsByteArrayContentTypes?.Count)
 					{
-						return LoggedResponseAsByteArrayContentTypes
-							.Any(x => -1 < x.IndexOf(contentType, StringComparison.OrdinalIgnoreCase)
-									|| -1 < contentType.IndexOf(x, StringComparison.OrdinalIgnoreCase));
+						bodyAsString = false;
+						return LogAllResponseContentTypes
+							|| LoggedResponseAsByteArrayContentTypes
+								.Any(x => -1 < x.IndexOf(contentType, StringComparison.OrdinalIgnoreCase)
+										|| -1 < contentType.IndexOf(x, StringComparison.OrdinalIgnoreCase));
 					}
 					else
 					{
-						return false;
+						bodyAsString = false;
+						return LogAllResponseContentTypes;
 					}
 				}
 			}

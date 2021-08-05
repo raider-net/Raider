@@ -96,8 +96,12 @@ namespace Raider.AspNetCore.Logging.Dto
 						await httpRequest.Body.CopyToAsync(requestBodyStream);
 						requestBodyStream.Seek(0, SeekOrigin.Begin);
 						request.Body = new StreamReader(requestBodyStream /* TODO , encoding*/).ReadToEnd();
+
+						if (string.IsNullOrWhiteSpace(request.Body))
+							request.Body = null;
 					}
-					originalRequestBody.Seek(0, SeekOrigin.Begin);
+					if (originalRequestBody.CanSeek)
+						originalRequestBody.Seek(0, SeekOrigin.Begin);
 				}
 				finally
 				{
@@ -115,8 +119,12 @@ namespace Raider.AspNetCore.Logging.Dto
 						await httpRequest.Body.CopyToAsync(requestBodyStream);
 						requestBodyStream.Seek(0, SeekOrigin.Begin);
 						request.BodyByteArray = requestBodyStream.ToArray();
+
+						if (request.BodyByteArray != null && request.BodyByteArray.Length == 0)
+							request.BodyByteArray = null;
 					}
-					originalRequestBody.Seek(0, SeekOrigin.Begin);
+					if (originalRequestBody.CanSeek)
+						originalRequestBody.Seek(0, SeekOrigin.Begin);
 				}
 				finally
 				{

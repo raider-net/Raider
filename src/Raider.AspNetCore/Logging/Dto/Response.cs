@@ -43,8 +43,12 @@ namespace Raider.AspNetCore.Logging.Dto
 				CorrelationId = correlationId,
 				ExternalCorrelationId = externalCorrelationId,
 				StatusCode = statusCode,
-				Body = body,
-				BodyByteArray = bodyByteArray,
+				Body = string.IsNullOrWhiteSpace(body)
+					? null
+					: body,
+				BodyByteArray = (bodyByteArray != null && bodyByteArray.Length == 0)
+					? null
+					: bodyByteArray,
 				Error = error,
 				ElapsedMilliseconds = elapsedMilliseconds,
 			};
