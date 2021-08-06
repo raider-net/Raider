@@ -91,17 +91,24 @@ namespace Raider.AspNetCore.Logging.Dto
 				var originalRequestBody = httpRequest.Body;
 				try
 				{
-					using (var requestBodyStream = new MemoryStream())
-					{
-						await httpRequest.Body.CopyToAsync(requestBodyStream);
-						requestBodyStream.Seek(0, SeekOrigin.Begin);
-						request.Body = new StreamReader(requestBodyStream /* TODO , encoding*/).ReadToEnd();
+					var requestBodyStream = new MemoryStream();
+					await httpRequest.Body.CopyToAsync(requestBodyStream);
+					requestBodyStream.Seek(0, SeekOrigin.Begin);
+					request.Body = new StreamReader(requestBodyStream /* TODO , encoding*/).ReadToEnd();
 
-						if (string.IsNullOrWhiteSpace(request.Body))
-							request.Body = null;
-					}
+					if (string.IsNullOrWhiteSpace(request.Body))
+						request.Body = null;
+
 					if (originalRequestBody.CanSeek)
+					{
 						originalRequestBody.Seek(0, SeekOrigin.Begin);
+						requestBodyStream.Dispose();
+					}
+					else
+					{
+						requestBodyStream.Seek(0, SeekOrigin.Begin);
+						originalRequestBody = requestBodyStream;
+					}
 				}
 				finally
 				{
