@@ -284,6 +284,45 @@ namespace Raider.Extensions
 			firstDuplicate = default;
 			return false;
 		}
+
+		public static List<T> GetDuplicates<T>(this IEnumerable<T> source)
+		{
+			if (source == null)
+				throw new ArgumentNullException(nameof(source));
+
+			var result = new List<T>();
+			var checkBuffer = new HashSet<T>();
+			foreach (var t in source)
+			{
+				if (checkBuffer.Add(t))
+					continue;
+
+				result.Add(t);
+			}
+
+			return result;
+		}
+
+		public static List<T> GetDuplicates<T, TCompare>(this IEnumerable<T> source, Func<T?, TCompare?> equalityTransformation)
+		{
+			if (equalityTransformation == null)
+				return GetDuplicates(source);
+
+			if (source == null)
+				throw new ArgumentNullException(nameof(source));
+
+			var result = new List<T>();
+			var checkBuffer = new HashSet<TCompare?>();
+			foreach (var t in source)
+			{
+				if (checkBuffer.Add(equalityTransformation(t)))
+					continue;
+
+				result.Add(t);
+			}
+
+			return result;
+		}
 	}
 
 	public class IOrderedEnumerableNoOrderWrapper<T> : IOrderedEnumerable<T>
