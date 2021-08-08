@@ -10,21 +10,6 @@ namespace Raider.EntityFrameworkCore
 	{
 		public static TContext CreateNewDbContext<TContext>(
 			IServiceProvider serviceProvider,
-			string? connectionString = null)
-			where TContext : DbContext
-		{
-			if (serviceProvider == null)
-				throw new ArgumentNullException(nameof(serviceProvider));
-
-			var dbContext = serviceProvider.GetRequiredService<TContext>();
-			if (dbContext is DbContextBase dbContextBase)
-				dbContextBase.Initialize(null, connectionString);
-
-			return dbContext;
-		}
-
-		public static TContext CreateNewDbContext<TContext>(
-			IServiceProvider serviceProvider,
 			IDbContextTransaction? existingDbContextTransaction,
 			out IDbContextTransaction? newDbContextTransaction,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,

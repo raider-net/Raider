@@ -40,6 +40,7 @@ namespace Raider.EntityFrameworkCore
 			}
 		}
 
+		public IDbContextTransaction? DbContextTransaction => Database?.CurrentTransaction;
 		public IDbTransaction? DbTransaction => Database?.CurrentTransaction?.GetDbTransaction();
 
 		private string? _dbConnectionString;
