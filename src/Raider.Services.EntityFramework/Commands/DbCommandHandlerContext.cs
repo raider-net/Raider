@@ -25,18 +25,22 @@ namespace Raider.Services.EntityFramework.Commands
 		public TContext CreateNewDbContext<TContext>(
 			IDbContextTransaction? dbContextTransaction = null,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
-			IsolationLevel? transactionIsolationLevel = null)
+			IsolationLevel? transactionIsolationLevel = null,
+			string? connectionString = null)
 			where TContext : DbContext
 		{
-			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(ServiceProvider, dbContextTransaction ?? DbContextTransaction, out IDbContextTransaction? newDbContextTransaction, transactionUsage, transactionIsolationLevel);
+			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(ServiceProvider, dbContextTransaction ?? DbContextTransaction, out IDbContextTransaction? newDbContextTransaction, transactionUsage, transactionIsolationLevel, connectionString);
 			DbContextTransaction = newDbContextTransaction;
 			return dbContext;
 		}
 
-		public TContext GetOrCreateDbContext<TContext>(TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew, IsolationLevel? transactionIsolationLevel = null)
+		public TContext GetOrCreateDbContext<TContext>(
+			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
+			IsolationLevel? transactionIsolationLevel = null,
+			string? connectionString = null)
 			where TContext : DbContext
 		{
-			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContext<TContext>(null, transactionUsage, transactionIsolationLevel)).CheckDbTransaction(transactionUsage);
+			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContext<TContext>(null, transactionUsage, transactionIsolationLevel, connectionString)).CheckDbTransaction(transactionUsage);
 			return (TContext)result;
 		}
 

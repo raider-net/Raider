@@ -40,18 +40,20 @@ namespace Raider.Services.EntityFramework
 		public TContext CreateNewDbContext<TContext>(
 			IDbContextTransaction? dbContextTransaction = null,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
-			IsolationLevel? transactionIsolationLevel = null)
+			IsolationLevel? transactionIsolationLevel = null,
+			string? connectionString = null)
 			where TContext : DbContext
 			=> _commandHandlerContext == null
 				? throw new InvalidOperationException($"{nameof(_commandHandlerContext)} == null")
-				: _commandHandlerContext.CreateNewDbContext<TContext>(dbContextTransaction, transactionUsage, transactionIsolationLevel);
+				: _commandHandlerContext.CreateNewDbContext<TContext>(dbContextTransaction, transactionUsage, transactionIsolationLevel, connectionString);
 
 		public TContext GetOrCreateDbContext<TContext>(
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
-			IsolationLevel? transactionIsolationLevel = null) 
+			IsolationLevel? transactionIsolationLevel = null,
+			string? connectionString = null) 
 			where TContext : DbContext
 			=> _commandHandlerContext == null
 				? throw new InvalidOperationException($"{nameof(_commandHandlerContext)} == null")
-				: _commandHandlerContext.GetOrCreateDbContext<TContext>(transactionUsage, transactionIsolationLevel);
+				: _commandHandlerContext.GetOrCreateDbContext<TContext>(transactionUsage, transactionIsolationLevel, connectionString);
 	}
 }
