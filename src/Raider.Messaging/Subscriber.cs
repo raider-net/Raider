@@ -326,7 +326,7 @@ namespace Raider.Messaging
 					await LogActivityAsync(
 						traceInfo,
 						ComponentState.Error,
-						MessageResult.Error(message, DelayTable, DefaultDelaTimeStamp == TimeSpan.Zero ? TimeSpan.FromMinutes(5) : DefaultDelaTimeStamp),
+						MessageResult.ErrorOrSuspended(message, MaxMessageProcessingRetryCount, DelayTable, DefaultDelaTimeStamp == TimeSpan.Zero ? TimeSpan.FromMinutes(5) : DefaultDelaTimeStamp),
 						new LogError(traceInfo, nameof(TimerCallback), $"{nameof(ProcessMessageAsync)}", ex.ToStringTrace())
 						{
 							IdSubscriberMessage = message.IdSubscriberMessage

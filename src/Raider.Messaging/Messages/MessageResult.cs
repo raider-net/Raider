@@ -46,17 +46,17 @@ namespace Raider.Messaging.Messages
 
 		public static MessageResult Error(ISubscriberMessage message, Dictionary<int, TimeSpan>? delayTable, TimeSpan defaultTimeSpan, string? snapshot = null)
 			=> (delayTable == null || delayTable.Count == 0 || delayTable.All(x => x.Key < 0))
-			? throw new ArgumentNullException(nameof(delayTable))
-			: new MessageResult
-				{
-					IdSubscriberMessage = message.IdSubscriberMessage,
-					State = MessageState.Error,
-					Snapshot = snapshot ?? message.Snapshot,
-					RetryCount = message.RetryCount + 1,
-					DelayedToUtc = DateTimeOffset.UtcNow.Add(FindDelay(message.RetryCount, delayTable, defaultTimeSpan)),
-					OriginalConcurrencyToken = message.OriginalConcurrencyToken,
-					NewConcurrencyToken = message.NewConcurrencyToken
-				};
+				? throw new ArgumentNullException(nameof(delayTable))
+				: new MessageResult
+					{
+						IdSubscriberMessage = message.IdSubscriberMessage,
+						State = MessageState.Error,
+						Snapshot = snapshot ?? message.Snapshot,
+						RetryCount = message.RetryCount + 1,
+						DelayedToUtc = DateTimeOffset.UtcNow.Add(FindDelay(message.RetryCount, delayTable, defaultTimeSpan)),
+						OriginalConcurrencyToken = message.OriginalConcurrencyToken,
+						NewConcurrencyToken = message.NewConcurrencyToken
+					};
 
 		public static MessageResult Suspended(ISubscriberMessage message, string? snapshot = null)
 			=> new()
@@ -69,6 +69,11 @@ namespace Raider.Messaging.Messages
 				OriginalConcurrencyToken = message.OriginalConcurrencyToken,
 				NewConcurrencyToken = message.NewConcurrencyToken
 			};
+
+		public static MessageResult ErrorOrSuspended(ISubscriberMessage message, int maxMessageProcessingRetryCount, Dictionary<int, TimeSpan>? delayTable, TimeSpan defaultTimeSpan, string? snapshot = null)
+			=> (0 < maxMessageProcessingRetryCount && maxMessageProcessingRetryCount < message.RetryCount)
+				? Suspended(message, snapshot)
+				: Error(message, delayTable, defaultTimeSpan, snapshot);
 
 		public static MessageResult Corrupted(ISubscriberMessage message, string? snapshot = null)
 			=> new()

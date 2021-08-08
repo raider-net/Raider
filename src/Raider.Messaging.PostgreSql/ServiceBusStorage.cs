@@ -476,6 +476,8 @@ namespace Raider.Messaging.PostgreSql
 
 			if (dbTransaction == null)
 			{
+				//TODO: preco je dbTransaction == null ???? ... mala by byt vzdy vyplnena
+
 				using var tran = await connection.BeginTransactionAsync(cancellationToken);
 
 				await _dbMessage.InsertAsync(connection, null, message, idMessageType, cancellationToken);
@@ -488,6 +490,8 @@ namespace Raider.Messaging.PostgreSql
 				{
 					await _dbSubscriberMessage.InsertAsync(connection, tran, subscribers.Select(s => s.IdComponent).ToList(), message, MessageState.Pending, cancellationToken);
 				}
+
+				await tran.CommitAsync(cancellationToken);
 			}
 			else
 			{
