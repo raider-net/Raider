@@ -8,6 +8,7 @@ using Raider.Extensions;
 using Raider.Identity;
 using Raider.Trace;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -20,7 +21,7 @@ namespace Raider.AspNetCore.Authentication
 	{
 		private static Dictionary<string, string>? _cookieDataProtectionPurposes; //Dictionary<cookieName, purpose>
 		private static bool _dataProtectorsCreated = false;
-		private static Dictionary<string, IDataProtector>? _dataProtectors; //Dictionary<cookieName, IDataProtector>
+		private static ConcurrentDictionary<string, IDataProtector>? _dataProtectors; //Dictionary<cookieName, IDataProtector>
 
 		private static readonly object _initLock = new();
 		private static bool _initialized = false;
@@ -67,13 +68,13 @@ namespace Raider.AspNetCore.Authentication
 			if (_cookieDataProtectionPurposes == null)
 				return null;
 
-			_dataProtectors = new Dictionary<string, IDataProtector>();
+			_dataProtectors = new ConcurrentDictionary<string, IDataProtector>();
 			var dataProtectionProvider = context.RequestServices.GetRequiredService<IDataProtectionProvider>();
 
 			foreach (var kvp in _cookieDataProtectionPurposes)
 			{
 				var dataProtector = dataProtectionProvider.CreateProtector(kvp.Value);
-				_dataProtectors.Add(kvp.Key, dataProtector);
+				_dataProtectors.TryAdd(kvp.Key, dataProtector);
 			}
 
 			_dataProtectorsCreated = true;

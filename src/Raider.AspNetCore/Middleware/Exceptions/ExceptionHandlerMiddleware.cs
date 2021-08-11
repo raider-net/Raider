@@ -18,6 +18,7 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 	{
 		private readonly RequestDelegate _next;
 		private readonly ExceptionHandlerOptions _options;
+		private readonly bool externalExceptionHandler;
 		private readonly ILogger _logger;
 		private readonly Func<object, Task> _clearCacheHeadersDelegate;
 
@@ -37,6 +38,10 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 
 				_options.ExceptionHandler = _next;
 			}
+			else
+			{
+				externalExceptionHandler = true;
+			}
 		}
 
 		public Task Invoke(HttpContext context)
@@ -50,7 +55,7 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 				var task = _next(context);
 				if (!task.IsCompletedSuccessfully)
 				{
-					return Awaited(this, traceInfo, context, task);
+					return Awaited(this, traceInfo, context, task, _options);
 				}
 
 				if (context.Response.StatusCode != StatusCodes.Status404NotFound)
@@ -63,7 +68,7 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 
 			return HandleException(traceInfo, context, edi);
 
-			static async Task Awaited(ExceptionHandlerMiddleware middleware, ITraceInfo traceInfo, HttpContext context, Task task)
+			static async Task Awaited(ExceptionHandlerMiddleware middleware, ITraceInfo traceInfo, HttpContext context, Task task, ExceptionHandlerOptions options)
 			{
 				ExceptionDispatchInfo? edi = null;
 				try
@@ -75,10 +80,15 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 					edi = ExceptionDispatchInfo.Capture(exception);
 				}
 
-				if (edi != null || context.Response.StatusCode == StatusCodes.Status404NotFound)
+				if (edi != null || HandleStatusCode(context.Response.StatusCode, options))
 					await middleware.HandleException(traceInfo, context, edi);
 			}
 		}
+
+		private static bool HandleStatusCode(int statusCode, ExceptionHandlerOptions options)
+			=> (options.HandleAllClientAndServerErrors && 400 <= statusCode)
+			|| (options.HandleOnlyStatusCodes != null
+				&& options.HandleOnlyStatusCodes.Contains(statusCode));
 
 		private async Task HandleException(ITraceInfo traceInfo, HttpContext context, ExceptionDispatchInfo? edi)
 		{
@@ -105,6 +115,22 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 			{
 				_logger.LogErrorMessage(traceInfo, x => x.InternalMessage("The response has already started, the error handler will not be executed."));
 				edi?.Throw();
+				
+				return; //if not thrown
+			}
+
+			if (_options.Mode == ExceptionHandlerMode.CatchOnly)
+			{
+				if (externalExceptionHandler)
+				{
+					await _options.ExceptionHandler!(context);
+				}
+				else
+				{
+					edi?.Throw(); // Re-throw the original if we couldn't handle it
+				}
+
+				return;
 			}
 
 			PathString originalPath = context.Request.Path;
@@ -140,8 +166,7 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 				context.Response.StatusCode = statusCode == StatusCodes.Status404NotFound ? statusCode : StatusCodes.Status500InternalServerError;
 				context.Response.OnStarting(_clearCacheHeadersDelegate, context.Response);
 
-				if (_options.ExceptionHandler != null)
-					await _options.ExceptionHandler(context);
+				await _options.ExceptionHandler!(context);
 
 				return;
 			}
