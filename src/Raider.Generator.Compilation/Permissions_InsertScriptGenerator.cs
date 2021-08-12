@@ -84,7 +84,7 @@ namespace Raider.Generator.Compilation
             this.Write("INSERT INTO mbs.\"Permission\"\r\n\t(\"IdPermission\", \"Name\"");
             
             #line 49 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(withDescription ? ", \"Description\"" : ""));
+            this.Write(this.ToStringHelper.ToStringWithCulture(withDescription ? ", \"DisplayName\", \"Description\"" : ""));
             
             #line default
             #line hidden
@@ -117,6 +117,13 @@ namespace Raider.Generator.Compilation
             #line default
             #line hidden
             this.Write("\', ");
+            
+            #line 59 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(string.IsNullOrWhiteSpace(permisison.Description) ? ("'" + permisison.Name + "'") : ("'" + permisison.Description + "'")));
+            
+            #line default
+            #line hidden
+            this.Write(", ");
             
             #line 59 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(string.IsNullOrWhiteSpace(permisison.Description) ? "null" : ("'" + permisison.Description + "'")));
@@ -155,7 +162,14 @@ namespace Raider.Generator.Compilation
             
             #line default
             #line hidden
-            this.Write("\')");
+            this.Write("\', ");
+            
+            #line 65 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(string.IsNullOrWhiteSpace(permisison.Description) ? ("'" + permisison.Name + "'") : ("'" + permisison.Description + "'")));
+            
+            #line default
+            #line hidden
+            this.Write(")");
             
             #line 65 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(permissions.Count == idx ? "" : ","));
