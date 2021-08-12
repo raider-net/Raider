@@ -176,6 +176,7 @@ namespace Raider.Infrastructure
 			return sb.ToString();
 		}
 
+		[DebuggerHidden]
 		[DebuggerStepThrough]
 		internal static string GetSafeString(Func<string> action)
 		{

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Raider.Data
 {
@@ -33,11 +34,15 @@ namespace Raider.Data
 				: options.MaximumBackoffInterval;
 		}
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public void MarkSuccess()
 		{
 			_failuresSinceSuccessfulBatch = 0;
 		}
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public void MarkFailure()
 		{
 			++_failuresSinceSuccessfulBatch;

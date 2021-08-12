@@ -9,11 +9,7 @@ namespace Raider.Web
 		public string? FileName { get; set; }
 		public string? ContentType { get; set; }
 		public long? Length { get; set; }
-
-		/// <summary>
-		/// Form field name
-		/// </summary>
-		public string? Name { get; set; }
+		public string? Tag { get; set; }
 
 		public Stream? OpenReadStream()
 		{

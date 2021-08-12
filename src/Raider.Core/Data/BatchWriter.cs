@@ -2,6 +2,7 @@
 using Raider.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -101,6 +102,8 @@ namespace Raider.Data
 		/// completed at the time of sink disposal will be flushed (or attempted to,
 		/// depending on app domain state).
 		/// </remarks>
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public void Write(T obj)
 		{
 			if (obj == null) throw new ArgumentNullException(nameof(obj));
@@ -137,6 +140,8 @@ namespace Raider.Data
 			_queue.TryEnqueue(obj);
 		}
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		private async Task OnTick()
 		{
 			try

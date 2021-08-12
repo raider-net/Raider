@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +20,13 @@ namespace Raider.Infrastructure
 		public PortableTimer(Func<CancellationToken, Task> onTick, Action<string, object?, object?, object?>? errorLogger = null) // errorLogger = Action<format, arg0, arg1, arg2>
 		{
 			_onTick = onTick ?? throw new ArgumentNullException(nameof(onTick));
-			_timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
+
+			[DebuggerHidden]
+			[DebuggerStepThrough]
+			void Tick(object? state)
+				=> OnTick();
+
+			_timer = new Timer(Tick, null, Timeout.Infinite, Timeout.Infinite);
 			_errorLogger = errorLogger;
 		}
 
@@ -36,6 +43,8 @@ namespace Raider.Infrastructure
 			}
 		}
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		private async void OnTick()
 		{
 			try
