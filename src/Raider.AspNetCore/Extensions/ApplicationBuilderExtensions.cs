@@ -2,6 +2,7 @@
 using Raider.AspNetCore.Middleware.Exceptions;
 using Raider.AspNetCore.Middleware.HostNormalizer;
 using Raider.AspNetCore.Middleware.Initialization;
+using Raider.AspNetCore.Middleware.Security;
 using Raider.AspNetCore.Middleware.Tracking;
 using Raider.Logging.Database.PostgreSql;
 using System;
@@ -50,6 +51,15 @@ namespace Raider.AspNetCore.Extensions
 				throw new ArgumentNullException(nameof(app));
 
 			app.UseMiddleware<RequestTrackingMiddleware>();
+			return app;
+		}
+
+		public static IApplicationBuilder UseRaiderHeadersSecurity(this IApplicationBuilder app)
+		{
+			if (app == null)
+				throw new ArgumentNullException(nameof(app));
+
+			app.UseMiddleware<SecurityMiddleware>();
 			return app;
 		}
 

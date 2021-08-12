@@ -183,8 +183,12 @@ namespace Raider.AspNetCore.Middleware.Security
 		public static IResponseHeaderOptions XContentTypeOptions { get; } =
 			new ResponseHeaderOptions("x-content-type-options", "nosniff", Protocol.httpAndHttps);
 
-		public static IResponseHeaderOptions XFrameOptions { get; } =
+		public static IResponseHeaderOptions XFrameOptions_DENY { get; } =
 			new ResponseHeaderOptions("x-frame-options", "DENY", Protocol.httpAndHttps)
+				.ApplyToContentType("text/html");
+
+		public static IResponseHeaderOptions XFrameOptions_SAMEORIGIN { get; } =
+			new ResponseHeaderOptions("x-frame-options", "SAMEORIGIN", Protocol.httpAndHttps)
 				.ApplyToContentType("text/html");
 
 		public static IResponseHeaderOptions XPermittedCrossDomainPolicies { get; } =

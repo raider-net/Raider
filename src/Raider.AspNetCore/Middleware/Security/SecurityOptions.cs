@@ -54,11 +54,23 @@ namespace Raider.AspNetCore.Middleware.Security
 			return this;
 		}
 
-		public static SecurityOptions GetDefaultOptions()
-			=> new SecurityOptions()
+		public SecurityOptions SetDefaultWebOptions()
+			=> this
 				.SetHeader(ResponseHeaderOptions.ReferrerPolicy)
 				.SetHeader(ResponseHeaderOptions.XContentTypeOptions)
-				.SetHeader(ResponseHeaderOptions.XFrameOptions)
+				.SetHeader(ResponseHeaderOptions.XFrameOptions_SAMEORIGIN)
+				.SetHeader(ResponseHeaderOptions.XPermittedCrossDomainPolicies)
+				.SetHeader(ResponseHeaderOptions.XXssProtection)
+				.SetHeader(ResponseHeaderOptions.ExpectCT)
+				.SetHeader(ResponseHeaderOptions.FeaturePolicy)
+				//.SetHeader(ResponseHeaderOptions.ContentSecurityPolicy)
+				.SetHeader(ResponseHeaderOptions.RemoveSerever);
+
+		public SecurityOptions SetDefaultWebApiOptions()
+			=> this
+				.SetHeader(ResponseHeaderOptions.ReferrerPolicy)
+				.SetHeader(ResponseHeaderOptions.XContentTypeOptions)
+				.SetHeader(ResponseHeaderOptions.XFrameOptions_DENY)
 				.SetHeader(ResponseHeaderOptions.XPermittedCrossDomainPolicies)
 				.SetHeader(ResponseHeaderOptions.XXssProtection)
 				.SetHeader(ResponseHeaderOptions.ExpectCT)
