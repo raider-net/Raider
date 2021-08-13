@@ -185,11 +185,11 @@ namespace Raider.Services.Aspects
 							_logger.LogErrorMessage(errMsg);
 						}
 
-						await context.RollbackAsync(cancellationToken);
+						await context.RollbackSafeAsync(cancellationToken);
 					}
 					else
 					{
-						await context.CommitAsync(cancellationToken);
+						await context.CommitSafeAsync(cancellationToken);
 					}
 
 					callEndTicks = StaticWatch.CurrentTicks;
@@ -201,7 +201,7 @@ namespace Raider.Services.Aspects
 					methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
 
 					var hasTrans = context.HasTransaction();
-					await context.RollbackAsync(cancellationToken);
+					await context.RollbackSafeAsync(cancellationToken);
 
 					var clientErrorMessage = context.GetDefaultClientErrorMessage(executeEx);
 

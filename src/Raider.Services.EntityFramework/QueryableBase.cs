@@ -61,7 +61,12 @@ namespace Raider.Services.EntityFramework
 				DbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 		}
 
-		protected void SetDbContext<THandlerContext, TBuilder>(IDbContextTransaction? dbContextTransaction = null)
+		protected void SetDbContext<THandlerContext, TBuilder>()
+			where THandlerContext : DbCommandHandlerContext
+			where TBuilder : DbCommandHandlerContext.Builder<THandlerContext>
+			=> SetDbContext<THandlerContext, TBuilder>(null, false);
+
+		protected void SetDbContext<THandlerContext, TBuilder>(IDbContextTransaction? dbContextTransaction, bool isTransactionCommitted)
 			where THandlerContext : DbCommandHandlerContext
 			where TBuilder : DbCommandHandlerContext.Builder<THandlerContext>
 		{
@@ -69,7 +74,7 @@ namespace Raider.Services.EntityFramework
 			if (dbContextTransaction == null)
 				SetDbContext(ServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
 			else
-				SetDbContext(ServiceContext.CreateNewDbContext<TDbContext>(dbContextTransaction, TransactionUsage.ReuseOrCreateNew), true);
+				SetDbContext(ServiceContext.CreateNewDbContext<TDbContext>(dbContextTransaction, isTransactionCommitted, TransactionUsage.ReuseOrCreateNew), true);
 		}
 
 		protected IQueryable<T> DefaultInternal<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)

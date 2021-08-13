@@ -184,11 +184,11 @@ namespace Raider.QueryServices.Aspects
 							_logger.LogErrorMessage(errMsg);
 						}
 
-						await context.RollbackAsync(cancellationToken);
+						await context.RollbackSafeAsync(cancellationToken);
 					}
 					else
 					{
-						await context.CommitAsync(cancellationToken);
+						await context.CommitSafeAsync(cancellationToken);
 					}
 
 					callEndTicks = StaticWatch.CurrentTicks;
@@ -200,7 +200,7 @@ namespace Raider.QueryServices.Aspects
 					methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
 
 					var hasTrans = context.HasTransaction();
-					await context.RollbackAsync(cancellationToken);
+					await context.RollbackSafeAsync(cancellationToken);
 
 					result = new QueryResultBuilder<TResult>()
 						.WithError(traceInfo,

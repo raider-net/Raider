@@ -321,17 +321,21 @@ namespace Raider.QueryServices.Queries
 		public virtual bool HasTransaction()
 			=> false;
 
-		public virtual void Commit()
-		{
-		}
+		internal protected virtual void CommitSafe() { }
 
-		public virtual void Rollback()
-		{
-		}
+		internal protected virtual void RollbackSafe() { }
 
-		public virtual void DisposeTransaction()
-		{
-		}
+		public virtual void Commit() { }
+
+		public virtual void Rollback() { }
+
+		public virtual void DisposeTransaction() { }
+
+		internal protected virtual Task CommitSafeAsync(CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
+
+		internal protected virtual Task RollbackSafeAsync(CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
 
 		public virtual Task CommitAsync(CancellationToken cancellationToken = default)
 			=> Task.CompletedTask;

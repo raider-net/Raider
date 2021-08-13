@@ -4,6 +4,8 @@ using Raider.EntityFrameworkCore;
 using Raider.QueryServices.EntityFramework.Queries;
 using System;
 using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Raider.QueryServices.EntityFramework
 {
@@ -25,7 +27,8 @@ namespace Raider.QueryServices.EntityFramework
 	{
 		private DbQueryHandlerContext? _queryHandlerContext;
 
-		public IDbContextTransaction? DbContextTransaction => _queryHandlerContext.DbContextTransaction;
+		public IDbContextTransaction? DbContextTransaction => _queryHandlerContext?.DbContextTransaction;
+		public bool IsTransactionCommitted => _queryHandlerContext?.IsTransactionCommitted ?? false;
 
 		public DbQueryServiceContext()
 			: base()
@@ -39,13 +42,19 @@ namespace Raider.QueryServices.EntityFramework
 
 		public TContext CreateNewDbContext<TContext>(
 			IDbContextTransaction? dbContextTransaction = null,
+			bool isTransactionCommitted = false,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null,
 			string? connectionString = null)
 			where TContext : DbContext
 			=> _queryHandlerContext == null
 				? throw new InvalidOperationException($"{nameof(_queryHandlerContext)} == null")
-				: _queryHandlerContext.CreateNewDbContext<TContext>(dbContextTransaction, transactionUsage, transactionIsolationLevel, connectionString);
+				: _queryHandlerContext.CreateNewDbContext<TContext>(
+						dbContextTransaction,
+						isTransactionCommitted,
+						transactionUsage,
+						transactionIsolationLevel,
+						connectionString);
 
 		public TContext GetOrCreateDbContext<TContext>(
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
@@ -54,6 +63,34 @@ namespace Raider.QueryServices.EntityFramework
 			where TContext : DbContext
 			=> _queryHandlerContext == null
 				? throw new InvalidOperationException($"{nameof(_queryHandlerContext)} == null")
-				: _queryHandlerContext.GetOrCreateDbContext<TContext>(transactionUsage, transactionIsolationLevel, connectionString);
+				: _queryHandlerContext.GetOrCreateDbContext<TContext>(
+						transactionUsage,
+						transactionIsolationLevel,
+						connectionString);
+
+		public bool HasTransaction()
+			=> _queryHandlerContext?.HasTransaction() ?? false;
+
+		public void Commit()
+			=> _queryHandlerContext?.Commit();
+
+		public void Rollback()
+			=> _queryHandlerContext?.Rollback();
+
+		public Task CommitAsync(CancellationToken cancellationToken = default)
+		{
+			if (_queryHandlerContext != null)
+				return _queryHandlerContext.CommitAsync(cancellationToken);
+
+			return Task.CompletedTask;
+		}
+
+		public Task RollbackAsync(CancellationToken cancellationToken = default)
+		{
+			if (_queryHandlerContext != null)
+				return _queryHandlerContext.RollbackAsync(cancellationToken);
+
+			return Task.CompletedTask;
+		}
 	}
 }

@@ -16,6 +16,7 @@ namespace Raider.Services.EntityFramework.Commands
 		private readonly ConcurrentDictionary<Type, DbContext> _dbContextCache = new ConcurrentDictionary<Type, DbContext>();
 
 		public IDbContextTransaction? DbContextTransaction { get; private set; }
+		public bool IsTransactionCommitted { get; private set; }
 
 		public DbCommandHandlerContext(IServiceProvider serviceProvider)
 			: base(serviceProvider)
@@ -24,12 +25,35 @@ namespace Raider.Services.EntityFramework.Commands
 
 		public TContext CreateNewDbContext<TContext>(
 			IDbContextTransaction? dbContextTransaction = null,
+			bool isTransactionCommitted = false,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null,
 			string? connectionString = null)
 			where TContext : DbContext
 		{
-			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(ServiceProvider, dbContextTransaction ?? DbContextTransaction, out IDbContextTransaction? newDbContextTransaction, transactionUsage, transactionIsolationLevel, connectionString);
+			var oldTransaction = dbContextTransaction ?? DbContextTransaction;
+			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(
+				ServiceProvider,
+				oldTransaction,
+				out IDbContextTransaction? newDbContextTransaction,
+				transactionUsage,
+				transactionIsolationLevel,
+				() => IsTransactionCommitted,
+				connectionString);
+
+			if (oldTransaction != newDbContextTransaction)
+			{
+				IsTransactionCommitted = true;
+			}
+			else if (DbContextTransaction == newDbContextTransaction)
+			{
+				//IsTransactionCommitted == IsTransactionCommitted
+			}
+			else if (dbContextTransaction == newDbContextTransaction)
+			{
+				IsTransactionCommitted = isTransactionCommitted;
+			}
+
 			DbContextTransaction = newDbContextTransaction;
 			return dbContext;
 		}
@@ -40,7 +64,12 @@ namespace Raider.Services.EntityFramework.Commands
 			string? connectionString = null)
 			where TContext : DbContext
 		{
-			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContext<TContext>(null, transactionUsage, transactionIsolationLevel, connectionString)).CheckDbTransaction(transactionUsage);
+			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContext<TContext>(
+				null,
+				false,
+				transactionUsage,
+				transactionIsolationLevel,
+				connectionString)).CheckDbTransaction(transactionUsage);
 			return (TContext)result;
 		}
 
@@ -70,29 +99,73 @@ namespace Raider.Services.EntityFramework.Commands
 		public override bool HasTransaction()
 			=> DbContextTransaction != null;
 
+		protected override void CommitSafe()
+		{
+			if (DbContextTransaction == null || IsTransactionCommitted)
+				return;
+
+			DbContextTransaction.Commit();
+			IsTransactionCommitted = true;
+		}
+
+		protected override void RollbackSafe()
+		{
+			if (DbContextTransaction == null || IsTransactionCommitted)
+				return;
+
+			DbContextTransaction.Rollback();
+			IsTransactionCommitted = true; //naozaj? po commitnuti transakcie sa uz neda pozuit transakcia na dalsi commit alebo rollback?
+		}
+
 		public override void Commit()
-			=> DbContextTransaction?.Commit();
+		{
+			DbContextTransaction?.Commit();
+			IsTransactionCommitted = true;
+		}
 
 		public override void Rollback()
-			=> DbContextTransaction?.Rollback();
+		{
+			DbContextTransaction?.Rollback();
+			IsTransactionCommitted = true;
+		}
 
 		public override void DisposeTransaction()
 			=> DbContextTransaction?.Dispose();
 
-		public override Task CommitAsync(CancellationToken cancellationToken = default)
+		protected override async Task CommitSafeAsync(CancellationToken cancellationToken = default)
 		{
-			if (DbContextTransaction != null)
-				return DbContextTransaction.CommitAsync(cancellationToken);
+			if (DbContextTransaction == null || IsTransactionCommitted)
+				return;
 
-			return Task.CompletedTask;
+			await DbContextTransaction.CommitAsync(cancellationToken);
+			IsTransactionCommitted = true;
 		}
 
-		public override Task RollbackAsync(CancellationToken cancellationToken = default)
+		protected override async Task RollbackSafeAsync(CancellationToken cancellationToken = default)
+		{
+			if (DbContextTransaction == null || IsTransactionCommitted)
+				return;
+
+			await DbContextTransaction.RollbackAsync(cancellationToken);
+			IsTransactionCommitted = true;
+		}
+
+		public override async Task CommitAsync(CancellationToken cancellationToken = default)
 		{
 			if (DbContextTransaction != null)
-				return DbContextTransaction.RollbackAsync(cancellationToken);
+			{
+				await DbContextTransaction.CommitAsync(cancellationToken);
+				IsTransactionCommitted = true;
+			}
+		}
 
-			return Task.CompletedTask;
+		public override async Task RollbackAsync(CancellationToken cancellationToken = default)
+		{
+			if (DbContextTransaction != null)
+			{
+				await DbContextTransaction.RollbackAsync(cancellationToken);
+				IsTransactionCommitted = true;
+			}
 		}
 
 		public override ValueTask DisposeTransactionAsync()

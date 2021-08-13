@@ -26,6 +26,7 @@ namespace Raider.EntityFrameworkCore
 
 		protected DbConnection? ExternalDbConnection { get; private set; }
 		protected string? ExternalConnectionString { get; private set; }
+		protected Func<bool>? IsTransactionCommittedDelegate { get; private set; }
 		protected internal QueryCacheManager QueryCacheManager { get; private set; }
 
 		private DbConnection? dbConnection;
@@ -74,7 +75,7 @@ namespace Raider.EntityFrameworkCore
 
 		private bool initialized = false;
 		private readonly object _initLock = new();
-		internal void Initialize(DbConnection? externalDbConnection, string? externalConnectionString)
+		internal void Initialize(DbConnection? externalDbConnection, string? externalConnectionString, Func<bool>? isTransactionCommittedDelegate)
 		{
 			if (initialized)
 				return;
@@ -86,6 +87,7 @@ namespace Raider.EntityFrameworkCore
 
 				ExternalDbConnection = externalDbConnection;
 				ExternalConnectionString = externalConnectionString;
+				IsTransactionCommittedDelegate = isTransactionCommittedDelegate;
 
 				initialized = true;
 			}
@@ -145,6 +147,14 @@ namespace Raider.EntityFrameworkCore
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
+
+			if (IsTransactionCommittedDelegate != null)
+			{
+				var isCommitted = IsTransactionCommittedDelegate();
+				if (isCommitted)
+					throw new InvalidOperationException("The underlying transaction has already been committed.");
+			}
+
 			SetEntities(options);
 
 			return base.SaveChanges(acceptAllChangesOnSuccess);
@@ -182,6 +192,14 @@ namespace Raider.EntityFrameworkCore
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
+
+			if (IsTransactionCommittedDelegate != null)
+			{
+				var isCommitted = IsTransactionCommittedDelegate();
+				if (isCommitted)
+					throw new InvalidOperationException("The underlying transaction has already been committed.");
+			}
+
 			SetEntities(options);
 
 			return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);

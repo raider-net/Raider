@@ -182,11 +182,11 @@ namespace Raider.QueryServices.Aspects
 							_logger.LogErrorMessage(errMsg);
 						}
 
-						context.Rollback();
+						context.RollbackSafe();
 					}
 					else
 					{
-						context.Commit();
+						context.CommitSafe();
 					}
 
 					callEndTicks = StaticWatch.CurrentTicks;
@@ -198,7 +198,7 @@ namespace Raider.QueryServices.Aspects
 					methodCallElapsedMilliseconds = StaticWatch.ElapsedMilliseconds(callStartTicks, callEndTicks);
 
 					var hasTrans = context.HasTransaction();
-					context.Rollback();
+					context.RollbackSafe();
 
 					result = new QueryResultBuilder<TResult>()
 						.WithError(traceInfo,

@@ -14,6 +14,7 @@ namespace Raider.EntityFrameworkCore
 			out IDbContextTransaction? newDbContextTransaction,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null,
+			Func<bool>? isTransactionCommittedDelegate = null,
 			string? connectionString = null)
 			where TContext : DbContext
 		{
@@ -23,7 +24,7 @@ namespace Raider.EntityFrameworkCore
 			var dbContext = serviceProvider.GetRequiredService<TContext>();
 			if (dbContext is DbContextBase dbContextBase)
 			{
-				dbContextBase.Initialize(transactionUsage == TransactionUsage.ReuseOrCreateNew ? existingDbContextTransaction?.GetDbTransaction().Connection : null, connectionString);
+				dbContextBase.Initialize(transactionUsage == TransactionUsage.ReuseOrCreateNew ? existingDbContextTransaction?.GetDbTransaction().Connection : null, connectionString, isTransactionCommittedDelegate);
 			}
 			return SetDbTransaction(dbContext, existingDbContextTransaction, out newDbContextTransaction, transactionUsage, transactionIsolationLevel);
 		}

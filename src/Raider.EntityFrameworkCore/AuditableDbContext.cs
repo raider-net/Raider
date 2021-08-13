@@ -56,6 +56,13 @@ namespace Raider.EntityFrameworkCore
 		{
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
 
+			if (IsTransactionCommittedDelegate != null)
+			{
+				var isCommitted = IsTransactionCommittedDelegate();
+				if (isCommitted)
+					throw new InvalidOperationException("The underlying transaction has already been committed.");
+			}
+
 			var auditCorrelationId = Guid.NewGuid();
 			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId, options);
 
@@ -103,6 +110,13 @@ namespace Raider.EntityFrameworkCore
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			using var disposable = CreateDbLogScope(memberName, sourceFilePath, sourceLineNumber);
+
+			if (IsTransactionCommittedDelegate != null)
+			{
+				var isCommitted = IsTransactionCommittedDelegate();
+				if (isCommitted)
+					throw new InvalidOperationException("The underlying transaction has already been committed.");
+			}
 
 			var auditCorrelationId = Guid.NewGuid();
 			var auditEntriesWithTempProperty = OnBeforeSaveChanges(auditCorrelationId, options);
