@@ -4,6 +4,7 @@ using Raider.EntityFrameworkCore;
 using Raider.Services.EntityFramework.Commands;
 using System;
 using System.Data;
+using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,8 +41,30 @@ namespace Raider.Services.EntityFramework
 			_commandHandlerContext = (DbCommandHandlerContext)commandHandlerContext;
 		}
 
-		public TContext CreateNewDbContext<TContext>(
-			IDbContextTransaction? dbContextTransaction = null,
+		public TContext CreateNewDbContextWithNewTransaction<TContext>(
+			out IDbContextTransaction? newDbContextTransaction,
+			IsolationLevel? transactionIsolationLevel = null,
+			Func<bool>? isTransactionCommittedDelegate = null,
+			string? connectionString = null)
+			where TContext : DbContext
+			=> _commandHandlerContext == null
+				? throw new InvalidOperationException($"{nameof(_commandHandlerContext)} == null")
+				: _commandHandlerContext.CreateNewDbContextWithNewTransaction<TContext>(
+						out newDbContextTransaction,
+						transactionIsolationLevel,
+						isTransactionCommittedDelegate,
+						connectionString);
+
+		public TContext CreateNewDbContextWithoutTransaction<TContext>(DbConnection? externalDbConnection = null, string? connectionString = null)
+			where TContext : DbContext
+			=> _commandHandlerContext == null
+				? throw new InvalidOperationException($"{nameof(_commandHandlerContext)} == null")
+				: _commandHandlerContext.CreateNewDbContextWithoutTransaction<TContext>(
+						externalDbConnection,
+						connectionString);
+
+		public TContext CreateNewDbContextWithExistingTransaction<TContext>(
+			IDbContextTransaction dbContextTransaction,
 			bool isTransactionCommitted = false,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null,
@@ -49,12 +72,12 @@ namespace Raider.Services.EntityFramework
 			where TContext : DbContext
 			=> _commandHandlerContext == null
 				? throw new InvalidOperationException($"{nameof(_commandHandlerContext)} == null")
-				: _commandHandlerContext.CreateNewDbContext<TContext>(
-						dbContextTransaction,
-						isTransactionCommitted,
-						transactionUsage,
-						transactionIsolationLevel,
-						connectionString);
+				: _commandHandlerContext.CreateNewDbContextWithExistingTransaction<TContext>(
+					dbContextTransaction,
+					isTransactionCommitted,
+					transactionUsage,
+					transactionIsolationLevel,
+					connectionString);
 
 		public TContext GetOrCreateDbContext<TContext>(
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,

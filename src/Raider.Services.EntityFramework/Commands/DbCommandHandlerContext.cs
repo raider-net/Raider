@@ -5,6 +5,7 @@ using Raider.EntityFrameworkCore;
 using System;
 using System.Collections.Concurrent;
 using System.Data;
+using System.Data.Common;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +24,43 @@ namespace Raider.Services.EntityFramework.Commands
 		{
 		}
 
-		public TContext CreateNewDbContext<TContext>(
+		public TContext CreateNewDbContextWithNewTransaction<TContext>(
+			out IDbContextTransaction? newDbContextTransaction,
+			IsolationLevel? transactionIsolationLevel = null,
+			Func<bool>? isTransactionCommittedDelegate = null,
+			string? connectionString = null)
+			where TContext : DbContext
+			=> DbContextFactory.CreateNewDbContext<TContext>(
+				ServiceProvider,
+				null,
+				out newDbContextTransaction,
+				TransactionUsage.CreateNew,
+				transactionIsolationLevel,
+				isTransactionCommittedDelegate,
+				connectionString);
+
+		public TContext CreateNewDbContextWithoutTransaction<TContext>(DbConnection? externalDbConnection = null, string? connectionString = null)
+			where TContext : DbContext
+			=> DbContextFactory.CreateNewDbContextWithoutTransaction<TContext>(
+				ServiceProvider,
+				externalDbConnection,
+				connectionString);
+
+		public TContext CreateNewDbContextWithExistingTransaction<TContext>(
+			IDbContextTransaction dbContextTransaction,
+			bool isTransactionCommitted = false,
+			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
+			IsolationLevel? transactionIsolationLevel = null,
+			string? connectionString = null)
+			where TContext : DbContext
+			=> CreateNewDbContextInternal<TContext>(
+				dbContextTransaction,
+				isTransactionCommitted,
+				transactionUsage,
+				transactionIsolationLevel,
+				connectionString);
+
+		private TContext CreateNewDbContextInternal<TContext>(
 			IDbContextTransaction? dbContextTransaction = null,
 			bool isTransactionCommitted = false,
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
@@ -31,33 +68,37 @@ namespace Raider.Services.EntityFramework.Commands
 			string? connectionString = null)
 			where TContext : DbContext
 		{
-			var oldTransaction = dbContextTransaction ?? DbContextTransaction;
+			var oldTransaction = dbContextTransaction ?? (transactionUsage == TransactionUsage.ReuseOrCreateNew ? DbContextTransaction : null);
 			var dbContext = DbContextFactory.CreateNewDbContext<TContext>(
 				ServiceProvider,
 				oldTransaction,
 				out IDbContextTransaction? newDbContextTransaction,
 				transactionUsage,
 				transactionIsolationLevel,
-				() => IsTransactionCommitted,
+				() => transactionUsage == TransactionUsage.ReuseOrCreateNew && IsTransactionCommitted,
 				connectionString);
 
-			if (oldTransaction != null)
+			if (transactionUsage == TransactionUsage.ReuseOrCreateNew)
 			{
-				if (oldTransaction != newDbContextTransaction)
+				if (oldTransaction != null)
 				{
-					IsTransactionCommitted = true;
+					if (oldTransaction != newDbContextTransaction)
+					{
+						IsTransactionCommitted = true;
+					}
+					else if (DbContextTransaction == newDbContextTransaction)
+					{
+						//IsTransactionCommitted == IsTransactionCommitted
+					}
+					else if (dbContextTransaction == newDbContextTransaction)
+					{
+						IsTransactionCommitted = isTransactionCommitted;
+					}
 				}
-				else if (DbContextTransaction == newDbContextTransaction)
-				{
-					//IsTransactionCommitted == IsTransactionCommitted
-				}
-				else if (dbContextTransaction == newDbContextTransaction)
-				{
-					IsTransactionCommitted = isTransactionCommitted;
-				}
+
+				DbContextTransaction = newDbContextTransaction;
 			}
 
-			DbContextTransaction = newDbContextTransaction;
 			return dbContext;
 		}
 
@@ -67,7 +108,7 @@ namespace Raider.Services.EntityFramework.Commands
 			string? connectionString = null)
 			where TContext : DbContext
 		{
-			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContext<TContext>(
+			var result = _dbContextCache.GetOrAdd(typeof(TContext), (dbContextType) => CreateNewDbContextInternal<TContext>(
 				null,
 				false,
 				transactionUsage,

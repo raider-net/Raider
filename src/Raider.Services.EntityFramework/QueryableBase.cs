@@ -74,7 +74,7 @@ namespace Raider.Services.EntityFramework
 			if (dbContextTransaction == null)
 				SetDbContext(ServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
 			else
-				SetDbContext(ServiceContext.CreateNewDbContext<TDbContext>(dbContextTransaction, isTransactionCommitted, TransactionUsage.ReuseOrCreateNew), true);
+				SetDbContext(ServiceContext.CreateNewDbContextWithExistingTransaction<TDbContext>(dbContextTransaction, isTransactionCommitted, TransactionUsage.ReuseOrCreateNew), true);
 		}
 
 		protected IQueryable<T> DefaultInternal<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
