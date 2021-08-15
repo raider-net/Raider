@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Data;
+using System.Data.Common;
 
 namespace Raider.EntityFrameworkCore
 {
@@ -27,6 +28,23 @@ namespace Raider.EntityFrameworkCore
 				dbContextBase.Initialize(transactionUsage == TransactionUsage.ReuseOrCreateNew ? existingDbContextTransaction?.GetDbTransaction().Connection : null, connectionString, isTransactionCommittedDelegate);
 			}
 			return SetDbTransaction(dbContext, existingDbContextTransaction, out newDbContextTransaction, transactionUsage, transactionIsolationLevel);
+		}
+
+		public static TContext CreateNewDbContextWithoutTransaction<TContext>(
+			IServiceProvider serviceProvider,
+			DbConnection? externalDbConnection = null,
+			string? connectionString = null)
+			where TContext : DbContext
+		{
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
+
+			var dbContext = serviceProvider.GetRequiredService<TContext>();
+			if (dbContext is DbContextBase dbContextBase)
+			{
+				dbContextBase.Initialize(externalDbConnection, connectionString, null);
+			}
+			return dbContext;
 		}
 
 		public static TContext SetDbTransaction<TContext>(
