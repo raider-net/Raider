@@ -41,17 +41,20 @@ namespace Raider.Services.EntityFramework.Commands
 				() => IsTransactionCommitted,
 				connectionString);
 
-			if (oldTransaction != newDbContextTransaction)
+			if (oldTransaction != null)
 			{
-				IsTransactionCommitted = true;
-			}
-			else if (DbContextTransaction == newDbContextTransaction)
-			{
-				//IsTransactionCommitted == IsTransactionCommitted
-			}
-			else if (dbContextTransaction == newDbContextTransaction)
-			{
-				IsTransactionCommitted = isTransactionCommitted;
+				if (oldTransaction != newDbContextTransaction)
+				{
+					IsTransactionCommitted = true;
+				}
+				else if (DbContextTransaction == newDbContextTransaction)
+				{
+					//IsTransactionCommitted == IsTransactionCommitted
+				}
+				else if (dbContextTransaction == newDbContextTransaction)
+				{
+					IsTransactionCommitted = isTransactionCommitted;
+				}
 			}
 
 			DbContextTransaction = newDbContextTransaction;
