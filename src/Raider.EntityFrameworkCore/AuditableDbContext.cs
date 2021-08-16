@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Audit;
 using Raider.EntityFrameworkCore.Concurrence;
+using Raider.EntityFrameworkCore.Correlation;
 using Raider.EntityFrameworkCore.Synchronyzation;
 using System;
 using System.Collections.Generic;
@@ -192,6 +193,25 @@ namespace Raider.EntityFrameworkCore
 						case EntityState.Modified:
 							if (WasModifiedNotIgnorredProperty(entry, synchronizable))
 								synchronizable.SyncToken = Guid.NewGuid();
+							break;
+
+						default:
+							break;
+					}
+				}
+
+				if ((options == null || options.SetCorrelationId) && entry.Entity is ICorrelable correlable)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+							if (Guid.Empty.Equals(correlable.CorrelationId))
+								correlable.CorrelationId = Guid.NewGuid();
+							break;
+						case EntityState.Modified:
+							var originalCorrelationId = entry.OriginalValues.GetValue<Guid>(nameof(correlable.CorrelationId));
+							if (!correlable.CorrelationId.Equals(originalCorrelationId))
+								correlable.CorrelationId = originalCorrelationId;
 							break;
 
 						default:

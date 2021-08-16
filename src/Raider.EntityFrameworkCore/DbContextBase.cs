@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Raider.EntityFrameworkCore.Concurrence;
+using Raider.EntityFrameworkCore.Correlation;
 using Raider.EntityFrameworkCore.Database;
 using Raider.EntityFrameworkCore.QueryCache;
 using Raider.EntityFrameworkCore.Synchronyzation;
@@ -254,7 +255,10 @@ namespace Raider.EntityFrameworkCore
 
 		protected virtual void SetEntities(SaveOptions? options)
 		{
-			if (options != null && !options.SetConcurrencyToken && !options.SetSyncToken)
+			if (options != null
+				&& !options.SetConcurrencyToken
+				&& !options.SetSyncToken
+				&& !options.SetCorrelationId)
 				return;
 
 			ChangeTracker.DetectChanges();
@@ -290,6 +294,24 @@ namespace Raider.EntityFrameworkCore
 								synchronizable.SyncToken = Guid.NewGuid();
 							break;
 
+						default:
+							break;
+					}
+				}
+
+				if ((options == null || options.SetCorrelationId) && entry.Entity is ICorrelable correlable)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+							if (Guid.Empty.Equals(correlable.CorrelationId))
+								correlable.CorrelationId = Guid.NewGuid();
+							break;
+						case EntityState.Modified:
+							var originalCorrelationId = entry.OriginalValues.GetValue<Guid>(nameof(correlable.CorrelationId));
+							if (!correlable.CorrelationId.Equals(originalCorrelationId))
+								correlable.CorrelationId = originalCorrelationId;
+							break;
 						default:
 							break;
 					}
