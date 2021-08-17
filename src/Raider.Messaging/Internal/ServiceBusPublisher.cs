@@ -50,13 +50,13 @@ namespace Raider.Messaging
 			}
 		}
 
-		public Task<IMessage<TData>> PublishMessageAsync<TData>(int idPublisher, TData mesage, IMessage? previousMessage = null, DateTimeOffset? validToUtc = null, bool isRecovery = false, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default) where TData : IMessageData
+		public Task<IMessage<TData>> PublishMessageAsync<TData>(int idPublisher, TData message, IMessage? previousMessage = null, DateTimeOffset? validToUtc = null, bool isRecovery = false, IDbTransaction? dbTransaction = null, CancellationToken cancellationToken = default) where TData : IMessageData
 		{
 			var publisher = _register.TryGetPublisher<TData>(idPublisher);
 			if (publisher == null)
 				throw new ArgumentException($"Not registered {nameof(idPublisher)}: {idPublisher}", nameof(idPublisher));
 
-			return publisher.PublishMessageAsync(mesage, previousMessage, validToUtc, isRecovery, dbTransaction, cancellationToken);
+			return publisher.PublishMessageAsync(message, previousMessage, validToUtc, isRecovery, dbTransaction, cancellationToken);
 		}
 	}
 }

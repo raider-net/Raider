@@ -42,8 +42,9 @@ namespace Raider.Messaging
 		public override sealed IReadOnlyDictionary<object, object> ServiceBusHostProperties => Storage?.ServiceBusHost?.Properties ?? new ReadOnlyDictionary<object, object>(new Dictionary<object, object>());
 
 		public Type PublishingMessageDataType { get; } = typeof(TData);
+		public bool WriteToSubscribers { get; }
 
-		public Publisher(int idPublisher, string name, int idScenario)
+		public Publisher(int idPublisher, string name, int idScenario, bool writeToSubscribers)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
@@ -58,6 +59,7 @@ namespace Raider.Messaging
 			LastActivityUtc = DateTime.UtcNow;
 			Subscribers = new List<ISubscriber>();
 			State = ComponentState.Offline;
+			WriteToSubscribers = writeToSubscribers;
 		}
 
 		private readonly AsyncLock _initLock = new();
@@ -216,7 +218,7 @@ namespace Raider.Messaging
 
 			try
 			{
-				await MessageBox.WriteMessageAsync(message, Subscribers, dbTransaction, cancellationToken);
+				await MessageBox.WriteMessageAsync(message, WriteToSubscribers ? Subscribers : new List<ISubscriber>(), dbTransaction, cancellationToken);
 
 				await LogActivityAsync(traceInfo, ComponentState.Idle, null, cancellationToken);
 			}

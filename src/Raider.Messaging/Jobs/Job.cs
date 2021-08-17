@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Raider.Extensions;
-using Raider.Localization;
-using Raider.Logging.Extensions;
 using Raider.Messaging.Messages;
 using Raider.Threading;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,6 +47,8 @@ namespace Raider.Messaging
 		public IServiceBusRegister? Register { get; set; }
 		public override sealed IReadOnlyDictionary<object, object> ServiceBusHostProperties => Storage?.ServiceBusHost?.Properties ?? new ReadOnlyDictionary<object, object>(new Dictionary<object, object>());
 
+		protected IReadOnlyDictionary<Type, int>? MessageTypeIds => Storage?.MessageTypeIds;
+
 		public Job(int idSubscriber, string name)
 			: this(idSubscriber, name, 0)
 		{
@@ -70,6 +71,13 @@ namespace Raider.Messaging
 		}
 
 		public abstract Task<ComponentState> ExecuteAsync(JobContext context, CancellationToken cancellationToken = default);
+
+		protected virtual Task OnStart(CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
+
+		protected List<int>? GetMessageSubscriberIds<TData>()
+			where TData : IMessageData
+			=> Register?.GetMessageSubscribers<TData>()?.Select(x => x.IdComponent).ToList();
 
 		Task IJob.InitializeAsync(IServiceProvider serviceProvider, IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
 			=> InitializeAsync(serviceProvider, storage, messageBox, loggerFactory, cancellationToken);
@@ -168,6 +176,7 @@ namespace Raider.Messaging
 			try
 			{
 				await Storage.WriteJobStartAsync(context, this, cancellationToken);
+				await OnStart(cancellationToken);
 
 				_stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 				_timer = new Timer(TimerCallback, null, DelayedStart, ExecuteInterval);

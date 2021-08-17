@@ -99,11 +99,11 @@ namespace Raider.Messaging.Internal
 
 
 
-		public IServiceBusRegister RegisterPublisher<TData>(int idPublisher, string name)
+		public IServiceBusRegister RegisterPublisher<TData>(int idPublisher, string name, bool writeToSubscribers = true)
 			where TData : IMessageData
-			=> RegisterPublisher<TData>(idPublisher, name, 0);
+			=> RegisterPublisher<TData>(idPublisher, name, 0, writeToSubscribers);
 
-		public IServiceBusRegister RegisterPublisher<TData>(int idPublisher, string name, int idScenario)
+		public IServiceBusRegister RegisterPublisher<TData>(int idPublisher, string name, int idScenario, bool writeToSubscribers = true)
 			where TData : IMessageData
 		{
 			if (!_allowedPublishers)
@@ -112,7 +112,7 @@ namespace Raider.Messaging.Internal
 			if (RegistrationFinished)
 				throw new NotSupportedException("Component registration was finished.");
 
-			var publisher = new Publisher<TData>(idPublisher, name, idScenario)
+			var publisher = new Publisher<TData>(idPublisher, name, idScenario, writeToSubscribers)
 			{
 				Register = this
 			};

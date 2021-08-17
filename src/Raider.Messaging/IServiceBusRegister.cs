@@ -15,10 +15,10 @@ namespace Raider.Messaging
 
 		IServiceBusRegister RegisterScenario(int idScenario, string name);
 
-		IServiceBusRegister RegisterPublisher<TData>(int idPublisher, string name)
+		IServiceBusRegister RegisterPublisher<TData>(int idPublisher, string name, bool writeToSubscribers = true)
 			where TData : IMessageData;
 
-		IServiceBusRegister RegisterPublisher<TData>(int idPublisher, string name, int idScenario)
+		IServiceBusRegister RegisterPublisher<TData>(int idPublisher, string name, int idScenario, bool writeToSubscribers = true)
 			where TData : IMessageData;
 
 		IServiceBusRegister RegisterSubscriber<TData>(Subscriber<TData> subscriber)

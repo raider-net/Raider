@@ -10,6 +10,7 @@ namespace Raider.Messaging
 	public interface IPublisher : IComponent
 	{
 		Type PublishingMessageDataType { get; }
+		bool WriteToSubscribers { get; }
 
 		internal Task InitializeAsync(IServiceBusStorage storage, IMessageBox messageBox, ILoggerFactory loggerFactory, CancellationToken cancellationToken = default);
 	}
