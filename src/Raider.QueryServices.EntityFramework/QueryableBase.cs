@@ -92,13 +92,19 @@ namespace Raider.QueryServices.EntityFramework
 		public IQueryable<T> Default()
 			=> Default<T>();
 
-		public IQueryable<T> WithAcl()
-			=> WithAcl<T>();
+		public IQueryable<T> WithReadOnlyAcl()
+			=> WithReadOnlyAcl<T>();
+
+		public IQueryable<T> WithWriteAcl()
+			=> WithWriteAcl<T>();
 
 		public virtual IQueryable<T> Default<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
 			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
 
-		public virtual IQueryable<T> WithAcl<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
+		public virtual IQueryable<T> WithReadOnlyAcl<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
+			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
+
+		public virtual IQueryable<T> WithWriteAcl<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
 			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
 	}
 }
