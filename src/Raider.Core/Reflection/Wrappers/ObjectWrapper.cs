@@ -14,12 +14,12 @@ namespace Raider.Reflection
 		}
 
 		public ObjectWrapper()
-		: this(null, default)
+			: this(null, default)
 		{
 		}
 
 		public ObjectWrapper(T? instance)
-		: this(null, instance)
+			: this(null, instance)
 		{
 		}
 
