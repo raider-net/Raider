@@ -66,7 +66,7 @@ namespace Raider.AspNetCore.Middleware.Security
 				//.SetHeader(ResponseHeaderOptions.ContentSecurityPolicy)
 				.SetHeader(ResponseHeaderOptions.RemoveSerever);
 
-		public SecurityOptions SetDefaultWebApiOptions()
+		public SecurityOptions SetDefaultWebApiOptions(string swaggerPath = "/swagger")
 			=> this
 				.SetHeader(ResponseHeaderOptions.ReferrerPolicy)
 				.SetHeader(ResponseHeaderOptions.XContentTypeOptions)
@@ -75,7 +75,7 @@ namespace Raider.AspNetCore.Middleware.Security
 				.SetHeader(ResponseHeaderOptions.XXssProtection)
 				.SetHeader(ResponseHeaderOptions.ExpectCT)
 				.SetHeader(ResponseHeaderOptions.FeaturePolicy)
-				.SetHeader(ResponseHeaderOptions.ContentSecurityPolicy)
+				.SetHeader(ResponseHeaderOptions.ContentSecurityPolicy.IgnoredPath(swaggerPath))
 				.SetHeader(ResponseHeaderOptions.RemoveSerever);
 	}
 }

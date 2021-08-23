@@ -13,6 +13,12 @@ namespace Raider.AspNetCore.Middleware.Security
 		string? Value { get; }
 		Protocol ApplyToProtocol { get; }
 		IReadOnlyList<string>? ApplyOnlyToContentTypes { get; }
+		IReadOnlyList<string>? AllowedPaths { get; }
+		IReadOnlyList<string>? IgnoredPaths { get; }
+
+		ResponseHeaderOptions ApplyToContentType(string contentType);
+		ResponseHeaderOptions AllowOnlyPath(string path);
+		ResponseHeaderOptions IgnoredPath(string path);
 	}
 
 	public class ResponseHeaderOptions : IResponseHeaderOptions
@@ -30,6 +36,10 @@ namespace Raider.AspNetCore.Middleware.Security
 		public Protocol ApplyToProtocol { get; set; }
 		public List<string>? ApplyOnlyToContentTypes { get; set; }
 		IReadOnlyList<string>? IResponseHeaderOptions.ApplyOnlyToContentTypes => ApplyOnlyToContentTypes;
+		public List<string>? AllowedPaths { get; set; }
+		IReadOnlyList<string>? IResponseHeaderOptions.AllowedPaths => AllowedPaths;
+		public List<string>? IgnoredPaths { get; set; }
+		IReadOnlyList<string>? IResponseHeaderOptions.IgnoredPaths => IgnoredPaths;
 
 		public ResponseHeaderOptions(string key, string? value, Protocol applyToProtocol = Protocol.httpAndHttps)
 		{
@@ -44,7 +54,7 @@ namespace Raider.AspNetCore.Middleware.Security
 		public ResponseHeaderOptions ApplyToContentType(string contentType)
 		{
 			if (string.IsNullOrWhiteSpace(contentType))
-				throw new ArgumentNullException(nameof(contentType));
+				return this;
 
 			if (ApplyOnlyToContentTypes == null)
 				ApplyOnlyToContentTypes = new List<string>();
@@ -53,9 +63,61 @@ namespace Raider.AspNetCore.Middleware.Security
 			return this;
 		}
 
+		public ResponseHeaderOptions AllowOnlyPath(string path)
+		{
+			if (string.IsNullOrWhiteSpace(path))
+				return this;
+
+			if (AllowedPaths == null)
+				AllowedPaths = new List<string>();
+
+			AllowedPaths.AddUniqueItem(path);
+			return this;
+		}
+
+		public ResponseHeaderOptions IgnoredPath(string path)
+		{
+			if (string.IsNullOrWhiteSpace(path))
+				return this;
+
+			if (IgnoredPaths == null)
+				IgnoredPaths = new List<string>();
+
+			IgnoredPaths.AddUniqueItem(path);
+			return this;
+		}
+
+		private static bool IsAllowedPath(string path, IResponseHeaderOptions options)
+		{
+			if (options.IgnoredPaths == null || options.IgnoredPaths.Count == 0)
+			{
+				if (options.AllowedPaths == null || options.AllowedPaths.Count == 0)
+				{
+					return true;
+				}
+				else
+				{
+					foreach (var allowedPath in options.AllowedPaths)
+						if (path.StartsWith(allowedPath))
+							return true;
+
+					return false;
+				}
+			}
+			else
+			{
+				foreach (var ignoredPath in options.IgnoredPaths)
+					if (path.StartsWith(ignoredPath))
+						return false;
+
+				return true;
+			}
+		}
+
 		internal static void Apply(HttpContext context, IResponseHeaderOptions options)
 		{
 			var request = context.Request;
+			var path = request.Path;
 
 			var headers = context.Response.Headers;
 
@@ -67,13 +129,15 @@ namespace Raider.AspNetCore.Middleware.Security
 					{
 						if (options.ApplyOnlyToContentTypes == null || options.ApplyOnlyToContentTypes.Count == 0)
 						{
-							headers.Remove(options.Key);
+							if (IsAllowedPath(path, options))
+								headers.Remove(options.Key);
 						}
 						else
 						{
 							if (string.IsNullOrWhiteSpace(context.Response.ContentType))
 							{
-								headers.Remove(options.Key);
+								if (IsAllowedPath(path, options))
+									headers.Remove(options.Key);
 							}
 							else
 							{
@@ -81,7 +145,9 @@ namespace Raider.AspNetCore.Middleware.Security
 								{
 									if (context.Response.ContentType.StartsWith(contentType))
 									{
-										headers.Remove(options.Key);
+										if (IsAllowedPath(path, options))
+											headers.Remove(options.Key);
+
 										break;
 									}
 								}
@@ -92,13 +158,15 @@ namespace Raider.AspNetCore.Middleware.Security
 					{
 						if (options.ApplyOnlyToContentTypes == null || options.ApplyOnlyToContentTypes.Count == 0)
 						{
-							headers[options.Key] = options.Value;
+							if (IsAllowedPath(path, options))
+								headers[options.Key] = options.Value;
 						}
 						else
 						{
 							if (string.IsNullOrWhiteSpace(context.Response.ContentType))
 							{
-								headers[options.Key] = options.Value;
+								if (IsAllowedPath(path, options))
+									headers[options.Key] = options.Value;
 							}
 							else
 							{
@@ -106,7 +174,9 @@ namespace Raider.AspNetCore.Middleware.Security
 								{
 									if (context.Response.ContentType.StartsWith(contentType))
 									{
-										headers[options.Key] = options.Value;
+										if (IsAllowedPath(path, options))
+											headers[options.Key] = options.Value;
+
 										break;
 									}
 								}
@@ -123,13 +193,15 @@ namespace Raider.AspNetCore.Middleware.Security
 					{
 						if (options.ApplyOnlyToContentTypes == null || options.ApplyOnlyToContentTypes.Count == 0)
 						{
-							headers.Remove(options.Key);
+							if (IsAllowedPath(path, options))
+								headers.Remove(options.Key);
 						}
 						else
 						{
 							if (string.IsNullOrWhiteSpace(context.Response.ContentType))
 							{
-								headers.Remove(options.Key);
+								if (IsAllowedPath(path, options))
+									headers.Remove(options.Key);
 							}
 							else
 							{
@@ -137,7 +209,9 @@ namespace Raider.AspNetCore.Middleware.Security
 								{
 									if (context.Response.ContentType.StartsWith(contentType))
 									{
-										headers.Remove(options.Key);
+										if (IsAllowedPath(path, options))
+											headers.Remove(options.Key);
+
 										break;
 									}
 								}
@@ -148,13 +222,15 @@ namespace Raider.AspNetCore.Middleware.Security
 					{
 						if (options.ApplyOnlyToContentTypes == null || options.ApplyOnlyToContentTypes.Count == 0)
 						{
-							headers[options.Key] = options.Value;
+							if (IsAllowedPath(path, options))
+								headers[options.Key] = options.Value;
 						}
 						else
 						{
 							if (string.IsNullOrWhiteSpace(context.Response.ContentType))
 							{
-								headers[options.Key] = options.Value;
+								if (IsAllowedPath(path, options))
+									headers[options.Key] = options.Value;
 							}
 							else
 							{
@@ -162,7 +238,9 @@ namespace Raider.AspNetCore.Middleware.Security
 								{
 									if (context.Response.ContentType.StartsWith(contentType))
 									{
-										headers[options.Key] = options.Value;
+										if (IsAllowedPath(path, options))
+											headers[options.Key] = options.Value;
+
 										break;
 									}
 								}
@@ -240,8 +318,8 @@ namespace Raider.AspNetCore.Middleware.Security
 					"font-src 'none';" +
 					"form-action 'none';" + //self
 					"frame-ancestors 'none';" +
-					"frame-src 'none';" +
-					"img-src 'none';" +
+					"frame-src 'none';" +  ////////////////////because the document's frame is sandboxed and the 'allow-scripts' permission is not set.
+					"img-src 'none';" + //ee
 					"manifest-src 'none';" +
 					"media-src 'none';" +
 					"object-src 'none';" +
@@ -251,7 +329,7 @@ namespace Raider.AspNetCore.Middleware.Security
 					"script-src-elem 'none';" +
 					"style-src 'none';" +
 					"style-src-attr 'none';" +
-					"style-src-elem 'none';" +
+					"style-src-elem 'none';" + //ee .... unsafe-inline OR nonce
 					"upgrade-insecure-requests;" +
 					"worker-src 'none';",
 				Protocol.httpAndHttps)
