@@ -1,4 +1,5 @@
-﻿using Raider.Logging;
+﻿using Raider.Commands.Exceptions;
+using Raider.Logging;
 using System.Collections.Generic;
 
 namespace Raider.Commands.Internal
@@ -26,6 +27,14 @@ namespace Raider.Commands.Internal
 			SuccessMessages = new List<ILogMessage>();
 			WarningMessages = new List<ILogMessage>();
 			ErrorMessages = new List<IErrorMessage>();
+		}
+
+		public void ThrowIfError()
+		{
+			if (!HasError)
+				return;
+
+			throw new CommandResultException(this);
 		}
 	}
 

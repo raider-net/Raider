@@ -26,5 +26,7 @@ namespace Raider.Queries
 		TResult? Result { get; set; }
 
 		void ClearResult();
+
+		void ThrowIfError();
 	}
 }

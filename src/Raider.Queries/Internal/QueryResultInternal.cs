@@ -1,4 +1,5 @@
 ﻿using Raider.Logging;
+using Raider.Queries.Exceptions;
 using System.Collections.Generic;
 
 namespace Raider.Queries.Internal
@@ -48,6 +49,14 @@ namespace Raider.Queries.Internal
 		{
 			_result = default;
 			ResultWasSet = false;
+		}
+
+		public void ThrowIfError()
+		{
+			if (!HasError)
+				return;
+
+			throw new QueryResultException<TResult>(this);
 		}
 	}
 }

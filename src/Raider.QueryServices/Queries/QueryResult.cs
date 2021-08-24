@@ -1,5 +1,6 @@
 ﻿using Raider.Logging;
 using Raider.Queries;
+using Raider.Queries.Exceptions;
 using System.Collections.Generic;
 
 namespace Raider.QueryServices.Queries
@@ -52,6 +53,14 @@ namespace Raider.QueryServices.Queries
 		{
 			_result = default;
 			ResultWasSet = false;
+		}
+
+		public void ThrowIfError()
+		{
+			if (!HasError)
+				return;
+
+			throw new QueryResultException<T>(this);
 		}
 	}
 }

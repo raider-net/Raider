@@ -13,19 +13,22 @@ namespace Raider.Extensions
 			if (exception == null)
 				throw new ArgumentNullException(nameof(exception));
 
-			if (exception.Data.Contains(RAIDER_LOG_MESSAGE))
+			if (logMessage != null)
 			{
-				var value = exception.Data[RAIDER_LOG_MESSAGE];
-				if (value is ErrorMessage msg)
+				if (exception.Data.Contains(RAIDER_LOG_MESSAGE))
 				{
-					msg.Detail = string.IsNullOrWhiteSpace(msg.Detail)
-						? $"---NEXT LOG MESSAGE---{Environment.NewLine}{logMessage.FullMessage}"
-						: $"{msg.Detail}{Environment.NewLine}---NEXT LOG MESSAGE---{Environment.NewLine}{logMessage.FullMessage}";
+					var value = exception.Data[RAIDER_LOG_MESSAGE];
+					if (value is ErrorMessage msg)
+					{
+						msg.Detail = string.IsNullOrWhiteSpace(msg.Detail)
+							? $"---NEXT LOG MESSAGE---{Environment.NewLine}{logMessage.FullMessage}"
+							: $"{msg.Detail}{Environment.NewLine}---NEXT LOG MESSAGE---{Environment.NewLine}{logMessage.FullMessage}";
+					}
 				}
-			}
-			else
-			{
-				exception.Data[RAIDER_LOG_MESSAGE] = logMessage;
+				else
+				{
+					exception.Data[RAIDER_LOG_MESSAGE] = logMessage;
+				}
 			}
 
 			return exception;

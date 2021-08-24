@@ -2,6 +2,7 @@
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Raider.Logging.SerilogEx
@@ -14,11 +15,15 @@ namespace Raider.Logging.SerilogEx
 		private static readonly ScalarValue _correlationId = new ScalarValue(nameof(ILogMessage.TraceInfo.CorrelationId));
 		private static readonly ScalarValue _isDbLog = new ScalarValue(IS_DB_LOG);
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static bool IsLogType(string logType, LogEvent logEvent)
 		=> logEvent != null
 			&& logEvent.Properties.TryGetValue(logType, out LogEventPropertyValue? value)
 			&& value is DictionaryValue;
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static IDictionary<string, object?>? ConvertToDictionary(string logType, LogEvent logEvent)
 		{
 			if (logEvent == null || logEvent.Properties == null)
@@ -76,24 +81,38 @@ namespace Raider.Logging.SerilogEx
 			return result;
 		}
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static bool IsLogMessage(LogEvent logEvent)
 			=> IsLogType(LoggerSettings.LogMessage, logEvent);
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static IDictionary<string, object?>? ConvertLogMessageToDictionary(LogEvent logEvent)
 			=> ConvertToDictionary(LoggerSettings.LogMessage, logEvent);
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static bool IsEnvironmentInfo(LogEvent logEvent)
 			=> IsLogType(LoggerSettings.EnvironmentInfo, logEvent);
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static IDictionary<string, object?>? ConvertEnvironmentInfoToDictionary(LogEvent logEvent)
 			=> ConvertToDictionary(LoggerSettings.EnvironmentInfo, logEvent);
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static bool IsHardwareInfo(LogEvent logEvent)
 			=> IsLogType(LoggerSettings.HardwareInfo, logEvent);
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static IDictionary<string, object?>? ConvertHardwareInfoToDictionary(LogEvent logEvent)
 			=> ConvertToDictionary(LoggerSettings.HardwareInfo, logEvent);
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static IDictionary<string, object?>? ConvertLogToDictionary(LogEvent logEvent)
 		{
 			if (logEvent == null)

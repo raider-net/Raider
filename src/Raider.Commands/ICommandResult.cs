@@ -20,6 +20,8 @@ namespace Raider.Commands
 		bool HasAnyMessage { get; }
 
 		long? AffectedEntities { get; set; }
+
+		void ThrowIfError();
 	}
 
 	public interface ICommandResult<TResult> : ICommandResult
