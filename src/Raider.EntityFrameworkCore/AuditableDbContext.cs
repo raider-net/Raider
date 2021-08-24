@@ -169,7 +169,7 @@ namespace Raider.EntityFrameworkCore
 					}
 				}
 
-				if ((options == null || options.SetConcurrencyToken) && entry.Entity is IConcurrent concurrent)
+				if ((options == null || options.SetConcurrencyToken != false) && entry.Entity is IConcurrent concurrent)
 				{
 					switch (entry.State)
 					{
@@ -183,7 +183,7 @@ namespace Raider.EntityFrameworkCore
 					}
 				}
 
-				if ((options == null || options.SetSyncToken) && entry.Entity is ISynchronizable synchronizable)
+				if ((options == null || options.SetSyncToken != false) && entry.Entity is ISynchronizable synchronizable)
 				{
 					switch (entry.State)
 					{
@@ -200,7 +200,7 @@ namespace Raider.EntityFrameworkCore
 					}
 				}
 
-				if ((options == null || options.SetCorrelationId) && entry.Entity is ICorrelable correlable)
+				if ((options == null || options.SetCorrelationId != false) && entry.Entity is ICorrelable correlable)
 				{
 					switch (entry.State)
 					{
