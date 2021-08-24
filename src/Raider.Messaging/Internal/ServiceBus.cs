@@ -14,6 +14,7 @@ namespace Raider.Messaging
 {
 	internal class ServiceBus : BackgroundService
 	{
+		private readonly Action<IServiceProvider>? _onInitialized;
 		private readonly int _startMaxRetryCount;
 		private readonly ServiceBusHost _serviceBusHost;
 		private readonly IServiceScope _serviceScope;
@@ -63,6 +64,7 @@ namespace Raider.Messaging
 			}
 
 			var opt = options.Value;
+			_onInitialized = opt.OnInitialized;
 			_startMaxRetryCount = opt.ServiceHostStartMaxRetryCount;
 			if (_startMaxRetryCount < 0)
 				_startMaxRetryCount = 0;
@@ -163,6 +165,8 @@ namespace Raider.Messaging
 
 				await _register.InitializeComponentsAsync(_serviceProvider, _storage, ctx, _messageBox, _loggerFactory, cancellationToken);
 				_initialized = true;
+
+				_onInitialized?.Invoke(_serviceProvider);
 
 				try
 				{

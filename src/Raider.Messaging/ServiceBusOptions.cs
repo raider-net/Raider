@@ -12,6 +12,7 @@ namespace Raider.Messaging
 		public string? Description { get; set; }
 		public int? IdUser { get; set; }
 		public Dictionary<object, object> Properties { get; }
+		public Action<IServiceProvider>? OnInitialized { get; set; }
 
 		public ServiceBusOptions()
 		{

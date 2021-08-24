@@ -34,6 +34,7 @@ namespace Raider.Messaging.Extensions
 				o.Description = cfg.ServiceBusOptions.Description;
 				o.IdUser = cfg.ServiceBusOptions.IdUser;
 				o.AddProperties(cfg.ServiceBusOptions.Properties);
+				o.OnInitialized = cfg.ServiceBusOptions.OnInitialized;
 			});
 
 			services.TryAddSingleton<IServiceBusStorage, TStorage>();
