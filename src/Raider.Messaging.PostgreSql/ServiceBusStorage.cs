@@ -472,15 +472,15 @@ namespace Raider.Messaging.PostgreSql
 				throw new InvalidOperationException($"{nameof(ServiceBusHost)} was not set.");
 
 			var idMessageType = GetMessageTypeId<TData>();
-			using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
 
 			if (dbTransaction == null)
 			{
 				//TODO: preco je dbTransaction == null ???? ... mala by byt vzdy vyplnena
 
+				using var connection = await CreateConnectionAsync(ServiceBusHost, cancellationToken);
 				using var tran = await connection.BeginTransactionAsync(cancellationToken);
 
-				await _dbMessage.InsertAsync(connection, null, message, idMessageType, cancellationToken);
+				await _dbMessage.InsertAsync(connection, tran, message, idMessageType, cancellationToken);
 
 				if (subscribers == null || subscribers.Count == 0)
 				{
@@ -497,6 +497,10 @@ namespace Raider.Messaging.PostgreSql
 			{
 				if (dbTransaction is not NpgsqlTransaction npgsqlTran)
 					throw new ArgumentException($"{nameof(dbTransaction)} must be {nameof(NpgsqlTransaction)}", nameof(dbTransaction));
+
+				var connection = npgsqlTran.Connection;
+				if (connection == null)
+					throw new InvalidConstraintException("Transaction has no connection.");
 
 				await _dbMessage.InsertAsync(connection, npgsqlTran, message, idMessageType, cancellationToken);
 
