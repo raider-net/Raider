@@ -10,7 +10,7 @@ namespace Raider.Streams
 			if (stream == null)
 				throw new ArgumentNullException(nameof(stream));
 
-			byte[] byteArray = (stream as MemoryStream)?.ToArray();
+			byte[]? byteArray = (stream as MemoryStream)?.ToArray();
 
 			if (byteArray == null)
 				using (MemoryStream ms = new MemoryStream())
