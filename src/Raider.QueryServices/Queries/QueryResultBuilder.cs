@@ -191,7 +191,7 @@ namespace Raider.QueryServices.Queries
 					.LogLevel( LogLevel.Error)
 					.ValidationFailure(failure, true)
 					.ClientMessage(failure.Message, true) //TODO read from settings when to use MessageWithPropertyName
-					.PropertyName(failure.ValidationFrame.ToString()?.TrimPrefix("_."), true);
+					.PropertyName(string.IsNullOrWhiteSpace(failure.ValidationFrame.PropertyName) ? null : failure.ValidationFrame.ToString()?.TrimPrefix("_."), !string.IsNullOrWhiteSpace(failure.ValidationFrame.PropertyName));
 
 			return errorMessageBuilder.Build();
 		}
@@ -206,7 +206,7 @@ namespace Raider.QueryServices.Queries
 					.LogLevel(LogLevel.Warning)
 					.ValidationFailure(failure, true)
 					.ClientMessage(failure.Message, true) //TODO read from settings when to use MessageWithPropertyName
-					.PropertyName(failure.ValidationFrame.ToString()?.TrimPrefix("_."), true);
+					.PropertyName(string.IsNullOrWhiteSpace(failure.ValidationFrame.PropertyName) ? null : failure.ValidationFrame.ToString()?.TrimPrefix("_."), !string.IsNullOrWhiteSpace(failure.ValidationFrame.PropertyName));
 
 			return logMessageBuilder.Build();
 		}
