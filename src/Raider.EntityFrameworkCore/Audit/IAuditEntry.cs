@@ -14,7 +14,7 @@ namespace Raider.EntityFrameworkCore.Audit
 		string? AffectedColumns { get; set; }
 		Guid AuditCorrelationId { get; set; }
 		string? CommandQueryName { get; set; }
-		long? IdCommandQuery { get; set; }
+		Guid? IdCommandQuery { get; set; }
 		Guid? CorrelationId { get; set; }
 	}
 }

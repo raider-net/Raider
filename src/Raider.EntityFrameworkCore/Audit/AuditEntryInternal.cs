@@ -20,7 +20,7 @@ namespace Raider.EntityFrameworkCore.Audit
 		public List<string> ChangedColumns { get; } = new List<string>();
 		public bool HasTemporaryProperties => TemporaryProperties.Any();
 		public string? CommandQueryName { get; set; }
-		public long? IdCommandQuery { get; set; }
+		public Guid? IdCommandQuery { get; set; }
 		public Guid? CorrelationId { get; set; }
 
 		public AuditEntryInternal(EntityEntry entry)

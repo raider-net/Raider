@@ -36,14 +36,18 @@ namespace Raider.QueryServices.EntityFramework.Queries
 				TransactionUsage.CreateNew,
 				transactionIsolationLevel,
 				isTransactionCommittedDelegate,
-				connectionString);
+				connectionString,
+				QueryName,
+				IdQueryEntry);
 
 		public TContext CreateNewDbContextWithoutTransaction<TContext>(DbConnection? externalDbConnection = null, string? connectionString = null)
 			where TContext : DbContext
 			=> DbContextFactory.CreateNewDbContextWithoutTransaction<TContext>(
 				ServiceProvider,
 				externalDbConnection,
-				connectionString);
+				connectionString,
+				QueryName,
+				IdQueryEntry);
 
 		public TContext CreateNewDbContextWithExistingTransaction<TContext>(
 			IDbContextTransaction dbContextTransaction,
@@ -75,7 +79,9 @@ namespace Raider.QueryServices.EntityFramework.Queries
 				transactionUsage,
 				transactionIsolationLevel,
 				() => transactionUsage == TransactionUsage.ReuseOrCreateNew && IsTransactionCommitted,
-				connectionString);
+				connectionString,
+				QueryName,
+				IdQueryEntry);
 
 			if (transactionUsage == TransactionUsage.ReuseOrCreateNew)
 			{

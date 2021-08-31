@@ -223,7 +223,9 @@ namespace Raider.EntityFrameworkCore
 				{
 					IdUser = _userId,
 					Created = now,
-					CorrelationId = _applicationContext.TraceInfo.CorrelationId
+					CorrelationId = _applicationContext.TraceInfo.CorrelationId,
+					CommandQueryName = this.CommandQueryName,
+					IdCommandQuery = this.IdCommandQuery
 				};
 
 				auditEntries.Add(auditEntry);

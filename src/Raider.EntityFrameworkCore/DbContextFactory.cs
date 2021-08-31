@@ -16,7 +16,9 @@ namespace Raider.EntityFrameworkCore
 			TransactionUsage transactionUsage = TransactionUsage.ReuseOrCreateNew,
 			IsolationLevel? transactionIsolationLevel = null,
 			Func<bool>? isTransactionCommittedDelegate = null,
-			string? connectionString = null)
+			string? connectionString = null,
+			string? commandQueryName = null,
+			Guid? idCommandQuery = null)
 			where TContext : DbContext
 		{
 			if (serviceProvider == null)
@@ -25,6 +27,8 @@ namespace Raider.EntityFrameworkCore
 			var dbContext = serviceProvider.GetRequiredService<TContext>();
 			if (dbContext is DbContextBase dbContextBase)
 			{
+				dbContextBase.CommandQueryName = commandQueryName;
+				dbContextBase.IdCommandQuery = idCommandQuery;
 				dbContextBase.Initialize(transactionUsage == TransactionUsage.ReuseOrCreateNew ? existingDbContextTransaction?.GetDbTransaction().Connection : null, connectionString, isTransactionCommittedDelegate);
 			}
 			return SetDbTransaction(dbContext, existingDbContextTransaction, out newDbContextTransaction, transactionUsage, transactionIsolationLevel);
@@ -33,7 +37,9 @@ namespace Raider.EntityFrameworkCore
 		public static TContext CreateNewDbContextWithoutTransaction<TContext>(
 			IServiceProvider serviceProvider,
 			DbConnection? externalDbConnection = null,
-			string? connectionString = null)
+			string? connectionString = null,
+			string? commandQueryName = null,
+			Guid? idCommandQuery = null)
 			where TContext : DbContext
 		{
 			if (serviceProvider == null)
@@ -42,6 +48,8 @@ namespace Raider.EntityFrameworkCore
 			var dbContext = serviceProvider.GetRequiredService<TContext>();
 			if (dbContext is DbContextBase dbContextBase)
 			{
+				dbContextBase.CommandQueryName = commandQueryName;
+				dbContextBase.IdCommandQuery = idCommandQuery;
 				dbContextBase.Initialize(externalDbConnection, connectionString, null);
 			}
 			return dbContext;

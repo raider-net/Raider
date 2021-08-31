@@ -58,6 +58,9 @@ namespace Raider.EntityFrameworkCore
 			}
 		}
 
+		public string? CommandQueryName { get; internal set; }
+		public Guid? IdCommandQuery { get; internal set; }
+
 		public DbContextBase(DbContextOptions options, ILogger logger, IApplicationContext appContext/*, disabledEtitiesFromAudit, disabledEtityPropertiesFromAudit*/)
 			: base(options)
 		{
