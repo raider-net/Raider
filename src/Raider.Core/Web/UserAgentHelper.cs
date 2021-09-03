@@ -13,9 +13,9 @@ namespace Raider.Web
 
 			var result =
 				IsIE(userAgent) ??
+				IsEdge(userAgent) ??
 				IsChrome(userAgent) ??
 				IsFirefox(userAgent) ??
-				IsEdge(userAgent) ??
 				IsSafari(userAgent) ??
 				IsOpera(userAgent);
 
@@ -85,6 +85,18 @@ namespace Raider.Web
 		public static BrowserInfo? IsEdge(string userAgent)
 		{
 			var edge = BrowserType.Edge.ToString().ToLower();
+			if (userAgent.Contains(edge))
+			{
+				var first = userAgent.IndexOf(edge);
+				var version = userAgent.Substring(first + edge.Length + 1);
+				return new BrowserInfo
+				{
+					Version = ToVersion(version),
+					Type = BrowserType.Edge
+				};
+			}
+
+			edge = "edg";
 			if (userAgent.Contains(edge))
 			{
 				var first = userAgent.IndexOf(edge);
