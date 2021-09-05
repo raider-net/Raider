@@ -9,5 +9,7 @@ namespace Raider.Ldap
 		public string? LdapFilter { get; set; }
 		public SearchScope SearchScope { get; set; } = SearchScope.Subtree;
 		public List<string>? Attributes { get; set; }
+		public int? MaxResultsToRequest { get; set; }
+		public SearchOption? SearchOptionsControl { get; set; }
 	}
 }

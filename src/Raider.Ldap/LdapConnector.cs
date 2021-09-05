@@ -46,42 +46,79 @@ namespace Raider.Ldap
 				throw new ArgumentNullException(nameof(search));
 
 			var searchRequest = new SearchRequest(search.DistinguishedName, search.LdapFilter, search.SearchScope, search.Attributes?.ToArray());
-			
-			var response = (SearchResponse)_connection.SendRequest(searchRequest);
+
+			PageResultRequestControl? pageResultRequestControl = null;
+			if (search.MaxResultsToRequest.HasValue)
+			{
+				pageResultRequestControl = new PageResultRequestControl(search.MaxResultsToRequest.Value);
+				searchRequest.Controls.Add(pageResultRequestControl);
+			}
+
+			if (search.SearchOptionsControl.HasValue)
+			{
+				var searchOptionsControl = new SearchOptionsControl(search.SearchOptionsControl.Value);
+				searchRequest.Controls.Add(searchOptionsControl);
+			}
+
 			var utf8 = new UTF8Encoding(false, true);
 			var result = new List<LdapEntry>();
+			SearchResponse? response = null;
 
-			foreach (SearchResultEntry entry in response.Entries)
+			PageResultResponseControl? pageResponseControl = null;
+
+			var pages = 0;
+			while (true)
 			{
-				var attributes = new List<LdapAttributeValues>();
-				foreach (string attrName in entry.Attributes.AttributeNames)
-				{
-					var attr = entry.Attributes[attrName];
-					var attributeValues = new LdapAttributeValues(attr.Name);
-					attributes.Add(attributeValues);
+				pages++;
+				response = (SearchResponse)_connection.SendRequest(searchRequest);
 
-					foreach (var o in attr)
+				foreach (SearchResultEntry entry in response.Entries)
+				{
+					var attributes = new List<LdapAttributeValues>();
+					foreach (string attrName in entry.Attributes.AttributeNames)
 					{
-						if (o is byte[] v)
+						var attr = entry.Attributes[attrName];
+						var attributeValues = new LdapAttributeValues(attr.Name);
+						attributes.Add(attributeValues);
+
+						foreach (var o in attr)
 						{
-							try
+							if (o is byte[] v)
 							{
-								attributeValues.Values.Add(new LdapValue { StringValue = utf8.GetString(v) });
+								try
+								{
+									attributeValues.Values.Add(new LdapValue { StringValue = utf8.GetString(v) });
+								}
+								catch (ArgumentException)
+								{
+									attributeValues.Values.Add(new LdapValue { ByteArrayValue = v });
+								}
 							}
-							catch (ArgumentException)
+							else
 							{
-								attributeValues.Values.Add(new LdapValue { ByteArrayValue = v });
+								attributeValues.Values.Add(new LdapValue { Error = $"Not supported type: {o?.GetType()?.FullName}" });
 							}
-						}
-						else
-						{
-							attributeValues.Values.Add(new LdapValue { Error = $"Not supported type: {o?.GetType()?.FullName}" });
 						}
 					}
+
+					attributes = attributes.OrderBy(x => x.Name).ToList();
+					result.Add(new LdapEntry(attributes));
 				}
 
-				attributes = attributes.OrderBy(x => x.Name).ToList();
-				result.Add(new LdapEntry(attributes));
+				if (pageResultRequestControl == null)
+					break;
+
+				if (response.Controls.Length == 0)
+					break;
+
+				pageResponseControl = response.Controls[0] as PageResultResponseControl;
+				if (pageResponseControl == null)
+					break;
+
+				if (pageResponseControl.Cookie.Length == 0)
+					break;
+
+				pageResultRequestControl.Cookie = pageResponseControl.Cookie;
 			}
 
 			return result;
