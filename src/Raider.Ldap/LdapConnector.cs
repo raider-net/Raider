@@ -21,8 +21,6 @@ namespace Raider.Ldap
 			if (!string.IsNullOrWhiteSpace(validationError))
 				throw new ArgumentException(validationError, nameof(config));
 
-			var credential = new NetworkCredential(config.UserName, config.Password, config.DomainName);
-
 			_connection = new LdapConnection(new LdapDirectoryIdentifier(config.Server, config.Port, false, false))
 			{
 				AuthType = config.AuthType,
@@ -30,7 +28,16 @@ namespace Raider.Ldap
 			_connection.Timeout = TimeSpan.FromSeconds(30);
 			_connection.SessionOptions.VerifyServerCertificate = (LdapConnection conn, X509Certificate cert) => true;
 			_connection.SessionOptions.SecureSocketLayer = config.SecureSocketLayer;
-			_connection.Bind(credential);
+
+			if (string.IsNullOrWhiteSpace(config.UserName))
+			{
+				_connection.Bind();
+			}
+			else
+			{
+				var credential = new NetworkCredential(config.UserName, config.Password, config.DomainName);
+				_connection.Bind(credential);
+			}
 		}
 
 		public List<LdapResultValue> Search(LdapSearchConfig search)
