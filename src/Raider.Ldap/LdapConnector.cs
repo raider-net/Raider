@@ -40,24 +40,25 @@ namespace Raider.Ldap
 			}
 		}
 
-		public List<LdapResultValue> Search(LdapSearchConfig search)
+		public List<LdapEntry> Search(LdapSearchConfig search)
 		{
 			if (search == null)
 				throw new ArgumentNullException(nameof(search));
 
-			var result = new List<LdapResultValue>();
 			var searchRequest = new SearchRequest(search.DistinguishedName, search.LdapFilter, search.SearchScope, search.Attributes?.ToArray());
 			
 			var response = (SearchResponse)_connection.SendRequest(searchRequest);
 			var utf8 = new UTF8Encoding(false, true);
+			var result = new List<LdapEntry>();
 
 			foreach (SearchResultEntry entry in response.Entries)
 			{
+				var attributes = new List<LdapAttributeValues>();
 				foreach (string attrName in entry.Attributes.AttributeNames)
 				{
 					var attr = entry.Attributes[attrName];
-					var val = new LdapResultValue(attr.Name);
-					result.Add(val);
+					var attributeValues = new LdapAttributeValues(attr.Name);
+					attributes.Add(attributeValues);
 
 					foreach (var o in attr)
 					{
@@ -65,22 +66,24 @@ namespace Raider.Ldap
 						{
 							try
 							{
-								val.Values.Add(new LdapValue { StringValue = utf8.GetString(v) });
+								attributeValues.Values.Add(new LdapValue { StringValue = utf8.GetString(v) });
 							}
 							catch (ArgumentException)
 							{
-								val.Values.Add(new LdapValue { ByteArrayValue = v });
+								attributeValues.Values.Add(new LdapValue { ByteArrayValue = v });
 							}
 						}
 						else
 						{
-							val.Values.Add(new LdapValue { Error = $"Not supported type: {o?.GetType()?.FullName}" });
+							attributeValues.Values.Add(new LdapValue { Error = $"Not supported type: {o?.GetType()?.FullName}" });
 						}
 					}
 				}
+
+				attributes = attributes.OrderBy(x => x.Name).ToList();
+				result.Add(new LdapEntry(attributes));
 			}
 
-			result = result.OrderBy(x => x.Name).ToList();
 			return result;
 		}
 	}
