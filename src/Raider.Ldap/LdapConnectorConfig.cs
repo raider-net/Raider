@@ -1,7 +1,7 @@
 ﻿using System.DirectoryServices.Protocols;
 using System.Text;
 
-namespace Raider
+namespace Raider.Ldap
 {
 	public class LdapConnectorConfig
 	{

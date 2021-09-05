@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
 
-namespace Raider
+namespace Raider.Ldap
 {
 	public class LdapSearchConfig
 	{

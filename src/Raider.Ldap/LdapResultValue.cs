@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Raider
+namespace Raider.Ldap
 {
 	public class LdapResultValue
 	{

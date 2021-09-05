@@ -1,4 +1,4 @@
-﻿namespace Raider
+﻿namespace Raider.Ldap
 {
 	public class LdapValue
 	{
