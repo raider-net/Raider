@@ -11,6 +11,7 @@ namespace Raider.Ldap
 	public class LdapConnector
 	{
 		private readonly LdapConnection _connection;
+		private readonly UTF8Encoding _utf8;
 
 		public LdapConnector(LdapConnectorConfig config)
 		{
@@ -38,9 +39,11 @@ namespace Raider.Ldap
 				var credential = new NetworkCredential(config.UserName, config.Password, config.DomainName);
 				_connection.Bind(credential);
 			}
+
+			_utf8 = new UTF8Encoding(false, true);
 		}
 
-		public List<LdapEntry> Search(LdapSearchConfig search)
+		public LdapSearchResult Search(LdapSearchConfig search)
 		{
 			if (search == null)
 				throw new ArgumentNullException(nameof(search));
@@ -60,59 +63,35 @@ namespace Raider.Ldap
 				searchRequest.Controls.Add(searchOptionsControl);
 			}
 
-			var utf8 = new UTF8Encoding(false, true);
-			var result = new List<LdapEntry>();
-			SearchResponse? response = null;
-
-			PageResultResponseControl? pageResponseControl = null;
-
+			var result = new LdapSearchResult();
 			var pages = 0;
 			while (true)
 			{
 				pages++;
-				response = (SearchResponse)_connection.SendRequest(searchRequest);
 
-				foreach (SearchResultEntry entry in response.Entries)
+				SearchResponse? searchResponse;
+				try
 				{
-					var attributes = new List<LdapAttributeValues>();
-					foreach (string attrName in entry.Attributes.AttributeNames)
-					{
-						var attr = entry.Attributes[attrName];
-						var attributeValues = new LdapAttributeValues(attr.Name);
-						attributes.Add(attributeValues);
-
-						foreach (var o in attr)
-						{
-							if (o is byte[] v)
-							{
-								try
-								{
-									attributeValues.Values.Add(new LdapValue { StringValue = utf8.GetString(v) });
-								}
-								catch (ArgumentException)
-								{
-									attributeValues.Values.Add(new LdapValue { ByteArrayValue = v });
-								}
-							}
-							else
-							{
-								attributeValues.Values.Add(new LdapValue { Error = $"Not supported type: {o?.GetType()?.FullName}" });
-							}
-						}
-					}
-
-					attributes = attributes.OrderBy(x => x.Name).ToList();
-					result.Add(new LdapEntry(attributes));
+					searchResponse = _connection.SendRequest(searchRequest) as SearchResponse;
+					ParseEntries(searchResponse, result);
 				}
+				catch (DirectoryOperationException ex)
+				{
+					result.Errors.Add(ex.Message);
+					searchResponse = ex.Response as SearchResponse;
+					ParseEntries(searchResponse, result);
+				}
+
+				if (searchResponse == null)
+					break;
 
 				if (pageResultRequestControl == null)
 					break;
 
-				if (response.Controls.Length == 0)
+				if (searchResponse.Controls.Length == 0)
 					break;
 
-				pageResponseControl = response.Controls[0] as PageResultResponseControl;
-				if (pageResponseControl == null)
+				if (searchResponse.Controls[0] is not PageResultResponseControl pageResponseControl)
 					break;
 
 				if (pageResponseControl.Cookie.Length == 0)
@@ -122,6 +101,45 @@ namespace Raider.Ldap
 			}
 
 			return result;
+		}
+
+		private void ParseEntries(SearchResponse? searchResponse, LdapSearchResult result)
+		{
+			if (searchResponse == null)
+				return;
+
+			foreach (SearchResultEntry entry in searchResponse.Entries)
+			{
+				var attributes = new List<LdapAttributeValues>();
+				foreach (string attrName in entry.Attributes.AttributeNames)
+				{
+					var attr = entry.Attributes[attrName];
+					var attributeValues = new LdapAttributeValues(attr.Name);
+					attributes.Add(attributeValues);
+
+					foreach (var o in attr)
+					{
+						if (o is byte[] v)
+						{
+							try
+							{
+								attributeValues.Values.Add(new LdapValue { StringValue = _utf8.GetString(v) });
+							}
+							catch (ArgumentException)
+							{
+								attributeValues.Values.Add(new LdapValue { ByteArrayValue = v });
+							}
+						}
+						else
+						{
+							attributeValues.Values.Add(new LdapValue { Error = $"Not supported type: {o?.GetType()?.FullName}" });
+						}
+					}
+				}
+
+				attributes = attributes.OrderBy(x => x.Name).ToList();
+				result.AddEntry(new LdapEntry(attributes));
+			}
 		}
 	}
 }
