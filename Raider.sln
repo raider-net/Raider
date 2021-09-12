@@ -57,6 +57,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.NetHttp", "src\Raide
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Ldap", "src\Raider.Ldap\Raider.Ldap.csproj", "{1CC79B82-68CA-465B-9431-5CA7449FBA91}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Media", "src\Raider.Media\Raider.Media.csproj", "{10C9F283-6F4A-481A-A1C2-C2B61874F44C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +165,10 @@ Global
 		{1CC79B82-68CA-465B-9431-5CA7449FBA91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CC79B82-68CA-465B-9431-5CA7449FBA91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CC79B82-68CA-465B-9431-5CA7449FBA91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10C9F283-6F4A-481A-A1C2-C2B61874F44C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10C9F283-6F4A-481A-A1C2-C2B61874F44C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10C9F283-6F4A-481A-A1C2-C2B61874F44C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10C9F283-6F4A-481A-A1C2-C2B61874F44C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -193,6 +199,7 @@ Global
 		{0A818293-9107-4FED-AE02-7C862001E100} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 		{9F641C16-DDD6-420D-8D4C-08241F1E882F} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 		{1CC79B82-68CA-465B-9431-5CA7449FBA91} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
+		{10C9F283-6F4A-481A-A1C2-C2B61874F44C} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4CE87C92-BF04-4D94-B102-15AC816005FB}
