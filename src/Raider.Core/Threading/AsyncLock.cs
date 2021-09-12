@@ -16,7 +16,12 @@ namespace Raider.Threading
 
 	public class AsyncLock : IDisposable
 	{
-		private SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+		private readonly SemaphoreSlim _semaphoreSlim;
+
+		public AsyncLock()
+		{
+			_semaphoreSlim = new SemaphoreSlim(1, 1);
+		}
 
 		public async Task<AsyncLock> LockAsync()
 		{
@@ -24,24 +29,9 @@ namespace Raider.Threading
 			return this;
 		}
 
-		private bool disposed;
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!disposed)
-			{
-				if (disposing)
-				{
-					_semaphoreSlim.Release();
-				}
-
-				disposed = true;
-			}
-		}
-
 		public void Dispose()
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
+			_semaphoreSlim.Release();
 		}
 	}
 }
