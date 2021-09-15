@@ -32,6 +32,8 @@ namespace Raider.Media.Audio
 		
 		public event Action<IMediaPlayInfo>? OnStop;
 		public event Action<string>? OnError;
+		public event Func<IMediaPlayInfo, Task>? OnStopAsync;
+		public event Func<string, Task>? OnErrorAsync;
 
 		public AudioPlayer(LibVLC libVLC, int targetVolume = 100)
 		{
@@ -67,27 +69,46 @@ namespace Raider.Media.Audio
 				MediaDurationStopwatch.Stop();
 			};
 
-			MediaPlayer.Stopped += (object? sender, EventArgs e) =>
+			MediaPlayer.Stopped += async (object? sender, EventArgs e) =>
 				{
 					if (MediaStartTime.HasValue && !MediaEndTime.HasValue)
 						MediaEndTime = DateTime.UtcNow;
 
 					MediaDurationStopwatch.Stop();
-					try
+					if (MediaInfo != null)
 					{
-						if (OnStop != null && MediaInfo != null)
+						if (OnStop != null)
 						{
-							OnStop.Invoke(new MediaPlayInfo(MediaInfo)
+							try
 							{
-								MediaStartTime = MediaStartTime,
-								MediaEndTime = MediaEndTime,
-								PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
-								MediaError = MediaError,
-								MediaManuallyStopped = MediaManuallyStopped
-							});
+								OnStop.Invoke(new MediaPlayInfo(MediaInfo)
+								{
+									MediaStartTime = MediaStartTime,
+									MediaEndTime = MediaEndTime,
+									PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
+									MediaError = MediaError,
+									MediaManuallyStopped = MediaManuallyStopped
+								});
+							}
+							catch { }
+						}
+
+						if (OnStopAsync != null)
+						{
+							try
+							{
+								await OnStopAsync.Invoke(new MediaPlayInfo(MediaInfo)
+								{
+									MediaStartTime = MediaStartTime,
+									MediaEndTime = MediaEndTime,
+									PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
+									MediaError = MediaError,
+									MediaManuallyStopped = MediaManuallyStopped
+								});
+							}
+							catch { }
 						}
 					}
-					catch { }
 				};
 
 			MediaPlayer.EndReached += (object? sender, EventArgs e) =>
@@ -199,7 +220,7 @@ namespace Raider.Media.Audio
 				}
 				catch (Exception ex)
 				{
-					WriteErrorLog("PLAY", ex);
+					await WriteErrorLogAsync("PLAY", ex);
 					return false;
 				}
 			}
@@ -226,7 +247,7 @@ namespace Raider.Media.Audio
 				}
 				catch (Exception ex)
 				{
-					WriteErrorLog("PAUSE", ex);
+					await WriteErrorLogAsync("PAUSE", ex);
 					return null;
 				}
 			}
@@ -265,7 +286,7 @@ namespace Raider.Media.Audio
 				}
 				catch (Exception ex)
 				{
-					WriteErrorLog("RESUME", ex);
+					await WriteErrorLogAsync("RESUME", ex);
 					return false;
 				}
 			}
@@ -312,12 +333,12 @@ namespace Raider.Media.Audio
 			}
 			catch (Exception ex)
 			{
-				WriteErrorLog("STOP", ex);
+				await WriteErrorLogAsync("STOP", ex);
 				return null;
 			}
 		}
 
-		private void WriteErrorLog(string methodName, Exception ex)
+		private async Task WriteErrorLogAsync(string methodName, Exception ex)
 		{
 			if (ex == null)
 				return;
@@ -329,11 +350,23 @@ namespace Raider.Media.Audio
 
 			_errorBuilder.Append(sb).AppendLine();
 
-			try
+			if (OnError != null)
 			{
-				OnError?.Invoke(sb.ToString());
+				try
+				{
+					OnError.Invoke(sb.ToString());
+				}
+				catch { }
 			}
-			catch { }
+
+			if (OnErrorAsync != null)
+			{
+				try
+				{
+					await OnErrorAsync.Invoke(sb.ToString());
+				}
+				catch { }
+			}
 		}
 	}
 }
