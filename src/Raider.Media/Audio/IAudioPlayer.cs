@@ -12,7 +12,7 @@ namespace Raider.Media.Audio
 
 		void SetTargetVolume(int targetVolume);
 		Task SetVolumeAsync(int toVolume, bool progressive);
-		Task<bool> PlayAsync(IMediaInfo mediaInfo, int? volume, bool progressiveVolume);
+		Task<bool> PlayAsync(IMediaFile mediaFile, int? volume, bool progressiveVolume);
 		Task<double?> PauseAsync(bool progressiveVolume);
 		Task<bool> ResumeAsync(int? volume, bool progressiveVolume);
 		Task<double?> StopAsync(bool removeMedia, bool progressiveVolume);

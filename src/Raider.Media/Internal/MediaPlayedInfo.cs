@@ -1,19 +1,19 @@
 ﻿using System;
 
-namespace Raider.Media
+namespace Raider.Media.Internal
 {
-	internal class MediaPlayInfo : IMediaPlayInfo
+	internal class MediaPlayedInfo : IMediaPlayedInfo
 	{
-		public IMediaInfo MediaInfo { get; }
+		public IMediaFile MediaFile { get; }
 		public DateTime? MediaStartTime { get; set; }
 		public DateTime? MediaEndTime { get; set; }
 		public double? PlayTimeInSeconds { get; set; }
 		public string? MediaError { get; set; }
 		public bool? MediaManuallyStopped { get; set; }
 
-		public MediaPlayInfo(IMediaInfo mediaInfo)
+		public MediaPlayedInfo(IMediaFile mediaFile)
 		{
-			MediaInfo = mediaInfo;
+			MediaFile = mediaFile;
 		}
 	}
 }

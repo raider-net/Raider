@@ -1,5 +1,6 @@
 ﻿using LibVLCSharp.Shared;
 using Raider.Extensions;
+using Raider.Media.Internal;
 using Raider.Threading;
 using System;
 using System.Diagnostics;
@@ -20,7 +21,7 @@ namespace Raider.Media.Audio
 		private readonly StringBuilder _errorBuilder;
 		
 		public MediaPlayer MediaPlayer { get; }
-		public IMediaInfo? MediaInfo { get; private set; }
+		public IMediaFile? MediaFile { get; private set; }
 		public LibVLCSharp.Shared.Media? Media { get; private set; }
 		public DateTime? MediaStartTime { get; private set; }
 		public DateTime? MediaEndTime { get; private set; }
@@ -30,9 +31,9 @@ namespace Raider.Media.Audio
 		public bool IsPlaying => MediaPlayer.IsPlaying;
 		public int TargetVolume { get; private set; }
 		
-		public event Action<IMediaPlayInfo>? OnStop;
+		public event Action<IMediaPlayedInfo>? OnStop;
 		public event Action<string>? OnError;
-		public event Func<IMediaPlayInfo, Task>? OnStopAsync;
+		public event Func<IMediaPlayedInfo, Task>? OnStopAsync;
 		public event Func<string, Task>? OnErrorAsync;
 
 		public AudioPlayer(LibVLC libVLC, int targetVolume = 100)
@@ -75,13 +76,13 @@ namespace Raider.Media.Audio
 						MediaEndTime = DateTime.UtcNow;
 
 					MediaDurationStopwatch.Stop();
-					if (MediaInfo != null)
+					if (MediaFile != null)
 					{
 						if (OnStop != null)
 						{
 							try
 							{
-								OnStop.Invoke(new MediaPlayInfo(MediaInfo)
+								OnStop.Invoke(new MediaPlayedInfo(MediaFile)
 								{
 									MediaStartTime = MediaStartTime,
 									MediaEndTime = MediaEndTime,
@@ -97,7 +98,7 @@ namespace Raider.Media.Audio
 						{
 							try
 							{
-								await OnStopAsync.Invoke(new MediaPlayInfo(MediaInfo)
+								await OnStopAsync.Invoke(new MediaPlayedInfo(MediaFile)
 								{
 									MediaStartTime = MediaStartTime,
 									MediaEndTime = MediaEndTime,
@@ -179,15 +180,15 @@ namespace Raider.Media.Audio
 			MediaEndTime = null;
 		}
 
-		public async Task<bool> PlayAsync(IMediaInfo mediaInfo, int? volume, bool progressiveVolume)
+		public async Task<bool> PlayAsync(IMediaFile mediaFile, int? volume, bool progressiveVolume)
 		{
-			if (mediaInfo == null)
-				throw new ArgumentNullException(nameof(mediaInfo));
+			if (mediaFile == null)
+				throw new ArgumentNullException(nameof(mediaFile));
 
-			if (string.IsNullOrWhiteSpace(mediaInfo.MediaLocation))
-				throw new ArgumentException($"{nameof(mediaInfo)}.{nameof(mediaInfo.MediaLocation)} == null", $"{nameof(mediaInfo)}.{nameof(mediaInfo.MediaLocation)}");
+			if (string.IsNullOrWhiteSpace(mediaFile.MediaLocation))
+				throw new ArgumentException($"{nameof(mediaFile)}.{nameof(mediaFile.MediaLocation)} == null", $"{nameof(mediaFile)}.{nameof(mediaFile.MediaLocation)}");
 
-			MediaInfo = mediaInfo;
+			MediaFile = mediaFile;
 
 			using (await _audioMediaPlayerLock.LockAsync())
 			{
@@ -210,7 +211,7 @@ namespace Raider.Media.Audio
 
 					ResetPaying();
 
-					Media = new LibVLCSharp.Shared.Media(_libVLC, mediaInfo.MediaLocation);
+					Media = new LibVLCSharp.Shared.Media(_libVLC, mediaFile.MediaLocation);
 					var result = MediaPlayer.Play(Media);
 
 					if (progressiveVolume)

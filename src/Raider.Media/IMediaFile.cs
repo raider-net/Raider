@@ -1,6 +1,6 @@
 ﻿namespace Raider.Media
 {
-	public interface IMediaInfo
+	public interface IMediaFile
 	{
 		string MediaLocation { get; }
 	}
