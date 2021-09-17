@@ -20,6 +20,8 @@ namespace Raider.Media.Audio
 
 		public event Action<int, IMediaPlayedInfo>? OnStop;
 		public event Action<string>? OnError;
+		public event Func<int, IMediaPlayedInfo, Task>? OnStopAsync;
+		public event Func<string, Task>? OnErrorAsync;
 
 		public AudioMultiPlayer(int mediaPlayersCount)
 		{
@@ -28,13 +30,17 @@ namespace Raider.Media.Audio
 
 			Core.Initialize();
 			_libVLC = new LibVLC();
-			_libVLC.Log += (object? sender, LogEventArgs e) =>
+			_libVLC.Log += async (object? sender, LogEventArgs e) =>
 			{
 				if (e.Level == LogLevel.Error)
 				{
 					var error = e?.FormattedLog;
 					if (!string.IsNullOrWhiteSpace(error))
+					{
 						OnError?.Invoke(error);
+						if (OnErrorAsync != null)
+							await OnErrorAsync.Invoke(error);
+					}
 				}
 			};
 
@@ -43,7 +49,13 @@ namespace Raider.Media.Audio
 			{
 				var index = i;
 				var player = new AudioPlayer(_libVLC, 100);
-				player.OnStop += (IMediaPlayedInfo mediaPlayInfo) => OnStop?.Invoke(index, mediaPlayInfo);
+				player.OnStop += (IMediaPlayedInfo mediaPlayedInfo) => OnStop?.Invoke(index, mediaPlayedInfo);
+				player.OnStopAsync +=
+					async (IMediaPlayedInfo mediaPlayedInfo) =>
+					{
+						if (OnStopAsync != null)
+							await OnStopAsync.Invoke(index, mediaPlayedInfo);
+					};
 				_audioMediaPlayers.Add(player);
 			}
 		}
