@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibVLCSharp.Shared;
+using System;
 
 namespace Raider.Media.Internal
 {
@@ -10,6 +11,9 @@ namespace Raider.Media.Internal
 		public double? PlayTimeInSeconds { get; set; }
 		public string? MediaError { get; set; }
 		public bool? MediaManuallyStopped { get; set; }
+		public string? Mrl { get; set; }
+		public VLCState? State { get; set; }
+		public MediaType? Type { get; set; }
 
 		public MediaPlayedInfo(IMediaFile mediaFile)
 		{

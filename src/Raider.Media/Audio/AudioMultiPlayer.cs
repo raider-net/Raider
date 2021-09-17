@@ -149,15 +149,7 @@ namespace Raider.Media.Audio
 			int i = 0;
 			foreach (var audioMediaPlayer in _audioMediaPlayers)
 			{
-				result.Add(i, new MediaPlayInfo
-				{
-					IsPlaying = audioMediaPlayer.MediaPlayer.IsPlaying,
-					Length = audioMediaPlayer.MediaPlayer.Length,
-					Position = audioMediaPlayer.MediaPlayer.Position,
-					Time = audioMediaPlayer.MediaPlayer.Time,
-					Volume = audioMediaPlayer.MediaPlayer.Volume
-				});
-
+				result.Add(i, audioMediaPlayer.GetMediaPlayInfo());
 				i++;
 			}
 

@@ -88,7 +88,10 @@ namespace Raider.Media.Audio
 									MediaEndTime = MediaEndTime,
 									PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
 									MediaError = MediaError,
-									MediaManuallyStopped = MediaManuallyStopped
+									MediaManuallyStopped = MediaManuallyStopped,
+									Mrl = Media?.Mrl,
+									State = Media?.State,
+									Type = Media?.Type
 								});
 							}
 							catch { }
@@ -104,7 +107,10 @@ namespace Raider.Media.Audio
 									MediaEndTime = MediaEndTime,
 									PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
 									MediaError = MediaError,
-									MediaManuallyStopped = MediaManuallyStopped
+									MediaManuallyStopped = MediaManuallyStopped,
+									Mrl = Media?.Mrl,
+									State = Media?.State,
+									Type = Media?.Type
 								});
 							}
 							catch { }
@@ -369,5 +375,18 @@ namespace Raider.Media.Audio
 				catch { }
 			}
 		}
+
+		public IMediaPlayInfo GetMediaPlayInfo()
+			=> new MediaPlayInfo
+			{
+				IsPlaying = MediaPlayer.IsPlaying,
+				Length = MediaPlayer.Length,
+				Position = MediaPlayer.Position,
+				Time = MediaPlayer.Time,
+				Volume = MediaPlayer.Volume,
+				Mrl = Media?.Mrl,
+				State = Media?.State,
+				Type = Media?.Type
+			};
 	}
 }

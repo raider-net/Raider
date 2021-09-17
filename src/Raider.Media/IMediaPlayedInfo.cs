@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibVLCSharp.Shared;
+using System;
 
 namespace Raider.Media
 {
@@ -10,5 +11,8 @@ namespace Raider.Media
 		double? PlayTimeInSeconds { get; }
 		string? MediaError { get; }
 		bool? MediaManuallyStopped { get; }
+		string? Mrl { get; }
+		VLCState? State { get; }
+		MediaType? Type { get; }
 	}
 }

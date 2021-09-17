@@ -16,5 +16,7 @@ namespace Raider.Media.Audio
 		Task<double?> PauseAsync(bool progressiveVolume);
 		Task<bool> ResumeAsync(int? volume, bool progressiveVolume);
 		Task<double?> StopAsync(bool removeMedia, bool progressiveVolume);
+
+		IMediaPlayInfo GetMediaPlayInfo();
 	}
 }
