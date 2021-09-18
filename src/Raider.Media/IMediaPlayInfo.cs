@@ -4,6 +4,8 @@ namespace Raider.Media
 {
 	public interface IMediaPlayInfo
 	{
+		IMediaFile? MediaFile { get; }
+
 		/// <summary>
 		/// true if the media player is playing, false otherwise
 		/// </summary>

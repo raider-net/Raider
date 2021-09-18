@@ -72,10 +72,11 @@ namespace Raider.Media.Audio
 
 			MediaPlayer.Stopped += async (object? sender, EventArgs e) =>
 				{
+					MediaDurationStopwatch.Stop();
+
 					if (MediaStartTime.HasValue && !MediaEndTime.HasValue)
 						MediaEndTime = DateTime.UtcNow;
 
-					MediaDurationStopwatch.Stop();
 					if (MediaFile != null)
 					{
 						if (OnStop != null)
@@ -120,10 +121,10 @@ namespace Raider.Media.Audio
 
 			MediaPlayer.EndReached += (object? sender, EventArgs e) =>
 			{
+				MediaDurationStopwatch.Stop();
+
 				if (MediaStartTime.HasValue && !MediaEndTime.HasValue)
 					MediaEndTime = DateTime.UtcNow;
-
-				MediaDurationStopwatch.Stop();
 			};
 		}
 
@@ -379,6 +380,7 @@ namespace Raider.Media.Audio
 		public IMediaPlayInfo GetMediaPlayInfo()
 			=> new MediaPlayInfo
 			{
+				MediaFile = MediaFile,
 				IsPlaying = MediaPlayer.IsPlaying,
 				Length = MediaPlayer.Length,
 				Position = MediaPlayer.Position,
