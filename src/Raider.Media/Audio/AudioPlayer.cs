@@ -382,8 +382,11 @@ namespace Raider.Media.Audio
 			{
 				MediaFile = MediaFile,
 				IsPlaying = MediaPlayer.IsPlaying,
-				Length = MediaPlayer.Length,
 				Position = MediaPlayer.Position,
+				MediaStartTime = MediaStartTime,
+				MediaEndTime = MediaEndTime,
+				PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
+				Length = MediaPlayer.Length,
 				Time = MediaPlayer.Time,
 				Volume = MediaPlayer.Volume,
 				Mrl = Media?.Mrl,

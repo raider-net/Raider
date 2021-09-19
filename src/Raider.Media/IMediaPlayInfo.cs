@@ -1,4 +1,5 @@
 ﻿using LibVLCSharp.Shared;
+using System;
 
 namespace Raider.Media
 {
@@ -15,7 +16,13 @@ namespace Raider.Media
 		/// Get movie position as percentage between 0.0 and 1.0. or -1 if there is no media.
 		/// </summary>
 		float Position { get; }
-
+		
+		double? PlayTimeInSeconds { get; }
+		
+		DateTime? MediaStartTime { get; }
+		
+		DateTime? MediaEndTime { get; }
+		
 		/// <summary>
 		/// Get the movie time (in ms), or -1 if there is no media.
 		/// </summary>
