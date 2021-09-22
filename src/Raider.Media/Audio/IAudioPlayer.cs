@@ -11,12 +11,12 @@ namespace Raider.Media.Audio
 		int TargetVolume { get; }
 
 		void SetTargetVolume(int targetVolume);
-		Task SetVolumeAsync(int toVolume, bool progressive);
+		Task SetVolumeAsync(int fromVolume, int toVolume, bool progressive);
 		Task<bool> PlayAsync(IMediaFile mediaFile, int? volume, bool progressiveVolume);
 		Task<double?> PauseAsync(bool progressiveVolume);
 		Task<bool> ResumeAsync(int? volume, bool progressiveVolume);
 		Task<double?> StopAsync(bool removeMedia, bool progressiveVolume);
 
-		IMediaPlayInfo GetMediaPlayInfo();
+		IMediaInfo GetMediaPlayInfo();
 	}
 }

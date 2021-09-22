@@ -18,9 +18,13 @@ namespace Raider.Media.Audio
 		private readonly LibVLC _libVLC;
 		private readonly List<IAudioPlayer> _audioMediaPlayers;
 
-		public event Action<int, IMediaPlayedInfo>? OnStop;
+		public event Action<int, IMediaInfo>? OnPlaying;
+		public event Action<int, IMediaInfo>? OnPaused;
+		public event Action<int, IMediaInfo>? OnStop;
 		public event Action<string>? OnError;
-		public event Func<int, IMediaPlayedInfo, Task>? OnStopAsync;
+		public event Func<int, IMediaInfo, Task>? OnPlayingAsync;
+		public event Func<int, IMediaInfo, Task>? OnPausedAsync;
+		public event Func<int, IMediaInfo, Task>? OnStopAsync;
 		public event Func<string, Task>? OnErrorAsync;
 
 		public AudioMultiPlayer(int mediaPlayersCount)
@@ -49,9 +53,23 @@ namespace Raider.Media.Audio
 			{
 				var index = i;
 				var player = new AudioPlayer(_libVLC, 100);
-				player.OnStop += (IMediaPlayedInfo mediaPlayedInfo) => OnStop?.Invoke(index, mediaPlayedInfo);
+				player.OnPlaying += (IMediaInfo mediaPlayedInfo) => OnPlaying?.Invoke(index, mediaPlayedInfo);
+				player.OnPaused += (IMediaInfo mediaPlayedInfo) => OnPaused?.Invoke(index, mediaPlayedInfo);
+				player.OnStop += (IMediaInfo mediaPlayedInfo) => OnStop?.Invoke(index, mediaPlayedInfo);
+				player.OnPlayingAsync +=
+					async (IMediaInfo mediaPlayedInfo) =>
+					{
+						if (OnPlayingAsync != null)
+							await OnPlayingAsync.Invoke(index, mediaPlayedInfo);
+					};
+				player.OnPausedAsync +=
+					async (IMediaInfo mediaPlayedInfo) =>
+					{
+						if (OnPausedAsync != null)
+							await OnPausedAsync.Invoke(index, mediaPlayedInfo);
+					};
 				player.OnStopAsync +=
-					async (IMediaPlayedInfo mediaPlayedInfo) =>
+					async (IMediaInfo mediaPlayedInfo) =>
 					{
 						if (OnStopAsync != null)
 							await OnStopAsync.Invoke(index, mediaPlayedInfo);
@@ -65,7 +83,8 @@ namespace Raider.Media.Audio
 			if (mediaPlayerIndex < 0 || _audioMediaPlayers.Count <= mediaPlayerIndex)
 				throw new ArgumentOutOfRangeException(nameof(mediaPlayerIndex), $"{nameof(mediaPlayerIndex)} < 0 || {nameof(_audioMediaPlayers)}.Count <= {mediaPlayerIndex}");
 
-			await _audioMediaPlayers[mediaPlayerIndex].SetVolumeAsync(volume, progressiveVolume);
+			var audioPlayer = _audioMediaPlayers[mediaPlayerIndex];
+			await audioPlayer.SetVolumeAsync(audioPlayer.MediaPlayer.Volume, volume, progressiveVolume);
 		}
 
 		public void SetTargetVolume(int mediaPlayerIndex, int volume)
@@ -142,9 +161,9 @@ namespace Raider.Media.Audio
 			return result;
 		}
 
-		public Dictionary<int, IMediaPlayInfo> GetMediaPlayInfo()
+		public Dictionary<int, IMediaInfo> GetMediaPlayInfo()
 		{
-			var result = new Dictionary<int, IMediaPlayInfo>();
+			var result = new Dictionary<int, IMediaInfo>();
 
 			int i = 0;
 			foreach (var audioMediaPlayer in _audioMediaPlayers)

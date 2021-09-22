@@ -30,10 +30,14 @@ namespace Raider.Media.Audio
 		public bool MediaManuallyStopped { get; private set; }
 		public bool IsPlaying => MediaPlayer.IsPlaying;
 		public int TargetVolume { get; private set; }
-		
-		public event Action<IMediaPlayedInfo>? OnStop;
+
+		public event Action<IMediaInfo>? OnPlaying;
+		public event Action<IMediaInfo>? OnPaused;
+		public event Action<IMediaInfo>? OnStop;
 		public event Action<string>? OnError;
-		public event Func<IMediaPlayedInfo, Task>? OnStopAsync;
+		public event Func<IMediaInfo, Task>? OnPlayingAsync;
+		public event Func<IMediaInfo, Task>? OnPausedAsync;
+		public event Func<IMediaInfo, Task>? OnStopAsync;
 		public event Func<string, Task>? OnErrorAsync;
 
 		public AudioPlayer(LibVLC libVLC, int targetVolume = 100)
@@ -52,7 +56,7 @@ namespace Raider.Media.Audio
 			TargetVolume = targetVolume;
 			MediaPlayer.Volume = TargetVolume;
 
-			MediaPlayer.Playing += (object? sender, EventArgs e) =>
+			MediaPlayer.Playing += async (object? sender, EventArgs e) =>
 			{
 				if (MediaStartTime.HasValue) //resume
 				{
@@ -63,11 +67,53 @@ namespace Raider.Media.Audio
 					MediaStartTime = DateTime.UtcNow;
 					MediaDurationStopwatch.Restart();
 				}
+
+				if (MediaFile != null)
+				{
+					if (OnPlaying != null)
+					{
+						try
+						{
+							OnPlaying.Invoke(GetMediaPlayInfo());
+						}
+						catch { }
+					}
+
+					if (OnPlayingAsync != null)
+					{
+						try
+						{
+							await OnPlayingAsync.Invoke(GetMediaPlayInfo());
+						}
+						catch { }
+					}
+				}
 			};
 
-			MediaPlayer.Paused += (object? sender, EventArgs e) =>
+			MediaPlayer.Paused += async (object? sender, EventArgs e) =>
 			{
 				MediaDurationStopwatch.Stop();
+
+				if (MediaFile != null)
+				{
+					if (OnPaused != null)
+					{
+						try
+						{
+							OnPaused.Invoke(GetMediaPlayInfo());
+						}
+						catch { }
+					}
+
+					if (OnPausedAsync != null)
+					{
+						try
+						{
+							await OnPausedAsync.Invoke(GetMediaPlayInfo());
+						}
+						catch { }
+					}
+				}
 			};
 
 			MediaPlayer.Stopped += async (object? sender, EventArgs e) =>
@@ -83,17 +129,7 @@ namespace Raider.Media.Audio
 						{
 							try
 							{
-								OnStop.Invoke(new MediaPlayedInfo(MediaFile)
-								{
-									MediaStartTime = MediaStartTime,
-									MediaEndTime = MediaEndTime,
-									PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
-									MediaError = MediaError,
-									MediaManuallyStopped = MediaManuallyStopped,
-									Mrl = Media?.Mrl,
-									State = Media?.State,
-									Type = Media?.Type
-								});
+								OnStop.Invoke(GetMediaPlayInfo());
 							}
 							catch { }
 						}
@@ -102,17 +138,7 @@ namespace Raider.Media.Audio
 						{
 							try
 							{
-								await OnStopAsync.Invoke(new MediaPlayedInfo(MediaFile)
-								{
-									MediaStartTime = MediaStartTime,
-									MediaEndTime = MediaEndTime,
-									PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
-									MediaError = MediaError,
-									MediaManuallyStopped = MediaManuallyStopped,
-									Mrl = Media?.Mrl,
-									State = Media?.State,
-									Type = Media?.Type
-								});
+								await OnStopAsync.Invoke(GetMediaPlayInfo());
 							}
 							catch { }
 						}
@@ -138,25 +164,28 @@ namespace Raider.Media.Audio
 			TargetVolume = targetVolume;
 		}
 
-		public async Task SetVolumeAsync(int toVolume, bool progressive)
+		public async Task SetVolumeAsync(int fromVolume, int toVolume, bool progressive)
 		{
 			using (await _setVolumeLock.LockAsync())
 			{
+				if (fromVolume < 0)
+					fromVolume = 0;
+				else if (100 < fromVolume)
+					fromVolume = 100;
+
 				if (toVolume < 0)
 					toVolume = 0;
 				else if (100 < toVolume)
 					toVolume = 100;
 
-				var mediaPlayerVolume = MediaPlayer.Volume;
-
-				if (toVolume == mediaPlayerVolume)
+				if (fromVolume == toVolume)
 					return;
 
 				if (progressive)
 				{
-					if (toVolume < mediaPlayerVolume)
+					if (toVolume < fromVolume)
 					{
-						var diff = mediaPlayerVolume - toVolume;
+						var diff = fromVolume - toVolume;
 						var vol = diff / progressiveVolumeSteps;
 						for (int i = 0; i < (progressiveVolumeSteps - 1); i++)
 						{
@@ -166,7 +195,7 @@ namespace Raider.Media.Audio
 					}
 					else //if (mediaPlayerVolume < targetVolume)
 					{
-						var diff = toVolume - mediaPlayerVolume;
+						var diff = toVolume - fromVolume;
 						var vol = diff / progressiveVolumeSteps;
 						for (int i = 0; i < (progressiveVolumeSteps - 1); i++)
 						{
@@ -222,7 +251,7 @@ namespace Raider.Media.Audio
 					var result = MediaPlayer.Play(Media);
 
 					if (progressiveVolume)
-						await SetVolumeAsync(TargetVolume, true);
+						await SetVolumeAsync(0, TargetVolume, true);
 
 					return result;
 				}
@@ -247,7 +276,7 @@ namespace Raider.Media.Audio
 						return null;
 
 					if (progressiveVolume)
-						await SetVolumeAsync(0, true);
+						await SetVolumeAsync(MediaPlayer.Volume, 0, true);
 
 					MediaPlayer.Pause();
 
@@ -288,7 +317,7 @@ namespace Raider.Media.Audio
 					var result = MediaPlayer.Play();
 
 					if (progressiveVolume)
-						await SetVolumeAsync(TargetVolume, true);
+						await SetVolumeAsync(0, TargetVolume, true);
 
 					return result;
 				}
@@ -329,7 +358,7 @@ namespace Raider.Media.Audio
 			try
 			{
 				if (progressiveVolume)
-					await SetVolumeAsync(0, true);
+					await SetVolumeAsync(MediaPlayer.Volume, 0, true);
 
 				MediaManuallyStopped = true;
 				MediaPlayer.Stop();
@@ -377,10 +406,9 @@ namespace Raider.Media.Audio
 			}
 		}
 
-		public IMediaPlayInfo GetMediaPlayInfo()
-			=> new MediaPlayInfo
+		public IMediaInfo GetMediaPlayInfo()
+			=> new MediaInfo(MediaFile!)
 			{
-				MediaFile = MediaFile,
 				IsPlaying = MediaPlayer.IsPlaying,
 				Position = MediaPlayer.Position,
 				MediaStartTime = MediaStartTime,
@@ -391,7 +419,9 @@ namespace Raider.Media.Audio
 				Volume = MediaPlayer.Volume,
 				Mrl = Media?.Mrl,
 				State = Media?.State,
-				Type = Media?.Type
+				Type = Media?.Type,
+				MediaError = null,
+				MediaManuallyStopped = null
 			};
 	}
 }

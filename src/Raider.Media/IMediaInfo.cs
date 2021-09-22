@@ -3,7 +3,7 @@ using System;
 
 namespace Raider.Media
 {
-	public interface IMediaPlayInfo
+	public interface IMediaInfo
 	{
 		IMediaFile? MediaFile { get; }
 
@@ -17,11 +17,11 @@ namespace Raider.Media
 		/// </summary>
 		float Position { get; }
 		
-		double? PlayTimeInSeconds { get; }
-		
 		DateTime? MediaStartTime { get; }
 		
 		DateTime? MediaEndTime { get; }
+		
+		double? PlayTimeInSeconds { get; }
 		
 		/// <summary>
 		/// Get the movie time (in ms), or -1 if there is no media.
@@ -52,5 +52,9 @@ namespace Raider.Media
 		/// The type of the media
 		/// </summary>
 		MediaType? Type { get; }
+
+		string? MediaError { get; }
+
+		bool? MediaManuallyStopped { get; }
 	}
 }
