@@ -54,7 +54,7 @@ namespace Raider.Media.Audio
 			_errorBuilder = new StringBuilder();
 			MediaDurationStopwatch = new Stopwatch();
 			TargetVolume = targetVolume;
-			MediaPlayer.Volume = TargetVolume;
+			MediaPlayer.Volume = VolumeHelper.ThirdRoofOfScaleOnAmplitude(TargetVolume);
 
 			MediaPlayer.Playing += async (object? sender, EventArgs e) =>
 			{
@@ -189,7 +189,8 @@ namespace Raider.Media.Audio
 						var vol = diff / progressiveVolumeSteps;
 						for (int i = 0; i < (progressiveVolumeSteps - 1); i++)
 						{
-							MediaPlayer.Volume -= vol;
+							var next = VolumeHelper.CubicScaleOnAmplitude(MediaPlayer.Volume) - vol;
+							MediaPlayer.Volume = VolumeHelper.ThirdRoofOfScaleOnAmplitude(next);
 							await Task.Delay(progressiveVolumeStepDurationInMilliseconds);
 						}
 					}
@@ -199,13 +200,14 @@ namespace Raider.Media.Audio
 						var vol = diff / progressiveVolumeSteps;
 						for (int i = 0; i < (progressiveVolumeSteps - 1); i++)
 						{
-							MediaPlayer.Volume += vol;
+							var next = VolumeHelper.CubicScaleOnAmplitude(MediaPlayer.Volume) + vol;
+							MediaPlayer.Volume = VolumeHelper.ThirdRoofOfScaleOnAmplitude(next);
 							await Task.Delay(progressiveVolumeStepDurationInMilliseconds);
 						}
 					}
 				}
 
-				MediaPlayer.Volume = toVolume;
+				MediaPlayer.Volume = VolumeHelper.ThirdRoofOfScaleOnAmplitude(toVolume);
 			}
 		}
 
@@ -242,7 +244,7 @@ namespace Raider.Media.Audio
 					}
 					else
 					{
-						MediaPlayer.Volume = TargetVolume;
+						MediaPlayer.Volume = VolumeHelper.ThirdRoofOfScaleOnAmplitude(TargetVolume);
 					}
 
 					ResetPaying();
@@ -276,7 +278,7 @@ namespace Raider.Media.Audio
 						return null;
 
 					if (progressiveVolume)
-						await SetVolumeAsync(MediaPlayer.Volume, 0, true);
+						await SetVolumeAsync(VolumeHelper.CubicScaleOnAmplitude(MediaPlayer.Volume), 0, true);
 
 					MediaPlayer.Pause();
 
@@ -311,7 +313,7 @@ namespace Raider.Media.Audio
 					}
 					else
 					{
-						MediaPlayer.Volume = TargetVolume;
+						MediaPlayer.Volume = VolumeHelper.ThirdRoofOfScaleOnAmplitude(TargetVolume);
 					}
 
 					var result = MediaPlayer.Play();
@@ -358,7 +360,7 @@ namespace Raider.Media.Audio
 			try
 			{
 				if (progressiveVolume)
-					await SetVolumeAsync(MediaPlayer.Volume, 0, true);
+					await SetVolumeAsync(VolumeHelper.CubicScaleOnAmplitude(MediaPlayer.Volume), 0, true);
 
 				MediaManuallyStopped = true;
 				MediaPlayer.Stop();
@@ -416,7 +418,7 @@ namespace Raider.Media.Audio
 				PlayTimeInSeconds = MediaDurationStopwatch.Elapsed.TotalSeconds,
 				Length = MediaPlayer.Length,
 				Time = MediaPlayer.Time,
-				Volume = MediaPlayer.Volume,
+				Volume = VolumeHelper.CubicScaleOnAmplitude(MediaPlayer.Volume),
 				Mrl = Media?.Mrl,
 				State = Media?.State,
 				Type = Media?.Type,
