@@ -105,6 +105,6 @@ namespace Raider.QueryServices.EntityFramework
 			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
 
 		public virtual IQueryable<T> WithWriteAcl<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
-			=> DefaultInternal<TProp, TProp>(null, includableConfigurator);
+			=> WithReadOnlyAcl(includableConfigurator);
 	}
 }
