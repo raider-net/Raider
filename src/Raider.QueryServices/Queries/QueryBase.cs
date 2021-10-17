@@ -4,6 +4,8 @@ namespace Raider.QueryServices.Queries
 {
 	public abstract class QueryBase<TResult> : IQuery<TResult>
 	{
+		public abstract string CommandIdentifier { get; }
+
 		public virtual string Serialize()
 			=> System.Text.Json.JsonSerializer.Serialize(this);
 

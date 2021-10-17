@@ -4,6 +4,8 @@ namespace Raider.Services.Commands
 {
 	public abstract class CommandBase : ICommand
 	{
+		public abstract string CommandIdentifier { get; }
+
 		public virtual string Serialize()
 			=> System.Text.Json.JsonSerializer.Serialize(this);
 
