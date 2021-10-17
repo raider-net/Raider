@@ -46,7 +46,7 @@ DELETE FROM mbs."Permission";
 	}
 #>
 INSERT INTO mbs."Permission"
-	("IdPermission", "Name"<#= withDescription ? ", \"DisplayName\", \"Description\"" : "" #>)
+	("IdPermission", "Name", "IsSystemPermission"<#= withDescription ? ", \"DisplayName\", \"Description\"" : "" #>)
 VALUES
 <#
 	int idx = 0;
@@ -56,13 +56,13 @@ VALUES
 		if (withDescription)
 		{
 #>
-	 (<#= permisison.IdPermission #>, '<#= permisison.Name #>', <#= string.IsNullOrWhiteSpace(permisison.Description) ? ("'" + permisison.Name + "'") : ("'" + permisison.Description + "'") #>, <#= string.IsNullOrWhiteSpace(permisison.Description) ? "null" : ("'" + permisison.Description + "'") #>)<#= permissions.Count == idx ? "" : "," #>
+	 (<#= permisison.IdPermission #>, '<#= permisison.Name #>', <#= permisison.IsSystemPermission.ToString().ToLower() #>, <#= string.IsNullOrWhiteSpace(permisison.Description) ? ("'" + permisison.Name + "'") : ("'" + permisison.Description + "'") #>, <#= string.IsNullOrWhiteSpace(permisison.Description) ? "null" : ("'" + permisison.Description + "'") #>)<#= permissions.Count == idx ? "" : "," #>
 <#
 		}
 		else
 		{
 #>
-	 (<#= permisison.IdPermission #>, '<#= permisison.Name #>', <#= string.IsNullOrWhiteSpace(permisison.Description) ? ("'" + permisison.Name + "'") : ("'" + permisison.Description + "'") #>)<#= permissions.Count == idx ? "" : "," #>
+	 (<#= permisison.IdPermission #>, '<#= permisison.Name #>', <#= permisison.IsSystemPermission.ToString().ToLower() #>, <#= string.IsNullOrWhiteSpace(permisison.Description) ? ("'" + permisison.Name + "'") : ("'" + permisison.Description + "'") #>)<#= permissions.Count == idx ? "" : "," #>
 <#
 		}
 	}

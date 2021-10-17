@@ -81,7 +81,7 @@ namespace Raider.Generator.Compilation
             
             #line default
             #line hidden
-            this.Write("INSERT INTO mbs.\"Permission\"\r\n\t(\"IdPermission\", \"Name\"");
+            this.Write("INSERT INTO mbs.\"Permission\"\r\n\t(\"IdPermission\", \"Name\", \"IsSystemPermission\"");
             
             #line 49 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(withDescription ? ", \"DisplayName\", \"Description\"" : ""));
@@ -117,6 +117,13 @@ namespace Raider.Generator.Compilation
             #line default
             #line hidden
             this.Write("\', ");
+            
+            #line 59 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(permisison.IsSystemPermission.ToString().ToLower()));
+            
+            #line default
+            #line hidden
+            this.Write(", ");
             
             #line 59 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(string.IsNullOrWhiteSpace(permisison.Description) ? ("'" + permisison.Name + "'") : ("'" + permisison.Description + "'")));
@@ -163,6 +170,13 @@ namespace Raider.Generator.Compilation
             #line default
             #line hidden
             this.Write("\', ");
+            
+            #line 65 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(permisison.IsSystemPermission.ToString().ToLower()));
+            
+            #line default
+            #line hidden
+            this.Write(", ");
             
             #line 65 "C:\Code\GitLab\Raider\src\Raider.Generator.Compilation\Permissions_InsertScriptGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(string.IsNullOrWhiteSpace(permisison.Description) ? ("'" + permisison.Name + "'") : ("'" + permisison.Description + "'")));

@@ -2,8 +2,9 @@
 {
 	public interface IPermission
 	{
-		public int IdPermission { get; set; }
-		public string Name { get; set; }
-		public string? Description { get; set; }
+		int IdPermission { get; set; }
+		string Name { get; set; }
+		string? Description { get; set; }
+		bool IsSystemPermission { get; set; }
 	}
 }
