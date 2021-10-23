@@ -10,12 +10,24 @@ namespace Raider.Web
 		public string? ContentType { get; set; }
 		public long? Length { get; set; }
 		public string? Tag { get; set; }
+		public string? Hash { get; set; }
 
-		public Stream? OpenReadStream()
+		public Stream? OpenReadStream(bool asMemoryStream = false)
 		{
 			Stream? stream = null;
 			if (Content != null)
-				stream = Content;
+			{
+				if (asMemoryStream)
+				{
+					var memoryStream = new MemoryStream();
+					Content.CopyTo(memoryStream);
+					stream = memoryStream;
+				}
+				else
+				{
+					stream = Content;
+				}
+			}
 			else if (Data != null)
 				stream = new MemoryStream(Data);
 
