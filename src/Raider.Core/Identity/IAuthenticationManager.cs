@@ -1,5 +1,6 @@
 ﻿using Raider.Identity;
 using Raider.Web;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Raider.AspNetCore.Authentication
@@ -23,6 +24,6 @@ namespace Raider.AspNetCore.Authentication
 
 		Task<AuthenticatedUser?> SetUserDataRolesPremissions(AuthenticatedUser user, IRequestMetadata? requestMetadata = null);
 
-		Task<AuthenticatedUser?> SetUserDataAsync(AuthenticatedUser user, IRequestMetadata? requestMetadata = null);
+		Task<AuthenticatedUser?> SetUserDataAsync(AuthenticatedUser user, IRequestMetadata? requestMetadata = null, List<int>? roleIds = null);
 	}
 }
