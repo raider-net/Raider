@@ -251,16 +251,18 @@ namespace Raider.AspNetCore.Authentication
 
 			var applicationContext = context.RequestServices.GetRequiredService<IApplicationContext>();
 
+			var roleIds = roleIdClaims?.Select(c => int.Parse(c.Value)).ToList();
+
 			var user = new AuthenticatedUser(userId, loginClaim.Value, displayNameClaim.Value, applicationContext.Next())
 			{
 				UserData = null,
 				Roles = roleClaims?.Select(c => c.Value).ToList(),
-				RoleIds = roleIdClaims?.Select(c => int.Parse(c.Value)).ToList(),
+				RoleIds = roleIds,
 				Permissions = premissionClaims?.Select(c => c.Value).ToList()
 			};
 
 			var authenticationManager = context.RequestServices.GetRequiredService<IAuthenticationManager>();
-			user = await authenticationManager.SetUserDataAsync(user, applicationContext.RequestMetadata);
+			user = await authenticationManager.SetUserDataAsync(user, applicationContext.RequestMetadata, roleIds);
 			
 			return CreateRaiderPrincipal(principal.Identity, user, true, true, logger, applicationContext, authenticationManager);
 		}
