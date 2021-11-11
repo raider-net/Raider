@@ -536,5 +536,32 @@ namespace Raider.Text
 
 			return string.Format(CultureInfo.InvariantCulture, "{0}", value);
 		}
+
+		public static string BeautifyJson(string json)
+		{
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+			var obj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+			var formatted = Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
+			return formatted;
+#elif NET5_0
+			using var document = System.Text.Json.JsonDocument.Parse(json);
+			using var stream = new System.IO.MemoryStream();
+
+			//var testSettings = new System.Text.Encodings.Web.TextEncoderSettings(System.Text.Unicode.UnicodeRanges.All);
+
+			using var writer =
+				new System.Text.Json.Utf8JsonWriter(
+					stream,
+					new System.Text.Json.JsonWriterOptions
+					{
+						Indented = true,
+						Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+					});
+
+			document.WriteTo(writer);
+			writer.Flush();
+			return Encoding.UTF8.GetString(stream.ToArray());
+#endif
+		}
 	}
 }
