@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,6 +38,8 @@ namespace Raider.Database.PostgreSql
 			_isInternalConnection = false;
 		}
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public async Task<ulong> WriteBatchAsync(IEnumerable<IDictionary<string, object?>?>? rows, string connectionString, CancellationToken cancellationToken = default)
 		{
 			if (rows == null || !rows.Any())
@@ -50,6 +53,8 @@ namespace Raider.Database.PostgreSql
 			return await WriteBatchAsync(rows, connection, false, false, cancellationToken);
 		}
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public Task<ulong> WriteBatchAsync(IEnumerable<IDictionary<string, object?>> rows, bool openConnection = false, bool disposeConnection = false, CancellationToken cancellationToken = default)
 		{
 			if (rows == null || !rows.Any())
@@ -61,6 +66,8 @@ namespace Raider.Database.PostgreSql
 			return WriteBatchAsync(rows, _connection, openConnection, disposeConnection, cancellationToken);
 		}
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public async Task<ulong> WriteBatchAsync(IEnumerable<IDictionary<string, object?>?> rows, NpgsqlConnection connection, bool openConnection = false, bool disposeConnection = false, CancellationToken cancellationToken = default)
 		{
 			ulong result = 0;

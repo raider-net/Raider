@@ -1,6 +1,7 @@
 ﻿using Raider.Data;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +27,8 @@ namespace Raider.Database.PostgreSql
 
 		public abstract IDictionary<string, object?>? ToDictionary(T obj);
 
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		protected override async Task<ulong> WriteBatchAsync(IEnumerable<T> batch, CancellationToken cancellationToken = default)
 		{
 			if (string.IsNullOrWhiteSpace(_connectionString))
