@@ -563,5 +563,61 @@ namespace Raider.Text
 			return Encoding.UTF8.GetString(stream.ToArray());
 #endif
 		}
+
+		/// <summary>
+		/// ReduceWhitespaces
+		/// </summary>
+		/// <param name="value">Input string</param>
+		/// <param name="reduceToWhitespace">All whitespace replaces with this char. If null, first whitespace will be used</param>
+		/// <returns>String without multiple whitespaces</returns>
+		public static string ReduceWhitespaces(string value, char? reduceToWhitespace = ' ')
+		{
+			var newString = new StringBuilder();
+			bool previousIsWhitespace = false;
+			for (int i = 0; i < value.Length; i++)
+			{
+				var val = value[i];
+				if (char.IsWhiteSpace(val))
+				{
+					if (previousIsWhitespace)
+						continue;
+
+					previousIsWhitespace = true;
+
+					if (reduceToWhitespace.HasValue)
+						val = reduceToWhitespace.Value;
+				}
+				else
+				{
+					previousIsWhitespace = false;
+				}
+
+				newString.Append(val);
+			}
+
+			return newString.ToString();
+		}
+
+		public static string ConcatIfNotNullOrEmpty(this string source, string text)
+		{
+			if (string.IsNullOrEmpty(source))
+				return text ?? source;
+
+			if (string.IsNullOrEmpty(text))
+				return source ?? text;
+
+			return string.Concat(source, text);
+		}
+
+		public static string ConcatIfNotNullOrEmpty(this string source, string delimiter, string text)
+		{
+			if (string.IsNullOrEmpty(source))
+				return text ?? source;
+
+			if (string.IsNullOrEmpty(text))
+				return source ?? text;
+
+			return string.Concat(source, delimiter, text);
+		}
 	}
 }

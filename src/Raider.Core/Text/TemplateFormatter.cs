@@ -51,5 +51,26 @@ namespace Raider.Text
 					: string.Format(format, value);
 			});
 		}
+
+		public static List<string> GetPlaceholdersKeys(string template)
+		{
+			var result = new List<string>();
+
+			if (template == null)
+				return result;
+
+			var matches = _keyRegex.Matches(template);
+			foreach (Match match in matches)
+			{
+				if (1 < match.Groups.Count)
+				{
+					var key = match.Groups[1].Value;
+					if (!string.IsNullOrWhiteSpace(key))
+						result.Add(key);
+				}
+			}
+
+			return result;
+		}
 	}
 }
