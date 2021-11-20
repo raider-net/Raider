@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Localization;
+using Raider.Localization.Internal;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace Raider.Extensions
 {
@@ -73,7 +75,7 @@ namespace Raider.Extensions
 					}
 					else
 					{
-						localizedValue = localizedString;
+						localizedValue = localizedString!;
 						return true;
 					}
 				}
@@ -102,11 +104,16 @@ namespace Raider.Extensions
 					}
 					else
 					{
-						localizedValue = localizedString;
+						localizedValue = localizedString!;
 						return true;
 					}
 				}
 			}
 		}
+
+		public static IStringLocalizer? WithCulture(this IStringLocalizer localizer, CultureInfo cultureInfo)
+			=> localizer is ResourceManagerStringLocalizer resourceManagerStringLocalizer
+				? new ResourceManagerStringLocalizerWithCulture(resourceManagerStringLocalizer, cultureInfo)
+				: null;
 	}
 }
