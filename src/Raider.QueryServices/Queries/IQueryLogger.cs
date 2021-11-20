@@ -3,6 +3,6 @@
 	public interface IQueryLogger
 	{
 		void WriteQueryEntry(IQueryEntry entry);
-		void WriteQueryExit(IQueryEntry entry, decimal elapsedMilliseconds);
+		void WriteQueryExit(IQueryEntry entry, decimal elapsedMilliseconds, bool isError, string? data);
 	}
 }

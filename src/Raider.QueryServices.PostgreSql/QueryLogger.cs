@@ -32,12 +32,12 @@ namespace Raider.QueryServices.PostgreSql
 			_entryWriter.Write(entry);
 		}
 
-		public void WriteQueryExit(IQueryEntry entry, decimal elapsedMilliseconds)
+		public void WriteQueryExit(IQueryEntry entry, decimal elapsedMilliseconds, bool isError, string? data)
 		{
 			if (_exitWriter == null)
 				throw new InvalidOperationException($"{nameof(QueryExitWriter)} was not set.");
 
-			_exitWriter.Write(new QueryExit { IdCommandQueryExit = entry.IdCommandQueryEntry, ElapsedMilliseconds = elapsedMilliseconds });
+			_exitWriter.Write(new QueryExit { IdCommandQueryExit = entry.IdCommandQueryEntry, ElapsedMilliseconds = elapsedMilliseconds, IsError = isError, Data = data });
 		}
 	}
 }

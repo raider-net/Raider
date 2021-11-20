@@ -224,7 +224,7 @@ namespace Raider.QueryServices.Aspects
 					{
 						long endTicks = StaticWatch.CurrentTicks;
 						var elapsedMilliseconds = StaticWatch.ElapsedMilliseconds(startTicks.Value, endTicks);
-						queryEntryLogger.WriteQueryExit(queryEntry, elapsedMilliseconds);
+						queryEntryLogger.WriteQueryExit(queryEntry, elapsedMilliseconds, result.HasError, handlerOptions.SerializeQuery ? queryBase.SerializeResult(result) : null);
 					}
 				}
 			}

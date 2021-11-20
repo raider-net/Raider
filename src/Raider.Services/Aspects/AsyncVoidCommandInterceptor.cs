@@ -229,7 +229,7 @@ namespace Raider.Services.Aspects
 					{
 						long endTicks = StaticWatch.CurrentTicks;
 						var elapsedMilliseconds = StaticWatch.ElapsedMilliseconds(startTicks.Value, endTicks);
-						commandEntryLogger.WriteCommandExit(commandEntry, elapsedMilliseconds);
+						commandEntryLogger.WriteCommandExit(commandEntry, elapsedMilliseconds, result.HasError, handlerOptions.SerializeCommand ? commandBase.SerializeResult(result) : null);
 					}
 				}
 			}
