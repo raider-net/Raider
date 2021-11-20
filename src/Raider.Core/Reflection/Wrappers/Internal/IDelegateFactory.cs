@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Raider.Reflection.Internal
 {
-	internal interface IDelegateFactory
+	public interface IDelegateFactory
 	{
 		Func<T?, object?> CreateGet<T>(MemberInfo memberInfo);
 

@@ -8,7 +8,7 @@ namespace Raider.Reflection.Internal
 	public delegate object ObjectConstructor<T>(params object?[] args);
 	public delegate TResult? MethodCall<T, TResult>(T? target, params object?[] args);
 
-	internal class DelegateFactory : IDelegateFactory
+	public class DelegateFactory : IDelegateFactory
 	{
 		private static readonly DelegateFactory _instance = new();
 		public static DelegateFactory Instance => _instance;
