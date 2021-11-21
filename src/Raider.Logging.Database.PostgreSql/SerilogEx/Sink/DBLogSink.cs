@@ -5,6 +5,7 @@ using Serilog.Debugging;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 {
@@ -29,7 +30,8 @@ namespace Raider.Logging.Database.PostgreSql.SerilogEx.Sink
 		public override IDictionary<string, object?>? ToDictionary(LogEvent logEvent)
 			=> LogEventHelper.ConvertLogToDictionary(logEvent);
 
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public void Emit(LogEvent logEvent)
 			=> Write(logEvent);
 	}

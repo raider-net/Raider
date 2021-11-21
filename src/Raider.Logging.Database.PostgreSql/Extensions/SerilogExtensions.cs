@@ -4,12 +4,15 @@ using Raider.Logging.SerilogEx;
 using Serilog.Configuration;
 using Serilog.Events;
 using System;
+using System.Diagnostics;
 
 namespace Serilog
 {
+	[DebuggerStepThrough]
 	public static class SerilogExtensions
 	{
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static LoggerConfiguration LogMessageSinkToPostgreSql(
 			this LoggerSinkConfiguration loggerConfiguration,
 			DBLogMessageSinkOptions options,
@@ -19,13 +22,23 @@ namespace Serilog
 				throw new ArgumentNullException(nameof(loggerConfiguration));
 
 			var sink = new DBLogMessageSink(options);
+
+			[DebuggerHidden]
+			[DebuggerStepThrough]
+			bool Condition(LogEvent logEvent)
+				=> LogEventHelper.IsLogMessage(logEvent);
+
+			[DebuggerHidden]
+			[DebuggerStepThrough]
+			void Configure(LoggerSinkConfiguration configuration)
+				=> configuration.Sink(sink, restrictedToMinimumLevel);
+
 			return loggerConfiguration
-					.Conditional(
-						logEvent => LogEventHelper.IsLogMessage(logEvent),
-						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
+					.Conditional(Condition, Configure);
 		}
 
-		[System.Diagnostics.DebuggerStepThrough]
+		[DebuggerHidden]
+		[DebuggerStepThrough]
 		public static LoggerConfiguration LogSinkToPostgreSql(
 			this LoggerSinkConfiguration loggerConfiguration,
 			DBLogSinkOptions options,
@@ -36,13 +49,22 @@ namespace Serilog
 				throw new ArgumentNullException(nameof(loggerConfiguration));
 
 			var sink = new DBLogSink(options);
+
+			[DebuggerHidden]
+			[DebuggerStepThrough]
+			bool Condition(LogEvent logEvent)
+				=> logAllLogEvents
+					|| (!LogEventHelper.IsLogMessage(logEvent)
+						&& !LogEventHelper.IsEnvironmentInfo(logEvent)
+						&& !LogEventHelper.IsHardwareInfo(logEvent));
+
+			[DebuggerHidden]
+			[DebuggerStepThrough]
+			void Configure(LoggerSinkConfiguration configuration)
+				=> configuration.Sink(sink, restrictedToMinimumLevel);
+
 			return loggerConfiguration
-					.Conditional(
-						logEvent => logAllLogEvents 
-							|| (!LogEventHelper.IsLogMessage(logEvent)
-								&& !LogEventHelper.IsEnvironmentInfo(logEvent)
-								&& !LogEventHelper.IsHardwareInfo(logEvent)),
-						cfg => cfg.Sink(sink, restrictedToMinimumLevel));
+					.Conditional(Condition, Configure);
 		}
 
 		//public static LoggerConfiguration HardwareInfoSinkToPostgreSql(
