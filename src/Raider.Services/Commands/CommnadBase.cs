@@ -16,11 +16,6 @@ namespace Raider.Services.Commands
 		public virtual string Serialize()
 			=> System.Text.Json.JsonSerializer.Serialize(this, _jsonSerializerOptions);
 
-		public virtual string? SerializeResult<TResult>(ICommandResult<TResult> result)
-			=> result == null
-			? null
-			: System.Text.Json.JsonSerializer.Serialize(result, _jsonSerializerOptions);
-
 		public virtual string? SerializeResult(ICommandResult result)
 			=> result == null
 			? null
@@ -36,5 +31,10 @@ namespace Raider.Services.Commands
 		public new TCommand? Deserialize<TCommand>(string command)
 			where TCommand : CommandBase<TResult>
 			=> System.Text.Json.JsonSerializer.Deserialize<TCommand>(command, _jsonSerializerOptions);
+
+		public virtual string? SerializeResult(ICommandResult<TResult> result)
+			=> result == null
+			? null
+			: System.Text.Json.JsonSerializer.Serialize(result, _jsonSerializerOptions);
 	}
 }
