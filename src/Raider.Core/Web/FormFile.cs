@@ -1,9 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Raider.Web
 {
 	public class FormFile
 	{
+		public Guid? Id { get; set; }
 		public Stream? Content { get; set; }
 		public byte[]? Data { get; set; }
 		public string? FileName { get; set; }
@@ -11,6 +13,9 @@ namespace Raider.Web
 		public long? Length { get; set; }
 		public string? Tag { get; set; }
 		public string? Hash { get; set; }
+		public int DbOperation { get; set; }
+
+		public bool HasContentData => Content != null || Data != null;
 
 		public Stream? OpenReadStream(bool asMemoryStream = false)
 		{
