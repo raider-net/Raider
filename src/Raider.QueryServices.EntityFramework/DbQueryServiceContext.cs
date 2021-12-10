@@ -91,6 +91,24 @@ namespace Raider.QueryServices.EntityFramework
 						transactionIsolationLevel,
 						connectionString);
 
+		public void SetDbContext<TContext>(TContext dbContext)
+			where TContext : DbContext
+		{
+			if (_queryHandlerContext == null)
+				throw new InvalidOperationException($"{nameof(_queryHandlerContext)} == null");
+
+			_queryHandlerContext?.SetDbContext(dbContext);
+		}
+
+		public void ResetDbContext<TContext>(TContext dbContext)
+			where TContext : DbContext
+		{
+			if (_queryHandlerContext == null)
+				throw new InvalidOperationException($"{nameof(_queryHandlerContext)} == null");
+
+			_queryHandlerContext?.ResetDbContext(dbContext);
+		}
+
 		public bool HasTransaction()
 			=> _queryHandlerContext?.HasTransaction() ?? false;
 

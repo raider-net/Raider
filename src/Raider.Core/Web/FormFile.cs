@@ -28,6 +28,11 @@ namespace Raider.Web
 		public string? Hash { get; set; }
 		public int DbOperation { get; set; }
 
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+		[Newtonsoft.Json.JsonIgnore]
+#elif NET5_0
+		[System.Text.Json.Serialization.JsonIgnore]
+#endif
 		public bool HasContentData => Content != null || Data != null;
 
 		public Stream? OpenReadStream(bool asMemoryStream = false)

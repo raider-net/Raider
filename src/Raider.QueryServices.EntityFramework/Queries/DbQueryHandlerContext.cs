@@ -122,6 +122,18 @@ namespace Raider.QueryServices.EntityFramework.Queries
 			return (TContext)result;
 		}
 
+		public void SetDbContext<TContext>(TContext dbContext)
+			where TContext : DbContext
+		{
+			var result = _dbContextCache.TryAdd(typeof(TContext), dbContext);
+			if (!result)
+				throw new InvalidOperationException($"{nameof(dbContext)} type {typeof(TContext).FullName} already exists.");
+		}
+
+		public void ResetDbContext<TContext>(TContext dbContext)
+			where TContext : DbContext
+			=> _dbContextCache.AddOrUpdate(typeof(TContext), dbContext, (key, oldValue) => dbContext);
+
 		public override bool HasTransaction()
 			=> DbContextTransaction != null;
 

@@ -34,6 +34,12 @@ namespace Raider.QueryServices.EntityFramework
 			string? connectionString = null)
 			where TContext : DbContext;
 
+		void SetDbContext<TContext>(TContext dbContext)
+			where TContext : DbContext;
+
+		void ResetDbContext<TContext>(TContext dbContext)
+			where TContext : DbContext;
+
 		void Commit();
 
 		void Rollback();
