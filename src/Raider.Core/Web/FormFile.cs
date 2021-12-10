@@ -6,8 +6,21 @@ namespace Raider.Web
 	public class FormFile
 	{
 		public Guid? Id { get; set; }
+
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+		[Newtonsoft.Json.JsonIgnore]
+#elif NET5_0
+		[System.Text.Json.Serialization.JsonIgnore]
+#endif
 		public Stream? Content { get; set; }
+
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+		[Newtonsoft.Json.JsonIgnore]
+#elif NET5_0
+		[System.Text.Json.Serialization.JsonIgnore]
+#endif
 		public byte[]? Data { get; set; }
+
 		public string? FileName { get; set; }
 		public string? ContentType { get; set; }
 		public long? Length { get; set; }
