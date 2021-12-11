@@ -74,7 +74,9 @@ namespace Raider.Generator.Compilation
 			string rootNamespace,
 			Assembly assembly,
 			CultureInfo defaultCulture,
-			string resourcesClassName)
+			string resourcesClassName,
+			List<CultureInfo>? checkForCultures = null,
+			bool compareResourceKyes = false)
 		{
 			if (string.IsNullOrWhiteSpace(targetProject))
 				throw new ArgumentNullException(nameof(targetProject));
@@ -84,7 +86,7 @@ namespace Raider.Generator.Compilation
 				targetProject += "\\";
 			}
 
-			var resFiles = ResourceLoader.LoadResources(targetProject, assembly, defaultCulture, ResourceLoadOptions.LoadResxAllResources, SearchOption.AllDirectories);
+			var resFiles = ResourceLoader.LoadResources(targetProject, assembly, defaultCulture, ResourceLoadOptions.LoadResxAllResources, SearchOption.AllDirectories, checkForCultures, compareResourceKyes);
 
 			var resourcesGenerator = new ResourcesGenerator
 			{
@@ -104,7 +106,9 @@ namespace Raider.Generator.Compilation
 			string targetProject,
 			string rootNamespace,
 			Assembly assembly,
-			CultureInfo? defaultCulture)
+			CultureInfo? defaultCulture,
+			List<CultureInfo>? checkForCultures = null,
+			bool compareResourceKyes = false)
 		{
 			if (string.IsNullOrWhiteSpace(targetProject))
 				throw new ArgumentNullException(nameof(targetProject));
@@ -114,7 +118,7 @@ namespace Raider.Generator.Compilation
 				targetProject += "\\";
 			}
 
-			var resFiles = ResourceLoader.LoadResources(targetProject, assembly, defaultCulture, ResourceLoadOptions.LoadResxAllResources, SearchOption.AllDirectories);
+			var resFiles = ResourceLoader.LoadResources(targetProject, assembly, defaultCulture, ResourceLoadOptions.LoadResxAllResources, SearchOption.AllDirectories, checkForCultures, compareResourceKyes);
 
 			var resourcesGenerator = new ResourceKeysGenerator
 			{
