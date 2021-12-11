@@ -1,5 +1,4 @@
 ﻿using Raider.Extensions;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,9 +17,9 @@ namespace Raider.Localization
 		public string Name { get; set; }
 		public CultureInfo CultureInfo { get; set; }
 		public ResourceManager ResourceManager { get; private set; }
-		public string ResourceManagerBaseName => ResourceManager?.BaseName;
-		public ResourceSet ResourceSet { get; set; }
-		public List<Resource> Resources { get; private set; }
+		public string? ResourceManagerBaseName => ResourceManager?.BaseName;
+		public ResourceSet? ResourceSet { get; set; }
+		public List<Resource>? Resources { get; private set; }
 		public List<string> Errors { get; }
 
 		public ResourceFile()
@@ -28,7 +27,7 @@ namespace Raider.Localization
 			Errors = new List<string>();
 		}
 
-		public ResourceFile(string relativePath, List<Resource> resources)
+		public ResourceFile(string relativePath, List<Resource>? resources)
 			: this()
 		{
 			RelativePath = relativePath;
@@ -38,7 +37,7 @@ namespace Raider.Localization
 		public ResourceFile LoadResourceSet(bool parseResources)
 		{
 			ResourceManager = ResourceLoader.CreateResourceManager(ResourceAssembly, RelativePath);
-			ResourceSet = ResourceManager?.GetResourceSet(CultureInfo ?? CultureInfo.InvariantCulture, true, true);
+			ResourceSet = ResourceManager.GetResourceSet(CultureInfo ?? CultureInfo.InvariantCulture, true, true);
 			if (parseResources) ParseResources();
 			return this;
 		}
@@ -101,7 +100,7 @@ namespace Raider.Localization
 		public List<string> GetConfigurationFolderStructure(string targetWebProjectFolderPath)
 		{
 			var filePath = Path.GetDirectoryName(FullPath);
-			var relativeFilePath = filePath.TrimPrefix(targetWebProjectFolderPath, true);
+			var relativeFilePath = filePath!.TrimPrefix(targetWebProjectFolderPath, true);
 			if (relativeFilePath.StartsWith("\\"))
 				relativeFilePath = relativeFilePath.Substring(1);
 			var tmp = relativeFilePath.Split('\\');
