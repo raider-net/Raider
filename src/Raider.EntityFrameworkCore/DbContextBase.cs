@@ -290,7 +290,8 @@ namespace Raider.EntityFrameworkCore
 					switch (entry.State)
 					{
 						case EntityState.Added:
-							synchronizable.SyncToken = Guid.NewGuid();
+							if (Guid.Empty.Equals(synchronizable.SyncToken))
+								synchronizable.SyncToken = Guid.NewGuid();
 							break;
 						case EntityState.Modified:
 							if (WasModifiedNotIgnorredProperty(entry, synchronizable))
