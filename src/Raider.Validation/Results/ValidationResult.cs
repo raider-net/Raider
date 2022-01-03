@@ -3,13 +3,15 @@ using System.Collections.Generic;
 
 namespace Raider.Validation
 {
-	public class ValidationResult
+	public class ValidationResult : IValidationResult
 	{
 		private readonly List<IValidationFailure> _errors = new List<IValidationFailure>();
 
 		public IReadOnlyList<IValidationFailure> Errors => _errors;
 
 		public bool Interrupted { get; set; }
+
+		IReadOnlyList<IBaseValidationFailure> IValidationResult.Errors => _errors;
 
 		public ValidationResult()
 		{

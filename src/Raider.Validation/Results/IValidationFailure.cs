@@ -2,14 +2,9 @@
 
 namespace Raider.Validation
 {
-	public interface IValidationFailure
+	public interface IValidationFailure : IBaseValidationFailure
 	{
-		IValidationFrame ValidationFrame { get; }
 		ValidatorType Type { get; }
-		ValidationSeverity Severity { get; }
-		string Message { get; }
-		string MessageWithPropertyName { get; }
-		bool Conditional { get; }
 		IClientConditionDefinition? ClientConditionDefinition { get; }
 	}
 }
