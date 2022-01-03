@@ -10,7 +10,7 @@ namespace Raider.QueryServices.PostgreSql
 		public bool IsError { get; set; }
 		public string? Data { get; set; }
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 		{
 			var dict = new Dictionary<string, object?>
 			{

@@ -1,0 +1,1154 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Raider.ServiceBus</name>
+    </assembly>
+    <members>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.OnInit(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.OnStarted(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.OnStopping(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.OnError(Raider.ServiceBus.Components.FailureReason,System.Exception,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.OnHandlePrimaryRequestAsync(`0,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.Reply(`1,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.Reply(`1,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestAsync(Raider.ServiceBus.IRequestMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.OnHandleRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.OnHandleRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendResponseAsync(Raider.ServiceBus.IResponseMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.BusinessProcess`2.SendResponseAsync(Raider.ServiceBus.IResponseMessage,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="F:Raider.ServiceBus.Components.ComponentStatus.Offline">
+            <summary>
+            The component is offline
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.Components.ComponentStatus.Idle">
+            <summary>
+            The component is waiting for a message
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.Components.ComponentStatus.InProcess">
+            <summary>
+            Tne component is currently in process
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.Components.ComponentStatus.Error">
+            <summary>
+            The component is in error state
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.Components.ComponentStatus.Suspended">
+            <summary>
+            The component was suspended
+            </summary>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.OnHandlePrimaryRequestAsync(`0,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Invoking the BusinessProcess.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="previousTraceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.Reply(`1,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a response message asynchronously, when the caller does not wait for the response.
+            </summary>
+            <param name="message">The response message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.Reply(`1,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a response message asynchronously, when the caller does not wait for the response.
+            </summary>
+            <param name="message">The response message</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestAsync(Raider.ServiceBus.IRequestMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.OnHandleResponseAsync(Raider.ServiceBus.IResponseMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Handle a response message asynchronously, that come from <see cref="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)"/>.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="previousTraceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message and synchronously wait for a response.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="timeout">Timeout waiting for response</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message and synchronously wait for a response.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="timeout">Timeout waiting for response</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message and synchronously wait for a response.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="timeout">Timeout waiting for response</param>
+            <param name="options">Options for message sending.</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.OnHandleRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Handle a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="previousTraceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.OnHandleRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Handle a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="previousTraceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendResponseAsync(Raider.ServiceBus.IResponseMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a response message asynchronously, when the caller does not wait for the response.
+            </summary>
+            <param name="message">The response message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IBusinessProcess`2.SendResponseAsync(Raider.ServiceBus.IResponseMessage,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a response message asynchronously, when the caller does not wait for the response.
+            </summary>
+            <param name="message">The response message</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestAsync(Raider.ServiceBus.IRequestMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.OnHandleResponseAsync(Raider.ServiceBus.IResponseMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Handle a response message asynchronously, that come from <see cref="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)"/>.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="previousTraceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message and synchronously wait for a response.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="timeout">Timeout waiting for response</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message and synchronously wait for a response.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="timeout">Timeout waiting for response</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IInboundComponent.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message and synchronously wait for a response.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="timeout">Timeout waiting for response</param>
+            <param name="options">Options for message sending.</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.OnInit(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.OnStarted(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.OnStopping(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.OnError(Raider.ServiceBus.Components.FailureReason,System.Exception,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestAsync(Raider.ServiceBus.IRequestMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.InboundComponent.SendRequestSynchronouslyAsync``1(Raider.ServiceBus.IRequestMessage{``0},System.TimeSpan,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IOutboundComponent.OnHandleRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Handle a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="previousTraceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IOutboundComponent.OnHandleRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Handle a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="previousTraceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IOutboundComponent.SendResponseAsync(Raider.ServiceBus.IResponseMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a response message asynchronously, when the caller does not wait for the response.
+            </summary>
+            <param name="message">The response message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IOutboundComponent.SendResponseAsync(Raider.ServiceBus.IResponseMessage,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a response message asynchronously, when the caller does not wait for the response.
+            </summary>
+            <param name="message">The response message</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IServiceBusComponent.OnInit(System.Threading.CancellationToken)">
+            <summary>
+            On component initialization.
+            </summary>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IServiceBusComponent.OnStarted(System.Threading.CancellationToken)">
+            <summary>
+            On component started.
+            </summary>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IServiceBusComponent.OnStopping(System.Threading.CancellationToken)">
+            <summary>
+            On component stopping.
+            </summary>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.IServiceBusComponent.OnError(Raider.ServiceBus.Components.FailureReason,System.Exception,System.Threading.CancellationToken)">
+            <summary>
+            On component error.
+            </summary>
+            <param name="failureReason">Error reason</param>
+            <param name="exception">Exception</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.OutboundComponent.OnInit(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.OutboundComponent.OnStarted(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.OutboundComponent.OnStopping(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.OutboundComponent.OnError(Raider.ServiceBus.Components.FailureReason,System.Exception,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.OutboundComponent.OnHandleRequestAsync(Raider.ServiceBus.IRequestMessage,Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.OutboundComponent.OnHandleRequestAsync``1(Raider.ServiceBus.IRequestMessage{``0},Raider.ServiceBus.MessageOptions,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.OutboundComponent.SendResponseAsync(Raider.ServiceBus.IResponseMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Raider.ServiceBus.Components.OutboundComponent.SendResponseAsync(Raider.ServiceBus.IResponseMessage,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="P:Raider.ServiceBus.Config.IBusOptions.EnableMessageSerialization">
+            <summary>
+            The default behavior is to disable message serialization.
+            When serialization is enabled, it creates an independent message instance (deep copy of the original message).
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.IMessage">
+            <summary>
+            Marker interface for messages.
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.IBaseRequestMessage">
+            <summary>
+            Marker interface for base request messages.
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.IRequestMessage`1">
+            <summary>
+            Marker interface for request messages with response.
+            </summary>
+            <typeparam name="TResponse">The response message type associated with the request</typeparam>
+        </member>
+        <member name="T:Raider.ServiceBus.IRequestMessage">
+            <summary>
+            Marker interface for void request messages.
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.IResponseMessage">
+            <summary>
+            Marker interface for request messages.
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.MessageOptions.Async">
+            <summary>
+            Sends a message asynchronously, when the caller does not wait for the response.
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.MessageOptions.IdSourceResponseQueue">
+            <summary>
+            The source queue identifier to store response message from target component
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.MessageOptions.IdTargetComponent">
+            <summary>
+            Component this message is sent to
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.MessageOptions.IdTargetQueue">
+            <summary>
+            The target queue identifier
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.MessageOptions.Priority">
+            <summary>
+            Priority of the message
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.MessageOptions.Description">
+            <summary>
+            Description of the message
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.MessageOptions.Timeout">
+            <summary>
+            The timespan after which the Send request will be cancelled if no response arrives.
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Unchanged">
+            <summary>
+            The message status was not changed
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Created">
+            <summary>
+            The message was created
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Delivered">
+            <summary>
+            The message is in target component's queue
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.InProcess">
+            <summary>
+            The message is being processed
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Discarded">
+            <summary>
+            Discarded message - for example if message validity is expired
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Suspended">
+            <summary>
+            The message processing was suspended
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Deferred">
+            <summary>
+            The message processing was deferred
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Aborted">
+            <summary>
+            The message processing was aborted - not processed correctly
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Error">
+            <summary>
+            The error occured while processing the message
+            </summary>
+        </member>
+        <member name="F:Raider.ServiceBus.MessageStatus.Completed">
+            <summary>
+            The message processing was completed successfully
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.VoidResponseMessage">
+            <summary>
+            Represents a void response message type, since <see cref="T:System.Void"/> is not a valid return type in C#.
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.VoidResponseMessage.Value">
+            <summary>
+            Default and only value of the <see cref="T:Raider.ServiceBus.VoidResponseMessage"/> type.
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.VoidResponseMessage.Task">
+            <summary>
+            Task from a <see cref="T:Raider.ServiceBus.VoidResponseMessage"/> type.
+            </summary>
+        </member>
+        <member name="M:Raider.ServiceBus.VoidResponseMessage.CompareTo(Raider.ServiceBus.VoidResponseMessage)">
+            <summary>
+            Compares the current object with another object of the same type.
+            </summary>
+            <param name="other">An object to compare with this object.</param>
+            <returns>
+            A value that indicates the relative order of the objects being compared.
+            The return value has the following meanings:
+             - Less than zero: This object is less than the <paramref name="other" /> parameter.
+             - Zero: This object is equal to <paramref name="other" />.
+             - Greater than zero: This object is greater than <paramref name="other" />.
+            </returns>
+        </member>
+        <member name="M:Raider.ServiceBus.VoidResponseMessage.System#IComparable#CompareTo(System.Object)">
+            <summary>
+            Compares the current instance with another object of the same type and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
+            </summary>
+            <param name="obj">An object to compare with this instance.</param>
+            <returns>
+            A value that indicates the relative order of the objects being compared.
+            The return value has these meanings:
+             - Less than zero: This instance precedes <paramref name="obj" /> in the sort order.
+             - Zero: This instance occurs in the same position in the sort order as <paramref name="obj" />.
+             - Greater than zero: This instance follows <paramref name="obj" /> in the sort order.
+            </returns>
+        </member>
+        <member name="M:Raider.ServiceBus.VoidResponseMessage.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>
+            A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+            </returns>
+        </member>
+        <member name="M:Raider.ServiceBus.VoidResponseMessage.Equals(Raider.ServiceBus.VoidResponseMessage)">
+            <summary>
+            Determines whether the current object is equal to another object of the same type.
+            </summary>
+            <param name="other">An object to compare with this object.</param>
+            <returns>
+            <c>true</c> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Raider.ServiceBus.VoidResponseMessage.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:System.Object" /> is equal to this instance.
+            </summary>
+            <param name="obj">The object to compare with the current instance.</param>
+            <returns>
+            <c>true</c> if the specified <see cref="T:System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Raider.ServiceBus.VoidResponseMessage.op_Equality(Raider.ServiceBus.VoidResponseMessage,Raider.ServiceBus.VoidResponseMessage)">
+            <summary>
+            Determines whether the <paramref name="first"/> object is equal to the <paramref name="second"/> object.
+            </summary>
+            <param name="first">The first object.</param>
+            <param name="second">The second object.</param>
+            <c>true</c> if the <paramref name="first"/> object is equal to the <paramref name="second" /> object; otherwise, <c>false</c>.
+        </member>
+        <member name="M:Raider.ServiceBus.VoidResponseMessage.op_Inequality(Raider.ServiceBus.VoidResponseMessage,Raider.ServiceBus.VoidResponseMessage)">
+            <summary>
+            Determines whether the <paramref name="first"/> object is not equal to the <paramref name="second"/> object.
+            </summary>
+            <param name="first">The first object.</param>
+            <param name="second">The second object.</param>
+            <c>true</c> if the <paramref name="first"/> object is not equal to the <paramref name="second" /> object; otherwise, <c>false</c>.
+        </member>
+        <member name="M:Raider.ServiceBus.VoidResponseMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String" /> that represents this instance.
+            </summary>
+            <returns>A <see cref="T:System.String" /> that represents this instance.</returns>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.EventOptions.Timeout">
+            <summary>
+            The timespan after which the Send request will be cancelled if no response arrives.
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.EventOptions.IdSession">
+            <summary>
+            Id of the original request that launched the session. Used for tracing events
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Events.IEvent">
+            <summary>
+            Marker interface for events.
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Events.IEventBus">
+            <summary>
+            Bus to work with events.
+            </summary>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.IEventBus.Publish(Raider.ServiceBus.Events.IEvent,System.String,System.String,System.Int32)">
+            <summary>
+            Publish an event.
+            </summary>
+            <param name="event">The event</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.IEventBus.Publish(Raider.ServiceBus.Events.IEvent,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo)">
+            <summary>
+            Publish an event.
+            </summary>
+            <param name="event">The event</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.IEventBus.Publish(Raider.ServiceBus.Events.IEvent,Raider.ServiceBus.Events.EventOptions,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo)">
+            <summary>
+            Publish an event.
+            </summary>
+            <param name="event">The event</param>
+            <param name="options">Options for event publishing.</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.IEventBus.PublishAsync(Raider.ServiceBus.Events.IEvent,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Publish an event.
+            </summary>
+            <param name="event">The event</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.IEventBus.PublishAsync(Raider.ServiceBus.Events.IEvent,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Publish an event.
+            </summary>
+            <param name="event">The event</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.IEventBus.PublishAsync(Raider.ServiceBus.Events.IEvent,Raider.ServiceBus.Events.EventOptions,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Publish an event.
+            </summary>
+            <param name="event">The event</param>
+            <param name="options">Options for event publishing.</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="T:Raider.ServiceBus.Events.IEventHandler">
+            <summary>
+            Defines a base handler for events
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Events.IEventHandler`2">
+            <summary>
+            Defines a handler for an event
+            </summary>
+            <typeparam name="TEvent">The type of event being handled</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Events.IEventHandlerContext"/></typeparam>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.IEventHandler`2.InterceptorType">
+            <summary>
+            Interceptor for handle method. Interceptor must implement <see cref="T:Raider.ServiceBus.Events.Interceptors.IEventHandlerInterceptor`2"/>
+            </summary>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.IEventHandler`2.Handle(`0,`1)">
+            <summary>
+            Handles an event
+            </summary>
+            <returns>Response from the event</returns>
+        </member>
+        <member name="T:Raider.ServiceBus.Events.IAsyncEventHandler`2">
+            <summary>
+            Defines a handler for an event
+            </summary>
+            <typeparam name="TEvent">The type of event being handled</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Events.IEventHandlerContext"/></typeparam>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.IAsyncEventHandler`2.InterceptorType">
+            <summary>
+            Interceptor for handle method. Interceptor must implement <see cref="T:Raider.ServiceBus.Events.Interceptors.IAsyncEventHandlerInterceptor`2"/>
+            </summary>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.IAsyncEventHandler`2.HandleAsync(`0,`1,System.Threading.CancellationToken)">
+            <summary>
+            Handles an event
+            </summary>
+            <returns>Response from the event</returns>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.IEventHandlerContext.TransactionContext">
+            <summary>
+            Current transaction context
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.IEventHandlerContext.PreviousTraceInfo">
+            <summary>
+            Parent method scope
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.IEventHandlerContext.IdHost">
+            <summary>
+            Current host id
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.IEventHandlerContext.IdEvent">
+            <summary>
+            Event id
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.IEventHandlerContext.IdSession">
+            <summary>
+            Id of the session used for tracing events
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Events.IEventHandlerContext.Timeout">
+            <summary>
+            The timespan after which the Send request will be cancelled if no response arrives.
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Events.Interceptors.IEventHandlerInterceptor">
+            <summary>
+            Defines a base interceptor for event handlers
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Events.Interceptors.IEventHandlerInterceptor`2">
+            <summary>
+            Defines an interceptor for event handlers
+            </summary>
+            <typeparam name="TEvent">The type of event being handled</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Events.IEventHandlerContext"/></typeparam>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.Interceptors.IEventHandlerInterceptor`2.InterceptHandle(`0,`1,System.Func{`0,`1,Raider.IResult})">
+            <summary>
+            Intercepts the event handler handle method
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Events.Interceptors.IAsyncEventHandlerInterceptor`2">
+            <summary>
+            Defines an interceptor for event handlers
+            </summary>
+            <typeparam name="TEvent">The type of request event being handled</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Events.IEventHandlerContext"/></typeparam>
+        </member>
+        <member name="M:Raider.ServiceBus.Events.Interceptors.IAsyncEventHandlerInterceptor`2.InterceptHandleAsync(`0,`1,System.Func{`0,`1,System.Threading.CancellationToken,System.Threading.Tasks.Task{Raider.IResult}},System.Threading.CancellationToken)">
+            <summary>
+            Intercepts the event handler handle method
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IMessageBus">
+            <summary>
+            Bus to work with request-response messages.
+            </summary>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.Send(Raider.ServiceBus.Messages.IRequestMessage,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.Send(Raider.ServiceBus.Messages.IRequestMessage,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.Send(Raider.ServiceBus.Messages.IRequestMessage,Raider.ServiceBus.Messages.MessageOptions,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.Send``1(Raider.ServiceBus.Messages.IRequestMessage{``0},System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+            <returns>The response message.</returns>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.Send``1(Raider.ServiceBus.Messages.IRequestMessage{``0},Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+            <returns>The response message.</returns>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.Send``1(Raider.ServiceBus.Messages.IRequestMessage{``0},Raider.ServiceBus.Messages.MessageOptions,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+            <returns>The response message.</returns>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.SendAsync(Raider.ServiceBus.Messages.IRequestMessage,System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.SendAsync(Raider.ServiceBus.Messages.IRequestMessage,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.SendAsync(Raider.ServiceBus.Messages.IRequestMessage,Raider.ServiceBus.Messages.MessageOptions,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.SendAsync``1(Raider.ServiceBus.Messages.IRequestMessage{``0},System.Threading.CancellationToken,System.String,System.String,System.Int32)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+            <param name="memberName">Allows you to obtain the method or property name of the caller to the method.</param>
+            <param name="sourceFilePath">Allows you to obtain the full path of the source file that contains the caller. This is the file path at the time of compile.</param>
+            <param name="sourceLineNumber">Allows you to obtain the line number in the source file at which the method is called.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.SendAsync``1(Raider.ServiceBus.Messages.IRequestMessage{``0},Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageBus.SendAsync``1(Raider.ServiceBus.Messages.IRequestMessage{``0},Raider.ServiceBus.Messages.MessageOptions,Raider.Transactions.ITransactionContext,Raider.Trace.ITraceInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a request message.
+            </summary>
+            <typeparam name="TResponse">The response message type</typeparam>
+            <param name="message">The request message</param>
+            <param name="options">Options for message sending.</param>
+            <param name="transactionContext">Current transaction context for handler</param>
+            <param name="traceInfo">Parent trace info</param>
+            <param name="cancellationToken">Cancellation token to notify if the client no longer is interested in the response.</param>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IMessageHandler">
+            <summary>
+            Defines a base handler for a request messages
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IMessageHandler`3">
+            <summary>
+            Defines a handler for a request message with response message
+            </summary>
+            <typeparam name="TRequestMessage">The type of request message being handled</typeparam>
+            <typeparam name="TResponse">The type of response from the handler</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Messages.IMessageHandlerContext"/></typeparam>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.IMessageHandler`3.InterceptorType">
+            <summary>
+            Interceptor for handle method. Interceptor must implement <see cref="T:Raider.ServiceBus.Messages.Interceptors.IMessageHandlerInterceptor`3"/>
+            </summary>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IMessageHandler`3.Handle(`0,`2)">
+            <summary>
+            Handles a request message
+            </summary>
+            <returns>Response from the request message</returns>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IAsyncMessageHandler`3">
+            <summary>
+            Defines a handler for a request message with response message
+            </summary>
+            <typeparam name="TRequestMessage">The type of request message being handled</typeparam>
+            <typeparam name="TResponse">The type of response from the handler</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Messages.IMessageHandlerContext"/></typeparam>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.IAsyncMessageHandler`3.InterceptorType">
+            <summary>
+            Interceptor for handle method. Interceptor must implement <see cref="T:Raider.ServiceBus.Messages.Interceptors.IAsyncMessageHandlerInterceptor`3"/>
+            </summary>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.IAsyncMessageHandler`3.HandleAsync(`0,`2,System.Threading.CancellationToken)">
+            <summary>
+            Handles a request message
+            </summary>
+            <returns>Response from the request message</returns>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IMessageHandler`2">
+            <summary>
+            Defines a handler for a request message with no response message
+            </summary>
+            <typeparam name="TRequestMessage">The type of request message being handled</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Messages.IMessageHandlerContext"/></typeparam>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IAsyncMessageHandler`2">
+            <summary>
+            Defines a handler for a request message with no response message
+            </summary>
+            <typeparam name="TRequestMessage">The type of request message being handled</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Messages.IMessageHandlerContext"/></typeparam>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.IMessageHandlerContext.TransactionContext">
+            <summary>
+            Current transaction context
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.IMessageHandlerContext.PreviousTraceInfo">
+            <summary>
+            Parent method scope
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.IMessageHandlerContext.IdHost">
+            <summary>
+            Current host id
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.IMessageHandlerContext.IdMessage">
+            <summary>
+            Request message id
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.IMessageHandlerContext.IdSession">
+            <summary>
+            Id of the session used for tracing messages
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.IMessageHandlerContext.Timeout">
+            <summary>
+            The timespan after which the Send request will be cancelled if no response arrives.
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.Interceptors.IMessageHandlerInterceptor">
+            <summary>
+            Defines a base interceptor for message handlers
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.Interceptors.IMessageHandlerInterceptor`3">
+            <summary>
+            Defines an interceptor for message handlers
+            </summary>
+            <typeparam name="TRequestMessage">The type of request message being handled</typeparam>
+            <typeparam name="TResponse">The type of response from the handler</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Messages.IMessageHandlerContext"/></typeparam>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.Interceptors.IMessageHandlerInterceptor`3.InterceptHandle(`0,`2,System.Func{`0,`2,Raider.IResult{`1}})">
+            <summary>
+            Intercepts the message handler handle method
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.Interceptors.IAsyncMessageHandlerInterceptor`3">
+            <summary>
+            Defines an interceptor for message handlers
+            </summary>
+            <typeparam name="TRequestMessage">The type of request message being handled</typeparam>
+            <typeparam name="TResponse">The type of response from the handler</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Messages.IMessageHandlerContext"/></typeparam>
+        </member>
+        <member name="M:Raider.ServiceBus.Messages.Interceptors.IAsyncMessageHandlerInterceptor`3.InterceptHandleAsync(`0,`2,System.Func{`0,`2,System.Threading.CancellationToken,System.Threading.Tasks.Task{Raider.IResult{`1}}},System.Threading.CancellationToken)">
+            <summary>
+            Intercepts the message handler handle method
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.Interceptors.IMessageHandlerInterceptor`2">
+            <summary>
+            Defines an interceptor for message handlers
+            </summary>
+            <typeparam name="TRequestMessage">The type of request message being handled</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Messages.IMessageHandlerContext"/></typeparam>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.Interceptors.IAsyncMessageHandlerInterceptor`2">
+            <summary>
+            Defines an interceptor for message handlers
+            </summary>
+            <typeparam name="TRequestMessage">The type of request message being handled</typeparam>
+            <typeparam name="TContext">The type of <see cref="T:Raider.ServiceBus.Messages.IMessageHandlerContext"/></typeparam>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IBaseRequestMessage">
+            <summary>
+            Marker interface for base request messages.
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IRequestMessage`1">
+            <summary>
+            Marker interface for request messages.
+            </summary>
+            <typeparam name="TResponse">The response message type associated with the request</typeparam>
+        </member>
+        <member name="T:Raider.ServiceBus.Messages.IRequestMessage">
+            <summary>
+            Marker interface for request messages.
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.MessageOptions.Timeout">
+            <summary>
+            The timespan after which the Send request will be cancelled if no response arrives.
+            </summary>
+        </member>
+        <member name="P:Raider.ServiceBus.Messages.MessageOptions.IdSession">
+            <summary>
+            Id of the original request that launched the session. Used for tracing messages
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Resolver.AssemblyQualifiedNameTypeResolver">
+            <summary>
+            <see cref="T:Raider.ServiceBus.Resolver.ITypeResolver"/> that uses the <see cref="P:System.Type.AssemblyQualifiedName"/> for converting type to string.
+            </summary>
+        </member>
+        <member name="T:Raider.ServiceBus.Resolver.FullNameTypeResolver">
+            <summary>
+            <see cref="T:Raider.ServiceBus.Resolver.ITypeResolver"/> that uses the <see cref="P:System.Type.FullName"/> for converting type to string.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -122,7 +122,7 @@ namespace Raider.Messaging
 
 				try
 				{
-					_fallbackLogger = loggerFactory.CreateLogger<ServiceBus>();
+					_fallbackLogger = loggerFactory.CreateLogger<Job>();
 				}
 				catch (Exception ex)
 				{

@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -102,7 +101,7 @@ namespace Raider.Messaging
 
 				try
 				{
-					_fallbackLogger = loggerFactory.CreateLogger<ServiceBus>();
+					_fallbackLogger = loggerFactory.CreateLogger<Publisher<TData>>();
 				}
 				catch (Exception ex)
 				{

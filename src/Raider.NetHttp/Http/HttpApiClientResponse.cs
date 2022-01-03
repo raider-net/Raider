@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Raider.Net;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -282,7 +283,7 @@ namespace Raider.NetHttp.Http
 			{
 				contentType = contentTypeKvp.Value.FirstOrDefault();
 
-				if (contentType?.StartsWith("application/json", StringComparison.OrdinalIgnoreCase) ?? false)
+				if (contentType?.StartsWith(MimeTypes.json, StringComparison.OrdinalIgnoreCase) ?? false)
 				{
 					try
 					{

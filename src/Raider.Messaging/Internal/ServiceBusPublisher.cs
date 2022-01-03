@@ -27,7 +27,7 @@ namespace Raider.Messaging
 
 			try
 			{
-				_fallbackLogger = _loggerFactory.CreateLogger<ServiceBus>();
+				_fallbackLogger = _loggerFactory.CreateLogger<ServiceBusPublisher>();
 			}
 			catch (Exception ex)
 			{
