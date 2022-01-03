@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using NpgsqlTypes;
 using Raider.Extensions;
+using Raider.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace Raider.Database.PostgreSql
 				ColumnNames = PropertyNames;
 				PropertyColumnMapping = PropertyNames.ToDictionary(k => k, v => v);
 
-				if (options.PropertyTypeMappingIsRequired)
+				if (options.PropertyTypeMappingIsRequired || (PropertyTypeMapping != null && 0 < PropertyTypeMapping.Count))
 					ColumnTypes = PropertyNames.ToDictionary(p => p, p => ConvertType(p));
 			}
 			else
@@ -73,14 +74,14 @@ namespace Raider.Database.PostgreSql
 						pcMapping.Add(propertyName, propertyName);
 					}
 
-					if (options.PropertyTypeMappingIsRequired)
+					if (options.PropertyTypeMappingIsRequired || (PropertyTypeMapping != null && 0 < PropertyTypeMapping.Count))
 						columnTypes.Add(propertyName, ConvertType(propertyName));
 				}
 
 				PropertyColumnMapping = pcMapping;
 				ColumnNames = columnNames;
 
-				if (options.PropertyTypeMappingIsRequired)
+				if (options.PropertyTypeMappingIsRequired || (PropertyTypeMapping != null && 0 < PropertyTypeMapping.Count))
 					ColumnTypes = columnTypes;
 			}
 		}
@@ -147,13 +148,13 @@ namespace Raider.Database.PostgreSql
 			: $"{string.Join(", ", propertyNames.Select(propertyName => PropertyColumnMapping.TryGetValue(propertyName, out _) ? GetParameterName(PropertyIndex[propertyName]) : throw new ArgumentException($"PropertyName {propertyName} is not a valid property mapped to any column.", nameof(propertyNames))))}";
 
 		public string ToInsertSql(string? returnningColumnName = null, List<string>? propertyNames = null)
-			=> $"INSERT INTO {SchemaName}.{(UseQuotationMarksForTableName ? "\"" : "")}{TableName}{(UseQuotationMarksForTableName ? "\"" : "")} ({GetColumns(propertyNames)})  VALUES({GetColumnParameters(propertyNames)}){(string.IsNullOrWhiteSpace(returnningColumnName) ? "" : $"RETURNING {returnningColumnName}")}";
+			=> $"INSERT INTO {StringHelper.ConcatIfNotNullOrEmpty(SchemaName, ".", (UseQuotationMarksForTableName ? "\"" : ""))}{TableName}{(UseQuotationMarksForTableName ? "\"" : "")} ({GetColumns(propertyNames)})  VALUES({GetColumnParameters(propertyNames)}){(string.IsNullOrWhiteSpace(returnningColumnName) ? "" : $"RETURNING {returnningColumnName}")}";
 
 		public string ToUpdateSql(List<string>? propertyNames = null, string ? where = null)
-			=> $"UPDATE {SchemaName}.{(UseQuotationMarksForTableName ? "\"" : "")}{TableName}{(UseQuotationMarksForTableName ? "\"" : "")} SET {GetColumnSetters(propertyNames)}{(string.IsNullOrWhiteSpace(where) ? "" : $" WHERE {where}")}";
+			=> $"UPDATE {StringHelper.ConcatIfNotNullOrEmpty(SchemaName, ".", (UseQuotationMarksForTableName ? "\"" : ""))}{TableName}{(UseQuotationMarksForTableName ? "\"" : "")} SET {GetColumnSetters(propertyNames)}{(string.IsNullOrWhiteSpace(where) ? "" : $" WHERE {where}")}";
 
 		public string ToCopySql()
-			=> $"COPY {SchemaName}.{(UseQuotationMarksForTableName ? "\"" : "")}{TableName}{(UseQuotationMarksForTableName ? "\"" : "")} ({GetColumns()}) FROM STDIN (FORMAT BINARY)";
+			=> $"COPY {StringHelper.ConcatIfNotNullOrEmpty(SchemaName, ".", (UseQuotationMarksForTableName ? "\"" : ""))}{TableName}{(UseQuotationMarksForTableName ? "\"" : "")} ({GetColumns()}) FROM STDIN (FORMAT BINARY)";
 
 		public void SetParameters(NpgsqlCommand command, IDictionary<string, object?> data)
 		{
@@ -171,7 +172,10 @@ namespace Raider.Database.PostgreSql
 						value = converter(value);
 				}
 
-				command.Parameters.AddWithValue(GetParameterName(PropertyIndex[propertyName]), value ?? DBNull.Value);
+				if (ColumnTypes == null)
+					command.Parameters.AddWithValue(GetParameterName(PropertyIndex[propertyName]), value ?? DBNull.Value);
+				else
+					command.Parameters.AddWithValue(GetParameterName(PropertyIndex[propertyName]), ColumnTypes[propertyName], value ?? DBNull.Value);
 			}
 
 			foreach (var kvp in data)

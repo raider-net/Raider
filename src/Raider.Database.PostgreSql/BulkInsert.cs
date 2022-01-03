@@ -113,7 +113,7 @@ namespace Raider.Database.PostgreSql
 			}
 
 			if (disposeConnection)
-				connection.Dispose();
+				await connection.DisposeAsync();
 
 			return result;
 		}

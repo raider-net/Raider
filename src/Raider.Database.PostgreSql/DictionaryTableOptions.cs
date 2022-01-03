@@ -8,6 +8,7 @@ namespace Raider.Database.PostgreSql
 	{
 		public string? SchemaName { get; set; }
 		public string? TableName { get; set; }
+		public bool IsTemporaryTable { get; set; }
 		public List<string>? PropertyNames { get; set; }
 		public Dictionary<string, string>? PropertyColumnMapping { get; set; }
 		public Dictionary<string, NpgsqlDbType>? PropertyTypeMapping { get; set; }
@@ -18,7 +19,7 @@ namespace Raider.Database.PostgreSql
 
 		public DictionaryTableOptions Validate(bool validateProperties, bool validatePropertyMapping)
 		{
-			if (string.IsNullOrWhiteSpace(SchemaName))
+			if (!IsTemporaryTable && string.IsNullOrWhiteSpace(SchemaName))
 				throw new ArgumentNullException(nameof(SchemaName));
 
 			if (string.IsNullOrWhiteSpace(TableName))
