@@ -3,6 +3,7 @@ using System.Text;
 using System.Reflection;
 using System.Linq;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Raider.Extensions
 {
@@ -17,7 +18,7 @@ namespace Raider.Extensions
          http://msdn.microsoft.com/en-us/library/bfft1t3c.aspx
          */
 
-		private static readonly Dictionary<string, string> basicTypeStrings = new Dictionary<string, string>()
+		private static readonly Dictionary<string, string> baseTypeStrings = new Dictionary<string, string>()
 		{
 			{"bool", "bool"},
 			{"Boolean", "bool"},
@@ -88,25 +89,34 @@ namespace Raider.Extensions
 			{ typeof(object), "object" }
 		};
 
-		public static string GetShortValueType(this Type type)
+		public static string? GetShortValueTypeName(this Type type)
 		{
-			if (type == null) return null;
-			string result;
-			typesMap.TryGetValue(type, out result);
+			if (type == null)
+				return null;
+
+			typesMap.TryGetValue(type, out var result);
 			return result;
 		}
 
-		public static bool IsBasicType(this Type type)
+		public static bool IsBaseType(this Type type)
 		{
-			if (type == null) return false;
-			return basicTypeStrings.ContainsKey(type.Name);
+			if (type == null)
+				return false;
+			
+			return baseTypeStrings.ContainsKey(type.Name);
 		}
 
 		public static bool IsNullable(this Type type)
 		{
-			if (type == null) return false;
-			if (!type.IsValueType) return true; // ref-type
-			if (Nullable.GetUnderlyingType(type) != null) return true; // Nullable<T>
+			if (type == null)
+				return false;
+
+			if (!type.IsValueType)
+				return true; // ref-type
+
+			if (Nullable.GetUnderlyingType(type) != null)
+				return true; // Nullable<T>
+
 			return false; // value-type
 		}
 
@@ -115,48 +125,62 @@ namespace Raider.Extensions
 			var typeInfo = type.GetTypeInfo();
 
 			return !typeInfo.IsValueType
-				   || (typeInfo.IsGenericType
+					|| (typeInfo.IsGenericType
 						&& typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>));
 		}
 
 		public static Type ToNullable(this Type type)
-		{
-			if (IsNullable(type))
-			{
-				return type;
-			}
-			else
-			{
-				return typeof(Nullable<>).MakeGenericType(type);
-			}
-		}
+			=> IsNullable(type)
+				? type
+				: typeof(Nullable<>).MakeGenericType(type);
 
 		public static bool IsDelegate(this Type type)
 		{
-			if (type == null) return false;
-			return type == typeof(MulticastDelegate) || type.IsSubclassOf(typeof(Delegate)) || type == typeof(Delegate);
+			if (type == null)
+				return false;
+
+			return type == typeof(MulticastDelegate)
+					|| type.IsSubclassOf(typeof(Delegate))
+					|| type == typeof(Delegate);
 		}
 
 		public static bool IsStruct(this Type type)
 		{
-			if (type == null) return false;
-			return type.IsValueType && !type.IsPrimitive && !type.IsEnum && type != typeof(decimal);
+			if (type == null)
+				return false;
+
+			return type.IsValueType
+					&& !type.IsPrimitive
+					&& !type.IsEnum
+					&& type != typeof(decimal);
 		}
 
 		public static bool IsEquivalentNullableType(this Type mainType, Type type)
 		{
-			if (mainType == null || type == null) return (mainType == null && type == null);
+			if (mainType == null || type == null)
+				return mainType == null && type == null;
 
-			Type mainT = mainType.IsNullable() ? (Nullable.GetUnderlyingType(mainType) ?? mainType) : mainType;
-			Type t = type.IsNullable() ? (Nullable.GetUnderlyingType(type) ?? type) : type;
+			Type mainT = mainType.IsNullable()
+				? (Nullable.GetUnderlyingType(mainType) ?? mainType)
+				: mainType;
+
+			Type t = type.IsNullable()
+				? (Nullable.GetUnderlyingType(type) ?? type)
+				: type;
+
 			return mainT == t;
 		}
 
-		public static Type GetUnderlyingNullableType(this Type mainType)
+		[return: NotNullIfNotNull("mainType")]
+		public static Type? GetUnderlyingNullableType(this Type mainType)
 		{
-			if (mainType == null) return null;
+			if (mainType == null)
+				return null;
 
-			Type type = mainType.IsNullable() ? (Nullable.GetUnderlyingType(mainType) ?? mainType) : mainType;
+			Type type = mainType.IsNullable()
+				? (Nullable.GetUnderlyingType(mainType) ?? mainType)
+				: mainType;
+
 			return type;
 		}
 
@@ -172,10 +196,11 @@ namespace Raider.Extensions
 					: type);
 		}
 
-		public static bool HasTheSameTypeDefinition(this Type type, Type otherType)
+		public static bool HasSameTypeDefinition(this Type type, Type otherType)
 		{
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
+
 			if (otherType == null)
 				return false;
 
@@ -192,24 +217,26 @@ namespace Raider.Extensions
 
 		public static string ToFriendlyName(this Type type, bool useShortValueTypes = true, bool showGenericArguments = true, bool showReflectedType = true, bool compactNullable = false, bool showFullNames = false)
 		{
-			if (type == null) return string.Empty;
-			StringBuilder b = new StringBuilder();
-			BuiLdfriendlyName(b, type, useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
-			return b.ToString();
+			if (type == null)
+				return string.Empty;
+
+			StringBuilder sb = new();
+			BuildfriendlyName(sb, type, useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
+			return sb.ToString();
 		}
 
-		private static void BuiLdfriendlyName(StringBuilder builder, Type type, bool useShortValueTypes, bool showGenericArguments, bool showReflectedType, bool compactNullable, bool showFullNames)
+		private static void BuildfriendlyName(StringBuilder builder, Type type, bool useShortValueTypes, bool showGenericArguments, bool showReflectedType, bool compactNullable, bool showFullNames)
 		{
 			bool isBasic = true;
 			if (showReflectedType && type.IsNested && !type.IsGenericParameter)
 			{
-				BuiLdfriendlyName(builder, type.ReflectedType, useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
+				BuildfriendlyName(builder, type.ReflectedType, useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
 				builder.Append('.');
 			}
 			if (type.IsArray)
 			{
 				isBasic = false;
-				BuiLdfriendlyName(builder, type.GetElementType(), useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
+				BuildfriendlyName(builder, type.GetElementType(), useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
 				builder.Append('[');
 				for (int rank = type.GetArrayRank(); rank > 1; --rank) builder.Append(',');
 				builder.Append(']');
@@ -217,7 +244,7 @@ namespace Raider.Extensions
 			if (type.IsPointer)
 			{
 				isBasic = false;
-				BuiLdfriendlyName(builder, type.GetElementType(), useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
+				BuildfriendlyName(builder, type.GetElementType(), useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
 				builder.Append('*');
 			}
 			if (type.IsGenericParameter)
@@ -270,7 +297,7 @@ namespace Raider.Extensions
 						for (int i = 0; i < args.Length; ++i)
 						{
 							if (i > 0) builder.Append(", ");
-							BuiLdfriendlyName(builder, args[i], useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
+							BuildfriendlyName(builder, args[i], useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
 						}
 						builder.Append('>');
 					}
@@ -280,7 +307,7 @@ namespace Raider.Extensions
 					bool isNullable = compactNullable && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 					if (isNullable)
 					{
-						BuiLdfriendlyName(builder, Nullable.GetUnderlyingType(type), useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
+						BuildfriendlyName(builder, Nullable.GetUnderlyingType(type), useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
 						builder.Append('?');
 					}
 					else
@@ -293,7 +320,7 @@ namespace Raider.Extensions
 							for (int i = 0; i < args.Length; ++i)
 							{
 								if (i > 0) builder.Append(", ");
-								BuiLdfriendlyName(builder, args[i], useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
+								BuildfriendlyName(builder, args[i], useShortValueTypes, showGenericArguments, showReflectedType, compactNullable, showFullNames);
 							}
 							builder.Append('>');
 						}
@@ -302,7 +329,11 @@ namespace Raider.Extensions
 			}
 			if (isBasic)
 			{
-				string valueType = useShortValueTypes ? GetShortValueType(type) : null;
+				string? valueType =
+					useShortValueTypes
+						? GetShortValueTypeName(type)
+						: null;
+
 				if (showFullNames && !string.IsNullOrWhiteSpace(type.FullName)) //type.FullName == null pre T napr. pri type Nullable<T> / Nullable<>
 				{
 					builder.Append(valueType ?? type.FullName);
@@ -314,21 +345,68 @@ namespace Raider.Extensions
 			}
 		}
 
-		public static T GetFirstAttribute<T>(this Type type, bool inherit = true) where T : System.Attribute
+		public static T? GetFirstAttribute<T>(this Type type, bool inherit = true) where T : System.Attribute
 		{
-			if (type == null) return default(T);
+			if (type == null)
+				return default;
+
 			var result = type.GetCustomAttributes(typeof(T), inherit);
-			return result != null ? result.FirstOrDefault() as T : null;
+			return
+				result != null
+					? result.FirstOrDefault() as T
+					: null;
 		}
 
-		public static T[] GetAttributeList<T>(this Type type, bool inherit = true) where T : System.Attribute
+		public static T[]? GetAttributeList<T>(this Type type, bool inherit = true) where T : System.Attribute
 		{
-			if (type == null) return default(T[]);
+			if (type == null)
+				return default;
+
 			var result = type.GetCustomAttributes(typeof(T), inherit);
-			return result != null ? result as T[] : null;
+			return
+				result != null
+					? result as T[]
+					: null;
 		}
 
-		#region Implements
+		/// <summary>
+		/// Returns true if the supplied <paramref name="type"/> inherits from the given class <typeparamref name="T"/>.
+		/// </summary>
+		/// <typeparam name="T">The type (class) to check for.</typeparam>
+		/// <param name="type">The type to check.</param>
+		/// <returns>True if the given type inherits from the specified class.</returns>
+		/// <remarks>This method is for classes only. Use <seealso cref="Implements"/> for interface types and <seealso cref="InheritsOrImplements"/> 
+		/// to check both interfaces and classes.</remarks>
+		public static bool Inherits<T>(this Type type)
+		{
+			return type.Inherits(typeof(T));
+		}
+
+		/// <summary>
+		/// Returns true if the supplied <paramref name="type"/> inherits from the given class <paramref name="baseType"/>.
+		/// </summary>
+		/// <param name="baseType">The type (class) to check for.</param>
+		/// <param name="type">The type to check.</param>
+		/// <returns>True if the given type inherits from the specified class.</returns>
+		/// <remarks>This method is for classes only. Use <seealso cref="Implements"/> for interface types and <seealso cref="InheritsOrImplements"/> 
+		/// to check both interfaces and classes.</remarks>
+		public static bool Inherits(this Type type, Type baseType)
+		{
+			if (baseType == null || type == null || type == baseType)
+				return false;
+			var rootType = typeof(object);
+			if (baseType == rootType)
+				return true;
+			while (type != null && type != rootType)
+			{
+				var current = type.IsGenericType && baseType.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type;
+				if (baseType == current)
+					return true;
+				type = type.BaseType;
+			}
+			return false;
+		}
+
 		/// <summary>
 		/// Returns true if the supplied <paramref name="type"/> implements the given interface <typeparamref name="T"/>.
 		/// </summary>
@@ -341,14 +419,6 @@ namespace Raider.Extensions
 		{
 			return type.Implements(typeof(T));
 		}
-
-		//public static bool Implements(this Type type, Type interfaceType)
-		//{
-		//    if (interfaceType == null || !interfaceType.IsInterface) return false;
-		//    if (type == null || type.IsInterface) return false;
-		//    Type[] interfaces = type.GetInterfaces();
-		//    return interfaces != null && interfaces.Contains(interfaceType);
-		//}
 
 		/// <summary>
 		/// Returns true of the supplied <paramref name="type"/> implements the given interface <paramref name="interfaceType"/>. If the given
@@ -370,7 +440,30 @@ namespace Raider.Extensions
 
 			return interfaceType.IsAssignableFrom(type);
 		}
-		#endregion
+
+		/// <summary>
+		/// Returns true if the supplied <paramref name="type"/> inherits from or implements the type <typeparamref name="T"/>.
+		/// </summary>
+		/// <typeparam name="T">The base type to check for.</typeparam>
+		/// <param name="type">The type to check.</param>
+		/// <returns>True if the given type inherits from or implements the specified base type.</returns>
+		public static bool InheritsOrImplements<T>(this Type type)
+		{
+			return type.InheritsOrImplements(typeof(T));
+		}
+
+		/// <summary>
+		/// Returns true of the supplied <paramref name="type"/> inherits from or implements the type <paramref name="baseType"/>.
+		/// </summary>
+		/// <param name="baseType">The base type to check for.</param>
+		/// <param name="type">The type to check.</param>
+		/// <returns>True if the given type inherits from or implements the specified base type.</returns>
+		public static bool InheritsOrImplements(this Type type, Type baseType)
+		{
+			if (type == null || baseType == null)
+				return false;
+			return baseType.IsInterface ? type.Implements(baseType) : type.Inherits(baseType);
+		}
 
 		public static IEnumerable<Type> GetBaseTypes(this Type type)
 		{
@@ -428,6 +521,30 @@ namespace Raider.Extensions
 		}
 
 		public static ConstructorInfo? GetDefaultConstructor(this Type type)
-			=> type.GetConstructors().FirstOrDefault(t => t.GetParameters().Count() == 0);
+			=> type?.GetConstructors().FirstOrDefault(t => t.GetParameters().Count() == 0);
+
+		public static bool CanBeCastTo(this Type type, Type toType)
+		{
+			if (type == null)
+				return false;
+
+			if (type == toType)
+				return true;
+
+			return toType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
+		}
+
+		/// <summary>
+		/// examples: Class1<> Class2<,> Class3<,,> Interface1<> Interface2<,> Interface3<,,>...
+		/// </summary>
+		public static bool IsOpenGeneric(this Type type)
+			=> type != null
+				&& (type.GetTypeInfo().IsGenericTypeDefinition
+					|| type.GetTypeInfo().ContainsGenericParameters);
+
+		public static bool IsInstanceable(this Type type)
+			=> type != null
+				&& !type.GetTypeInfo().IsAbstract
+				&& !type.GetTypeInfo().IsInterface;
 	}
 }

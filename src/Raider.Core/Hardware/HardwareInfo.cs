@@ -58,7 +58,7 @@ namespace Raider.Hardware
 #endif
 			};
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 		{
 			var dict = new DictionaryBuilder<string>()
 				.TryAdd(nameof(RuntimeUniqueKey), RuntimeUniqueKey, out _)

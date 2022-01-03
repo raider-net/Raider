@@ -19,7 +19,7 @@ namespace Raider.Hardware
 		public string? OS { get; set; }
 		public string? HWJson { get; set; }
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 			=> new DictionaryBuilder<string>()
 				.TryAdd(nameof(RuntimeUniqueKey), RuntimeUniqueKey, out _)
 				.AddIfNotWhiteSpace(nameof(HWThumbprint), HWThumbprint, out _)

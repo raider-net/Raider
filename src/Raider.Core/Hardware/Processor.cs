@@ -17,7 +17,7 @@ namespace Raider.Hardware
 		public ulong? PercentIdleTime { get; set; }
 		public ulong? PercentProcessorTime { get; set; }
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 			=> new DictionaryBuilder<string>()
 				.AddIfHasValue(nameof(ClockSpeed), ClockSpeed, out _)
 				.AddIfHasValue(nameof(NumberOfLogicalProcessors), NumberOfLogicalProcessors, out _)

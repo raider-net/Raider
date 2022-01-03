@@ -65,7 +65,7 @@ namespace Raider.Hardware
 			return this;
 		}
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 			=> new DictionaryBuilder<string>()
 				.AddIfNotWhiteSpace(nameof(MachineName), MachineName, out _)
 				.AddIfNotWhiteSpace(nameof(Caption), Caption, out _)

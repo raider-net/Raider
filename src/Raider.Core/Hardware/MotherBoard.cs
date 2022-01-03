@@ -14,7 +14,7 @@ namespace Raider.Hardware
 		public string? SerialNumber { get; set; }
 		public string? Version { get; set; }
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 			=> new DictionaryBuilder<string>()
 				.AddIfNotWhiteSpace(nameof(Model), Model, out _)
 				.AddIfNotWhiteSpace(nameof(Product), Product, out _)

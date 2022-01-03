@@ -6,6 +6,14 @@ namespace Raider.Converters
 {
 	public static class GuidConverter
 	{
+		public static readonly Guid RAIDER_STRING_NAMESPACE = new("308D1EBE-6253-428B-9F10-8A80F8A7BCE5");
+
+		public enum StringUuidVersionHashAlgorithm
+		{
+			MD5 = 3,
+			SHA1 = 5
+		}
+
 		public static Guid ToGuid(sbyte value)
 		{
 			byte[] bytes = new byte[16];
@@ -193,7 +201,7 @@ namespace Raider.Converters
 			return result;
 		}
 
-		public static decimal GuidToDecimal(Guid value, bool trimGuid = true)
+		public static decimal GuidToDecimal(Guid value)
 		{
 			byte[] b = //trimGuid
 				//? TrimGuidBytes(value, 16)
@@ -262,6 +270,95 @@ namespace Raider.Converters
 
 			var result = new DateTime(BitConverter.ToInt64(b, 0));
 			return result;
+		}
+
+		/// <summary>
+		/// Creates a name-based UUID using the algorithm from RFC 4122 §4.3.
+		/// </summary>
+		/// <param name="value">The value (within that namespace).</param>
+		/// <returns>A UUID derived from the <see cref="RAIDER_STRING_NAMESPACE"/> namespace and value.</returns>
+		public static Guid ToGuid(string value) =>
+			ToGuid(value, RAIDER_STRING_NAMESPACE, StringUuidVersionHashAlgorithm.SHA1);
+
+		/// <summary>
+		/// Creates a name-based UUID using the algorithm from RFC 4122 §4.3.
+		/// </summary>
+		/// <param name="value">The value (within that namespace).</param>
+		/// <param name="namespaceId">The ID of the namespace.</param>
+		/// <param name="version">The version number of the UUID to create; this value must be either
+		/// 3 (for MD5 hashing) or 5 (for SHA-1 hashing).</param>
+		/// <returns>A UUID derived from the namespace and value.</returns>
+		public static Guid ToGuid(string value, Guid namespaceId, StringUuidVersionHashAlgorithm version)
+		{
+			int versionNumber = (int)version;
+
+			if (namespaceId == Guid.Empty)
+				throw new ArgumentException("Namespace cannot be an empty GUID.", nameof(namespaceId));
+
+			if (namespaceId == default)
+				throw new ArgumentNullException(nameof(namespaceId), "Namespace cannot be null or empty.");
+
+			if (string.IsNullOrEmpty(value))
+				throw new ArgumentNullException(nameof(value), "Name cannot be null or empty.");
+
+			if (versionNumber != 3 && versionNumber != 5)
+				throw new ArgumentOutOfRangeException(nameof(versionNumber), "version must be either 3 or 5.");
+
+			// convert the name to a sequence of octets (as defined by the standard or conventions of its namespace) (step 3)
+			// ASSUME: UTF-8 encoding is always appropriate
+			var nameBytes = System.Text.Encoding.UTF8.GetBytes(value);
+
+			if (nameBytes.Length == 0)
+				throw new InvalidOperationException($"{nameof(nameBytes)}.Length == 0");
+
+			// convert the namespace UUID to network order (step 3)
+			var namespaceBytes = namespaceId.ToByteArray();
+			SwapByteOrder(namespaceBytes);
+
+			// compute the hash of the name space ID concatenated with the name (step 4)
+			byte[] hash;
+			using (var algorithm = versionNumber == 3
+					? (System.Security.Cryptography.HashAlgorithm)System.Security.Cryptography.MD5.Create()
+					: System.Security.Cryptography.SHA1.Create())
+			{
+				var combinedBytes = new byte[namespaceBytes.Length + nameBytes.Length];
+				Buffer.BlockCopy(namespaceBytes, 0, combinedBytes, 0, namespaceBytes.Length);
+				Buffer.BlockCopy(nameBytes, 0, combinedBytes, namespaceBytes.Length, nameBytes.Length);
+
+				hash = algorithm.ComputeHash(combinedBytes);
+			}
+
+			// most bytes from the hash are copied straight to the bytes of the new GUID (steps 5-7, 9, 11-12)
+			var newGuid = new byte[16];
+			Array.Copy(hash, 0, newGuid, 0, 16);
+
+			// set the four most significant bits (bits 12 through 15) of the time_hi_and_version
+			// field to the appropriate 4-bit version number from Section 4.1.3 (step 8)
+			newGuid[6] = (byte)((newGuid[6] & 0x0F) | (versionNumber << 4));
+
+			// set the two most significant bits (bits 6 and 7) of the clock_seq_hi_and_reserved
+			// to zero and one, respectively (step 10)
+			newGuid[8] = (byte)((newGuid[8] & 0x3F) | 0x80);
+
+			// convert the resulting UUID to local byte order (step 13)
+			SwapByteOrder(newGuid);
+			return new Guid(newGuid);
+		}
+
+		// Converts a GUID (expressed as a byte array) to/from network order (MSB-first).
+		private static void SwapByteOrder(byte[] guid)
+		{
+			SwapBytes(guid, 0, 3);
+			SwapBytes(guid, 1, 2);
+			SwapBytes(guid, 4, 5);
+			SwapBytes(guid, 6, 7);
+		}
+
+		private static void SwapBytes(byte[] guid, int left, int right)
+		{
+			var temp = guid[left];
+			guid[left] = guid[right];
+			guid[right] = temp;
 		}
 
 		public static Guid WriteToGuid(sbyte value, Guid guid)

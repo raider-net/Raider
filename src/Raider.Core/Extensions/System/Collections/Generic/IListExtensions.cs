@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Raider.Extensions
@@ -9,29 +10,26 @@ namespace Raider.Extensions
 		public static T Get<T>(this IList<T> list, int index) where T : class
 		{
 			if (list == null || index < 0 || list.Count < index)
-			{
-				return default(T);
-			}
+				return default;
+
 			try
 			{
 				return list[index];
 			}
-			catch (System.Exception)
+			catch
 			{
-				return default(T);
+				return default;
 			}
 		}
 
 		public static T Get<T>(this IList<T> list, int index, T defaultValue)
 		{
 			if (list == null)
-			{
 				throw new ArgumentNullException(nameof(list));
-			}
+
 			if (index < 0 || list.Count < index)
-			{
 				return defaultValue;
-			}
+
 			try
 			{
 				return list[index];
@@ -53,12 +51,24 @@ namespace Raider.Extensions
 			return list;
 		}
 
+		public static bool TryAddUniqueItem<T>(this IList<T> list, T item)
+		{
+			if (list == null)
+				return false;
+
+			if (item != null && !list.Contains(item))
+			{
+				list.Add(item);
+				return true;
+			}
+
+			return false;
+		}
+
 		public static IList<T> AddUniqueItem<T>(this IList<T> list, T item, IEqualityComparer<T> comparer)
 		{
 			if (list == null)
-			{
 				throw new ArgumentNullException(nameof(list));
-			}
 
 			if (!list.Contains(item, comparer) && item != null)
 			{
@@ -68,12 +78,24 @@ namespace Raider.Extensions
 			return list;
 		}
 
+		public static bool TryAddUniqueItem<T>(this IList<T> list, T item, IEqualityComparer<T> comparer)
+		{
+			if (list == null)
+				return false;
+
+			if (!list.Contains(item, comparer) && item != null)
+			{
+				list.Add(item);
+				return true;
+			}
+
+			return false;
+		}
+
 		public static IList<T> InsertItem<T>(this IList<T> list, int index, T item)
 		{
 			if (list == null)
-			{
 				throw new ArgumentNullException(nameof(list));
-			}
 
 			if (index >= list.Count)
 			{
@@ -91,12 +113,11 @@ namespace Raider.Extensions
 			return list;
 		}
 
-		public static List<T> CopyContainsRange<T>(this IList<T> list, IEnumerable<T> collection)
+		[return: NotNullIfNotNull("list")]
+		public static List<T>? CopyContainsRange<T>(this IList<T> list, IEnumerable<T> collection)
 		{
 			if (list == null || collection == null)
-			{
 				return null;
-			}
 
 			//List<T> result = new List<T>();
 			//foreach (T item in collection)
@@ -110,12 +131,11 @@ namespace Raider.Extensions
 			return result;
 		}
 
-		public static List<T> CopyContainsRange<T>(this IList<T> list, IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		[return: NotNullIfNotNull("list")]
+		public static List<T>? CopyContainsRange<T>(this IList<T> list, IEnumerable<T> collection, IEqualityComparer<T> comparer)
 		{
 			if (list == null || collection == null)
-			{
 				return null;
-			}
 
 			//List<T> result = new List<T>();
 			//foreach (T item in collection)
@@ -132,9 +152,7 @@ namespace Raider.Extensions
 		public static bool ContainsAll<T>(this IList<T> list, IEnumerable<T> collection)
 		{
 			if (list == null || collection == null)
-			{
 				return false;
-			}
 
 			int containsCount = 0;
 			foreach (T item in collection)
@@ -154,9 +172,7 @@ namespace Raider.Extensions
 		public static bool ContainsAll<T>(this IList<T> list, IEnumerable<T> collection, IEqualityComparer<T> comparer)
 		{
 			if (list == null || collection == null)
-			{
 				return false;
-			}
 
 			int containsCount = 0;
 			foreach (T item in collection)
@@ -176,9 +192,7 @@ namespace Raider.Extensions
 		public static bool ContainsAtLeastOne<T>(this IList<T> list, IEnumerable<T> collection)
 		{
 			if (list == null || collection == null)
-			{
 				return false;
-			}
 
 			foreach (T item in collection)
 			{
@@ -193,9 +207,7 @@ namespace Raider.Extensions
 		public static bool ContainsAtLeastOne<T>(this IList<T> list, IEnumerable<T> collection, IEqualityComparer<T> comparer)
 		{
 			if (list == null || collection == null)
-			{
 				return false;
-			}
 
 			foreach (T item in collection)
 			{
@@ -210,9 +222,7 @@ namespace Raider.Extensions
 		public static bool ContainsAtLeastOne<T>(this IList<T> list, params T[] collection)
 		{
 			if (list == null || collection == null)
-			{
 				return false;
-			}
 
 			foreach (T item in collection)
 			{
@@ -227,9 +237,7 @@ namespace Raider.Extensions
 		public static bool ContainsAtLeastOne<T>(this IList<T> list, IEqualityComparer<T> comparer, params T[] collection)
 		{
 			if (list == null || collection == null)
-			{
 				return false;
-			}
 
 			foreach (T item in collection)
 			{
@@ -244,9 +252,7 @@ namespace Raider.Extensions
 		public static bool AddUniqueRange<T>(this IList<T> list, IEnumerable<T> collection)
 		{
 			if (list == null || collection == null)
-			{
 				return false;
-			}
 
 			int addedCount = 0;
 			foreach (T item in collection)
@@ -260,21 +266,16 @@ namespace Raider.Extensions
 			return 0 < addedCount;
 		}
 
-		public static List<T> AddUniqueRange<T>(this List<T> list, IEnumerable<T> collection)
+		[return: NotNullIfNotNull("list")]
+		public static List<T>? AddUniqueRange<T>(this List<T> list, IEnumerable<T> collection)
 		{
 			if (list == null || collection == null)
-			{
 				return list;
-			}
 
-			int addedCount = 0;
 			foreach (T item in collection)
 			{
 				if (!list.Contains(item))
-				{
 					list.Add(item);
-					addedCount++;
-				}
 			}
 			return list;
 		}
@@ -282,9 +283,7 @@ namespace Raider.Extensions
 		public static bool AddUniqueRange<T>(this IList<T> list, IEnumerable<T> collection, IEqualityComparer<T> comparer)
 		{
 			if (list == null || collection == null)
-			{
 				return false;
-			}
 
 			int addedCount = 0;
 			foreach (T item in collection)
@@ -298,21 +297,16 @@ namespace Raider.Extensions
 			return 0 < addedCount;
 		}
 
-		public static List<T> AddUniqueRange<T>(this List<T> list, IEnumerable<T> collection, IEqualityComparer<T> comparer)
+		[return: NotNullIfNotNull("list")]
+		public static List<T>? AddUniqueRange<T>(this List<T> list, IEnumerable<T> collection, IEqualityComparer<T> comparer)
 		{
 			if (list == null || collection == null)
-			{
 				return list;
-			}
 
-			int addedCount = 0;
 			foreach (T item in collection)
 			{
 				if (!list.Contains(item, comparer))
-				{
 					list.Add(item);
-					addedCount++;
-				}
 			}
 			return list;
 		}
@@ -320,9 +314,7 @@ namespace Raider.Extensions
 		public static int RemoveContainsRange<T>(this IList<T> list, IEnumerable<T> collection)
 		{
 			if (list == null || collection == null)
-			{
 				return 0;
-			}
 
 			int removedCount = 0;
 			List<T> clonedContainsCollection = CopyContainsRange(list, collection);
@@ -337,9 +329,7 @@ namespace Raider.Extensions
 		public static int RemoveContainsRange<T>(this IList<T> list, IEnumerable<T> collection, IEqualityComparer<T> comparer)
 		{
 			if (list == null || collection == null)
-			{
 				return 0;
-			}
 
 			int removedCount = 0;
 			List<T> clonedContainsCollection = CopyContainsRange(list, collection, comparer);
@@ -351,12 +341,11 @@ namespace Raider.Extensions
 			return removedCount;
 		}
 
-		public static IList<T> GetNullIfEmpty<T>(this IList<T> list)
+		public static IList<T>? GetNullIfEmpty<T>(this IList<T> list)
 		{
 			if (list == null || list.Count == 0)
-			{
 				return null;
-			}
+
 			return list;
 		}
 	}

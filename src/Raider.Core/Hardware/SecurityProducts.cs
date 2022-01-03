@@ -12,7 +12,7 @@ namespace Raider.Hardware
 			Products = new List<SecurityProduct>();
 		}
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 		{
 			var dict = new Dictionary<string, object?>();
 

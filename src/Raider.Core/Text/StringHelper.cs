@@ -1,6 +1,7 @@
 ﻿using Raider.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -598,7 +599,9 @@ namespace Raider.Text
 			return newString.ToString();
 		}
 
-		public static string ConcatIfNotNullOrEmpty(this string source, string text)
+		[return: NotNullIfNotNull("source")]
+		[return: NotNullIfNotNull("text")]
+		public static string? ConcatIfNotNullOrEmpty(this string? source, string? text)
 		{
 			if (string.IsNullOrEmpty(source))
 				return text ?? source;
@@ -609,7 +612,9 @@ namespace Raider.Text
 			return string.Concat(source, text);
 		}
 
-		public static string ConcatIfNotNullOrEmpty(this string source, string delimiter, string text)
+		[return: NotNullIfNotNull("source")]
+		[return: NotNullIfNotNull("text")]
+		public static string? ConcatIfNotNullOrEmpty(this string? source, string delimiter, string? text)
 		{
 			if (string.IsNullOrEmpty(source))
 				return text ?? source;

@@ -16,7 +16,7 @@ namespace Raider.Hardware
 			LogicalDrivesAvailableFreeSpaceInMB = new Dictionary<string, double>();
 		}
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 		{
 			var dict = new Dictionary<string, object?>();
 
