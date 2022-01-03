@@ -56,9 +56,12 @@ namespace Raider.Logging.Extensions
 			configurator?.Invoke(loggerConfiguration);
 
 			Log.Logger = loggerConfiguration.CreateLogger();
+			Logger.SerilogLogger = Log.Logger;
 
 			if (configureLoggingBuilder == null)
 				configureLoggingBuilder = x => x.AddSerilog();
+
+			Logger.MicrosoftLoggingBuilder = configureLoggingBuilder;
 
 			services.AddLogging(configureLoggingBuilder);
 

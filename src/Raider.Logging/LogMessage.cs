@@ -44,7 +44,7 @@ namespace Raider.Logging
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
 
-		public IDictionary<string, object?> ToDictionary()
+		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 		{
 			var dict = new Dictionary<string, object?>
 			{

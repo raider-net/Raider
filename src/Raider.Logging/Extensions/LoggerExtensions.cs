@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using Raider.Identity;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Raider.Logging.Extensions
 {
@@ -62,6 +64,14 @@ namespace Raider.Logging.Extensions
 			return message;
 		}
 
+		public static ILogMessage? LogTraceMessage(
+			this ILogger logger,
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> LogTraceMessage(logger, TraceInfo.Create((RaiderPrincipal<int>?)null, null, null, memberName, sourceFilePath, sourceLineNumber), messageBuilder);
+
 		public static ILogMessage? LogTraceMessage(this ILogger logger, MethodLogScope scope, Action<LogMessageBuilder> messageBuilder)
 		{
 			if (scope?.TraceInfo == null)
@@ -101,6 +111,14 @@ namespace Raider.Logging.Extensions
 
 			return message;
 		}
+
+		public static ILogMessage? LogDebugMessage(
+			this ILogger logger,
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> LogDebugMessage(logger, TraceInfo.Create((RaiderPrincipal<int>?)null, null, null, memberName, sourceFilePath, sourceLineNumber), messageBuilder);
 
 		public static ILogMessage? LogDebugMessage(this ILogger logger, MethodLogScope scope, Action<LogMessageBuilder> messageBuilder)
 		{
@@ -142,6 +160,14 @@ namespace Raider.Logging.Extensions
 			return message;
 		}
 
+		public static ILogMessage? LogInformationMessage(
+			this ILogger logger,
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> LogInformationMessage(logger, TraceInfo.Create((RaiderPrincipal<int>?)null, null, null, memberName, sourceFilePath, sourceLineNumber), messageBuilder);
+
 		public static ILogMessage? LogInformationMessage(this ILogger logger, MethodLogScope scope, Action<LogMessageBuilder> messageBuilder)
 		{
 			if (scope?.TraceInfo == null)
@@ -182,6 +208,14 @@ namespace Raider.Logging.Extensions
 			return message;
 		}
 
+		public static ILogMessage? LogWarningMessage(
+			this ILogger logger,
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> LogWarningMessage(logger, TraceInfo.Create((RaiderPrincipal<int>?)null, null, null, memberName, sourceFilePath, sourceLineNumber), messageBuilder);
+
 		public static ILogMessage? LogWarningMessage(this ILogger logger, MethodLogScope scope, Action<LogMessageBuilder> messageBuilder)
 		{
 			if (scope?.TraceInfo == null)
@@ -216,6 +250,14 @@ namespace Raider.Logging.Extensions
 			return message;
 		}
 
+		public static IErrorMessage LogErrorMessage(
+			this ILogger logger,
+			Action<ErrorMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> LogErrorMessage(logger, TraceInfo.Create((RaiderPrincipal<int>?)null, null, null, memberName, sourceFilePath, sourceLineNumber), messageBuilder);
+
 		public static IErrorMessage LogErrorMessage(this ILogger logger, MethodLogScope scope, Action<ErrorMessageBuilder> messageBuilder)
 		{
 			if (scope?.TraceInfo == null)
@@ -249,6 +291,14 @@ namespace Raider.Logging.Extensions
 
 			return message;
 		}
+
+		public static IErrorMessage LogCriticalMessage(
+			this ILogger logger,
+			Action<ErrorMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> LogCriticalMessage(logger, TraceInfo.Create((RaiderPrincipal<int>?)null, null, null, memberName, sourceFilePath, sourceLineNumber), messageBuilder);
 
 		public static IErrorMessage LogCriticalMessage(this ILogger logger, MethodLogScope scope, Action<ErrorMessageBuilder> messageBuilder)
 		{
