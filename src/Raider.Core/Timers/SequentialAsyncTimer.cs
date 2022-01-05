@@ -1,64 +1,63 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Raider.Timers
 {
-	public abstract class SequentialAsyncTimer
+	public class SequentialAsyncTimer : BaseSequentialAsyncTimer
 	{
-		protected TimeSpan TimerInterval { get; set; }
-		protected readonly Timer _timer;
+		private readonly Func<object?, Task> _timerCallback;
+		private readonly Func<object?, Exception, Task>? _exceptionCallback;
 
-		public SequentialAsyncTimer(object? state)
+		public SequentialAsyncTimer(
+			object? state,
+			TimeSpan timerInterval,
+			Func<object?, Task> timerCallback,
+			Func<object?, Exception, Task>? exceptionCallback = null)
+			: base(state, timerInterval)
 		{
-			_timer = new Timer(TimerCallback, state, Timeout.Infinite, Timeout.Infinite);
+			_timerCallback = timerCallback ?? throw new ArgumentNullException(nameof(timerCallback));
+			_exceptionCallback = exceptionCallback;
 		}
 
-		private bool _started;
-		private readonly object _startLock = new();
-		protected virtual void StartInternal()
+		public SequentialAsyncTimer(
+			object? state,
+			TimeSpan startDelay,
+			TimeSpan timerInterval,
+			Func<object?, Task> timerCallback,
+			Func<object?, Exception, Task>? exceptionCallback = null)
+			: base(state, startDelay, timerInterval)
 		{
-			if (_started)
-				throw new InvalidOperationException($"{GetType().Name} already started.");
-
-			lock (_startLock)
-			{
-				if (_started)
-					throw new InvalidOperationException($"{GetType().Name} already started.");
-
-				StartTimerImmediately();
-				_started = true;
-			}
+			_timerCallback = timerCallback ?? throw new ArgumentNullException(nameof(timerCallback));
+			_exceptionCallback = exceptionCallback;
 		}
 
-		private async void TimerCallback(object? state)
-		{
-			StopTimer();
+		protected override Task OnTimerAsync(object? state)
+			=> _timerCallback(state);
 
-			try
-			{
-				await OnTimer(state);
-			}
-			catch (Exception ex)
-			{
-				await OnError(state, ex);
-			}
-			finally
-			{
-				StartTimer();
-			}
+		protected override Task OnErrorAsync(object? state, Exception ex)
+			=> _exceptionCallback?.Invoke(state, ex) ?? Task.CompletedTask;
+
+		public static SequentialSyncTimer Start(
+			object? state,
+			TimeSpan timerInterval,
+			Action<object?> timerCallback,
+			Action<object?, Exception>? exceptionCallback = null)
+		{
+			var timer = new SequentialSyncTimer(state, timerInterval, timerCallback, exceptionCallback);
+			timer.Start();
+			return timer;
 		}
 
-		protected abstract Task OnTimer(object? state);
-		protected abstract Task OnError(object? state, Exception ex);
-
-		protected virtual bool StartTimer()
-			=> _timer.Change(TimerInterval, Timeout.InfiniteTimeSpan);
-
-		protected virtual bool StartTimerImmediately()
-			=> _timer.Change(TimeSpan.Zero, Timeout.InfiniteTimeSpan);
-
-		protected virtual bool StopTimer()
-			=> _timer.Change(Timeout.Infinite, Timeout.Infinite);
+		public static SequentialSyncTimer Start(
+			object? state,
+			TimeSpan startDelay,
+			TimeSpan timerInterval,
+			Action<object?> timerCallback,
+			Action<object?, Exception>? exceptionCallback = null)
+		{
+			var timer = new SequentialSyncTimer(state, startDelay, timerInterval, timerCallback, exceptionCallback);
+			timer.Start();
+			return timer;
+		}
 	}
 }
