@@ -3,6 +3,7 @@ using Raider.AspNetCore.Logging.Internal;
 using Raider.AspNetCore.Logging.PostgreSql.Sink;
 using Raider.Extensions;
 using Raider.Logging;
+using Raider.Web.Logging;
 using System;
 using System.Threading;
 
@@ -32,7 +33,7 @@ namespace Raider.AspNetCore.Logging
 			_responseWriter = responseWriter;
 		}
 
-		public void WriteRequest(Request request)
+		public void WriteRequest(RequestDto request)
 		{
 			if (request == null)
 				return;
@@ -54,7 +55,7 @@ namespace Raider.AspNetCore.Logging
 			_requestAuthenticationWriter.Write(requestAuthentication);
 		}
 
-		public void WriteResponse(Response response)
+		public void WriteResponse(ResponseDto response)
 		{
 			if (response == null)
 				return;

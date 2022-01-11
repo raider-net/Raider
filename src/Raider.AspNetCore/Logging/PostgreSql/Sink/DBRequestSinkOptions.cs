@@ -2,6 +2,7 @@
 using Raider.AspNetCore.Logging.Dto;
 using Raider.Data;
 using Raider.Database.PostgreSql;
+using Raider.Web.Logging;
 using System.Collections.Generic;
 
 namespace Raider.AspNetCore.Logging.PostgreSql.Sink
@@ -10,46 +11,46 @@ namespace Raider.AspNetCore.Logging.PostgreSql.Sink
 	{
 		public DBRequestSinkOptions()
 		{
-			TableName = nameof(Request);
+			TableName = nameof(RequestDto);
 
 			PropertyNames = new List<string>
 			{
-				nameof(Request.RuntimeUniqueKey),
-				nameof(Request.Created),
-				nameof(Request.CorrelationId),
-				nameof(Request.ExternalCorrelationId),
-				nameof(Request.Protocol),
-				nameof(Request.Scheme),
-				nameof(Request.Host),
-				nameof(Request.RemoteIp),
-				nameof(Request.Method),
-				nameof(Request.Path),
-				nameof(Request.QueryString),
-				nameof(Request.Headers),
-				nameof(Request.Body),
-				nameof(Request.BodyByteArray),
-				nameof(Request.Form),
-				nameof(Request.Files)
+				nameof(RequestDto.RuntimeUniqueKey),
+				nameof(RequestDto.Created),
+				nameof(RequestDto.CorrelationId),
+				nameof(RequestDto.ExternalCorrelationId),
+				nameof(RequestDto.Protocol),
+				nameof(RequestDto.Scheme),
+				nameof(RequestDto.Host),
+				nameof(RequestDto.RemoteIp),
+				nameof(RequestDto.Method),
+				nameof(RequestDto.Path),
+				nameof(RequestDto.QueryString),
+				nameof(RequestDto.Headers),
+				nameof(RequestDto.Body),
+				nameof(RequestDto.BodyByteArray),
+				nameof(RequestDto.Form),
+				nameof(RequestDto.Files)
 			};
 
 			PropertyTypeMapping = new Dictionary<string, NpgsqlDbType>
 			{
-				{ nameof(Request.RuntimeUniqueKey), NpgsqlDbType.Uuid },
-				{ nameof(Request.Created), NpgsqlDbType.TimestampTz },
-				{ nameof(Request.CorrelationId), NpgsqlDbType.Uuid },
-				{ nameof(Request.ExternalCorrelationId), NpgsqlDbType.Varchar },
-				{ nameof(Request.Protocol), NpgsqlDbType.Varchar },
-				{ nameof(Request.Scheme), NpgsqlDbType.Varchar },
-				{ nameof(Request.Host), NpgsqlDbType.Varchar },
-				{ nameof(Request.RemoteIp), NpgsqlDbType.Varchar },
-				{ nameof(Request.Method), NpgsqlDbType.Varchar },
-				{ nameof(Request.Path), NpgsqlDbType.Varchar },
-				{ nameof(Request.QueryString), NpgsqlDbType.Varchar },
-				{ nameof(Request.Headers), NpgsqlDbType.Varchar },
-				{ nameof(Request.Body), NpgsqlDbType.Varchar },
-				{ nameof(Request.BodyByteArray), NpgsqlDbType.Bytea },
-				{ nameof(Request.Form), NpgsqlDbType.Varchar },
-				{ nameof(Request.Files), NpgsqlDbType.Varchar }
+				{ nameof(RequestDto.RuntimeUniqueKey), NpgsqlDbType.Uuid },
+				{ nameof(RequestDto.Created), NpgsqlDbType.TimestampTz },
+				{ nameof(RequestDto.CorrelationId), NpgsqlDbType.Uuid },
+				{ nameof(RequestDto.ExternalCorrelationId), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.Protocol), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.Scheme), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.Host), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.RemoteIp), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.Method), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.Path), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.QueryString), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.Headers), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.Body), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.BodyByteArray), NpgsqlDbType.Bytea },
+				{ nameof(RequestDto.Form), NpgsqlDbType.Varchar },
+				{ nameof(RequestDto.Files), NpgsqlDbType.Varchar }
 			};
 		}
 	}

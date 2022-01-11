@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raider.AspNetCore.Logging;
-using Raider.AspNetCore.Logging.Dto;
 using Raider.Diagnostics;
 using Raider.Extensions;
 using Raider.Logging.Extensions;
@@ -52,7 +51,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 					bool canLog = _options.CanLogRequest(context.Request, out bool bodyAsString);
 
 					var request =
-						await Request.Create(
+						await RequestDtoFactory.Create(
 							context.Request,
 							context.Connection?.RemoteIpAddress?.ToString(),
 							traceInfo.CorrelationId ?? Guid.Empty,
@@ -146,7 +145,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 							context.Response.Body = originalResponseBody;
 
 							var response =
-								Response.Create(
+								ResponseDtoFactory.Create(
 									context.Response,
 									traceInfo.CorrelationId ?? Guid.Empty,
 									traceInfo.ExternalCorrelationId,
@@ -190,7 +189,7 @@ namespace Raider.AspNetCore.Middleware.Tracking
 			}
 
 			var response =
-				Response.Create(
+				ResponseDtoFactory.Create(
 					context.Response,
 					traceInfo.CorrelationId ?? Guid.Empty,
 					traceInfo.ExternalCorrelationId,

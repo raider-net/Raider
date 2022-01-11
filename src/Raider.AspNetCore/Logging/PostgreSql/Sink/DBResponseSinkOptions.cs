@@ -2,6 +2,7 @@
 using Raider.AspNetCore.Logging.Dto;
 using Raider.Data;
 using Raider.Database.PostgreSql;
+using Raider.Web.Logging;
 using System.Collections.Generic;
 
 namespace Raider.AspNetCore.Logging.PostgreSql.Sink
@@ -10,34 +11,34 @@ namespace Raider.AspNetCore.Logging.PostgreSql.Sink
 	{
 		public DBResponseSinkOptions()
 		{
-			TableName = nameof(Response);
+			TableName = nameof(ResponseDto);
 
 			PropertyNames = new List<string>
 			{
-				nameof(Response.RuntimeUniqueKey),
-				nameof(Response.Created),
-				nameof(Response.CorrelationId),
-				nameof(Request.ExternalCorrelationId),
-				nameof(Response.StatusCode),
-				nameof(Response.Headers),
-				nameof(Response.Body),
-				nameof(Response.BodyByteArray),
-				nameof(Response.Error),
-				nameof(Response.ElapsedMilliseconds)
+				nameof(ResponseDto.RuntimeUniqueKey),
+				nameof(ResponseDto.Created),
+				nameof(ResponseDto.CorrelationId),
+				nameof(ResponseDto.ExternalCorrelationId),
+				nameof(ResponseDto.StatusCode),
+				nameof(ResponseDto.Headers),
+				nameof(ResponseDto.Body),
+				nameof(ResponseDto.BodyByteArray),
+				nameof(ResponseDto.Error),
+				nameof(ResponseDto.ElapsedMilliseconds)
 			};
 
 			PropertyTypeMapping = new Dictionary<string, NpgsqlDbType>
 			{
-				{ nameof(Response.RuntimeUniqueKey), NpgsqlDbType.Uuid },
-				{ nameof(Response.Created), NpgsqlDbType.TimestampTz },
-				{ nameof(Response.CorrelationId), NpgsqlDbType.Uuid },
-				{ nameof(Request.ExternalCorrelationId), NpgsqlDbType.Varchar },
-				{ nameof(Response.StatusCode), NpgsqlDbType.Integer },
-				{ nameof(Response.Headers), NpgsqlDbType.Varchar },
-				{ nameof(Response.Body), NpgsqlDbType.Varchar },
-				{ nameof(Response.BodyByteArray), NpgsqlDbType.Bytea },
-				{ nameof(Response.Error), NpgsqlDbType.Varchar },
-				{ nameof(Response.ElapsedMilliseconds), NpgsqlDbType.Numeric }
+				{ nameof(ResponseDto.RuntimeUniqueKey), NpgsqlDbType.Uuid },
+				{ nameof(ResponseDto.Created), NpgsqlDbType.TimestampTz },
+				{ nameof(ResponseDto.CorrelationId), NpgsqlDbType.Uuid },
+				{ nameof(ResponseDto.ExternalCorrelationId), NpgsqlDbType.Varchar },
+				{ nameof(ResponseDto.StatusCode), NpgsqlDbType.Integer },
+				{ nameof(ResponseDto.Headers), NpgsqlDbType.Varchar },
+				{ nameof(ResponseDto.Body), NpgsqlDbType.Varchar },
+				{ nameof(ResponseDto.BodyByteArray), NpgsqlDbType.Bytea },
+				{ nameof(ResponseDto.Error), NpgsqlDbType.Varchar },
+				{ nameof(ResponseDto.ElapsedMilliseconds), NpgsqlDbType.Numeric }
 			};
 		}
 	}

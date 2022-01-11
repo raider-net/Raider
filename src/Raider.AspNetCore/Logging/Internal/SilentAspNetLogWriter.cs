@@ -1,4 +1,5 @@
 ﻿using Raider.AspNetCore.Logging.Dto;
+using Raider.Web.Logging;
 using System;
 
 namespace Raider.AspNetCore.Logging.Internal
@@ -7,11 +8,11 @@ namespace Raider.AspNetCore.Logging.Internal
 	{
 		public static readonly IAspNetLogWriter Instance = new SilentAspNetLogWriter();
 
-		public void WriteRequest(Request request) { }
+		public void WriteRequest(RequestDto request) { }
 
 		public void WriteRequestAuthentication(RequestAuthentication requestAuthentication) { }
 
-		public void WriteResponse(Response response) { }
+		public void WriteResponse(ResponseDto response) { }
 
 		public void Dispose() { }
 	}
