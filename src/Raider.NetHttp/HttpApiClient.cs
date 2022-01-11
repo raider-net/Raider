@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Raider.Extensions;
 using Raider.NetHttp.Http;
 using System;
 using System.Net.Http;
@@ -12,31 +11,61 @@ namespace Raider.NetHttp
 	public abstract class HttpApiClient
 	{
 		private readonly HttpClient _client;
-		private readonly HttpApiClientOptions _options;
-		protected abstract ILogger<HttpApiClient> Logger { get; }
 
-		public HttpApiClient(HttpClient client, IOptions<HttpApiClientOptions> options)
+		protected HttpApiClientOptions Options { get; }
+		protected ILogger Logger { get; }
+
+		public HttpApiClient(HttpClient client, IOptions<HttpApiClientOptions> options, ILogger<HttpApiClient> logger)
 		{
 			_client = client ?? throw new ArgumentNullException(nameof(client));
-			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+			Options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+			Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+			var error = Options.Validate()?.ToString();
+			if (!string.IsNullOrWhiteSpace(error))
+				throw new InvalidOperationException(error);
 		}
 
-		protected async Task<T> SendAsync<T>(HttpApiClientRequest request, bool? continueOnCapturedContext, CancellationToken cancellationToken = default)
-			where T : HttpApiClientResponse, new()
+		public Task<IHttpApiClientResponse> SendAsync(Action<RequestBuilder> configureRequest, CancellationToken cancellationToken = default)
 		{
-			if (request == null)
-				throw new ArgumentNullException(nameof(request));
+			var builder = new RequestBuilder();
+			configureRequest.Invoke(builder);
 
-			var response = new T
-			{
-				Request = request
-			};
+			return SendAsync(builder, false, cancellationToken);
+		}
+
+		public Task<IHttpApiClientResponse> SendAsync(Action<RequestBuilder> configureRequest, bool? continueOnCapturedContext, CancellationToken cancellationToken = default)
+		{
+			var builder = new RequestBuilder();
+			configureRequest.Invoke(builder);
+
+			return SendAsync(builder, continueOnCapturedContext, cancellationToken);
+		}
+
+		public Task<IHttpApiClientResponse> SendAsync(IHttpApiClientRequest request, CancellationToken cancellationToken = default)
+		{
+			var builder = new RequestBuilder(request);
+			return SendAsync(builder, false, cancellationToken);
+		}
+
+		public Task<IHttpApiClientResponse> SendAsync(IHttpApiClientRequest request, bool? continueOnCapturedContext, CancellationToken cancellationToken = default)
+		{
+			var builder = new RequestBuilder(request);
+			return SendAsync(builder, continueOnCapturedContext, cancellationToken);
+		}
+
+		public async Task<IHttpApiClientResponse> SendAsync(RequestBuilder builder, bool? continueOnCapturedContext, CancellationToken cancellationToken = default)
+		{
+			if (builder == null)
+				throw new ArgumentNullException(nameof(builder));
+			
+			builder.BaseAddress(Options.BaseAddress, false);
+
+			var request = builder.Build();
+			var response = new Raider.NetHttp.Http.Internal.HttpApiClientResponse(request);
 
 			try
 			{
-				if (string.IsNullOrWhiteSpace(request.BaseAddress))
-					request.SetBaseAddress(_options.BaseAddress);
-
 				using var httpRequestMessage = request.ToHttpRequestMessage();
 
 				if (continueOnCapturedContext.HasValue)
@@ -46,10 +75,7 @@ namespace Raider.NetHttp
 							.SendAsync(httpRequestMessage, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken)
 							.ConfigureAwait(continueOnCapturedContext: continueOnCapturedContext.Value);
 
-					using (var httpResponseMessage = await httpResponseMessageTask)
-					{
-						await response.FromHttpResponseMessageAsync(httpResponseMessage, cancellationToken);
-					}
+					response.Response = await httpResponseMessageTask;
 				}
 				else
 				{
@@ -57,10 +83,7 @@ namespace Raider.NetHttp
 						_client
 							.SendAsync(httpRequestMessage, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
-					using (var httpResponseMessage = await httpResponseMessageTask)
-					{
-						await response.FromHttpResponseMessageAsync(httpResponseMessage, cancellationToken);
-					}
+					response.Response = await httpResponseMessageTask;
 				}
 			}
 			catch (TimeoutException)
@@ -73,54 +96,10 @@ namespace Raider.NetHttp
 			}
 			catch (Exception ex)
 			{
-				response.Exception = ex.ToStringTrace();
+				response.Exception = ex;
 			}
-
-			try
-			{
-				if (!response.IsOK)
-				{
-					var exception = response.GetException();
-					Logger.LogError(exception); //TODO: Log ErrorMessage instead
-				}
-			}
-			catch { }
 
 			return response;
-		}
-
-
-
-
-		public async Task<HttpApiClientResponse> SendAsync(HttpApiClientRequest request, CancellationToken cancellationToken = default)
-		{
-			try
-			{
-				var response = await SendAsync<HttpApiClientResponse>(request, null, cancellationToken);
-				return response;
-			}
-			catch (Exception ex)
-			{
-				Logger.LogError(ex, "Error"); //TODO: Log ErrorMessage instead
-			}
-
-			return new HttpApiClientResponse { Request = request };
-		}
-
-
-		public async Task<HttpApiClientResponse<T>> SendAsync<T>(HttpApiClientRequest request, CancellationToken cancellationToken = default)
-		{
-			try
-			{
-				var response = await SendAsync<HttpApiClientResponse<T>>(request, null, cancellationToken);
-				return response;
-			}
-			catch (Exception ex)
-			{
-				Logger.LogError(ex, "Error"); //TODO: Log ErrorMessage instead
-			}
-
-			return new HttpApiClientResponse<T> { Request = request };
 		}
 	}
 }

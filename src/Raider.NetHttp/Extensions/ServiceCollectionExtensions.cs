@@ -9,22 +9,24 @@ namespace Raider.Extensions
 	{
 		public static IServiceCollection AddHttpApiClient<TClient>(this IServiceCollection services,
 			Action<HttpApiClientOptions>? configureOptions,
-			Action<HttpClient>? configureClient,
-			Action<IHttpClientBuilder> configureHttpClientBuilder)
+			Action<HttpClient>? configureClient = null,
+			Action<IHttpClientBuilder>? configureHttpClientBuilder = null)
 			where TClient : HttpApiClient
 		{
 			var options = new HttpApiClientOptions();
 			configureOptions?.Invoke(options);
+
+			var error = options.Validate()?.ToString();
+			if (!string.IsNullOrWhiteSpace(error))
+				throw new InvalidOperationException(error);
 
 			services.Configure<HttpApiClientOptions>(opt =>
 			{
 				configureOptions?.Invoke(opt);
 			});
 
-			services.AddTransient<HttpApiClientMessageHandler>();
-
-			if (options == null)
-				options = new HttpApiClientOptions();
+			services.AddTransient<LogHandler>();
+			services.AddTransient<PolicyHandler>();
 
 			var httpClientBuilder =
 				services.AddHttpClient<TClient>(httpClient =>
@@ -40,11 +42,15 @@ namespace Raider.Extensions
 					configureClient?.Invoke(httpClient);
 				});
 
-			configureHttpClientBuilder?.Invoke(httpClientBuilder);
-
 			//na konci, aby to bol najviac outer handler
 			httpClientBuilder
-				.AddHttpMessageHandler<HttpApiClientMessageHandler>();
+				.AddHttpMessageHandler<PolicyHandler>();
+
+			configureHttpClientBuilder?.Invoke(httpClientBuilder);
+
+			//na konci, aby to bol najviac inner handler
+			httpClientBuilder
+				.AddHttpMessageHandler<LogHandler>();
 
 			if (options.AutomaticDecompression.HasValue
 				|| options.Proxy != null

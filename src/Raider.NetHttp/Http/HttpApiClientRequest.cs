@@ -1,14 +1,12 @@
-﻿using Raider.Extensions;
-using Raider.NetHttp.Http.Headers;
+﻿using Raider.NetHttp.Http.Headers;
 using Raider.Web;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 
 namespace Raider.NetHttp.Http
 {
-	public class HttpApiClientRequest
+	public class HttpApiClientRequest : IHttpApiClientRequest
 	{
 		public const string MultipartFormData = "form-data";
 
@@ -30,130 +28,6 @@ namespace Raider.NetHttp.Http
 			Headers = new RequestHeaders();
 		}
 
-		public HttpApiClientRequest SetBaseAddress(string? baseAddress)
-		{
-			BaseAddress = baseAddress;
-			return this;
-		}
-
-		public HttpApiClientRequest SetRelativePath(string path)
-		{
-			RelativePath = string.IsNullOrWhiteSpace(path)
-				? ""
-				: path.TrimPrefix("/");
-			return this;
-		}
-
-		public HttpApiClientRequest SetQueryString(string queryString)
-		{
-			QueryString = string.IsNullOrWhiteSpace(queryString)
-				? null
-				: $"?{queryString.TrimPrefix("?")}";
-			return this;
-		}
-
-		public HttpApiClientRequest SetQueryString(Dictionary<string, string> queryString)
-		{
-			if (queryString == null || queryString.Count == 0)
-				QueryString = null;
-			else
-				QueryString = $"?{string.Join("&", queryString.Select(kvp => $"{System.Net.WebUtility.UrlEncode(kvp.Key)}={System.Net.WebUtility.UrlEncode(kvp.Value)}"))}";
-
-			return this;
-		}
-
-		public HttpApiClientRequest AddQueryString(string key, string value)
-		{
-			if (string.IsNullOrWhiteSpace(key))
-				return this;
-
-			if (string.IsNullOrWhiteSpace(QueryString))
-			{
-				SetQueryString(new Dictionary<string, string> { { key, value } });
-			}
-			else
-			{
-				QueryString = $"{QueryString}&{key}={value}";
-			}
-
-			return this;
-		}
-
-		public HttpApiClientRequest SetMethod(string httpMethod)
-		{
-			if (string.IsNullOrWhiteSpace(httpMethod))
-				throw new ArgumentNullException(nameof(httpMethod));
-
-			HttpMethod = httpMethod;
-			return this;
-		}
-
-		public HttpApiClientRequest AddFormData(List<KeyValuePair<string, string>> formData)
-		{
-			if (formData == null || formData.Count == 0)
-				return this;
-
-			if (FormData == null)
-				FormData = new List<KeyValuePair<string, string>>();
-
-			FormData.AddRange(formData);
-
-			return this;
-		}
-
-		public HttpApiClientRequest AddStringContent(StringContent stringContent)
-		{
-			if (stringContent == null)
-				throw new ArgumentNullException(nameof(stringContent));
-
-			if (StringContents == null)
-				StringContents = new List<StringContent>();
-
-			StringContents.Add(stringContent);
-			return this;
-		}
-
-		public HttpApiClientRequest AddStreamContent(StreamContent streamContent)
-		{
-			if (streamContent == null)
-				throw new ArgumentNullException(nameof(streamContent));
-
-			if (StreamContents == null)
-				StreamContents = new List<StreamContent>();
-
-			StreamContents.Add(streamContent);
-			return this;
-		}
-
-		public HttpApiClientRequest AddByteArrayContent(ByteArrayContent byteArrayContent)
-		{
-			if (byteArrayContent == null)
-				throw new ArgumentNullException(nameof(byteArrayContent));
-
-			if (ByteArrayContents == null)
-				ByteArrayContents = new List<ByteArrayContent>();
-
-			ByteArrayContents.Add(byteArrayContent);
-			return this;
-		}
-
-		public HttpApiClientRequest SetMultipart(string multipartSubType, string multipartBoundary)
-		{
-			if (string.IsNullOrWhiteSpace(multipartSubType))
-				throw new ArgumentNullException(nameof(multipartSubType));
-
-			MultipartSubType = multipartSubType;
-			MultipartBoundary = multipartBoundary;
-			return this;
-		}
-
-		public string? GetRequestUri()
-			=> UriHelper.Combine(
-				string.IsNullOrWhiteSpace(BaseAddress)
-					? "/"
-					: BaseAddress,
-				$"{RelativePath}{QueryString}");
-
 		public HttpRequestMessage ToHttpRequestMessage()
 		{
 			if (HttpMethod == null)
@@ -174,7 +48,12 @@ namespace Raider.NetHttp.Http
 			return httpRequestMessage;
 		}
 
-		private HttpContent? ToHttpContent()
+		public string? GetRequestUri()
+			=> UriHelper.Combine(
+				string.IsNullOrWhiteSpace(BaseAddress) ? "/" : BaseAddress,
+				$"{RelativePath}{QueryString}");
+
+		public HttpContent? ToHttpContent()
 		{
 			var contentsCount =
 				(FormData?.Count ?? 0)
