@@ -119,7 +119,7 @@ namespace Raider.Extensions
 			return dict;
 		}
 
-		public static List<TKey> AddRangeUniqueKeys<TKey, TValue>(this IDictionary<TKey, TValue> dict, IDictionary<TKey, TValue> dictionary)
+		public static List<TKey>? AddRangeUniqueKeys<TKey, TValue>(this IDictionary<TKey, TValue> dict, IDictionary<TKey, TValue> dictionary)
 		{
 			if (dict == null || dictionary == null)
 			{
@@ -138,12 +138,12 @@ namespace Raider.Extensions
 			return result;
 		}
 
-		public static List<TKey> AddOrReplaceRange<TKey, TValue>(this IDictionary<TKey, TValue> dict, IDictionary<TKey, TValue> dictionary)
+		public static List<TKey>? AddOrReplaceRange<TKey, TValue>(this IDictionary<TKey, TValue> dict, IDictionary<TKey, TValue> dictionary)
 		{
 			if (dict == null || dictionary == null)
 				return null;
 
-			List<TKey> result = new List<TKey>();
+			var result = new List<TKey>();
 			foreach (KeyValuePair<TKey, TValue> item in dictionary)
 			{
 				if (dict.ContainsKey(item.Key))
