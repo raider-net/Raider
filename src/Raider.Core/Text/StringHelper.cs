@@ -622,7 +622,7 @@ namespace Raider.Text
 			if (string.IsNullOrEmpty(text))
 				return source ?? text;
 
-			return string.Join(source, delimiter, text);
+			return string.Concat(source, delimiter, text);
 		}
 
 		[return: NotNullIfNotNull("values")]
