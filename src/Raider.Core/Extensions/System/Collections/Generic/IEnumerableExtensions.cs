@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Raider.Collections;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -323,6 +324,9 @@ namespace Raider.Extensions
 
 			return result;
 		}
+
+		public static IEnumerable<T[]> Permutations<T>(this IEnumerable<T> values)
+			=> ArrayHelper.Permutations(values.ToArray());
 	}
 
 	public class IOrderedEnumerableNoOrderWrapper<T> : IOrderedEnumerable<T>

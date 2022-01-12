@@ -622,7 +622,38 @@ namespace Raider.Text
 			if (string.IsNullOrEmpty(text))
 				return source ?? text;
 
-			return string.Concat(source, delimiter, text);
+			return string.Join(source, delimiter, text);
 		}
+
+		[return: NotNullIfNotNull("values")]
+		public static string? ConcatIfNotNullOrEmpty(string delimiter, IEnumerable<string?> values)
+		{
+			if (values == null)
+				return null;
+
+			if (!values.Any())
+				return string.Empty;
+
+			var sb = new StringBuilder();
+			bool empty = true;
+
+			foreach (var value in values)
+			{
+				if (!string.IsNullOrEmpty(value))
+				{
+					if (!empty)
+						sb.Append(delimiter);
+
+					sb.Append(value);
+					empty = false;
+				}
+			}
+
+			return sb.ToString();
+		}
+
+		[return: NotNullIfNotNull("values")]
+		public static string? ConcatIfNotNullOrEmpty(string delimiter, params string?[] values)
+			=> ConcatIfNotNullOrEmpty(delimiter, (IEnumerable<string?>)values);
 	}
 }
