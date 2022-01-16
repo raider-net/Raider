@@ -1,4 +1,5 @@
 ﻿using Raider.Extensions;
+using Raider.NetHttp.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,15 +31,26 @@ namespace Raider.NetHttp.Http
 
 		TBuilder Method(HttpMethod httpMethod, bool force = true);
 
+		TBuilder ConfigureHeaders(Action<RequestHeaders> configure);
+
+		TBuilder Multipart(string multipartSubType, string? multipartBoundary);
+
+		TBuilder AddFormData(KeyValuePair<string, string> formData, bool force = true);
+
 		TBuilder AddFormData(List<KeyValuePair<string, string>> formData, bool force = true);
 
 		TBuilder AddStringContent(StringContent stringContent, bool force = true);
 
+		TBuilder AddStringContent(Func<StringContent, StringContent?> configureStringContent, bool force = true);
+
 		TBuilder AddStreamContent(StreamContent streamContent, bool force = true);
+
+		TBuilder AddStreamContent(Func<StreamContent, StreamContent?> configureStreamContent, bool force = true);
 
 		TBuilder AddByteArrayContent(ByteArrayContent byteArrayContent, bool force = true);
 
-		TBuilder Multipart(string multipartSubType, string multipartBoundary);
+		TBuilder AddByteArrayContent(Func<ByteArrayContent, ByteArrayContent?> configureByteArrayContent, bool force = true);
+
 	}
 
 	public abstract class RequestBuilderBase<TBuilder, TObject> : IRequestBuilder<TBuilder, TObject>
@@ -140,7 +152,45 @@ namespace Raider.NetHttp.Http
 		public TBuilder Method(HttpMethod httpMethod, bool force = true)
 		{
 			if (force || string.IsNullOrWhiteSpace(_request.HttpMethod))
-				_request.HttpMethod = httpMethod.ToString();
+			{
+				if (httpMethod == null)
+					throw new ArgumentNullException(nameof(httpMethod));
+
+				_request.HttpMethod = httpMethod.Method;
+			}
+
+			return _builder;
+		}
+
+		public TBuilder ConfigureHeaders(Action<RequestHeaders> configure)
+		{
+			if (configure == null)
+				return _builder;
+
+			configure.Invoke(_request.Headers);
+
+			return _builder;
+		}
+
+		public TBuilder Multipart(string multipartSubType, string? multipartBoundary)
+		{
+			if (string.IsNullOrWhiteSpace(multipartSubType))
+				throw new ArgumentNullException(nameof(multipartSubType));
+
+			_request.MultipartSubType = multipartSubType;
+			_request.MultipartBoundary = multipartBoundary;
+			return _builder;
+		}
+
+		public TBuilder AddFormData(KeyValuePair<string, string> formData, bool force = true)
+		{
+			if (force || _request.FormData == null)
+			{
+				if (_request.FormData == null)
+					_request.FormData = new List<KeyValuePair<string, string>>();
+
+				_request.FormData.Add(formData);
+			}
 
 			return _builder;
 		}
@@ -177,6 +227,26 @@ namespace Raider.NetHttp.Http
 			return _builder;
 		}
 
+		public TBuilder AddStringContent(Func<StringContent, StringContent?> configureStringContent, bool force = true)
+		{
+			if (force || _request.StringContents == null)
+			{
+				if (configureStringContent == null)
+					return _builder;
+
+				if (_request.StringContents == null)
+					_request.StringContents = new List<StringContent>();
+
+				var stringContent = new StringContent();
+				stringContent = configureStringContent.Invoke(stringContent);
+
+				if (stringContent != null)
+					_request.StringContents.Add(stringContent);
+			}
+
+			return _builder;
+		}
+
 		public TBuilder AddStreamContent(StreamContent streamContent, bool force = true)
 		{
 			if (force || _request.StreamContents == null)
@@ -188,6 +258,26 @@ namespace Raider.NetHttp.Http
 					_request.StreamContents = new List<StreamContent>();
 
 				_request.StreamContents.Add(streamContent);
+			}
+
+			return _builder;
+		}
+
+		public TBuilder AddStreamContent(Func<StreamContent, StreamContent?> configureStreamContent, bool force = true)
+		{
+			if (force || _request.StreamContents == null)
+			{
+				if (configureStreamContent == null)
+					return _builder;
+
+				if (_request.StreamContents == null)
+					_request.StreamContents = new List<StreamContent>();
+
+				var streamContent = new StreamContent();
+				streamContent = configureStreamContent.Invoke(streamContent);
+
+				if (streamContent != null)
+					_request.StreamContents.Add(streamContent);
 			}
 
 			return _builder;
@@ -209,13 +299,23 @@ namespace Raider.NetHttp.Http
 			return _builder;
 		}
 
-		public TBuilder Multipart(string multipartSubType, string multipartBoundary)
+		public TBuilder AddByteArrayContent(Func<ByteArrayContent, ByteArrayContent?> configureByteArrayContent, bool force = true)
 		{
-			if (string.IsNullOrWhiteSpace(multipartSubType))
-				throw new ArgumentNullException(nameof(multipartSubType));
+			if (force || _request.ByteArrayContents == null)
+			{
+				if (configureByteArrayContent == null)
+					return _builder;
 
-			_request.MultipartSubType = multipartSubType;
-			_request.MultipartBoundary = multipartBoundary;
+				if (_request.ByteArrayContents == null)
+					_request.ByteArrayContents = new List<ByteArrayContent>();
+
+				var byteArrayContent = new ByteArrayContent();
+				byteArrayContent = configureByteArrayContent.Invoke(byteArrayContent);
+
+				if (byteArrayContent != null)
+					_request.ByteArrayContents.Add(byteArrayContent);
+			}
+
 			return _builder;
 		}
 	}

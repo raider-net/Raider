@@ -94,7 +94,7 @@ namespace Raider.NetHttp.Http.Internal
 				? Task.FromResult((string?)null)
 				: Response.Content.ReadAsStringAsync();
 
-		public async Task<T?> ReadContentAsAsync<T>(
+		public async Task<T?> ReadJsonContentAsAsync<T>(
 			Newtonsoft.Json.JsonSerializerSettings? jsonSerializerOptions = null,
 			CancellationToken cancellationToken = default)
 		{

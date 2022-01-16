@@ -94,7 +94,7 @@ namespace Raider.NetHttp.Http.Internal
 				? Task.FromResult((string?)null)
 				: Response.Content.ReadAsStringAsync(cancellationToken) as Task<string?>;
 
-		public async Task<T?> ReadContentAsAsync<T>(
+		public async Task<T?> ReadJsonContentAsAsync<T>(
 			System.Text.Json.JsonSerializerOptions? jsonSerializerOptions = null, 
 			CancellationToken cancellationToken = default)
 		{
