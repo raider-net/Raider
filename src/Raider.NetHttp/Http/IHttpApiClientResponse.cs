@@ -19,7 +19,7 @@ namespace Raider.NetHttp.Http
 		[System.Text.Json.Serialization.JsonIgnore]
 #endif
 		Exception? Exception { get; }
-		string? ExceptionTest { get; }
+		string? ExceptionText { get; }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 		[Newtonsoft.Json.JsonIgnore]

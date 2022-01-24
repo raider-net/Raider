@@ -1,8 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Raider.Logging;
+using Raider.Logging.Extensions;
 using Raider.NetHttp.Http;
+using Raider.Trace;
 using System;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,7 +36,7 @@ namespace Raider.NetHttp
 			var builder = new RequestBuilder();
 			configureRequest.Invoke(builder);
 
-			return SendAsync(builder, false, cancellationToken);
+			return SendAsync(builder.Build(), false, cancellationToken);
 		}
 
 		public Task<IHttpApiClientResponse> SendAsync(Action<RequestBuilder> configureRequest, bool? continueOnCapturedContext, CancellationToken cancellationToken = default)
@@ -39,29 +44,22 @@ namespace Raider.NetHttp
 			var builder = new RequestBuilder();
 			configureRequest.Invoke(builder);
 
-			return SendAsync(builder, continueOnCapturedContext, cancellationToken);
+			return SendAsync(builder.Build(), continueOnCapturedContext, cancellationToken);
 		}
 
 		public Task<IHttpApiClientResponse> SendAsync(IHttpApiClientRequest request, CancellationToken cancellationToken = default)
 		{
-			var builder = new RequestBuilder(request);
-			return SendAsync(builder, false, cancellationToken);
+			return SendAsync(request, false, cancellationToken);
 		}
 
-		public Task<IHttpApiClientResponse> SendAsync(IHttpApiClientRequest request, bool? continueOnCapturedContext, CancellationToken cancellationToken = default)
+		public async Task<IHttpApiClientResponse> SendAsync(IHttpApiClientRequest request, bool? continueOnCapturedContext, CancellationToken cancellationToken = default)
 		{
-			var builder = new RequestBuilder(request);
-			return SendAsync(builder, continueOnCapturedContext, cancellationToken);
-		}
+			if (request == null)
+				throw new ArgumentNullException(nameof(request));
 
-		public async Task<IHttpApiClientResponse> SendAsync(RequestBuilder builder, bool? continueOnCapturedContext, CancellationToken cancellationToken = default)
-		{
-			if (builder == null)
-				throw new ArgumentNullException(nameof(builder));
-			
-			builder.BaseAddress(Options.BaseAddress, false);
+			if (string.IsNullOrWhiteSpace(request.BaseAddress))
+				request.BaseAddress = Options.BaseAddress;
 
-			var request = builder.Build();
 			var response = new Raider.NetHttp.Http.Internal.HttpApiClientResponse(request);
 
 			try
@@ -100,6 +98,44 @@ namespace Raider.NetHttp
 			}
 
 			return response;
+		}
+
+		protected virtual void LogError(
+			IHttpApiClientRequest? request,
+			IHttpApiClientResponse? response,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			if (request == null && response == null)
+				return;
+
+			var builder = new ErrorMessageBuilder(TraceInfo.Create(null, null, memberName, sourceFilePath, sourceLineNumber));
+			var sb = new StringBuilder();
+
+			if (request != null)
+				sb.AppendLine($"URI = {request.GetRequestUri()}");
+
+			if (response != null)
+			{
+				if (response.Exception != null)
+					builder.ExceptionInfo(response.Exception);
+
+				if (request == null && response.Request != null)
+					sb.AppendLine($"URI = {response.Request.GetRequestUri()}");
+
+				sb.AppendLine($"{nameof(response.StatusCode)} = {response.StatusCode}");
+
+				if (response.OperationCanceled.HasValue)
+					sb.AppendLine($"{nameof(response.OperationCanceled)} = {response.OperationCanceled}");
+
+				if (response.RequestTimedOut.HasValue)
+					sb.AppendLine($"{nameof(response.RequestTimedOut)} = {response.RequestTimedOut}");
+			}
+
+			builder.Detail(sb.ToString());
+
+			Logger.LogErrorMessage(builder.Build());
 		}
 	}
 }

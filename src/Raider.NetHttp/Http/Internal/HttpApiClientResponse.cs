@@ -26,7 +26,7 @@ namespace Raider.NetHttp.Http.Internal
 		[System.Text.Json.Serialization.JsonIgnore]
 		public Exception? Exception { get; set; }
 
-		public string? ExceptionTest => Exception?.ToStringTrace();
+		public string? ExceptionText => Exception?.ToStringTrace();
 
 		[System.Text.Json.Serialization.JsonIgnore]
 		public bool StatusCodeIsOK =>

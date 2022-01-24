@@ -26,7 +26,7 @@ namespace Raider.NetHttp.Http.Internal
 		[Newtonsoft.Json.JsonIgnore]
 		public Exception? Exception { get; set; }
 
-		public string? ExceptionTest => Exception?.ToStringTrace();
+		public string? ExceptionText => Exception?.ToStringTrace();
 
 		[Newtonsoft.Json.JsonIgnore]
 		public bool StatusCodeIsOK =>
