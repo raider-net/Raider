@@ -59,6 +59,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Ldap", "src\Raider.L
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Media", "src\Raider.Media\Raider.Media.csproj", "{10C9F283-6F4A-481A-A1C2-C2B61874F44C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Plugins.DependencyInjection", "src\Raider.Plugins.DependencyInjection\Raider.Plugins.DependencyInjection.csproj", "{8F16E4D7-9FFE-45D3-A208-23CCF43CC06C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raider.Plugins", "src\Raider.Plugins\Raider.Plugins.csproj", "{D4B86AF4-87BC-41F3-B518-79F23E59807A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -169,6 +173,14 @@ Global
 		{10C9F283-6F4A-481A-A1C2-C2B61874F44C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10C9F283-6F4A-481A-A1C2-C2B61874F44C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10C9F283-6F4A-481A-A1C2-C2B61874F44C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F16E4D7-9FFE-45D3-A208-23CCF43CC06C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F16E4D7-9FFE-45D3-A208-23CCF43CC06C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F16E4D7-9FFE-45D3-A208-23CCF43CC06C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F16E4D7-9FFE-45D3-A208-23CCF43CC06C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4B86AF4-87BC-41F3-B518-79F23E59807A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4B86AF4-87BC-41F3-B518-79F23E59807A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4B86AF4-87BC-41F3-B518-79F23E59807A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4B86AF4-87BC-41F3-B518-79F23E59807A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -200,6 +212,8 @@ Global
 		{9F641C16-DDD6-420D-8D4C-08241F1E882F} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 		{1CC79B82-68CA-465B-9431-5CA7449FBA91} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 		{10C9F283-6F4A-481A-A1C2-C2B61874F44C} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
+		{8F16E4D7-9FFE-45D3-A208-23CCF43CC06C} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
+		{D4B86AF4-87BC-41F3-B518-79F23E59807A} = {BF9D8523-64BE-4AB1-8F5B-126E98EED7F3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4CE87C92-BF04-4D94-B102-15AC816005FB}
