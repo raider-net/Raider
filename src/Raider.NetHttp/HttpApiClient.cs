@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Raider.Extensions;
 using Raider.Logging;
 using Raider.Logging.Extensions;
 using Raider.NetHttp.Http;
@@ -118,9 +119,6 @@ namespace Raider.NetHttp
 
 			if (response != null)
 			{
-				if (response.Exception != null)
-					builder.ExceptionInfo(response.Exception);
-
 				if (request == null && response.Request != null)
 					sb.AppendLine($"URI = {response.Request.GetRequestUri()}");
 
@@ -131,11 +129,50 @@ namespace Raider.NetHttp
 
 				if (response.RequestTimedOut.HasValue)
 					sb.AppendLine($"{nameof(response.RequestTimedOut)} = {response.RequestTimedOut}");
+
+				if (response.Exception != null)
+					builder.ExceptionInfo(response.Exception);
 			}
 
 			builder.Detail(sb.ToString());
 
 			Logger.LogErrorMessage(builder.Build());
+		}
+
+		protected virtual StringBuilder LogErrorToStringBuilder(
+			IHttpApiClientRequest? request,
+			IHttpApiClientResponse? response,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			var sb = new StringBuilder();
+
+			if (request != null)
+				sb.AppendLine($"URI = {request.GetRequestUri()}");
+
+			if (response != null)
+			{
+				if (request == null && response.Request != null)
+					sb.AppendLine($"URI = {response.Request.GetRequestUri()}");
+
+				sb.AppendLine($"{nameof(response.StatusCode)} = {response.StatusCode}");
+
+				if (response.OperationCanceled.HasValue)
+					sb.AppendLine($"{nameof(response.OperationCanceled)} = {response.OperationCanceled}");
+
+				if (response.RequestTimedOut.HasValue)
+					sb.AppendLine($"{nameof(response.RequestTimedOut)} = {response.RequestTimedOut}");
+
+				if (response.Exception != null)
+					sb.AppendLine($"Exception: {response.Exception.ToStringTrace()}");
+			}
+			else
+			{
+				sb.AppendLine("NO RESPONSE");
+			}
+
+			return sb;
 		}
 	}
 }
