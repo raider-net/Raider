@@ -89,12 +89,14 @@ namespace Raider.Plugins
 
 		public object Create(IServiceProvider serviceProvider, params object[] parameters)
 		{
-			return ActivatorUtilities.CreateInstance(serviceProvider, Type, parameters);
+			return serviceProvider.GetRequiredService(Type);
+			//return ActivatorUtilities.CreateInstance(serviceProvider, Type, parameters);
 		}
 
 		public T? Create<T>(IServiceProvider serviceProvider, params object[] parameters) where T : class
 		{
-			return ActivatorUtilities.CreateInstance(serviceProvider, Type, parameters) as T;
+			return serviceProvider.GetRequiredService(Type) as T;
+			//return ActivatorUtilities.CreateInstance(serviceProvider, Type, parameters) as T;
 		}
 	}
 }
