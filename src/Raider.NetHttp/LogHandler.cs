@@ -13,12 +13,13 @@ using System.Threading.Tasks;
 namespace Raider.NetHttp
 {
 	/// <inheritdoc />
-	public class LogHandler : DelegatingHandler
+	internal class LogHandler<TOptions> : DelegatingHandler
+		where TOptions : HttpApiClientOptions
 	{
-		private readonly HttpApiClientOptions _options;
+		private readonly TOptions _options;
 		private readonly ILogger _errorLogger;
 
-		public LogHandler(IOptions<HttpApiClientOptions> options, ILogger<HttpApiClientOptions> errorLogger)
+		public LogHandler(IOptions<TOptions> options, ILogger<LogHandler<TOptions>> errorLogger)
 		{
 			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 			_errorLogger = errorLogger ?? throw new ArgumentNullException(nameof(errorLogger));
@@ -50,7 +51,7 @@ namespace Raider.NetHttp
 					}
 					catch (Exception ex)
 					{
-						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler)}.{nameof(SendAsync)} - {nameof(logger.OnBeforeRequestSendAsStringAsync)}"));
+						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler<TOptions>)}.{nameof(SendAsync)} - {nameof(logger.OnBeforeRequestSendAsStringAsync)}"));
 					}
 				}
 
@@ -71,7 +72,7 @@ namespace Raider.NetHttp
 					}
 					catch (Exception ex)
 					{
-						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler)}.{nameof(SendAsync)} - {nameof(logger.OnBeforeRequestSendAsByteArrayAsync)}"));
+						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler<TOptions>)}.{nameof(SendAsync)} - {nameof(logger.OnBeforeRequestSendAsByteArrayAsync)}"));
 					}
 				}
 
@@ -92,7 +93,7 @@ namespace Raider.NetHttp
 					}
 					catch (Exception ex)
 					{
-						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler)}.{nameof(SendAsync)} - {nameof(logger.OnBeforeRequestSendAsStreamAsync)}"));
+						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler<TOptions>)}.{nameof(SendAsync)} - {nameof(logger.OnBeforeRequestSendAsStreamAsync)}"));
 					}
 				}
 
@@ -122,7 +123,7 @@ namespace Raider.NetHttp
 					}
 					catch (Exception ex)
 					{
-						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler)}.{nameof(SendAsync)} - {nameof(logger.OnAfterResponseReceivedAsStringAsync)}"));
+						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler<TOptions>)}.{nameof(SendAsync)} - {nameof(logger.OnAfterResponseReceivedAsStringAsync)}"));
 					}
 				}
 
@@ -143,7 +144,7 @@ namespace Raider.NetHttp
 					}
 					catch (Exception ex)
 					{
-						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler)}.{nameof(SendAsync)} - {nameof(logger.OnAfterResponseReceivedAsByteArrayAsync)}"));
+						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler<TOptions>)}.{nameof(SendAsync)} - {nameof(logger.OnAfterResponseReceivedAsByteArrayAsync)}"));
 					}
 				}
 
@@ -164,7 +165,7 @@ namespace Raider.NetHttp
 					}
 					catch (Exception ex)
 					{
-						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler)}.{nameof(SendAsync)} - {nameof(logger.OnAfterResponseReceivedAsStreamAsync)}"));
+						_errorLogger.LogErrorMessage(x => x.ExceptionInfo(ex).Detail($"{nameof(LogHandler<TOptions>)}.{nameof(SendAsync)} - {nameof(logger.OnAfterResponseReceivedAsStreamAsync)}"));
 					}
 				}
 			}

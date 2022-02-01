@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Raider.NetHttp
 {
-	public class HttpApiClientOptions : IValidable
+	public abstract class HttpApiClientOptions : IValidable
 	{
 		public string? BaseAddress { get; set; }
 		public string? UserAgent { get; set; } = nameof(HttpApiClient);

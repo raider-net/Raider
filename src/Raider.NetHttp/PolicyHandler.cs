@@ -9,11 +9,12 @@ using System.Threading.Tasks;
 namespace Raider.NetHttp
 {
 	/// <inheritdoc />
-	internal class PolicyHandler : DelegatingHandler
+	internal class PolicyHandler<TOptions> : DelegatingHandler
+		where TOptions : HttpApiClientOptions
 	{
-		private readonly HttpApiClientOptions _options;
+		private readonly TOptions _options;
 
-		public PolicyHandler(IOptions<HttpApiClientOptions> options)
+		public PolicyHandler(IOptions<TOptions> options)
 		{
 			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		}
@@ -26,7 +27,7 @@ namespace Raider.NetHttp
 			var policy = GetPolicy(uri);
 			if (policy == null)
 			{
-				response = await base.SendAsync(request, cancellationToken);
+				response = await SendInternalAsync(request, cancellationToken);
 			}
 			else
 			{
