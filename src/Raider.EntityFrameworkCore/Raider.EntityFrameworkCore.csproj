@@ -6,7 +6,7 @@
 		<Description>Raider.EntityFrameworkCore</Description>
 		<PackageTags></PackageTags>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-		<PackageReleaseNotes>Raider.EntityFrameworkCore</PackageReleaseNotes>
+		<PackageReleaseNotes></PackageReleaseNotes>
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/raider-net/Raider</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/raider-net/Raider</RepositoryUrl>
@@ -16,7 +16,7 @@
 		<Authors>Tomas Pilat</Authors>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
-		<Version>1.3.7</Version>
+		<Version>1.3.8</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
