@@ -1,6 +1,5 @@
 ﻿using Raider.Streams;
 using System.IO;
-using System.Linq;
 
 namespace Raider.Extensions
 {

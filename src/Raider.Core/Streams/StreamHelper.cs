@@ -13,7 +13,7 @@ namespace Raider.Streams
 			byte[]? byteArray = (stream as MemoryStream)?.ToArray();
 
 			if (byteArray == null)
-				using (MemoryStream ms = new MemoryStream())
+				using (var ms = new MemoryStream())
 				{
 					stream.CopyTo(ms);
 					byteArray = ms.ToArray();

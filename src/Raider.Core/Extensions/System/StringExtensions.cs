@@ -939,5 +939,9 @@ namespace Raider.Extensions
 		[return: NotNullIfNotNull("template")]
 		public static string? ReplacePlaceholders(this string template, IDictionary<string, object?> values)
 			=> TemplateFormatter.ReplacePlaceholders(template, values);
+
+		[return: NotNullIfNotNull("text")]
+		public static string? ToXmlEscapedValueString(this string text)
+			=> StringHelper.ToXmlValueString(text);
 	}
 }

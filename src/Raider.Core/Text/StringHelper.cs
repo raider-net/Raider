@@ -655,5 +655,14 @@ namespace Raider.Text
 		[return: NotNullIfNotNull("values")]
 		public static string? ConcatIfNotNullOrEmpty(string delimiter, params string?[] values)
 			=> ConcatIfNotNullOrEmpty(delimiter, (IEnumerable<string?>)values);
+
+		[return: NotNullIfNotNull("text")]
+		public static string? ToXmlValueString(string text)
+		{
+			if (text == null)
+				return text;
+
+			return new System.Xml.Linq.XElement("t", text).LastNode!.ToString();
+		}
 	}
 }
