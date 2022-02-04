@@ -30,7 +30,7 @@ namespace Raider.Plugins.Catalogs
 		{
 		}
 
-		public FolderPluginCatalog(string folderPath, FolderPluginCatalogOptions options)
+		public FolderPluginCatalog(string folderPath, FolderPluginCatalogOptions? options)
 			: this(folderPath, null, null, options)
 		{
 		}
@@ -45,12 +45,12 @@ namespace Raider.Plugins.Catalogs
 		{
 		}
 
-		public FolderPluginCatalog(string folderPath, TypeFinderCriteria finderCriteria, FolderPluginCatalogOptions options)
+		public FolderPluginCatalog(string folderPath, TypeFinderCriteria finderCriteria, FolderPluginCatalogOptions? options)
 			: this(folderPath, null, finderCriteria, options)
 		{
 		}
 
-		public FolderPluginCatalog(string folderPath, Action<TypeFinderCriteriaBuilder> configureFinder, FolderPluginCatalogOptions options)
+		public FolderPluginCatalog(string folderPath, Action<TypeFinderCriteriaBuilder> configureFinder, FolderPluginCatalogOptions? options)
 			: this(folderPath, configureFinder, null, options)
 		{
 		}
@@ -174,7 +174,7 @@ namespace Raider.Plugins.Catalogs
 
 			if (_options.PluginLoadContextOptions.UseHostApplicationAssemblies == UseHostApplicationAssembliesEnum.Always)
 			{
-				var hostApplicationPath = Environment.CurrentDirectory;
+				var hostApplicationPath = _options.CurrentDirectory ?? Environment.CurrentDirectory;
 				var hostDlls = Directory.GetFiles(hostApplicationPath, "*.dll", SearchOption.AllDirectories);
 
 				paths.AddRange(hostDlls);

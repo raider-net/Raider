@@ -7,7 +7,6 @@ using Raider.Plugins.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace Raider.Plugins.Extensions
@@ -17,20 +16,22 @@ namespace Raider.Plugins.Extensions
 		public static IServiceCollection AddPlugins<TPluginType>(
 			this IServiceCollection services,
 			string? pluginsDirectory = null,
+			bool setAdditionalRuntimePaths = false,
 			ServiceCollectionConfiguratorMode servicesConfiguratorMode = ServiceCollectionConfiguratorMode.TryApply,
 			object[]? servicesConfiguratorArgs = null,
 			Action<TypeFinderCriteriaBuilder>? configureTypeCriteria = null,
+			FolderPluginCatalogOptions? folderPluginCatalogOptions = null,
 			ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
 			where TPluginType : class
 		{
-			services.TryAddServices<TPluginType>();
+			services.TryAddServices<TPluginType>(setAdditionalRuntimePaths);
 
 			if (string.IsNullOrWhiteSpace(pluginsDirectory))
 			{
 				var entryAssembly = Assembly.GetEntryAssembly();
 
 				if (entryAssembly == null)
-					pluginsDirectory = Environment.CurrentDirectory;
+					pluginsDirectory = folderPluginCatalogOptions?.CurrentDirectory ?? Environment.CurrentDirectory;
 				else
 					pluginsDirectory = Path.GetDirectoryName(entryAssembly.Location)!;
 			}
@@ -50,7 +51,7 @@ namespace Raider.Plugins.Extensions
 				typeFinderCriteria = typeFinderCriteriaBuilder.Build();
 			}
 
-			var folderPluginCatalog = new FolderPluginCatalog(pluginsDirectory, typeFinderCriteria);
+			var folderPluginCatalog = new FolderPluginCatalog(pluginsDirectory, typeFinderCriteria, folderPluginCatalogOptions);
 			services.AddPluginCatalog(folderPluginCatalog);
 			services.AddPluginInstances<TPluginType>(serviceLifetime);
 
@@ -64,9 +65,11 @@ namespace Raider.Plugins.Extensions
 			this IServiceCollection services,
 			string pluginsDirectory,
 			Assembly assembly,
+			bool setAdditionalRuntimePaths = false,
 			ServiceCollectionConfiguratorMode servicesConfiguratorMode = ServiceCollectionConfiguratorMode.TryApply,
 			object[]? servicesConfiguratorArgs = null,
 			Action<TypeFinderCriteriaBuilder>? configureTypeCriteria = null,
+			AssemblyPluginCatalogOptions? assemblyPluginCatalogOptions = null,
 			ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
 			where TPluginType : class
 		{
@@ -76,7 +79,7 @@ namespace Raider.Plugins.Extensions
 			if (assembly == null)
 				throw new ArgumentNullException(nameof(assembly));
 
-			services.TryAddServices<TPluginType>();
+			services.TryAddServices<TPluginType>(setAdditionalRuntimePaths);
 
 			TypeFinderCriteria typeFinderCriteria;
 			var typeFinderCriteriaBuilder = TypeFinderCriteriaBuilder.Create();
@@ -93,7 +96,7 @@ namespace Raider.Plugins.Extensions
 				typeFinderCriteria = typeFinderCriteriaBuilder.Build();
 			}
 
-			var assemblyPluginCatalog = new AssemblyPluginCatalog(assembly, typeFinderCriteria);
+			var assemblyPluginCatalog = new AssemblyPluginCatalog(assembly, typeFinderCriteria, assemblyPluginCatalogOptions);
 			services.AddPluginCatalog(assemblyPluginCatalog);
 			services.AddPluginInstances<TPluginType>(serviceLifetime);
 
@@ -142,7 +145,7 @@ namespace Raider.Plugins.Extensions
 				throw new InvalidOperationException($"Cannot found type {expectedType.FullName} in assembly {assemblyPluginCatalog.Assembly.FullName} location = {assemblyPluginCatalog.Assembly.Location}");
 		}
 
-		private static IServiceCollection TryAddServices<TPluginType>(this IServiceCollection services)
+		private static IServiceCollection TryAddServices<TPluginType>(this IServiceCollection services, bool setAdditionalRuntimePaths)
 			where TPluginType : class
 		{
 			services.AddHostedService<PluginsInitializer>();
@@ -163,18 +166,21 @@ namespace Raider.Plugins.Extensions
 				return result;
 			});
 
-			if (PluginLoadContextOptions.Defaults.AdditionalRuntimePaths == null)
-				PluginLoadContextOptions.Defaults.AdditionalRuntimePaths = new List<string>();
+			if (setAdditionalRuntimePaths)
+			{
+				if (PluginLoadContextOptions.Defaults.AdditionalRuntimePaths == null)
+					PluginLoadContextOptions.Defaults.AdditionalRuntimePaths = new List<string>();
 
-			var runtimeAssemblyLocation = typeof(TPluginType).Assembly.Location;
+				var runtimeAssemblyLocation = typeof(TPluginType).Assembly.Location;
 
-			if (string.IsNullOrWhiteSpace(runtimeAssemblyLocation))
-				return services;
+				if (string.IsNullOrWhiteSpace(runtimeAssemblyLocation))
+					return services;
 
-			var runtimeAssemblyLocationDirectory = Path.GetDirectoryName(runtimeAssemblyLocation)!;
+				var runtimeAssemblyLocationDirectory = Path.GetDirectoryName(runtimeAssemblyLocation)!;
 
-			if (!PluginLoadContextOptions.Defaults.AdditionalRuntimePaths.Contains(runtimeAssemblyLocationDirectory))
-				PluginLoadContextOptions.Defaults.AdditionalRuntimePaths.Add(runtimeAssemblyLocationDirectory);
+				if (!PluginLoadContextOptions.Defaults.AdditionalRuntimePaths.Contains(runtimeAssemblyLocationDirectory))
+					PluginLoadContextOptions.Defaults.AdditionalRuntimePaths.Add(runtimeAssemblyLocationDirectory);
+			}
 
 			return services;
 		}

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Raider.Plugins.Options
 {
@@ -7,6 +8,8 @@ namespace Raider.Plugins.Options
 	/// </summary>
 	public class FolderPluginCatalogOptions
 	{
+		public string? CurrentDirectory { get; set; } = Environment.CurrentDirectory;
+
 		public string? FolderPath { get; set; }
 
 		/// <summary>
