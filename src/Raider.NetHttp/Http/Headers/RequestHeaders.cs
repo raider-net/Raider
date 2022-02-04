@@ -6,6 +6,9 @@ namespace Raider.NetHttp.Http.Headers
 {
 	public class RequestHeaders
 	{
+		public List<KeyValuePair<string, string?>> CustomHeaders { get; } = new List<KeyValuePair<string, string?>>();
+		public List<KeyValuePair<string, IEnumerable<string?>>> CustomCollectionHeaders { get; } = new List<KeyValuePair<string, IEnumerable<string?>>>();
+
 		public List<MediaTypeWithQualityHeader>? Accept { get; set; }
 		public List<ProductInfoHeader>? UserAgent { get; set; }
 		public List<ProductHeader>? Upgrade { get; set; }
@@ -37,6 +40,18 @@ namespace Raider.NetHttp.Http.Headers
 		public List<StringWithQualityHeader>? AcceptCharset { get; }
 		public DateTimeOffset? IfModifiedSince { get; set; }
 		public List<WarningHeader>? Warning { get; set; }
+
+		public RequestHeaders Add(string name, string? value)
+		{
+			CustomHeaders.Add(new KeyValuePair<string, string?>(name, value));
+			return this;
+		}
+
+		public RequestHeaders Add(string name, IEnumerable<string?> values)
+		{
+			CustomCollectionHeaders.Add(new KeyValuePair<string, IEnumerable<string?>>(name, values));
+			return this;
+		}
 
 		public void SetHttpRequestHeaders(HttpRequestHeaders httpRequestHeaders)
 		{
@@ -151,6 +166,12 @@ namespace Raider.NetHttp.Http.Headers
 			if (Warning != null && 0 < Warning.Count)
 				foreach (var warning in Warning)
 					httpRequestHeaders.Warning.Add(warning.ToWarningHeaderValue());
+
+			foreach (var customHeader in CustomHeaders)
+				httpRequestHeaders.Add(customHeader.Key, customHeader.Value);
+
+			foreach (var customCollectionHeader in CustomCollectionHeaders)
+				httpRequestHeaders.Add(customCollectionHeader.Key, customCollectionHeader.Value);
 		}
 	}
 }
