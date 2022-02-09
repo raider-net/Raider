@@ -101,7 +101,7 @@ namespace Raider.NetHttp
 			return response;
 		}
 
-		protected virtual void LogError(
+		protected virtual ErrorMessageBuilder? CreateErrorMessage(
 			IHttpApiClientRequest? request,
 			IHttpApiClientResponse? response,
 			[CallerMemberName] string memberName = "",
@@ -109,7 +109,7 @@ namespace Raider.NetHttp
 			[CallerLineNumber] int sourceLineNumber = 0)
 		{
 			if (request == null && response == null)
-				return;
+				return null;
 
 			var builder = new ErrorMessageBuilder(TraceInfo.Create(null, null, memberName, sourceFilePath, sourceLineNumber));
 			var sb = new StringBuilder();
@@ -136,7 +136,27 @@ namespace Raider.NetHttp
 
 			builder.Detail(sb.ToString());
 
-			Logger.LogErrorMessage(builder.Build());
+			return builder;
+		}
+
+		protected virtual ErrorMessageBuilder? LogError(
+			IHttpApiClientRequest? request,
+			IHttpApiClientResponse? response,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			if (request == null && response == null)
+				return null;
+
+			var errorMessageBuilder = CreateErrorMessage(request, response, memberName, sourceFilePath, sourceLineNumber);
+
+			if (errorMessageBuilder == null)
+				return null;
+
+			Logger.LogErrorMessage(errorMessageBuilder.Build());
+
+			return errorMessageBuilder;
 		}
 
 		protected virtual StringBuilder LogErrorToStringBuilder(
