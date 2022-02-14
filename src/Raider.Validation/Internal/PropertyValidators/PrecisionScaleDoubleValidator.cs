@@ -74,7 +74,7 @@ namespace Raider.Validation
 			var expectedIntegerDigits = Precision - Scale;
 			if (Scale < scale || expectedIntegerDigits < actualIntegerDigits)
 			{
-				return new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty()));
+				return new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty(), DetailInfoFunc?.Invoke(context.InstanceToValidate)));
 			}
 
 			return null;

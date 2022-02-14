@@ -187,6 +187,7 @@ namespace Raider
 					.LogLevel(LogLevel.Error)
 					.ValidationFailure(failure, true)
 					.ClientMessage(failure.Message, true) //TODO read from settings when to use MessageWithPropertyName
+					.Detail(failure.DetailInfo)
 					.PropertyName(string.IsNullOrWhiteSpace(failure.ValidationFrame.PropertyName) ? null : failure.ValidationFrame.ToString()?.TrimPrefix("_."), !string.IsNullOrWhiteSpace(failure.ValidationFrame.PropertyName));
 
 			return errorMessageBuilder.Build();
@@ -202,6 +203,7 @@ namespace Raider
 					.LogLevel(LogLevel.Warning)
 					.ValidationFailure(failure, true)
 					.ClientMessage(failure.Message, true) //TODO read from settings when to use MessageWithPropertyName
+					.Detail(failure.DetailInfo)
 					.PropertyName(string.IsNullOrWhiteSpace(failure.ValidationFrame.PropertyName) ? null : failure.ValidationFrame.ToString()?.TrimPrefix("_."), !string.IsNullOrWhiteSpace(failure.ValidationFrame.PropertyName));
 
 			return logMessageBuilder.Build();

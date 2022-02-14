@@ -8,8 +8,8 @@ namespace Raider.Validation
 		public Func<object?, bool> Condition { get; }
 		public string ErrorMessage { get; }
 
-		public ErrorValidator(Func<object, object>? func, ValidationFrame validationFrame, Func<object?, bool> condition, string errorMessage)
-			: base(func, validationFrame, true)
+		public ErrorValidator(Func<object, object>? func, ValidationFrame validationFrame, Func<object?, bool> condition, string errorMessage, Func<object?, string>? detailInfoFunc)
+			: base(func, validationFrame, true, null, detailInfoFunc)
 		{
 			Condition = condition ?? throw new ArgumentNullException(nameof(condition));
 			ErrorMessage = string.IsNullOrWhiteSpace(errorMessage)
@@ -17,10 +17,10 @@ namespace Raider.Validation
 				: errorMessage;
 		}
 
-		internal override ValidationResult Validate(ValidationContext validationContext)
+		internal override ValidationResult Validate(ValidationContext context)
 		{
-			return Condition.Invoke(validationContext.InstanceToValidate)
-				? new ValidationResult().AddFailure(new ValidationFailure(validationContext.ToReadOnlyValidationFrame(ValidationFrame), ValidatorType, Conditional, null, ErrorMessage, ErrorMessage))
+			return Condition.Invoke(context.InstanceToValidate)
+				? new ValidationResult().AddFailure(new ValidationFailure(context.ToReadOnlyValidationFrame(ValidationFrame), ValidatorType, Conditional, null, ErrorMessage, ErrorMessage, DetailInfoFunc?.Invoke(context.InstanceToValidate)))
 				: new ValidationResult();
 		}
 	}
@@ -31,8 +31,8 @@ namespace Raider.Validation
 		public Func<object?, bool> Condition { get; }
 		public string ErrorMessage { get; }
 
-		public ErrorValidator(Func<object, object>? func, ValidationFrame validationFrame, Func<object?, bool> condition, string errorMessage)
-			: base(func, validationFrame, true, null)
+		public ErrorValidator(Func<object, object>? func, ValidationFrame validationFrame, Func<object?, bool> condition, string errorMessage, Func<object?, string>? detailInfoFunc)
+			: base(func, validationFrame, true, null, detailInfoFunc)
 		{
 			Condition = condition ?? throw new ArgumentNullException(nameof(condition));
 			ErrorMessage = string.IsNullOrWhiteSpace(errorMessage)
@@ -40,10 +40,10 @@ namespace Raider.Validation
 				: errorMessage;
 		}
 
-		internal override ValidationResult Validate(ValidationContext validationContext)
+		internal override ValidationResult Validate(ValidationContext context)
 		{
-			return Condition.Invoke(validationContext.InstanceToValidate)
-				? new ValidationResult().AddFailure(new ValidationFailure(validationContext.ToReadOnlyValidationFrame(ValidationFrame), ValidatorType, Conditional, null, ErrorMessage, ErrorMessage))
+			return Condition.Invoke(context.InstanceToValidate)
+				? new ValidationResult().AddFailure(new ValidationFailure(context.ToReadOnlyValidationFrame(ValidationFrame), ValidatorType, Conditional, null, ErrorMessage, ErrorMessage, DetailInfoFunc?.Invoke(context.InstanceToValidate)))
 				: new ValidationResult();
 		}
 	}

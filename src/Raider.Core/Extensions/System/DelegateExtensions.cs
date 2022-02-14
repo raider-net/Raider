@@ -19,5 +19,13 @@ namespace Raider.Extensions
 
 			return x => func((T?)x);
 		}
+
+		public static Func<object?, string>? ToNonGeneric<T>(this Func<T?, string>? func)
+		{
+			if (func == null)
+				return default;
+
+			return x => func((T?)x);
+		}
 	}
 }

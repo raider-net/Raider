@@ -11,12 +11,12 @@ namespace Raider.Validation
 		public Validator<T> True { get; }
 		public Validator<T> False { get; }
 
-		public SwitchValidator(Func<object, object>? func, ValidationFrame validationFrame, Func<object?, bool> condition)
-			: base(func, validationFrame, true)
+		public SwitchValidator(Func<object, object>? func, ValidationFrame validationFrame, Func<object?, bool> condition, Func<object?, string>? detailInfoFunc)
+			: base(func, validationFrame, true, null, detailInfoFunc)
 		{
 			Condition = condition ?? throw new ArgumentNullException(nameof(condition));
-			True = new Validator<T>(Func, ValidationFrame, true);
-			False = new Validator<T>(Func, ValidationFrame, true);
+			True = new Validator<T>(Func, ValidationFrame, true, null,detailInfoFunc);
+			False = new Validator<T>(Func, ValidationFrame, true, null, detailInfoFunc);
 		}
 
 		public override IValidationDescriptor ToDescriptor()

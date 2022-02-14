@@ -10,6 +10,7 @@ namespace Raider.Validation
 		public ValidationSeverity Severity { get; set; } = ValidationSeverity.Error;
 		public string Message { get; internal set; }
 		public string MessageWithPropertyName { get; internal set; }
+		public string? DetailInfo { get; internal set; }
 		public bool Conditional { get; }
 		public IClientConditionDefinition? ClientConditionDefinition { get; }
 
@@ -19,7 +20,8 @@ namespace Raider.Validation
 			bool conditional,
 			IClientConditionDefinition? clientConditionDefinition,
 			string message,
-			string messageWithPropertyName)
+			string messageWithPropertyName,
+			string? detailInfo)
 		{
 			ValidationFrame = validationFrame ?? throw new ArgumentNullException(nameof(validationFrame));
 
@@ -32,6 +34,7 @@ namespace Raider.Validation
 
 			Message = message;
 			MessageWithPropertyName = messageWithPropertyName;
+			DetailInfo = detailInfo;
 		}
 
 		public override string ToString()

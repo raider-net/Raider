@@ -42,7 +42,7 @@ namespace Raider.Validation
 		internal override ValidationResult? Validate(ValidationContext context)
 			=> context.InstanceToValidate == null || ValueToCompare == null || (context.InstanceToValidate is IComparable value && 0 < value.CompareTo(ValueToCompare))
 				? null
-				: new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty()));
+				: new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty(), DetailInfoFunc?.Invoke(context.InstanceToValidate)));
 
 		public override IValidationDescriptor ToDescriptor()
 			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty())

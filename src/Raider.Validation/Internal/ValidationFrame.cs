@@ -64,16 +64,19 @@ namespace Raider.Validation
 			return enumeration;
 		}
 
-		public ValidationFrame SetParent(ValidationFrame parent)
+		public ValidationFrame SetParent(ValidationFrame parent, bool parentCanBeNull)
 		{
 			if (parent == null)
 				throw new ArgumentNullException(nameof(parent));
 
-			if (Parent == null)
-				throw new InvalidOperationException($"Parent is null.");
+			if (!parentCanBeNull)
+			{
+				if (parentCanBeNull || Parent == null)
+					throw new InvalidOperationException($"Parent is null.");
 
-			if (Parent.ObjectType != parent.ObjectType)
-				throw new InvalidOperationException($"Invalid {nameof(ObjectType)}.");
+				if (Parent.ObjectType != parent.ObjectType)
+					throw new InvalidOperationException($"Invalid {nameof(ObjectType)}.");
+			}
 
 			Parent = parent;
 

@@ -7,5 +7,6 @@
 		string Message { get; }
 		string MessageWithPropertyName { get; }
 		bool Conditional { get; }
+		string? DetailInfo { get; }
 	}
 }

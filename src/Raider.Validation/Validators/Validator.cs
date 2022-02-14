@@ -14,11 +14,13 @@ namespace Raider.Validation
 		public abstract ValidatorType ValidatorType { get; }
 		//internal abstract ValidationFrame ValidationFrame { get; }
 		internal Func<object, object>? Func { get; }
+		internal Func<object?, string>? DetailInfoFunc { get; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		public ValidatorBase(Func<object, object>? func)
+		public ValidatorBase(Func<object, object>? func, Func<object?, string>? detailInfoFunc)
 		{
 			Func = func;
+			DetailInfoFunc = detailInfoFunc;
 		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -42,7 +44,7 @@ namespace Raider.Validation
 		internal IReadOnlyList<ValidatorBase> Validators => _validators;
 
 		private Validator(Func<object, object>? func, ValidationFrame? validationFrame, ValidatorType validatorType, bool conditional)
-			: base(func)
+			: base(func, null)
 		{
 			ValidationFrame = validationFrame ?? new ValidationFrameRoot(typeof(T).FullName ?? "$ROOT");
 			_validators = new List<ValidatorBase>();
@@ -50,8 +52,8 @@ namespace Raider.Validation
 			Conditional = conditional;
 		}
 
-		internal Validator(Func<object, object>? func, ValidationFrame validationFrame, bool conditional, IClientConditionDefinition? clientConditionDefinition = null)
-			: base(func)
+		internal Validator(Func<object, object>? func, ValidationFrame validationFrame, bool conditional, IClientConditionDefinition? clientConditionDefinition, Func<object?, string>? detailInfoFunc)
+			: base(func, detailInfoFunc)
 		{
 			Conditional = conditional;
 			ClientConditionDefinition = clientConditionDefinition;
@@ -89,7 +91,7 @@ namespace Raider.Validation
 			//	ValidationFrame.SetParent(validationFrame);
 			//}
 
-			ValidationFrame.SetParent(validationFrame);
+			ValidationFrame.SetParent(validationFrame, this is ErrorValidator<T>);
 		}
 
 		internal void AddValidator(ValidatorBase validator)
@@ -207,21 +209,21 @@ namespace Raider.Validation
 			return Validate(ctx);
 		}
 
-		public Validator<T> If(Func<T?, bool> condition, Action<Validator<T>> @true)
+		public Validator<T> If(Func<T?, bool> condition, Action<Validator<T>> @true, Func<T?, string>? detailInfoFunc = null)
 		{
 			if (condition == null)
 				throw new ArgumentNullException(nameof(condition));
 			if (@true == null)
 				throw new ArgumentNullException(nameof(@true));
 
-			var validator = new ConditionalValidator<T>(Func, ValidationFrame, condition.ToNonGeneric());
+			var validator = new ConditionalValidator<T>(Func, ValidationFrame, condition.ToNonGeneric(), null, detailInfoFunc?.ToNonGeneric());
 			AddValidator(validator);
 
 			@true.Invoke(validator);
 			return this;
 		}
 
-		public Validator<T> IfElse(Func<T?, bool> condition, Action<Validator<T>> @true, Action<Validator<T>> @false)
+		public Validator<T> IfElse(Func<T?, bool> condition, Action<Validator<T>> @true, Action<Validator<T>> @false, Func<T?, string>? detailInfoFunc = null)
 		{
 			if (condition == null)
 				throw new ArgumentNullException(nameof(condition));
@@ -230,7 +232,7 @@ namespace Raider.Validation
 			if (@false == null)
 				throw new ArgumentNullException(nameof(@false));
 
-			var switchValidator = new SwitchValidator<T>(Func, ValidationFrame, condition.ToNonGeneric());
+			var switchValidator = new SwitchValidator<T>(Func, ValidationFrame, condition.ToNonGeneric(), detailInfoFunc?.ToNonGeneric());
 			AddValidator(switchValidator);
 
 			@true.Invoke(switchValidator.True);
@@ -238,20 +240,20 @@ namespace Raider.Validation
 			return this;
 		}
 
-		public Validator<T> WithError(Func<T?, bool> condition, string errorMessage)
+		public Validator<T> WithError(Func<T?, bool> condition, string errorMessage, Func<T?, string>? detailInfoFunc = null)
 		{
 			if (condition == null)
 				throw new ArgumentNullException(nameof(condition));
 			if (string.IsNullOrWhiteSpace(errorMessage))
 				throw new ArgumentNullException(nameof(errorMessage));
 
-			var validator = new ErrorValidator<T>(Func, ValidationFrame, condition.ToNonGeneric(), errorMessage);
+			var validator = new ErrorValidator<T>(Func, ValidationFrame, condition.ToNonGeneric(), errorMessage, detailInfoFunc?.ToNonGeneric());
 			AddValidator(validator);
 
 			return this;
 		}
 
-		public Validator<T> WithPropertyError<TProperty>(Expression<Func<T, TProperty>> expression, Func<T?, bool> condition, string errorMessage)
+		public Validator<T> WithPropertyError<TProperty>(Expression<Func<T, TProperty>> expression, Func<T?, bool> condition, string errorMessage, Func<T?, string>? detailInfoFunc = null)
 		{
 			if (expression == null)
 				throw new ArgumentNullException(nameof(expression));
@@ -263,7 +265,7 @@ namespace Raider.Validation
 			var newValidationFrame = ValidationFrame.AddProperty(typeof(T).FullName, expression.GetMemberName());
 
 			var getter = PropertyAccessor.GetCachedAccessor(expression);
-			var validator = new ErrorValidator<T, TProperty>(getter.ToNonGeneric(), newValidationFrame, condition.ToNonGeneric(), errorMessage);
+			var validator = new ErrorValidator<T, TProperty>(getter.ToNonGeneric(), newValidationFrame, condition.ToNonGeneric(), errorMessage, detailInfoFunc?.ToNonGeneric());
 			AddValidator(validator);
 
 			return this;
@@ -273,7 +275,8 @@ namespace Raider.Validation
 			Expression<Func<T, TProperty>> expression,
 			Action<PropertyValidator<T, TProperty>> propertyValidator,
 			Func<T?, bool>? condition = null,
-			Func<ClientCondition<T>, IClientConditionDefinition>? clientCondition = null)
+			Func<ClientCondition<T>, IClientConditionDefinition>? clientCondition = null,
+			Func<T?, string>? detailInfoFunc = null)
 		{
 			if (expression == null)
 				throw new ArgumentNullException(nameof(expression));
@@ -285,7 +288,7 @@ namespace Raider.Validation
 			var cc = new ClientCondition<T>();
 			var clientConditionDefinition = clientCondition?.Invoke(cc);
 
-			var propValidator = new PropertyValidator<T, TProperty>(PropertyAccessor.GetCachedAccessor(expression).ToNonGeneric(), newValidationFrame, condition != null, clientConditionDefinition);
+			var propValidator = new PropertyValidator<T, TProperty>(PropertyAccessor.GetCachedAccessor(expression).ToNonGeneric(), newValidationFrame, condition != null, clientConditionDefinition, detailInfoFunc?.ToNonGeneric());
 
 			if (condition == null && clientConditionDefinition == null)
 			{
@@ -293,7 +296,7 @@ namespace Raider.Validation
 			}
 			else
 			{
-				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric(), clientConditionDefinition);
+				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric(), clientConditionDefinition, detailInfoFunc?.ToNonGeneric());
 				AddValidator(condValidator);
 				condValidator.AddValidator(propValidator);
 			}
@@ -302,7 +305,7 @@ namespace Raider.Validation
 			return this;
 		}
 
-		public Validator<T> ForNavigation<TProperty>(Expression<Func<T, TProperty?>> expression, Action<Validator<TProperty>> validator, Func<T?, bool>? condition = null)
+		public Validator<T> ForNavigation<TProperty>(Expression<Func<T, TProperty?>> expression, Action<Validator<TProperty>> validator, Func<T?, bool>? condition = null, Func<T?, string>? detailInfoFunc = null)
 			where TProperty : class
 		{
 			if (expression == null)
@@ -312,7 +315,7 @@ namespace Raider.Validation
 
 			var newValidationFrame = ValidationFrame.AddNavigation(typeof(TProperty).FullName, expression.GetMemberName());
 
-			var navigationValidator = new NavigationValidator<T, TProperty>(expression, newValidationFrame, condition != null);
+			var navigationValidator = new NavigationValidator<T, TProperty>(expression, newValidationFrame, condition != null, detailInfoFunc?.ToNonGeneric());
 
 			if (condition == null)
 			{
@@ -320,7 +323,7 @@ namespace Raider.Validation
 			}
 			else
 			{
-				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric());
+				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric(), null, detailInfoFunc?.ToNonGeneric());
 				AddValidator(condValidator);
 				condValidator.AddValidator(navigationValidator);
 			}
@@ -329,7 +332,7 @@ namespace Raider.Validation
 			return this;
 		}
 
-		public Validator<T> ForEach<TItem>(Expression<Func<T, IEnumerable<TItem>>> expression, Action<Validator<TItem>> validator, Func<T?, bool>? condition = null)
+		public Validator<T> ForEach<TItem>(Expression<Func<T, IEnumerable<TItem>>> expression, Action<Validator<TItem>> validator, Func<T?, bool>? condition = null, Func<T?, string>? detailInfoFunc = null)
 		{
 			if (expression == null)
 				throw new ArgumentNullException(nameof(expression));
@@ -338,7 +341,7 @@ namespace Raider.Validation
 
 			var newValidationFrame = ValidationFrame.AddEnumeration(typeof(TItem).FullName, expression.GetMemberName());
 
-			var enumerableValidator = new EnumerableValidator<T, TItem>(expression, newValidationFrame, condition != null);
+			var enumerableValidator = new EnumerableValidator<T, TItem>(expression, newValidationFrame, condition != null, detailInfoFunc?.ToNonGeneric());
 
 			if (condition == null)
 			{
@@ -346,7 +349,7 @@ namespace Raider.Validation
 			}
 			else
 			{
-				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric());
+				var condValidator = new ConditionalValidator<T>(Func, newValidationFrame, condition?.ToNonGeneric(), null, detailInfoFunc?.ToNonGeneric());
 				AddValidator(condValidator);
 				condValidator.AddValidator(enumerableValidator);
 			}
@@ -355,7 +358,7 @@ namespace Raider.Validation
 			return this;
 		}
 
-		public Validator<TProperty> GetNavigateValidator<TProperty>(Expression<Func<T, TProperty?>> expression, bool setValidatorChain = true)
+		public Validator<TProperty> GetNavigateValidator<TProperty>(Expression<Func<T, TProperty?>> expression, bool setValidatorChain = true, Func<T?, string>? detailInfoFunc = null)
 			where TProperty : class
 		{
 			if (expression == null)
@@ -363,7 +366,7 @@ namespace Raider.Validation
 
 			var newValidationFrame = ValidationFrame.AddNavigation(typeof(TProperty).FullName, expression.GetMemberName());
 
-			var navigationValidator = new NavigationValidator<T, TProperty>(expression, newValidationFrame, Conditional);
+			var navigationValidator = new NavigationValidator<T, TProperty>(expression, newValidationFrame, Conditional, detailInfoFunc?.ToNonGeneric());
 
 			if (setValidatorChain)
 				AddValidator(navigationValidator);
@@ -371,14 +374,14 @@ namespace Raider.Validation
 			return navigationValidator;
 		}
 
-		public Validator<TItem> GetEnumerableValidator<TItem>(Expression<Func<T, IEnumerable<TItem>>> expression, bool setValidatorChain = true)
+		public Validator<TItem> GetEnumerableValidator<TItem>(Expression<Func<T, IEnumerable<TItem>>> expression, bool setValidatorChain = true, Func<T?, string>? detailInfoFunc = null)
 		{
 			if (expression == null)
 				throw new ArgumentNullException(nameof(expression));
 
 			var newValidationFrame = ValidationFrame.AddEnumeration(typeof(TItem).FullName, expression.GetMemberName());
 
-			var enumerableValidator = new EnumerableValidator<T, TItem>(expression, newValidationFrame, Conditional);
+			var enumerableValidator = new EnumerableValidator<T, TItem>(expression, newValidationFrame, Conditional, detailInfoFunc?.ToNonGeneric());
 
 			if (setValidatorChain)
 				AddValidator(enumerableValidator);

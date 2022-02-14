@@ -8,8 +8,8 @@ namespace Raider.Validation
 		public override ValidatorType ValidatorType { get; } = ValidatorType.ConditionalValidator;
 		public Func<object?, bool>? Condition { get; }
 
-		public ConditionalValidator(Func<object, object>? func, ValidationFrame validationFrame, Func<object?, bool>? condition, IClientConditionDefinition? clientConditionDefinition = null)
-			: base(func, validationFrame, true, clientConditionDefinition)
+		public ConditionalValidator(Func<object, object>? func, ValidationFrame validationFrame, Func<object?, bool>? condition, IClientConditionDefinition? clientConditionDefinition, Func<object?, string>? detailInfoFunc)
+			: base(func, validationFrame, true, clientConditionDefinition, detailInfoFunc)
 		{
 			if (condition == null && clientConditionDefinition == null)
 				throw new ArgumentNullException(nameof(condition));

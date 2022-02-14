@@ -40,7 +40,7 @@ namespace Raider.Validation
 		internal override ValidationResult? Validate(ValidationContext context)
 			=> ValidationHelper.IsDefaultOrEmpty(context.InstanceToValidate, _defaultValue)
 				? null
-				: new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty()));
+				: new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty(), DetailInfoFunc?.Invoke(context.InstanceToValidate)));
 
 		public override IValidationDescriptor ToDescriptor()
 			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty())
@@ -85,7 +85,7 @@ namespace Raider.Validation
 
 		internal override ValidationResult? Validate(ValidationContext context)
 			=> ValidationHelper.IsDefaultOrEmpty(context.InstanceToValidate, _defaultValue)
-				? new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty()))
+				? new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty(), DetailInfoFunc?.Invoke(context.InstanceToValidate)))
 				: null;
 
 		public override IValidationDescriptor ToDescriptor()

@@ -15,8 +15,8 @@ namespace Raider.Validation
 
 		internal Expression<Func<T, IEnumerable<TItem>>> Expression { get; }
 
-		public EnumerableValidator(Expression<Func<T, IEnumerable<TItem>>> expression, ValidationFrame validationFrame, bool conditional)
-			: base(PropertyAccessor.GetCachedAccessor(expression).ToNonGeneric(), validationFrame, conditional)
+		public EnumerableValidator(Expression<Func<T, IEnumerable<TItem>>> expression, ValidationFrame validationFrame, bool conditional, Func<object?, string>? detailInfoFunc)
+			: base(PropertyAccessor.GetCachedAccessor(expression).ToNonGeneric(), validationFrame, conditional, null, detailInfoFunc)
 		{
 			Expression = expression;
 		}

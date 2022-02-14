@@ -34,7 +34,7 @@ namespace Raider.Extensions
 			return exception;
 		}
 
-		public static T SetLogMessage<T>(this T exception, ILogMessage logMessage)
+		public static T SetLogMessage<T>(this T exception, ILogMessage? logMessage)
 			where T : Exception
 		{
 			if (exception == null)

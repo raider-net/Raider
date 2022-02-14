@@ -15,8 +15,8 @@ namespace Raider.Validation
 		protected virtual string DefaultValidationMessageWithProperty { get; }
 		protected TemplateFormatter TemplateFormatter { get; }
 
-		internal PropertyValidator(Func<object, object>? func, ValidationFrame validationFrame, bool conditional, IClientConditionDefinition? clientConditionDefinition)
-			: base(func, validationFrame, conditional, clientConditionDefinition)
+		internal PropertyValidator(Func<object, object>? func, ValidationFrame validationFrame, bool conditional, IClientConditionDefinition? clientConditionDefinition, Func<object?, string>? detailInfoFunc)
+			: base(func, validationFrame, conditional, clientConditionDefinition, detailInfoFunc)
 		{
 			DefaultValidationMessage = "";
 			DefaultValidationMessageWithProperty = "";
@@ -24,7 +24,7 @@ namespace Raider.Validation
 		}
 
 		protected PropertyValidator(PropertyValidator<T, TProperty> propertyValidator)
-			: base(propertyValidator.Func, propertyValidator.ValidationFrame, propertyValidator.Conditional, propertyValidator.ClientConditionDefinition)
+			: base(propertyValidator.Func, propertyValidator.ValidationFrame, propertyValidator.Conditional, propertyValidator.ClientConditionDefinition, propertyValidator.DetailInfoFunc)
 		{
 			DefaultValidationMessage = "";
 			DefaultValidationMessageWithProperty = "";

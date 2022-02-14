@@ -46,7 +46,7 @@ namespace Raider.Validation
 		internal override ValidationResult? Validate(ValidationContext context)
 			=> context.InstanceToValidate == null || _regex == null || (context.InstanceToValidate is string value && _regex.IsMatch(value))
 				? null
-				: new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty()));
+				: new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty(), DetailInfoFunc?.Invoke(context.InstanceToValidate)));
 
 		public override IValidationDescriptor ToDescriptor()
 			=> new ValidationDescriptor(typeof(T), ValidationFrame, ValidatorType, GetType().ToFriendlyFullName(), Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty())

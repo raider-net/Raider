@@ -12,8 +12,8 @@ namespace Raider.Validation
 		public override ValidatorType ValidatorType { get; } = ValidatorType.NavigationValidator;
 		public override bool Conditional { get; }
 
-		public NavigationValidator(Expression<Func<T, TProperty?>> expression, ValidationFrame validationFrame, bool conditional)
-			: base(PropertyAccessor.GetCachedAccessor(expression).ToNonGeneric(), validationFrame, conditional)
+		public NavigationValidator(Expression<Func<T, TProperty?>> expression, ValidationFrame validationFrame, bool conditional, Func<object?, string>? detailInfoFunc)
+			: base(PropertyAccessor.GetCachedAccessor(expression).ToNonGeneric(), validationFrame, conditional, null, detailInfoFunc)
 		{
 		}
 

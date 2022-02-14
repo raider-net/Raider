@@ -55,7 +55,7 @@ namespace Raider.Validation
 				if (MinLength <= value.Length && value.Length <= MaxLength)
 					return null;
 				else
-					return new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty()));
+					return new ValidationResult(new ValidationFailure(context.ToReadOnlyValidationFrame(), ValidatorType, Conditional, ClientConditionDefinition, GetValidationMessage(), GetValidationMessageWithProperty(), DetailInfoFunc?.Invoke(context.InstanceToValidate)));
 			}
 
 			throw new InvalidOperationException($"{nameof(context.InstanceToValidate)} must be string.");
