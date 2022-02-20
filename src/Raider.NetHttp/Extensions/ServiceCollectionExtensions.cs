@@ -57,7 +57,9 @@ namespace Raider.Extensions
 			if (options.AutomaticDecompression.HasValue
 				|| options.Proxy != null
 				|| options.UseDefaultCredentials.HasValue
-				|| options.Credentials != null)
+				|| options.Credentials != null
+				|| options.TrustToAllServerCertificates
+				|| !options.UsesCookieContainerToStoreServerCookies)
 			{
 				httpClientBuilder
 					.ConfigurePrimaryHttpMessageHandler(
@@ -76,6 +78,12 @@ namespace Raider.Extensions
 
 							if (options.Credentials != null)
 								handler.Credentials = options.Credentials;
+
+							if (options.TrustToAllServerCertificates && options.RemoteCertificateValidationCallback != null)
+								handler.ServerCertificateCustomValidationCallback = options.RemoteCertificateValidationCallback!;
+
+							if (!options.UsesCookieContainerToStoreServerCookies)
+								handler.UseCookies = false;
 
 							return handler;
 						});

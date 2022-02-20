@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace Raider.NetHttp.Http
 {
@@ -35,6 +37,8 @@ namespace Raider.NetHttp.Http
 
 		TBuilder Multipart(string multipartSubType, string? multipartBoundary);
 
+		TBuilder RequestTimeout(TimeSpan? requestTimeout, bool force = true);
+
 		TBuilder AddFormData(KeyValuePair<string, string> formData, bool force = true);
 
 		TBuilder AddFormData(List<KeyValuePair<string, string>> formData, bool force = true);
@@ -42,6 +46,14 @@ namespace Raider.NetHttp.Http
 		TBuilder AddStringContent(StringContent stringContent, bool force = true);
 
 		TBuilder AddStringContent(Func<StringContent, StringContent?> configureStringContent, bool force = true);
+
+		TBuilder AddJsonContent(JsonContent jsonContent, bool force = true);
+
+		TBuilder AddJsonContent(Func<JsonContent, JsonContent?> configureJsonContent, bool force = true);
+
+		TBuilder AddJsonContent<T>(JsonContent<T> jsonContent, bool force = true);
+
+		TBuilder AddJsonContent<T>(Func<JsonContent<T>, JsonContent<T>?> configureJsonContent, bool force = true);
 
 		TBuilder AddStreamContent(StreamContent streamContent, bool force = true);
 
@@ -182,6 +194,14 @@ namespace Raider.NetHttp.Http
 			return _builder;
 		}
 
+		public TBuilder RequestTimeout(TimeSpan? requestTimeout, bool force = true)
+		{
+			if (force || !_request.RequestTimeout.HasValue)
+				_request.RequestTimeout = requestTimeout;
+
+			return _builder;
+		}
+
 		public TBuilder AddFormData(KeyValuePair<string, string> formData, bool force = true)
 		{
 			if (force || _request.FormData == null)
@@ -242,6 +262,78 @@ namespace Raider.NetHttp.Http
 
 				if (stringContent != null)
 					_request.StringContents.Add(stringContent);
+			}
+
+			return _builder;
+		}
+
+		public TBuilder AddJsonContent(JsonContent jsonContent, bool force = true)
+		{
+			if (force || _request.JsonContents == null)
+			{
+				if (jsonContent == null)
+					throw new ArgumentNullException(nameof(jsonContent));
+
+				if (_request.JsonContents == null)
+					_request.JsonContents = new List<JsonContent>();
+
+				_request.JsonContents.Add(jsonContent);
+			}
+
+			return _builder;
+		}
+
+		public TBuilder AddJsonContent(Func<JsonContent, JsonContent?> configureJsonContent, bool force = true)
+		{
+			if (force || _request.JsonContents == null)
+			{
+				if (configureJsonContent == null)
+					return _builder;
+
+				if (_request.JsonContents == null)
+					_request.JsonContents = new List<JsonContent>();
+
+				var jsonContent = new JsonContent();
+				jsonContent = configureJsonContent.Invoke(jsonContent);
+
+				if (jsonContent != null)
+					_request.JsonContents.Add(jsonContent);
+			}
+
+			return _builder;
+		}
+
+		public TBuilder AddJsonContent<T>(JsonContent<T> jsonContent, bool force = true)
+		{
+			if (force || _request.JsonContents == null)
+			{
+				if (jsonContent == null)
+					throw new ArgumentNullException(nameof(jsonContent));
+
+				if (_request.JsonContents == null)
+					_request.JsonContents = new List<JsonContent>();
+
+				_request.JsonContents.Add(jsonContent);
+			}
+
+			return _builder;
+		}
+
+		public TBuilder AddJsonContent<T>(Func<JsonContent<T>, JsonContent<T>?> configureJsonContent, bool force = true)
+		{
+			if (force || _request.JsonContents == null)
+			{
+				if (configureJsonContent == null)
+					return _builder;
+
+				if (_request.JsonContents == null)
+					_request.JsonContents = new List<JsonContent>();
+
+				var jsonContent = new JsonContent<T>();
+				jsonContent = configureJsonContent.Invoke(jsonContent);
+
+				if (jsonContent != null)
+					_request.JsonContents.Add(jsonContent);
 			}
 
 			return _builder;

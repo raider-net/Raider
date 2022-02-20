@@ -6,8 +6,10 @@ namespace Raider.NetHttp.Http.Headers
 {
 	public class RequestHeaders
 	{
+		private const string Cookie = "Cookie";
 		public List<KeyValuePair<string, string?>> CustomHeaders { get; } = new List<KeyValuePair<string, string?>>();
 		public List<KeyValuePair<string, IEnumerable<string?>>> CustomCollectionHeaders { get; } = new List<KeyValuePair<string, IEnumerable<string?>>>();
+		public List<string> CookieCollectionHeaders { get; } = new List<string>();
 
 		public List<MediaTypeWithQualityHeader>? Accept { get; set; }
 		public List<ProductInfoHeader>? UserAgent { get; set; }
@@ -50,6 +52,15 @@ namespace Raider.NetHttp.Http.Headers
 		public RequestHeaders Add(string name, IEnumerable<string?> values)
 		{
 			CustomCollectionHeaders.Add(new KeyValuePair<string, IEnumerable<string?>>(name, values));
+			return this;
+		}
+
+		public RequestHeaders AddCookie(string key, string value)
+		{
+			if (string.IsNullOrWhiteSpace(key))
+				throw new ArgumentNullException(nameof(key));
+
+			CookieCollectionHeaders.Add($"{key}={value}");
 			return this;
 		}
 
@@ -172,6 +183,9 @@ namespace Raider.NetHttp.Http.Headers
 
 			foreach (var customCollectionHeader in CustomCollectionHeaders)
 				httpRequestHeaders.Add(customCollectionHeader.Key, customCollectionHeader.Value);
+
+			if (0 < CookieCollectionHeaders.Count)
+				httpRequestHeaders.Add(Cookie, string.Join("; ", CookieCollectionHeaders));
 		}
 	}
 }

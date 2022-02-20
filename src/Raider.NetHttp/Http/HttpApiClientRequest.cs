@@ -2,6 +2,7 @@
 using Raider.Web;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 
 namespace Raider.NetHttp.Http
@@ -18,8 +19,10 @@ namespace Raider.NetHttp.Http
 		public RequestHeaders Headers { get; }
 		public string? MultipartSubType { get; set; }
 		public string? MultipartBoundary { get; set; }
+		public TimeSpan? RequestTimeout { get; set; }
 		public List<KeyValuePair<string, string>>? FormData { get; set; }
 		public List<StringContent>? StringContents { get; set; }
+		public List<JsonContent>? JsonContents { get; set; }
 		public List<StreamContent>? StreamContents { get; set; }
 		public List<ByteArrayContent>? ByteArrayContents { get; set; }
 
@@ -58,6 +61,7 @@ namespace Raider.NetHttp.Http
 			var contentsCount =
 				(FormData?.Count ?? 0)
 				+ (StringContents?.Count ?? 0)
+				+ (JsonContents?.Count ?? 0)
 				+ (StreamContents?.Count ?? 0)
 				+ (ByteArrayContents?.Count ?? 0);
 
@@ -87,6 +91,15 @@ namespace Raider.NetHttp.Http
 								multipartFormDataContent.Add(stringContent.ToStringContent());
 							else
 								multipartFormDataContent.Add(stringContent.ToStringContent(), stringContent.HttpContentNameFormDataMultipartPurpose);
+						}
+
+					if (JsonContents != null)
+						foreach (var jsonContent in JsonContents)
+						{
+							if (string.IsNullOrWhiteSpace(jsonContent.HttpContentNameFormDataMultipartPurpose))
+								multipartFormDataContent.Add(jsonContent.ToJsonContent());
+							else
+								multipartFormDataContent.Add(jsonContent.ToJsonContent(), jsonContent.HttpContentNameFormDataMultipartPurpose);
 						}
 
 					if (StreamContents != null)
@@ -127,6 +140,10 @@ namespace Raider.NetHttp.Http
 						foreach (var stringContent in StringContents)
 							multipartContent.Add(stringContent.ToStringContent());
 
+					if (JsonContents != null)
+						foreach (var jsonContent in JsonContents)
+							multipartContent.Add(jsonContent.ToJsonContent());
+
 					if (StreamContents != null)
 						foreach (var streamContent in StreamContents)
 							multipartContent.Add(streamContent.ToStreamContent());
@@ -138,22 +155,26 @@ namespace Raider.NetHttp.Http
 
 				return multipartContent;
 			}
-			else
+			else //if (contentsCount == 1)
 			{
 				if (FormData != null && 0 < FormData.Count)
 					throw new InvalidOperationException($"{nameof(FormData)} must be send as {nameof(MultipartFormDataContent)}");
 
-				if (StringContents != null)
-					foreach (var stringContent in StringContents)
-						return stringContent.ToStringContent();
+				var stringContent = StringContents?.FirstOrDefault();
+				if (stringContent != null)
+					return stringContent.ToStringContent();
 
-				if (StreamContents != null)
-					foreach (var streamContent in StreamContents)
-						return streamContent.ToStreamContent();
+				var jsonContent = JsonContents?.FirstOrDefault();
+				if (jsonContent != null)
+					return jsonContent.ToJsonContent();
 
-				if (ByteArrayContents != null)
-					foreach (var byteArrayContent in ByteArrayContents)
-						return byteArrayContent.ToByteArrayContent();
+				var streamContent = StreamContents?.FirstOrDefault();
+				if (streamContent != null)
+					return streamContent.ToStreamContent();
+
+				var byteArrayContent = ByteArrayContents?.FirstOrDefault();
+				if (byteArrayContent != null)
+					return byteArrayContent.ToByteArrayContent();
 			}
 
 			return null;

@@ -19,6 +19,8 @@ namespace Raider.NetHttp
 		public Version? Version { get; set; }
 		public DecompressionMethods? AutomaticDecompression { get; set; } = DecompressionMethods.GZip;
 		public IWebProxy? Proxy { get; set; }
+		public bool TrustToAllServerCertificates { get; set; }
+		public bool UsesCookieContainerToStoreServerCookies { get; set; }
 		public bool? UseDefaultCredentials { get; set; }
 		public ICredentials? Credentials { get; set; }
 		public Dictionary<string, IAsyncPolicy<HttpResponseMessage>>? UriPolicies { get; set; } //Dictionary<Uri, IAsyncPolicy<HttpResponseMessage>> OR ----- Wildcard ----- Dictionary<*, IAsyncPolicy<HttpResponseMessage>>

@@ -63,15 +63,32 @@ namespace Raider.NetHttp
 
 			var response = new Raider.NetHttp.Http.Internal.HttpApiClientResponse(request);
 
+			CancellationTokenSource? requestTimeoutCancellationTokenSource = null;
+			CancellationTokenSource? linkedCancellationTokenSource = null;
+			var usedCancellationToken = cancellationToken;
 			try
 			{
+				if (request.RequestTimeout.HasValue)
+				{
+					requestTimeoutCancellationTokenSource = new CancellationTokenSource(request.RequestTimeout.Value);
+					if (cancellationToken != default)
+					{
+						linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(requestTimeoutCancellationTokenSource.Token, cancellationToken);
+						usedCancellationToken = linkedCancellationTokenSource.Token;
+					}
+					else
+					{
+						usedCancellationToken = requestTimeoutCancellationTokenSource.Token;
+					}
+				}
+
 				using var httpRequestMessage = request.ToHttpRequestMessage();
 
 				if (continueOnCapturedContext.HasValue)
 				{
 					var httpResponseMessageTask =
 						_client
-							.SendAsync(httpRequestMessage, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+							.SendAsync(httpRequestMessage, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, usedCancellationToken)
 							.ConfigureAwait(continueOnCapturedContext: continueOnCapturedContext.Value);
 
 					response.Response = await httpResponseMessageTask;
@@ -80,10 +97,17 @@ namespace Raider.NetHttp
 				{
 					var httpResponseMessageTask =
 						_client
-							.SendAsync(httpRequestMessage, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+							.SendAsync(httpRequestMessage, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, usedCancellationToken);
 
 					response.Response = await httpResponseMessageTask;
 				}
+			}
+			catch (TaskCanceledException)
+			{
+				if (requestTimeoutCancellationTokenSource != null && requestTimeoutCancellationTokenSource.IsCancellationRequested)
+					response.RequestTimedOut = true;
+				else
+					response.OperationCanceled = true;
 			}
 			catch (TimeoutException)
 			{
@@ -96,6 +120,11 @@ namespace Raider.NetHttp
 			catch (Exception ex)
 			{
 				response.Exception = ex;
+			}
+			finally
+			{
+				linkedCancellationTokenSource?.Dispose();
+				requestTimeoutCancellationTokenSource?.Dispose();
 			}
 
 			return response;
