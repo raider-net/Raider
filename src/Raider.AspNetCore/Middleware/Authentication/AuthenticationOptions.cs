@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Raider.AspNetCore.Middleware.Authentication
 {
@@ -42,10 +43,14 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		public Func<WindowsValidatePrincipalContext, Task> OnValidateWindowsPrincipal { get; private set; }
 
 		//HttpContext context, string authenticationSchemeType, ILogger logger
-		public Func<HttpContext, string, ILogger, RaiderPrincipal> CreateWindowsPrincipal { get; private set; }
+		public Func<HttpContext, string, ILogger, Task<RaiderPrincipal?>> CreateWindowsPrincipal { get; private set; }
 
+		public bool DisableCookieAuthenticationChallenge { get; set; }
 		public CookieAuthenticationOptions CookieAuthenticationOptions { get; private set; }
-		public string CookieName { get; private set; }
+
+		private string _cookieName;
+		public string CookieName => _cookieName ??= $"{CookieAuthenticationDefaults.CookiePrefix}{AuthenticationDefaults.AuthenticationScheme}";
+
 		public bool UseCookieAuthentication => CookieAuthenticationOptions != null;
 		public Func<CookieValidatePrincipalContext, Task> OnValidateCookiePrincipal { get; private set; }
 
@@ -53,6 +58,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		public Func<HttpContext, string, string, ILogger, Task<RaiderPrincipal?>> RecreateCookiePrincipal { get; private set; }
 		public Func<ClaimsPrincipal, RaiderPrincipal> ConvertCookiePrincipal { get; private set; }
 
+		public bool DisableTokenAuthenticationChallenge { get; set; }
 		public JwtBearerOptions TokenAuthenticationOptions { get; private set; }
 		public bool UseTokenAuthentication => TokenAuthenticationOptions != null;
 		public Func<TokenValidatedContext, Task> OnValidateTokenPrincipal { get; private set; }
@@ -66,7 +72,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		public Func<RequestValidatePrincipalContext, Task> OnValidateRequestPrincipal { get; private set; }
 
 		//HttpContext context, string authenticationSchemeType, ILogger logger
-		public Func<HttpContext, string, ILogger, RaiderPrincipal> CreateRequestPrincipal { get; private set; }
+		public Func<HttpContext, string, ILogger, Task<RaiderPrincipal?>> CreateRequestPrincipal { get; private set; }
 
 		public AuthenticationOptions SetWindowsAuthentication(WindowsAuthenticationOptions options, Func<WindowsValidatePrincipalContext, Task> onValidatePrincipal)
 		{
@@ -76,43 +82,43 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			return this;
 		}
 
-		public AuthenticationOptions SetWindowsAuthentication(Func<HttpContext, string, ILogger, RaiderPrincipal> createPrincipal)
+		public AuthenticationOptions SetWindowsAuthentication(Func<HttpContext, string, ILogger, Task<RaiderPrincipal?>> createPrincipal, bool disableWindowsAuthenticationChallenge = false)
 		{
 			AddAuthentication(AuthenticationType.WindowsIntegrated);
-			WindowsAuthenticationOptions = new WindowsAuthenticationOptions();
+			WindowsAuthenticationOptions = new WindowsAuthenticationOptions { DisableAuthenticationChallenge = disableWindowsAuthenticationChallenge };
 			CreateWindowsPrincipal = createPrincipal ?? throw new ArgumentNullException(nameof(createPrincipal));
-			OnValidateWindowsPrincipal = context =>
+			OnValidateWindowsPrincipal = async context =>
 			{
 				if (context.HttpContext?.User != null && context.HttpContext.User.Identity != null)
-					context.Principal = CreateWindowsPrincipal(context.HttpContext, context.Scheme.Name, context.Logger);
-				
-				return Task.FromResult<object>(null);
+					context.Principal = await CreateWindowsPrincipal(context.HttpContext, context.Scheme.Name, context.Logger);
 			};
 
 			return this;
 		}
 
-		public AuthenticationOptions SetCookieAuthentication(Func<CookieValidatePrincipalContext, Task> onValidatePrincipal)
-			=> SetCookieAuthentication(new CookieAuthenticationOptions(), onValidatePrincipal);
+		public AuthenticationOptions SetCookieAuthentication(Func<CookieValidatePrincipalContext, Task> onValidatePrincipal, bool disableCookieAuthenticationChallenge = false)
+			=> SetCookieAuthentication(new CookieAuthenticationOptions(), onValidatePrincipal, disableCookieAuthenticationChallenge);
 
-		public AuthenticationOptions SetCookieAuthenticationReplacePrincipal(Func<HttpContext, string, string, ILogger, Task<RaiderPrincipal?>> recreatePrincipal)
-			=> SetCookieAuthenticationReplacePrincipal(new CookieAuthenticationOptions(), recreatePrincipal);
+		public AuthenticationOptions SetCookieAuthenticationReplacePrincipal(Func<HttpContext, string, string, ILogger, Task<RaiderPrincipal?>> recreatePrincipal, bool disableCookieAuthenticationChallenge = false)
+			=> SetCookieAuthenticationReplacePrincipal(new CookieAuthenticationOptions(), recreatePrincipal, disableCookieAuthenticationChallenge);
 
-		public AuthenticationOptions SetCookieAuthenticationConvertPrincipal(Func<ClaimsPrincipal, RaiderPrincipal> convertPrincipal)
-			=> SetCookieAuthenticationConvertPrincipal(new CookieAuthenticationOptions(), convertPrincipal);
+		public AuthenticationOptions SetCookieAuthenticationConvertPrincipal(Func<ClaimsPrincipal, RaiderPrincipal> convertPrincipal, bool disableCookieAuthenticationChallenge = false)
+			=> SetCookieAuthenticationConvertPrincipal(new CookieAuthenticationOptions(), convertPrincipal, disableCookieAuthenticationChallenge);
 
-		public AuthenticationOptions SetCookieAuthentication(CookieAuthenticationOptions options, Func<CookieValidatePrincipalContext, Task> onValidatePrincipal)
+		public AuthenticationOptions SetCookieAuthentication(CookieAuthenticationOptions options, Func<CookieValidatePrincipalContext, Task> onValidatePrincipal, bool disableCookieAuthenticationChallenge = false)
 		{
 			AddAuthentication(AuthenticationType.Cookie);
 			CookieAuthenticationOptions = options ?? throw new ArgumentNullException(nameof(options));
+			DisableCookieAuthenticationChallenge = disableCookieAuthenticationChallenge;
 			OnValidateCookiePrincipal = onValidatePrincipal ?? throw new ArgumentNullException(nameof(onValidatePrincipal));
 			return this;
 		}
 
-		public AuthenticationOptions SetCookieAuthenticationReplacePrincipal(CookieAuthenticationOptions options, Func<HttpContext, string, string, ILogger, Task<RaiderPrincipal?>> recreatePrincipal)
+		public AuthenticationOptions SetCookieAuthenticationReplacePrincipal(CookieAuthenticationOptions options, Func<HttpContext, string, string, ILogger, Task<RaiderPrincipal?>> recreatePrincipal, bool disableCookieAuthenticationChallenge = false)
 		{
 			AddAuthentication(AuthenticationType.Cookie);
 			CookieAuthenticationOptions = options ?? throw new ArgumentNullException(nameof(options));
+			DisableCookieAuthenticationChallenge = disableCookieAuthenticationChallenge;
 			RecreateCookiePrincipal = recreatePrincipal ?? throw new ArgumentNullException(nameof(recreatePrincipal));
 			OnValidateCookiePrincipal = async context =>
 			{
@@ -123,10 +129,11 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			return this;
 		}
 
-		public AuthenticationOptions SetCookieAuthenticationConvertPrincipal(CookieAuthenticationOptions options, Func<ClaimsPrincipal, RaiderPrincipal> convertPrincipal)
+		public AuthenticationOptions SetCookieAuthenticationConvertPrincipal(CookieAuthenticationOptions options, Func<ClaimsPrincipal, RaiderPrincipal> convertPrincipal, bool disableCookieAuthenticationChallenge = false)
 		{
 			AddAuthentication(AuthenticationType.Cookie);
 			CookieAuthenticationOptions = options ?? throw new ArgumentNullException(nameof(options));
+			DisableCookieAuthenticationChallenge = disableCookieAuthenticationChallenge;
 			ConvertCookiePrincipal = convertPrincipal ?? throw new ArgumentNullException(nameof(convertPrincipal));
 			OnValidateCookiePrincipal = context =>
 			{
@@ -141,52 +148,57 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		public AuthenticationOptions SetCookieName(string cookieName)
 		{
-			CookieName = cookieName;
+			_cookieName = cookieName;
 			return this;
 		}
 
-		public AuthenticationOptions SetTokenAuthentication(TokenValidationParameters tokenValidationParameters, Func<TokenValidatedContext, Task> onValidatePrincipal)
+		public AuthenticationOptions SetTokenAuthentication(TokenValidationParameters tokenValidationParameters, Func<TokenValidatedContext, Task> onValidatePrincipal, bool disableTokenAuthenticationChallenge = false)
 		{
 			return SetTokenAuthentication(
 				new JwtBearerOptions
 				{
 					TokenValidationParameters = tokenValidationParameters
 				},
-				onValidatePrincipal);
+				onValidatePrincipal,
+				disableTokenAuthenticationChallenge);
 		}
 
-		public AuthenticationOptions SetTokenAuthenticationReplacePrincipal(TokenValidationParameters tokenValidationParameters, Func<HttpContext, string, string, ILogger, RaiderPrincipal> recreatePrincipal)
+		public AuthenticationOptions SetTokenAuthenticationReplacePrincipal(TokenValidationParameters tokenValidationParameters, Func<HttpContext, string, string, ILogger, RaiderPrincipal> recreatePrincipal, bool disableTokenAuthenticationChallenge = false)
 		{
 			return SetTokenAuthenticationReplacePrincipal(
 				new JwtBearerOptions
 				{
 					TokenValidationParameters = tokenValidationParameters
 				},
-				recreatePrincipal);
+				recreatePrincipal,
+				disableTokenAuthenticationChallenge);
 		}
 
-		public AuthenticationOptions SetTokenAuthenticationConvertPrincipal(TokenValidationParameters tokenValidationParameters, Func<ClaimsPrincipal, RaiderPrincipal> convertPrincipal)
+		public AuthenticationOptions SetTokenAuthenticationConvertPrincipal(TokenValidationParameters tokenValidationParameters, Func<ClaimsPrincipal, RaiderPrincipal> convertPrincipal, bool disableTokenAuthenticationChallenge = false)
 		{
 			return SetTokenAuthenticationConvertPrincipal(
 				new JwtBearerOptions
 				{
 					TokenValidationParameters = tokenValidationParameters
 				},
-				convertPrincipal);
+				convertPrincipal,
+				disableTokenAuthenticationChallenge);
 		}
 
-		public AuthenticationOptions SetTokenAuthentication(JwtBearerOptions options, Func<TokenValidatedContext, Task> onValidatePrincipal)
+		public AuthenticationOptions SetTokenAuthentication(JwtBearerOptions options, Func<TokenValidatedContext, Task> onValidatePrincipal, bool disableTokenAuthenticationChallenge = false)
 		{
 			AddAuthentication(AuthenticationType.Token);
 			TokenAuthenticationOptions = options ?? throw new ArgumentNullException(nameof(options));
+			DisableTokenAuthenticationChallenge = disableTokenAuthenticationChallenge;
 			OnValidateTokenPrincipal = onValidatePrincipal ?? throw new ArgumentNullException(nameof(onValidatePrincipal));
 			return this;
 		}
 
-		public AuthenticationOptions SetTokenAuthenticationReplacePrincipal(JwtBearerOptions options, Func<HttpContext, string, string, ILogger, RaiderPrincipal> recreatePrincipal)
+		public AuthenticationOptions SetTokenAuthenticationReplacePrincipal(JwtBearerOptions options, Func<HttpContext, string, string, ILogger, RaiderPrincipal> recreatePrincipal, bool disableTokenAuthenticationChallenge = false)
 		{
 			AddAuthentication(AuthenticationType.Token);
 			TokenAuthenticationOptions = options ?? throw new ArgumentNullException(nameof(options));
+			DisableTokenAuthenticationChallenge = disableTokenAuthenticationChallenge;
 			RecreateTokenPrincipal = recreatePrincipal ?? throw new ArgumentNullException(nameof(recreatePrincipal));
 			OnValidateTokenPrincipal = context =>
 			{
@@ -199,10 +211,11 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			return this;
 		}
 
-		public AuthenticationOptions SetTokenAuthenticationConvertPrincipal(JwtBearerOptions options, Func<ClaimsPrincipal, RaiderPrincipal> convertPrincipal)
+		public AuthenticationOptions SetTokenAuthenticationConvertPrincipal(JwtBearerOptions options, Func<ClaimsPrincipal, RaiderPrincipal> convertPrincipal, bool disableTokenAuthenticationChallenge = false)
 		{
 			AddAuthentication(AuthenticationType.Token);
 			TokenAuthenticationOptions = options ?? throw new ArgumentNullException(nameof(options));
+			DisableTokenAuthenticationChallenge = disableTokenAuthenticationChallenge;
 			ConvertTokenPrincipal = convertPrincipal ?? throw new ArgumentNullException(nameof(convertPrincipal));
 			OnValidateTokenPrincipal = context =>
 			{
@@ -223,17 +236,15 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			return this;
 		}
 
-		public AuthenticationOptions SetRequestAuthentication(Func<HttpContext, string, ILogger, RaiderPrincipal> createPrincipal)
+		public AuthenticationOptions SetRequestAuthentication(Func<HttpContext, string, ILogger, Task<RaiderPrincipal?>> createPrincipal, bool disableRequestAuthenticationChallenge = false, List<string>? anonymousUrlPathPrefixes = null)
 		{
 			AddAuthentication(AuthenticationType.Request);
-			RequestAuthenticationOptions = new RequestAuthenticationOptions();
+			RequestAuthenticationOptions = new RequestAuthenticationOptions { DisableAuthenticationChallenge = disableRequestAuthenticationChallenge, AnonymousUrlPathPrefixes = anonymousUrlPathPrefixes?.Select(x => x.ToLowerInvariant()).ToList() };
 			CreateRequestPrincipal = createPrincipal ?? throw new ArgumentNullException(nameof(createPrincipal));
-			OnValidateRequestPrincipal = context =>
+			OnValidateRequestPrincipal = async context =>
 			{
 				if (context.HttpContext?.User != null && context.HttpContext.User.Identity != null)
-					context.Principal = CreateRequestPrincipal(context.HttpContext, context.Scheme.Name, context.Logger);
-
-				return Task.FromResult<object>(null);
+					context.Principal = await CreateRequestPrincipal(context.HttpContext, context.Scheme.Name, context.Logger);
 			};
 
 			return this;

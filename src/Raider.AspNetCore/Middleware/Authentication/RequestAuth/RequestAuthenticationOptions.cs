@@ -1,6 +1,7 @@
 ﻿using Raider.AspNetCore.Middleware.Authentication.RequestAuth.Events;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
 namespace Raider.AspNetCore.Middleware.Authentication.RequestAuth
 {
@@ -9,6 +10,8 @@ namespace Raider.AspNetCore.Middleware.Authentication.RequestAuth
 		public PathString? AccessDeniedPath { get; set; }
 		public PathString? UnauthorizedPath { get; set; }
 		public string? ReturnUrlParameter { get; set; }
+		public bool DisableAuthenticationChallenge { get; set; }
+		public List<string>? AnonymousUrlPathPrefixes { get; set; }
 
 		public new RequestAuthenticationEvents Events
 		{

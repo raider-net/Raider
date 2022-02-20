@@ -881,9 +881,19 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task<AuthenticateResult> HandleRequestAuthenticateAsync()
 		{
-			if ((Options.UseRequestAuthentication) && Context != null)
+			if (Options.UseRequestAuthentication && Context != null)
 			{
-				RequestValidatePrincipalContext context = null;
+				var path = Context.Request.Path.ToString().ToLowerInvariant();
+
+				if (0 < Options.RequestAuthenticationOptions?.AnonymousUrlPathPrefixes?.Count
+					&& Options.RequestAuthenticationOptions.AnonymousUrlPathPrefixes.Any(x => path.StartsWith(x)))
+				{
+					var principal = Raider.AspNetCore.Authentication.AuthenticationService.CreateAnonymousUser(Scheme.Name);
+					var ticket = new AuthenticationTicket(principal, Options.Scheme);
+					return AuthenticateResult.Success(ticket);
+				}
+
+				RequestValidatePrincipalContext? context = null;
 				var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 
 				try
@@ -925,16 +935,16 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				switch (fallback)
 				{
 					case AuthenticationType.WindowsIntegrated:
-						await HandleWindowsForbiddenAsync(properties);
+						await HandleWindowsForbiddenAsync(properties, true);
 						break;
 					case AuthenticationType.Cookie:
-						await HandleCookieForbiddenAsync(properties);
+						await HandleCookieForbiddenAsync(properties, true);
 						break;
 					case AuthenticationType.Token:
-						await HandleTokenForbiddenAsync(properties);
+						await HandleTokenForbiddenAsync(properties, true);
 						break;
 					case AuthenticationType.Request:
-						await HandleRequestForbiddenAsync(properties);
+						await HandleRequestForbiddenAsync(properties, true);
 						break;
 					default:
 						throw new NotImplementedException($"{nameof(AuthenticationType)}.{fallback}");
@@ -944,7 +954,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleForbiddenAsync(properties);
 		}
 
-		protected async Task HandleWindowsForbiddenAsync(AuthenticationProperties properties)
+		protected async Task HandleWindowsForbiddenAsync(AuthenticationProperties properties, bool allowRedirect)
 		{
 			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleWindowsForbiddenAsync)} occured."));
@@ -952,6 +962,9 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleForbiddenAsync(properties);
 			else
 				throw new InvalidOperationException("WindowsAuthentication is not allowed.");
+
+			if (!allowRedirect)
+				return;
 
 			if (!string.IsNullOrWhiteSpace(Options.WindowsAuthenticationOptions.AccessDeniedPath))
 			{
@@ -973,7 +986,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			}
 		}
 
-		protected async Task HandleCookieForbiddenAsync(AuthenticationProperties properties)
+		protected async Task HandleCookieForbiddenAsync(AuthenticationProperties properties, bool allowRedirect)
 		{
 			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleCookieForbiddenAsync)} occured."));
@@ -981,6 +994,9 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleForbiddenAsync(properties);
 			else
 				throw new InvalidOperationException("CookieAuthentication is not allowed.");
+
+			if (!allowRedirect)
+				return;
 
 			if (!string.IsNullOrWhiteSpace(Options.CookieAuthenticationOptions.AccessDeniedPath))
 			{
@@ -1002,7 +1018,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			}
 		}
 
-		protected async Task HandleTokenForbiddenAsync(AuthenticationProperties properties)
+		protected async Task HandleTokenForbiddenAsync(AuthenticationProperties properties, bool allowRedirect)
 		{
 			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleTokenForbiddenAsync)} occured."));
@@ -1010,6 +1026,9 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleForbiddenAsync(properties);
 			else
 				throw new InvalidOperationException("TokenAuthentication is not allowed.");
+
+			if (!allowRedirect)
+				return;
 
 			//if (!string.IsNullOrWhiteSpace(Options.TokenAuthenticationOptions.AccessDeniedPath))
 			//{
@@ -1031,7 +1050,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			//}
 		}
 
-		protected async Task HandleRequestForbiddenAsync(AuthenticationProperties properties)
+		protected async Task HandleRequestForbiddenAsync(AuthenticationProperties properties, bool allowRedirect)
 		{
 			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleRequestForbiddenAsync)} occured."));
@@ -1039,6 +1058,9 @@ namespace Raider.AspNetCore.Middleware.Authentication
 				await base.HandleForbiddenAsync(properties);
 			else
 				throw new InvalidOperationException("RequestAuthentication is not allowed.");
+
+			if (!allowRedirect)
+				return;
 
 			if (!string.IsNullOrWhiteSpace(Options.RequestAuthenticationOptions.AccessDeniedPath))
 			{
@@ -1094,6 +1116,12 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleWindowsChallengeAsync(AuthenticationProperties properties)
 		{
+			if (Options.UseWindowsAuthentication && Options.WindowsAuthenticationOptions.DisableAuthenticationChallenge)
+			{
+				await HandleWindowsForbiddenAsync(properties, false);
+				return;
+			}
+
 			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleWindowsChallengeAsync)} occured."));
 			if (Options.UseWindowsAuthentication)
@@ -1123,6 +1151,12 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleCookieChallengeAsync(AuthenticationProperties properties)
 		{
+			if (Options.UseCookieAuthentication && Options.DisableCookieAuthenticationChallenge)
+			{
+				await HandleCookieForbiddenAsync(properties, false);
+				return;
+			}
+
 			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleCookieChallengeAsync)} occured."));
 			if (Options.UseCookieAuthentication)
@@ -1145,6 +1179,12 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleTokenChallengeAsync(AuthenticationProperties properties)
 		{
+			if (Options.UseTokenAuthentication && Options.DisableTokenAuthenticationChallenge)
+			{
+				await HandleTokenForbiddenAsync(properties, false);
+				return;
+			}
+
 			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleTokenChallengeAsync)} occured."));
 			if (Options.UseTokenAuthentication)
@@ -1227,6 +1267,12 @@ namespace Raider.AspNetCore.Middleware.Authentication
 
 		protected async Task HandleRequestChallengeAsync(AuthenticationProperties properties)
 		{
+			if (Options.UseRequestAuthentication && Options.RequestAuthenticationOptions.DisableAuthenticationChallenge)
+			{
+				await HandleRequestForbiddenAsync(properties, false);
+				return;
+			}
+
 			var appCtx = Context.RequestServices.GetRequiredService<IApplicationContext>();
 			_logger.LogWarningMessage(appCtx.Next(), x => x.InternalMessage($"{nameof(HandleRequestChallengeAsync)} occured."));
 			if (Options.UseRequestAuthentication)

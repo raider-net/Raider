@@ -18,7 +18,6 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 	{
 		private readonly RequestDelegate _next;
 		private readonly ExceptionHandlerOptions _options;
-		private readonly bool externalExceptionHandler;
 		private readonly ILogger _logger;
 		private readonly Func<object, Task> _clearCacheHeadersDelegate;
 
@@ -31,16 +30,10 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 			_options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_clearCacheHeadersDelegate = ClearCacheHeaders;
-			if (_options.ExceptionHandler == null)
+			if (_options.ExternalExceptionHandler == null)
 			{
 				if (_options.DefaultExceptionPath == null)
 					throw new InvalidOperationException("An error occurred when configuring the exception handler middleware. Either the 'DefaultExceptionPath' or the 'ExceptionHandler' property must be set.");
-
-				_options.ExceptionHandler = _next;
-			}
-			else
-			{
-				externalExceptionHandler = true;
 			}
 		}
 
@@ -58,7 +51,7 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 					return Awaited(this, traceInfo, context, task, _options);
 				}
 
-				if (context.Response.StatusCode != StatusCodes.Status404NotFound)
+				if (!_options.CheckEveryResponseStatusCode && context.Response.StatusCode != StatusCodes.Status404NotFound)
 					return Task.CompletedTask;
 			}
 			catch (Exception ex)
@@ -66,7 +59,10 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 				edi = ExceptionDispatchInfo.Capture(ex);
 			}
 
-			return HandleException(traceInfo, context, edi);
+			if (HandleStatusCode(context.Response.StatusCode, _options))
+				return HandleException(traceInfo, context, edi);
+
+			return Task.CompletedTask;
 
 			static async Task Awaited(ExceptionHandlerMiddleware middleware, ITraceInfo traceInfo, HttpContext context, Task task, ExceptionHandlerOptions options)
 			{
@@ -121,9 +117,9 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 
 			if (_options.Mode == ExceptionHandlerMode.CatchOnly)
 			{
-				if (externalExceptionHandler)
+				if (_options.ExternalExceptionHandler != null)
 				{
-					await _options.ExceptionHandler!(context);
+					await _options.ExternalExceptionHandler(context, ex);
 				}
 				else
 				{
@@ -166,7 +162,7 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 				context.Response.StatusCode = statusCode == StatusCodes.Status404NotFound ? statusCode : StatusCodes.Status500InternalServerError;
 				context.Response.OnStarting(_clearCacheHeadersDelegate, context.Response);
 
-				await _options.ExceptionHandler!(context);
+				await _next(context);
 
 				return;
 			}

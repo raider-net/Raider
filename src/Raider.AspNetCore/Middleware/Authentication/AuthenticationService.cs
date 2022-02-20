@@ -10,6 +10,7 @@ using Raider.Trace;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -400,12 +401,25 @@ namespace Raider.AspNetCore.Authentication
 
 		#endregion withhout HttpContext
 
+		public static RaiderPrincipal CreateAnonymousUser(string authenticationSchemeType)
+		{
+			var user = new Raider.Identity.AnonymousUser(TraceInfo.Create());
+
+			var claimsIdentity = new ClaimsIdentity(authenticationSchemeType);
+			claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, user.Login));
+			var identity = claimsIdentity;
+
+			return CreateRaiderPrincipal(identity, user, true, true, null, null, null);
+		}
+
+		[return: NotNullIfNotNull("identity")]
+		[return: NotNullIfNotNull("authenticatedUser")]
 		private static RaiderPrincipal<int>? CreateRaiderPrincipal(
 			IIdentity? identity,
 			AuthenticatedUser? authenticatedUser,
 			bool rolesToClams,
 			bool permissionsToClaims,
-			ILogger logger,
+			ILogger? logger,
 			IApplicationContext? applicationContext,
 			IAuthenticationManager? authenticationManager)
 		{

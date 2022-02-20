@@ -19,7 +19,8 @@ namespace Raider.AspNetCore.Middleware.Exceptions
 		public bool HandleAllClientAndServerErrors { get; set; }
 		public List<int>? HandleOnlyStatusCodes { get; set; }
 		internal Action<IErrorMessage, HttpContext>? OnErrorOccurs { get; set; } //Action<IErrorMessage, HttpContext>
-		public RequestDelegate? ExceptionHandler { get; set; }
+		public ExceptionHandlerDelegate? ExternalExceptionHandler { get; set; }
+		public bool CheckEveryResponseStatusCode { get; set; }
 
 		public ExceptionHandlerOptions OnError(Action<IErrorMessage, HttpContext> action)
 		{

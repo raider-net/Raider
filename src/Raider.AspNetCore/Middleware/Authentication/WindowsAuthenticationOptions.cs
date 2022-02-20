@@ -10,6 +10,7 @@ namespace Raider.AspNetCore.Middleware.Authentication
 		public PathString? AccessDeniedPath { get; set; }
 		public PathString? UnauthorizedPath { get; set; }
 		public string? ReturnUrlParameter { get; set; }
+		public bool DisableAuthenticationChallenge { get; set; }
 
 		public new WindowsAuthenticationEvents Events
 		{
