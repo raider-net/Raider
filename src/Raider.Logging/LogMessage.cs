@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using Raider.Identity;
 using Raider.Trace;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 using Newtonsoft.Json;
@@ -43,6 +45,86 @@ namespace Raider.Logging
 			Created = DateTimeOffset.Now;
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
+
+		public static ILogMessage CreateLogMessage(
+			LogLevel logLevel,
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			if (messageBuilder == null)
+				throw new ArgumentNullException(nameof(messageBuilder));
+
+			var builder = new LogMessageBuilder(Raider.Trace.TraceInfo.Create((RaiderPrincipal<int>?)null, null, null, memberName, sourceFilePath, sourceLineNumber))
+				.LogLevel(logLevel);
+
+			messageBuilder.Invoke(builder);
+			var message = builder.Build();
+
+			return message;
+		}
+
+		public static IErrorMessage CreateErrorMessage(
+			LogLevel logLevel,
+			Action<ErrorMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+		{
+			if (messageBuilder == null)
+				throw new ArgumentNullException(nameof(messageBuilder));
+
+			var builder = new ErrorMessageBuilder(Raider.Trace.TraceInfo.Create((RaiderPrincipal<int>?)null, null, null, memberName, sourceFilePath, sourceLineNumber))
+				.LogLevel(logLevel);
+
+			messageBuilder.Invoke(builder);
+			var message = builder.Build();
+
+			return message;
+		}
+
+		public static ILogMessage CreateTraceMessage(
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> CreateLogMessage(LogLevel.Trace, messageBuilder, memberName, sourceFilePath, sourceLineNumber);
+
+		public static ILogMessage CreateDebugMessage(
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> CreateLogMessage(LogLevel.Debug, messageBuilder, memberName, sourceFilePath, sourceLineNumber);
+
+		public static ILogMessage CreateInformationMessage(
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> CreateLogMessage(LogLevel.Information, messageBuilder, memberName, sourceFilePath, sourceLineNumber);
+
+		public static ILogMessage CreateWarningMessage(
+			Action<LogMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> CreateLogMessage(LogLevel.Warning, messageBuilder, memberName, sourceFilePath, sourceLineNumber);
+
+		public static IErrorMessage CreateErrorMessage(
+			Action<ErrorMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> CreateErrorMessage(LogLevel.Error, messageBuilder, memberName, sourceFilePath, sourceLineNumber);
+
+		public static IErrorMessage CreateCriticalMessage(
+			Action<ErrorMessageBuilder> messageBuilder,
+			[CallerMemberName] string memberName = "",
+			[CallerFilePath] string sourceFilePath = "",
+			[CallerLineNumber] int sourceLineNumber = 0)
+			=> CreateErrorMessage(LogLevel.Critical, messageBuilder, memberName, sourceFilePath, sourceLineNumber);
 
 		public IDictionary<string, object?> ToDictionary(Serializer.ISerializer? serializer = null)
 		{
