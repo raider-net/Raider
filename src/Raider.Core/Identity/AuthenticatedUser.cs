@@ -34,4 +34,15 @@ namespace Raider.Identity
 			TraceInfo = traceInfo ?? throw new ArgumentNullException(nameof(traceInfo));
 		}
 	}
+
+	public class AnonymousUser : AuthenticatedUser
+	{
+		public const string AnonymousRaiderUserName = "AnonymousRaiderUser";
+		public const int AnonymousRaiderUserId = -1;
+
+		public AnonymousUser(ITraceInfo traceInfo)
+			: base(AnonymousRaiderUserId, AnonymousRaiderUserName, null, traceInfo)
+		{
+		}
+	}
 }
