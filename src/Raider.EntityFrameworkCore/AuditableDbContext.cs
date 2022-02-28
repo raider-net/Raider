@@ -147,6 +147,72 @@ namespace Raider.EntityFrameworkCore
 				if (entry.Entity is IAuditEntry || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
 					continue;
 
+				var postModifiedProperties = new List<string>();
+
+				if ((options == null || options.SetConcurrencyToken != false) && entry.Entity is IConcurrent concurrent)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+						case EntityState.Modified:
+							concurrent.ConcurrencyToken = Guid.NewGuid();
+							postModifiedProperties.Add(nameof(concurrent.ConcurrencyToken));
+							break;
+
+						default:
+							break;
+					}
+				}
+
+				if ((options == null || options.SetSyncToken != false) && entry.Entity is ISynchronizable synchronizable)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+							if (Guid.Empty.Equals(synchronizable.SyncToken))
+							{
+								synchronizable.SyncToken = Guid.NewGuid();
+								postModifiedProperties.Add(nameof(synchronizable.SyncToken));
+							}
+							break;
+						case EntityState.Modified:
+							if (WasModifiedNotIgnorredProperty(entry, synchronizable))
+							{
+								synchronizable.SyncToken = Guid.NewGuid();
+								postModifiedProperties.Add(nameof(synchronizable.SyncToken));
+							}
+							break;
+
+						default:
+							break;
+					}
+				}
+
+				if ((options == null || options.SetCorrelationId != false) && entry.Entity is ICorrelable correlable)
+				{
+					switch (entry.State)
+					{
+						case EntityState.Added:
+							if (Guid.Empty.Equals(correlable.CorrelationId))
+							{
+								correlable.CorrelationId = Guid.NewGuid();
+								postModifiedProperties.Add(nameof(correlable.CorrelationId));
+							}
+							break;
+						case EntityState.Modified:
+							var originalCorrelationId = entry.OriginalValues.GetValue<Guid>(nameof(correlable.CorrelationId));
+							if (!correlable.CorrelationId.Equals(originalCorrelationId))
+							{
+								correlable.CorrelationId = originalCorrelationId;
+								postModifiedProperties.Add(nameof(correlable.CorrelationId));
+							}
+							break;
+
+						default:
+							break;
+					}
+				}
+
 				if (entry.Entity is IAuditable auditable)
 				{
 					switch (entry.State)
@@ -162,57 +228,6 @@ namespace Raider.EntityFrameworkCore
 								auditable.AuditModifiedTime = now;
 								auditable.IdAuditModifiedBy = _userId;
 							}
-							break;
-
-						default:
-							break;
-					}
-				}
-
-				if ((options == null || options.SetConcurrencyToken != false) && entry.Entity is IConcurrent concurrent)
-				{
-					switch (entry.State)
-					{
-						case EntityState.Added:
-						case EntityState.Modified:
-							concurrent.ConcurrencyToken = Guid.NewGuid();
-							break;
-
-						default:
-							break;
-					}
-				}
-
-				if ((options == null || options.SetSyncToken != false) && entry.Entity is ISynchronizable synchronizable)
-				{
-					switch (entry.State)
-					{
-						case EntityState.Added:
-							if (Guid.Empty.Equals(synchronizable.SyncToken))
-								synchronizable.SyncToken = Guid.NewGuid();
-							break;
-						case EntityState.Modified:
-							if (WasModifiedNotIgnorredProperty(entry, synchronizable))
-								synchronizable.SyncToken = Guid.NewGuid();
-							break;
-
-						default:
-							break;
-					}
-				}
-
-				if ((options == null || options.SetCorrelationId != false) && entry.Entity is ICorrelable correlable)
-				{
-					switch (entry.State)
-					{
-						case EntityState.Added:
-							if (Guid.Empty.Equals(correlable.CorrelationId))
-								correlable.CorrelationId = Guid.NewGuid();
-							break;
-						case EntityState.Modified:
-							var originalCorrelationId = entry.OriginalValues.GetValue<Guid>(nameof(correlable.CorrelationId));
-							if (!correlable.CorrelationId.Equals(originalCorrelationId))
-								correlable.CorrelationId = originalCorrelationId;
 							break;
 
 						default:
@@ -245,6 +260,8 @@ namespace Raider.EntityFrameworkCore
 						continue;
 					}
 
+					var isPostModified = postModifiedProperties.Contains(propertyName);
+
 					switch (entry.State)
 					{
 						case EntityState.Added:
@@ -258,7 +275,7 @@ namespace Raider.EntityFrameworkCore
 							break;
 
 						case EntityState.Modified:
-							if (property.IsModified)
+							if (property.IsModified || isPostModified)
 							{
 								auditEntry.ChangedColumns.Add(propertyName);
 								auditEntry.DbOperation = DbOperation.Update;

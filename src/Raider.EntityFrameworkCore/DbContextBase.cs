@@ -278,6 +278,7 @@ namespace Raider.EntityFrameworkCore
 						case EntityState.Added:
 						case EntityState.Modified:
 							concurrent.ConcurrencyToken = Guid.NewGuid();
+							entry.Property(nameof(concurrent.ConcurrencyToken)).IsModified = true;
 							break;
 
 						default:
@@ -291,11 +292,17 @@ namespace Raider.EntityFrameworkCore
 					{
 						case EntityState.Added:
 							if (Guid.Empty.Equals(synchronizable.SyncToken))
+							{
 								synchronizable.SyncToken = Guid.NewGuid();
+								entry.Property(nameof(synchronizable.SyncToken)).IsModified = true;
+							}
 							break;
 						case EntityState.Modified:
 							if (WasModifiedNotIgnorredProperty(entry, synchronizable))
+							{
 								synchronizable.SyncToken = Guid.NewGuid();
+								entry.Property(nameof(synchronizable.SyncToken)).IsModified = true;
+							}
 							break;
 
 						default:
@@ -309,12 +316,18 @@ namespace Raider.EntityFrameworkCore
 					{
 						case EntityState.Added:
 							if (Guid.Empty.Equals(correlable.CorrelationId))
+							{
 								correlable.CorrelationId = Guid.NewGuid();
+								entry.Property(nameof(correlable.CorrelationId)).IsModified = true;
+							}
 							break;
 						case EntityState.Modified:
 							var originalCorrelationId = entry.OriginalValues.GetValue<Guid>(nameof(correlable.CorrelationId));
 							if (!correlable.CorrelationId.Equals(originalCorrelationId))
+							{
 								correlable.CorrelationId = originalCorrelationId;
+								entry.Property(nameof(correlable.CorrelationId)).IsModified = true;
+							}
 							break;
 						default:
 							break;
