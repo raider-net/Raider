@@ -54,12 +54,7 @@ namespace Raider.Extensions
 			httpClientBuilder
 				.AddHttpMessageHandler<LogHandler<TOptions>>();
 
-			if (options.AutomaticDecompression.HasValue
-				|| options.Proxy != null
-				|| options.UseDefaultCredentials.HasValue
-				|| options.Credentials != null
-				|| options.TrustToAllServerCertificates
-				|| !options.UsesCookieContainerToStoreServerCookies)
+			if (options.ApplyToHttpClientHandler)
 			{
 				httpClientBuilder
 					.ConfigurePrimaryHttpMessageHandler(
@@ -67,23 +62,7 @@ namespace Raider.Extensions
 						{
 							var handler = new System.Net.Http.HttpClientHandler();
 
-							if (options.AutomaticDecompression.HasValue)
-								handler.AutomaticDecompression = options.AutomaticDecompression.Value;
-
-							if (options.Proxy != null)
-								handler.Proxy = options.Proxy;
-
-							if (options.UseDefaultCredentials.HasValue)
-								handler.UseDefaultCredentials = options.UseDefaultCredentials.Value;
-
-							if (options.Credentials != null)
-								handler.Credentials = options.Credentials;
-
-							if (options.TrustToAllServerCertificates && options.RemoteCertificateValidationCallback != null)
-								handler.ServerCertificateCustomValidationCallback = options.RemoteCertificateValidationCallback!;
-
-							if (!options.UsesCookieContainerToStoreServerCookies)
-								handler.UseCookies = false;
+							options.ConfigureHttpClientHandler(handler);
 
 							return handler;
 						});
