@@ -499,7 +499,7 @@ namespace Raider.Policy
 				this,
 				async (ex, timespan, i) =>
 				{
-					await onRetryAsync(ex, i);
+					await onRetryAsync(ex, i).ConfigureAwait(false);
 					return null;
 				},
 				retryCount
@@ -557,7 +557,7 @@ namespace Raider.Policy
 				this,
 				async (ex, timespan, i) =>
 				{
-					await onRetryAsync(ex, i);
+					await onRetryAsync(ex, i).ConfigureAwait(false);
 					return null;
 				});
 		}
@@ -636,7 +636,7 @@ namespace Raider.Policy
 				this,
 				async (ex, timespan, i) =>
 				{
-					await onRetryAsync(ex, timespan, i);
+					await onRetryAsync(ex, timespan, i).ConfigureAwait(false);
 					return null;
 				},
 				retryCount,
@@ -722,7 +722,7 @@ namespace Raider.Policy
 				this,
 				async (ex, timespan, i) =>
 				{
-					await onRetryAsync(ex, timespan, i);
+					await onRetryAsync(ex, timespan, i).ConfigureAwait(false);
 					return null;
 				},
 				sleepDurationsEnumerable: sleepDurations);
@@ -798,7 +798,7 @@ namespace Raider.Policy
 				this,
 				async (exception, timespan, i) =>
 				{
-					await onRetryAsync(exception, i, timespan);
+					await onRetryAsync(exception, i, timespan).ConfigureAwait(false);
 					return null;
 				},
 				sleepDurationProvider: sleepDurationProvider
@@ -1351,7 +1351,7 @@ namespace Raider.Policy
 				this,
 				async (result, timespan, i) =>
 				{
-					await onRetryAsync(result, i);
+					await onRetryAsync(result, i).ConfigureAwait(false);
 					return null;
 				},
 				retryCount
@@ -1408,7 +1408,7 @@ namespace Raider.Policy
 				this,
 				async (result, timespan, i) =>
 				{
-					await onRetryAsync(result, i);
+					await onRetryAsync(result, i).ConfigureAwait(false);
 					return null;
 				});
 		}
@@ -1486,7 +1486,7 @@ namespace Raider.Policy
 				this,
 				async (result, timespan, i) =>
 				{
-					await onRetryAsync(result, timespan, i);
+					await onRetryAsync(result, timespan, i).ConfigureAwait(false);
 					return null;
 				},
 				retryCount,
@@ -1572,7 +1572,7 @@ namespace Raider.Policy
 				this,
 				async (result, timespan, i) =>
 				{
-					await onRetryAsync(result, timespan, i);
+					await onRetryAsync(result, timespan, i).ConfigureAwait(false);
 					return null;
 				},
 				sleepDurationsEnumerable: sleepDurations);
@@ -1648,7 +1648,7 @@ namespace Raider.Policy
 				this,
 				async (exception, timespan, i) =>
 				{
-					await onRetryAsync(exception, i, timespan);
+					await onRetryAsync(exception, i, timespan).ConfigureAwait(false);
 					return null;
 				},
 				sleepDurationProvider: sleepDurationProvider

@@ -158,7 +158,7 @@ namespace Raider.Data
 					if (_waitingBatch.Count == 0)
 						return;
 
-					await WriteBatchAsync(_waitingBatch);
+					await WriteBatchAsync(_waitingBatch).ConfigureAwait(false);
 
 					batchWasFull = _waitingBatch.Count >= _batchSizeLimit;
 					_waitingBatch.Clear();

@@ -72,11 +72,11 @@ namespace Raider.Timers
 
 			try
 			{
-				await OnTimerAsync(state);
+				await OnTimerAsync(state).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
-				await OnErrorAsync(state, ex);
+				await OnErrorAsync(state, ex).ConfigureAwait(false);
 			}
 			finally
 			{

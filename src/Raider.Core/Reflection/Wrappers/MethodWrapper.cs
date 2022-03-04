@@ -7,7 +7,7 @@
 //namespace Raider.Reflection
 //{
 //	/* USAGE:
-	 
+
 //		public string Metoda(ref int ii, TestEnum? en, out double dd, DateTime? dt = null)
 //		{
 //			dd = 666;
@@ -103,12 +103,12 @@
 //						MethodInfo.IsStatic ? null : target,
 //						(methodParameters == null || methodParameters.Length == 0)
 //							? new object[MethodInfo.Parameters().Count]
-//							: methodParameters);
+//							: methodParameters).ConfigureAwait(false);
 //			}
 //		}
 
 //		public async Task<object> InvokeAsync(object target, Type[] methodGenericTypes, params object[] methodParameters)
-//			=> await InvokeAsync(MethodInfo.MakeGenericMethod(methodGenericTypes), target, methodParameters);
+//			=> await InvokeAsync(MethodInfo.MakeGenericMethod(methodGenericTypes), target, methodParameters).ConfigureAwait(false);
 
 //		internal async Task<object> InvokeAsync(MethodInfo genericMethodInfo, object target, params object[] methodParameters)
 //		{
@@ -127,7 +127,7 @@
 //						genericMethodInfo.IsStatic ? null : target,
 //						(methodParameters == null || methodParameters.Length == 0)
 //							? new object[genericMethodInfo.Parameters().Count]
-//							: methodParameters);
+//							: methodParameters).ConfigureAwait(false);
 //			}
 //		}
 
@@ -185,7 +185,7 @@
 //				: Invoke(genericMethodInfo, target, (object[])methodParameters);
 //		}
 //	}
-	
+
 //	public sealed class MethodKey : IEquatable<MethodKey>
 //	{
 //		public string Name { get; }

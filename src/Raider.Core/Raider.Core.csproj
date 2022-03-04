@@ -5,6 +5,7 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<RootNamespace>Raider</RootNamespace>
+		<PackageId>Raider.Core</PackageId>
 		<Description>Raider.Core</Description>
 		<PackageTags></PackageTags>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -18,7 +19,7 @@
 		<Authors>Tomas Pilat</Authors>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
-		<Version>1.4.7</Version>
+		<Version>1.5.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -30,6 +31,13 @@
 	
 	<ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.1.46">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	</ItemGroup>
 
 </Project>

@@ -26,7 +26,7 @@ namespace Raider.Threading
 
 		public async Task<AsyncLock> LockAsync()
 		{
-			await _semaphoreSlim.WaitAsync();
+			await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
 			return this;
 		}
 

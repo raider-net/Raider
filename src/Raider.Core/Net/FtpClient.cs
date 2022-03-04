@@ -80,7 +80,7 @@ namespace Raider.Net
 			var request = CreateFtpWebRequest(uri);
 			request.Method = WebRequestMethods.Ftp.ListDirectory;
 
-			using var response = (FtpWebResponse)await request.GetResponseAsync();
+			using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 			using var streamReader = new System.IO.StreamReader(response.GetResponseStream());
 			string responseString = streamReader.ReadToEnd();
 			string[] results = responseString.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -115,12 +115,12 @@ namespace Raider.Net
 			request.Method = WebRequestMethods.Ftp.DownloadFile;
 
 			var ms = new System.IO.MemoryStream();
-			using var response = (FtpWebResponse)await request.GetResponseAsync();
+			using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 			using var responseStream = response.GetResponseStream();
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-			await responseStream.CopyToAsync(ms);
+			await responseStream.CopyToAsync(ms).ConfigureAwait(false);
 #elif NET5_0
-			await responseStream.CopyToAsync(ms, cancellationToken);
+			await responseStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
 #endif
 			return ms;
 		}
@@ -149,12 +149,12 @@ namespace Raider.Net
 			request.Method = WebRequestMethods.Ftp.DownloadFile;
 
 			var ms = new System.IO.MemoryStream();
-			using var response = (FtpWebResponse)await request.GetResponseAsync();
+			using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 			using var responseStream = response.GetResponseStream();
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-			await responseStream.CopyToAsync(ms);
+			await responseStream.CopyToAsync(ms).ConfigureAwait(false);
 #elif NET5_0
-			await responseStream.CopyToAsync(ms, cancellationToken);
+			await responseStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
 #endif
 			return ms.ToArray();
 		}
@@ -192,7 +192,7 @@ namespace Raider.Net
 
 			try
 			{
-				using var response = (FtpWebResponse)await request.GetResponseAsync();
+				using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 				return true;
 			}
 			catch (WebException ex)
@@ -238,7 +238,7 @@ namespace Raider.Net
 
 			try
 			{
-				using var response = (FtpWebResponse)await request.GetResponseAsync();
+				using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 				return true;
 			}
 			catch (WebException ex)
@@ -310,18 +310,18 @@ namespace Raider.Net
 			}
 
 			var dirPath = System.IO.Path.GetDirectoryName(destRleativeFilePath);
-			await CreateDirectoryAsync(dirPath!, cancellationToken);
+			await CreateDirectoryAsync(dirPath!, cancellationToken).ConfigureAwait(false);
 
 			//download
 			var getFileRequest = CreateFtpWebRequest(sourceRleativeFilePath);
 			getFileRequest.Method = WebRequestMethods.Ftp.DownloadFile;
-			using var getFileResponse = (FtpWebResponse)await getFileRequest.GetResponseAsync();
+			using var getFileResponse = (FtpWebResponse)await getFileRequest.GetResponseAsync().ConfigureAwait(false);
 			using var responseStream = getFileResponse.GetResponseStream();
 			using var ms = new System.IO.MemoryStream();
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-			await responseStream.CopyToAsync(ms);
+			await responseStream.CopyToAsync(ms).ConfigureAwait(false);
 #elif NET5_0
-			await responseStream.CopyToAsync(ms, cancellationToken);
+			await responseStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
 #endif
 			ms.Seek(0, System.IO.SeekOrigin.Begin);
 
@@ -329,16 +329,16 @@ namespace Raider.Net
 			var uploadFileRequest = CreateFtpWebRequest(destRleativeFilePath);
 			uploadFileRequest.Method = WebRequestMethods.Ftp.UploadFile;
 			uploadFileRequest.ContentLength = ms.Length;
-			using (var requestStream = await uploadFileRequest.GetRequestStreamAsync())
+			using (var requestStream = await uploadFileRequest.GetRequestStreamAsync().ConfigureAwait(false))
 			{
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-				await ms.CopyToAsync(requestStream);
+				await ms.CopyToAsync(requestStream).ConfigureAwait(false);
 #elif NET5_0
-				await ms.CopyToAsync(requestStream, cancellationToken);
+				await ms.CopyToAsync(requestStream, cancellationToken).ConfigureAwait(false);
 #endif
 			}
 
-			using var uploadFileResponse = (FtpWebResponse)await uploadFileRequest.GetResponseAsync();
+			using var uploadFileResponse = (FtpWebResponse)await uploadFileRequest.GetResponseAsync().ConfigureAwait(false);
 			return true;
 				//uploadFileResponse.StatusCode == FtpStatusCode.CommandOK
 				//	? true
@@ -412,18 +412,18 @@ namespace Raider.Net
 			}
 
 			var dirPath = System.IO.Path.GetDirectoryName(destRleativeFilePath);
-			await CreateDirectoryAsync(dirPath!, cancellationToken);
+			await CreateDirectoryAsync(dirPath!, cancellationToken).ConfigureAwait(false);
 
 			//download
 			var getFileRequest = CreateFtpWebRequest(sourceRleativeFilePath);
 			getFileRequest.Method = WebRequestMethods.Ftp.DownloadFile;
-			using var getFileResponse = (FtpWebResponse)await getFileRequest.GetResponseAsync();
+			using var getFileResponse = (FtpWebResponse)await getFileRequest.GetResponseAsync().ConfigureAwait(false);
 			using var responseStream = getFileResponse.GetResponseStream();
 			using var ms = new System.IO.MemoryStream();
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-			await responseStream.CopyToAsync(ms);
+			await responseStream.CopyToAsync(ms).ConfigureAwait(false);
 #elif NET5_0
-			await responseStream.CopyToAsync(ms, cancellationToken);
+			await responseStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
 #endif
 			ms.Seek(0, System.IO.SeekOrigin.Begin);
 
@@ -431,16 +431,16 @@ namespace Raider.Net
 			var uploadFileRequest = CreateFtpWebRequest(destRleativeFilePath);
 			uploadFileRequest.Method = WebRequestMethods.Ftp.UploadFile;
 			uploadFileRequest.ContentLength = ms.Length;
-			using (var requestStream = await uploadFileRequest.GetRequestStreamAsync())
+			using (var requestStream = await uploadFileRequest.GetRequestStreamAsync().ConfigureAwait(false))
 			{
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-				await ms.CopyToAsync(requestStream);
+				await ms.CopyToAsync(requestStream).ConfigureAwait(false);
 #elif NET5_0
-				await ms.CopyToAsync(requestStream, cancellationToken);
+				await ms.CopyToAsync(requestStream, cancellationToken).ConfigureAwait(false);
 #endif
 			}
 
-			using var uploadFileResponse = (FtpWebResponse)await uploadFileRequest.GetResponseAsync();
+			using var uploadFileResponse = (FtpWebResponse)await uploadFileRequest.GetResponseAsync().ConfigureAwait(false);
 			//if (uploadFileResponse.StatusCode != FtpStatusCode.CommandOK)
 			//	throw new InvalidOperationException(string.IsNullOrWhiteSpace(uploadFileResponse.StatusDescription) ? $"Status code: {uploadFileResponse.StatusCode}" : uploadFileResponse.StatusDescription);
 
@@ -448,7 +448,7 @@ namespace Raider.Net
 			var deleteRequest = CreateFtpWebRequest(sourceRleativeFilePath);
 			deleteRequest.Method = WebRequestMethods.Ftp.DeleteFile;
 
-			using var response = (FtpWebResponse)await deleteRequest.GetResponseAsync();
+			using var response = (FtpWebResponse)await deleteRequest.GetResponseAsync().ConfigureAwait(false);
 			return true;
 				//response.StatusCode == FtpStatusCode.CommandOK
 				//	? true
@@ -498,19 +498,19 @@ namespace Raider.Net
 				throw new ArgumentNullException(nameof(sourceBytes));
 
 			var dirPath = System.IO.Path.GetDirectoryName(relativeFilePath);
-			await CreateDirectoryAsync(dirPath!, cancellationToken);
+			await CreateDirectoryAsync(dirPath!, cancellationToken).ConfigureAwait(false);
 
 			var request = CreateFtpWebRequest(relativeFilePath);
 			request.Method = WebRequestMethods.Ftp.UploadFile;
 
 			request.ContentLength = sourceBytes.Length;
 
-			using (var requestStream = await request.GetRequestStreamAsync())
+			using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
 			{
-				await requestStream.WriteAsync(sourceBytes, 0, sourceBytes.Length, cancellationToken);
+				await requestStream.WriteAsync(sourceBytes, 0, sourceBytes.Length, cancellationToken).ConfigureAwait(false);
 			}
 
-			using var response = (FtpWebResponse)await request .GetResponseAsync();
+			using var response = (FtpWebResponse)await request .GetResponseAsync().ConfigureAwait(false);
 			return true;
 				//response.StatusCode == FtpStatusCode.CommandOK
 				//	? true
@@ -561,7 +561,7 @@ namespace Raider.Net
 				throw new ArgumentNullException(nameof(sourceStream));
 
 			var dirPath = System.IO.Path.GetDirectoryName(relativeFilePath);
-			await CreateDirectoryAsync(dirPath!, cancellationToken);
+			await CreateDirectoryAsync(dirPath!, cancellationToken).ConfigureAwait(false);
 
 			var request = CreateFtpWebRequest(relativeFilePath);
 			request.Method = WebRequestMethods.Ftp.UploadFile;
@@ -569,12 +569,12 @@ namespace Raider.Net
 			var fileContents = sourceStream.ToArray();
 			request.ContentLength = fileContents.Length;
 
-			using (var requestStream = await request.GetRequestStreamAsync())
+			using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
 			{
-				await requestStream.WriteAsync(fileContents, 0, fileContents.Length, cancellationToken);
+				await requestStream.WriteAsync(fileContents, 0, fileContents.Length, cancellationToken).ConfigureAwait(false);
 			}
 
-			using var response = (FtpWebResponse)await request.GetResponseAsync();
+			using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 			return true;
 				//response.StatusCode == FtpStatusCode.CommandOK
 				//	? true
@@ -644,7 +644,7 @@ namespace Raider.Net
 			if (string.IsNullOrWhiteSpace(direcotryRelativePath))
 				throw new ArgumentNullException(nameof(direcotryRelativePath));
 
-			var existsDir = await DirectoryExistsAsync(direcotryRelativePath, cancellationToken);
+			var existsDir = await DirectoryExistsAsync(direcotryRelativePath, cancellationToken).ConfigureAwait(false);
 			if (existsDir)
 				return true;
 
@@ -654,13 +654,13 @@ namespace Raider.Net
 			foreach (var chunk in paths)
 			{
 				var path = sb.Append('/').Append(chunk).ToString();
-				existsDir = await DirectoryExistsAsync(path, cancellationToken);
+				existsDir = await DirectoryExistsAsync(path, cancellationToken).ConfigureAwait(false);
 				if (existsDir)
 					continue;
 
 				var request = CreateFtpWebRequest(path);
 				request.Method = WebRequestMethods.Ftp.MakeDirectory;
-				using var response = (FtpWebResponse)await request.GetResponseAsync();
+				using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 			}
 
 			return true;
@@ -692,7 +692,7 @@ namespace Raider.Net
 			var request = CreateFtpWebRequest(direcotryRelativePath);
 			request.Method = WebRequestMethods.Ftp.RemoveDirectory;
 
-			using var response = (FtpWebResponse)await request.GetResponseAsync();
+			using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 			return true;
 				//response.StatusCode == FtpStatusCode.CommandOK
 				//	? true
@@ -722,7 +722,7 @@ namespace Raider.Net
 			var request = CreateFtpWebRequest(relativeFilePath);
 			request.Method = WebRequestMethods.Ftp.DeleteFile;
 
-			using var response = (FtpWebResponse)await request.GetResponseAsync();
+			using var response = (FtpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 			return true;
 				//response.StatusCode == FtpStatusCode.CommandOK
 				//	? true

@@ -145,7 +145,7 @@ namespace Raider.Transactions.Internal
 			var onCommittedAsyncActions = Interlocked.Exchange(ref _onCommittedAsyncActions, new List<Func<ITransactionContext, CancellationToken, Task>>());
 			var onAfterCommitAsyncActions = Interlocked.Exchange(ref _onAfterCommitAsyncActions, new List<Func<ITransactionContext, CancellationToken, Task>>());
 
-			using(await _asyncLock.LockAsync())
+			using(await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
 				if (_disposed)
 					throw new InvalidOperationException($"Cannot commit disposed {nameof(TransactionContext)}.");
@@ -161,11 +161,11 @@ namespace Raider.Transactions.Internal
 
 				if (onCommittedAsyncActions != null)
 					foreach (var action in onCommittedAsyncActions)
-						await action(this, cancellationToken);
+						await action(this, cancellationToken).ConfigureAwait(false);
 
 				if (onAfterCommitAsyncActions != null)
 					foreach (var action in onAfterCommitAsyncActions)
-						await action(this, cancellationToken);
+						await action(this, cancellationToken).ConfigureAwait(false);
 			}
 		}
 
@@ -214,7 +214,7 @@ namespace Raider.Transactions.Internal
 			var onRollbackAsyncActions = Interlocked.Exchange(ref _onRollbackAsyncActions, new List<Func<ITransactionContext, CancellationToken, Task>>());
 			var onAfterRollbackAsyncActions = Interlocked.Exchange(ref _onAfterRollbackAsyncActions, new List<Func<ITransactionContext, CancellationToken, Task>>());
 
-			using (await _asyncLock.LockAsync())
+			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
 				if (_disposed)
 					throw new InvalidOperationException($"Cannot rollback disposed {nameof(TransactionContext)}.");
@@ -227,11 +227,11 @@ namespace Raider.Transactions.Internal
 
 				if (onRollbackAsyncActions != null)
 					foreach (var action in onRollbackAsyncActions)
-						await action(this, cancellationToken);
+						await action(this, cancellationToken).ConfigureAwait(false);
 
 				if (onAfterRollbackAsyncActions != null)
 					foreach (var action in onAfterRollbackAsyncActions)
-						await action(this, cancellationToken);
+						await action(this, cancellationToken).ConfigureAwait(false);
 			}
 		}
 
@@ -415,7 +415,7 @@ namespace Raider.Transactions.Internal
 
 				if (onDisposedAsyncActions != null)
 					foreach (var action in onDisposedAsyncActions)
-						await action(this);
+						await action(this).ConfigureAwait(false);
 
 				_disposed = true;
 			}
