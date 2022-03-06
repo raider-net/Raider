@@ -27,11 +27,11 @@ namespace Raider.NetHttp
 			var policy = GetPolicy(uri);
 			if (policy == null)
 			{
-				response = await SendInternalAsync(request, cancellationToken);
+				response = await SendInternalAsync(request, cancellationToken).ConfigureAwait(false);
 			}
 			else
 			{
-				response = await policy.ExecuteAsync(ct => SendInternalAsync(request, ct), cancellationToken);
+				response = await policy.ExecuteAsync(ct => SendInternalAsync(request, ct), cancellationToken).ConfigureAwait(false);
 			}
 
 			return response;

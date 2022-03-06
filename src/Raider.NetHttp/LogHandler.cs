@@ -36,18 +36,18 @@ namespace Raider.NetHttp
 			{
 				if (logger.OnBeforeRequestSendAsStringAsync != null)
 				{
-					var requestDto = await RequestDtoMapper.Map(request, null, null, null, true, false, false, cancellationToken);
+					var requestDto = await RequestDtoMapper.Map(request, null, null, null, true, false, false, cancellationToken).ConfigureAwait(false);
 					string? body = null;
 					if (request.Content != null)
 						body = await request.Content.ReadAsStringAsync(
 #if NET5_0
 						cancellationToken
 #endif
-						);
+						).ConfigureAwait(false);
 
 					try
 					{
-						await logger.OnBeforeRequestSendAsStringAsync.Invoke(requestDto, body, correlationId, cancellationToken);
+						await logger.OnBeforeRequestSendAsStringAsync.Invoke(requestDto, body, correlationId, cancellationToken).ConfigureAwait(false);
 					}
 					catch (Exception ex)
 					{
@@ -57,18 +57,18 @@ namespace Raider.NetHttp
 
 				if (logger.OnBeforeRequestSendAsByteArrayAsync != null)
 				{
-					var requestDto = await RequestDtoMapper.Map(request, null, null, null, true, false, false, cancellationToken);
+					var requestDto = await RequestDtoMapper.Map(request, null, null, null, true, false, false, cancellationToken).ConfigureAwait(false);
 					byte[]? body = null;
 					if (request.Content != null)
 						body = await request.Content.ReadAsByteArrayAsync(
 #if NET5_0
 						cancellationToken
 #endif
-						);
+						).ConfigureAwait(false);
 
 					try
 					{
-						await logger.OnBeforeRequestSendAsByteArrayAsync.Invoke(requestDto, body, correlationId, cancellationToken);
+						await logger.OnBeforeRequestSendAsByteArrayAsync.Invoke(requestDto, body, correlationId, cancellationToken).ConfigureAwait(false);
 					}
 					catch (Exception ex)
 					{
@@ -78,18 +78,18 @@ namespace Raider.NetHttp
 
 				if (logger.OnBeforeRequestSendAsStreamAsync != null)
 				{
-					var requestDto = await RequestDtoMapper.Map(request, null, null, null, true, false, false, cancellationToken);
+					var requestDto = await RequestDtoMapper.Map(request, null, null, null, true, false, false, cancellationToken).ConfigureAwait(false);
 					Stream? body = null;
 					if (request.Content != null)
 						body = await request.Content.ReadAsStreamAsync(
 #if NET5_0
 						cancellationToken
 #endif
-						);
+						).ConfigureAwait(false);
 
 					try
 					{
-						await logger.OnBeforeRequestSendAsStreamAsync.Invoke(requestDto, body, correlationId, cancellationToken);
+						await logger.OnBeforeRequestSendAsStreamAsync.Invoke(requestDto, body, correlationId, cancellationToken).ConfigureAwait(false);
 					}
 					catch (Exception ex)
 					{
@@ -100,7 +100,7 @@ namespace Raider.NetHttp
 				sw = Stopwatch.StartNew();
 			}
 
-			var response = await base.SendAsync(request, cancellationToken);
+			var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
 			if (logger != null)
 			{
@@ -108,18 +108,18 @@ namespace Raider.NetHttp
 
 				if (logger.OnAfterResponseReceivedAsStringAsync != null)
 				{
-					var responseDto = await ResponseDtoMapper.Map(response, null, null, sw?.ElapsedMilliseconds, true, false, false, cancellationToken);
+					var responseDto = await ResponseDtoMapper.Map(response, null, null, sw?.ElapsedMilliseconds, true, false, false, cancellationToken).ConfigureAwait(false);
 					string? body = null;
 					if (response.Content != null)
 						body = await response.Content.ReadAsStringAsync(
 #if NET5_0
 						cancellationToken
 #endif
-						);
+						).ConfigureAwait(false);
 
 					try
 					{
-						await logger.OnAfterResponseReceivedAsStringAsync.Invoke(responseDto, body, correlationId, cancellationToken);
+						await logger.OnAfterResponseReceivedAsStringAsync.Invoke(responseDto, body, correlationId, cancellationToken).ConfigureAwait(false);
 					}
 					catch (Exception ex)
 					{
@@ -129,18 +129,18 @@ namespace Raider.NetHttp
 
 				if (logger.OnAfterResponseReceivedAsByteArrayAsync != null)
 				{
-					var responseDto = await ResponseDtoMapper.Map(response, null, null, sw?.ElapsedMilliseconds, true, false, false, cancellationToken);
+					var responseDto = await ResponseDtoMapper.Map(response, null, null, sw?.ElapsedMilliseconds, true, false, false, cancellationToken).ConfigureAwait(false);
 					byte[]? body = null;
 					if (response.Content != null)
 						body = await response.Content.ReadAsByteArrayAsync(
 #if NET5_0
 						cancellationToken
 #endif
-						);
+						).ConfigureAwait(false);
 
 					try
 					{
-						await logger.OnAfterResponseReceivedAsByteArrayAsync.Invoke(responseDto, body, correlationId, cancellationToken);
+						await logger.OnAfterResponseReceivedAsByteArrayAsync.Invoke(responseDto, body, correlationId, cancellationToken).ConfigureAwait(false);
 					}
 					catch (Exception ex)
 					{
@@ -150,18 +150,18 @@ namespace Raider.NetHttp
 
 				if (logger.OnAfterResponseReceivedAsStreamAsync != null)
 				{
-					var responseDto = await ResponseDtoMapper.Map(response, null, null, sw?.ElapsedMilliseconds, true, false, false, cancellationToken);
+					var responseDto = await ResponseDtoMapper.Map(response, null, null, sw?.ElapsedMilliseconds, true, false, false, cancellationToken).ConfigureAwait(false);
 					Stream? body = null;
 					if (response.Content != null)
 						body = await response.Content.ReadAsStreamAsync(
 #if NET5_0
 						cancellationToken
 #endif
-						);
+						).ConfigureAwait(false);
 
 					try
 					{
-						await logger.OnAfterResponseReceivedAsStreamAsync.Invoke(responseDto, body, correlationId, cancellationToken);
+						await logger.OnAfterResponseReceivedAsStreamAsync.Invoke(responseDto, body, correlationId, cancellationToken).ConfigureAwait(false);
 					}
 					catch (Exception ex)
 					{

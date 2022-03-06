@@ -102,10 +102,10 @@ namespace Raider.NetHttp.Http.Internal
 				return default;
 
 			//var ms = new MemoryStream();
-			//await Response.Content.CopyToAsync(ms);
+			//await Response.Content.CopyToAsync(ms).ConfigureAwait(false);
 			//ms.Seek(0, SeekOrigin.Begin);
 
-			using var stream = await Response.Content.ReadAsStreamAsync();
+			using var stream = await Response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 			using var streamReader = new StreamReader(stream, new System.Text.UTF8Encoding(false));
 			using var jsonTextReader = new Newtonsoft.Json.JsonTextReader(streamReader);
 			var serializer = Newtonsoft.Json.JsonSerializer.Create(jsonSerializerOptions);

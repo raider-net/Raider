@@ -68,7 +68,7 @@ namespace Raider.NetHttp.Http
 #if NET5_0
 						cancellationToken
 #endif
-						);
+						).ConfigureAwait(false);
 
 				if (string.IsNullOrWhiteSpace(request.Body))
 					request.Body = null;
@@ -81,7 +81,7 @@ namespace Raider.NetHttp.Http
 #if NET5_0
 						cancellationToken
 #endif
-						);
+						).ConfigureAwait(false);
 
 				if (request.BodyByteArray != null && request.BodyByteArray.Length == 0)
 					request.BodyByteArray = null;

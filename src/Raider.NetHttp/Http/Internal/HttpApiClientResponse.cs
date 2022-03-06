@@ -101,8 +101,8 @@ namespace Raider.NetHttp.Http.Internal
 			if (Response == null)
 				return default;
 
-			using var stream = await Response.Content.ReadAsStreamAsync(cancellationToken);
-			var result = await System.Text.Json.JsonSerializer.DeserializeAsync<T>(stream, jsonSerializerOptions, cancellationToken);
+			using var stream = await Response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+			var result = await System.Text.Json.JsonSerializer.DeserializeAsync<T>(stream, jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
 			return result;
 		}
 
