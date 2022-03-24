@@ -15,9 +15,9 @@ namespace Raider.NetHttp.Http.Internal
 		private bool disposedValue;
 
 		public IHttpApiClientRequest Request { get; }
-		public HttpResponseMessage? Response { get; set; }
+		public HttpResponseMessage? HttpResponseMessage { get; set; }
 
-		public int? StatusCode => (int?)Response?.StatusCode;
+		public int? StatusCode => (int?)HttpResponseMessage?.StatusCode;
 
 		public bool? RequestTimedOut { get; set; }
 
@@ -47,9 +47,9 @@ namespace Raider.NetHttp.Http.Internal
 
 		public Task CopyContentToAsync(Stream stream, CancellationToken cancellationToken)
 		{
-			if (Response?.Content != null)
+			if (HttpResponseMessage?.Content != null)
 			{
-				Response.Content.CopyToAsync(stream);
+				HttpResponseMessage.Content.CopyToAsync(stream);
 			}
 
 			return Task.CompletedTask;
@@ -74,38 +74,38 @@ namespace Raider.NetHttp.Http.Internal
 		}
 
 		public List<KeyValuePair<string, IEnumerable<string>>>? GetResponseHeaders()
-			=> Response?.Headers?.ToList();
+			=> HttpResponseMessage?.Headers?.ToList();
 
 		public List<KeyValuePair<string, IEnumerable<string>>>? GetContentHeaders()
-			=> Response?.Content.Headers?.ToList();
+			=> HttpResponseMessage?.Content.Headers?.ToList();
 
 		public Task<Stream?> ReadContentAsStreamAsync(CancellationToken cancellationToken)
-			=> Response?.Content == null
+			=> HttpResponseMessage?.Content == null
 				? Task.FromResult((Stream?)null)
-				: Response.Content.ReadAsStreamAsync();
+				: HttpResponseMessage.Content.ReadAsStreamAsync();
 
 		public Task<byte[]?> ReadContentAsByteArrayAsync(CancellationToken cancellationToken)
-			=> Response?.Content == null
+			=> HttpResponseMessage?.Content == null
 				? Task.FromResult((byte[]?)null)
-				: Response.Content.ReadAsByteArrayAsync();
+				: HttpResponseMessage.Content.ReadAsByteArrayAsync();
 
 		public Task<string?> ReadContentAsStringAsync(CancellationToken cancellationToken)
-			=> Response?.Content == null
+			=> HttpResponseMessage?.Content == null
 				? Task.FromResult((string?)null)
-				: Response.Content.ReadAsStringAsync();
+				: HttpResponseMessage.Content.ReadAsStringAsync();
 
 		public async Task<T?> ReadJsonContentAsAsync<T>(
 			Newtonsoft.Json.JsonSerializerSettings? jsonSerializerOptions = null,
 			CancellationToken cancellationToken = default)
 		{
-			if (Response == null)
+			if (HttpResponseMessage == null)
 				return default;
 
 			//var ms = new MemoryStream();
 			//await Response.Content.CopyToAsync(ms).ConfigureAwait(false);
 			//ms.Seek(0, SeekOrigin.Begin);
 
-			using var stream = await Response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+			using var stream = await HttpResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
 			using var streamReader = new StreamReader(stream, new System.Text.UTF8Encoding(false));
 			using var jsonTextReader = new Newtonsoft.Json.JsonTextReader(streamReader);
 			var serializer = Newtonsoft.Json.JsonSerializer.Create(jsonSerializerOptions);
@@ -123,9 +123,9 @@ namespace Raider.NetHttp.Http.Internal
 		{
 			if (!disposedValue)
 			{
-				if (disposing && Response != null)
+				if (disposing && HttpResponseMessage != null)
 				{
-					Response.Dispose();
+					HttpResponseMessage.Dispose();
 				}
 
 				disposedValue = true;

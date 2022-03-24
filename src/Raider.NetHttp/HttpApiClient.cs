@@ -91,7 +91,7 @@ namespace Raider.NetHttp
 							.SendAsync(httpRequestMessage, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, usedCancellationToken)
 							.ConfigureAwait(continueOnCapturedContext: continueOnCapturedContext.Value);
 
-					response.Response = await httpResponseMessageTask;
+					response.HttpResponseMessage = await httpResponseMessageTask;
 				}
 				else
 				{
@@ -99,7 +99,7 @@ namespace Raider.NetHttp
 						_client
 							.SendAsync(httpRequestMessage, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, usedCancellationToken);
 
-					response.Response = await httpResponseMessageTask;
+					response.HttpResponseMessage = await httpResponseMessageTask;
 				}
 			}
 			catch (TaskCanceledException)

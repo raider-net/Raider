@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ namespace Raider.NetHttp.Http
 	public interface IHttpApiClientResponse : IDisposable
 	{
 		IHttpApiClientRequest Request { get; }
+		HttpResponseMessage? HttpResponseMessage { get; }
 		int? StatusCode { get; }
 		bool? RequestTimedOut { get; }
 		bool? OperationCanceled { get; }

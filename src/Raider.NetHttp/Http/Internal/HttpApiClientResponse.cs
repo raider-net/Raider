@@ -15,9 +15,9 @@ namespace Raider.NetHttp.Http.Internal
 		private bool disposedValue;
 
 		public IHttpApiClientRequest Request { get; }
-		public HttpResponseMessage? Response { get; set; }
+		public HttpResponseMessage? HttpResponseMessage { get; set; }
 
-		public int? StatusCode => (int?)Response?.StatusCode;
+		public int? StatusCode => (int?)HttpResponseMessage?.StatusCode;
 
 		public bool? RequestTimedOut { get; set; }
 
@@ -47,9 +47,9 @@ namespace Raider.NetHttp.Http.Internal
 
 		public Task CopyContentToAsync(Stream stream, CancellationToken cancellationToken)
 		{
-			if (Response?.Content != null)
+			if (HttpResponseMessage?.Content != null)
 			{
-				Response.Content.CopyToAsync(stream, cancellationToken);
+				HttpResponseMessage.Content.CopyToAsync(stream, cancellationToken);
 			}
 
 			return Task.CompletedTask;
@@ -74,34 +74,34 @@ namespace Raider.NetHttp.Http.Internal
 		}
 
 		public List<KeyValuePair<string, IEnumerable<string>>>? GetResponseHeaders()
-			=> Response?.Headers?.ToList();
+			=> HttpResponseMessage?.Headers?.ToList();
 
 		public List<KeyValuePair<string, IEnumerable<string>>>? GetContentHeaders()
-			=> Response?.Content.Headers?.ToList();
+			=> HttpResponseMessage?.Content.Headers?.ToList();
 
 		public Task<Stream?> ReadContentAsStreamAsync(CancellationToken cancellationToken)
-			=> Response?.Content == null
+			=> HttpResponseMessage?.Content == null
 				? Task.FromResult((Stream?)null)
-				: Response.Content.ReadAsStreamAsync(cancellationToken) as Task<Stream?>;
+				: HttpResponseMessage.Content.ReadAsStreamAsync(cancellationToken) as Task<Stream?>;
 
 		public Task<byte[]?> ReadContentAsByteArrayAsync(CancellationToken cancellationToken)
-			=> Response?.Content == null
+			=> HttpResponseMessage?.Content == null
 				? Task.FromResult((byte[]?)null)
-				: Response.Content.ReadAsByteArrayAsync(cancellationToken) as Task<byte[]?>;
+				: HttpResponseMessage.Content.ReadAsByteArrayAsync(cancellationToken) as Task<byte[]?>;
 
 		public Task<string?> ReadContentAsStringAsync(CancellationToken cancellationToken)
-			=> Response?.Content == null
+			=> HttpResponseMessage?.Content == null
 				? Task.FromResult((string?)null)
-				: Response.Content.ReadAsStringAsync(cancellationToken) as Task<string?>;
+				: HttpResponseMessage.Content.ReadAsStringAsync(cancellationToken) as Task<string?>;
 
 		public async Task<T?> ReadJsonContentAsAsync<T>(
 			System.Text.Json.JsonSerializerOptions? jsonSerializerOptions = null, 
 			CancellationToken cancellationToken = default)
 		{
-			if (Response == null)
+			if (HttpResponseMessage == null)
 				return default;
 
-			using var stream = await Response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+			using var stream = await HttpResponseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
 			var result = await System.Text.Json.JsonSerializer.DeserializeAsync<T>(stream, jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
 			return result;
 		}
@@ -115,9 +115,9 @@ namespace Raider.NetHttp.Http.Internal
 		{
 			if (!disposedValue)
 			{
-				if (disposing && Response != null)
+				if (disposing && HttpResponseMessage != null)
 				{
-					Response.Dispose();
+					HttpResponseMessage.Dispose();
 				}
 
 				disposedValue = true;
