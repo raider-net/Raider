@@ -577,7 +577,6 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			if (IsAjaxRequest(context.Request))
 			{
 				context.Response.Headers[HeaderNames.Location] = context.RedirectUri;
-				context.Response.StatusCode = 401;
 			}
 			else
 			{

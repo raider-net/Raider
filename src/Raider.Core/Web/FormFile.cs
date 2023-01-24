@@ -40,6 +40,9 @@ namespace Raider.Web
 			Stream? stream = null;
 			if (Content != null)
 			{
+				if (Content.CanSeek == true)
+					Content.Seek(0, SeekOrigin.Begin);
+
 				if (asMemoryStream)
 				{
 					var memoryStream = new MemoryStream();
