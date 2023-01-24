@@ -20,6 +20,8 @@ namespace Raider.Messaging
 		private readonly bool _stopTimerOnExecute = true;
 		private ILogger? _fallbackLogger;
 
+		private int _unhandledExceptionsCount = 0;
+
 		/// <summary>
 		/// IdJob
 		/// </summary>
@@ -39,6 +41,7 @@ namespace Raider.Messaging
 
 		protected abstract Dictionary<int, TimeSpan>? DelayTable { get; set; } //Dictionary<retryCount, Delay>
 		protected abstract TimeSpan DelayedStart { get; }
+		protected abstract TimeSpan DefaultExecuteInterval { get; set; }
 		protected abstract TimeSpan ExecuteInterval { get; set; }
 
 		private IServiceProvider? _serviceProvider;
@@ -248,9 +251,15 @@ namespace Raider.Messaging
 					{
 						await LogActivityAsync(traceInfo, ComponentState.Suspended, null, null, _stoppingCts?.Token ?? default);
 					}
+
+					_unhandledExceptionsCount = 0;
+					SetExecuteInterval();
 				}
 				catch (Exception ex)
 				{
+					_unhandledExceptionsCount++;
+					SetExecuteInterval();
+
 					await LogActivityAsync(
 						traceInfo,
 						ComponentState.Error,
@@ -261,6 +270,9 @@ namespace Raider.Messaging
 			}
 			catch (Exception ex)
 			{
+				_unhandledExceptionsCount++;
+				SetExecuteInterval();
+
 				await LogActivityAsync(
 					traceInfo,
 					ComponentState.Error,
@@ -372,6 +384,39 @@ namespace Raider.Messaging
 
 			await LogActivityAsync(traceInfo, ComponentState.Idle, null, null, _stoppingCts?.Token ?? default);
 			return _timer?.Change(TimeSpan.Zero, ExecuteInterval) ?? false;
+		}
+
+		private TimeSpan SetExecuteInterval()
+		{
+			if (DelayTable == null || _unhandledExceptionsCount == 0)
+			{
+				ExecuteInterval = DefaultExecuteInterval;
+				return ExecuteInterval;
+			}
+
+			TimeSpan? result = null;
+			int? bestDelta = null;
+			foreach (var retry in DelayTable.Keys.Where(x => 0 <= x))
+			{
+				var delta = Math.Abs(retry - _unhandledExceptionsCount);
+				if (bestDelta.HasValue)
+				{
+					if ((delta < bestDelta.Value)
+						|| (delta == bestDelta.Value && DelayTable[retry] < result))
+					{
+						bestDelta = delta;
+						result = DelayTable[retry];
+					}
+				}
+				else
+				{
+					bestDelta = delta;
+					result = DelayTable[retry];
+				}
+			}
+
+			ExecuteInterval = result ?? DefaultExecuteInterval;
+			return ExecuteInterval;
 		}
 
 		private bool disposed;
