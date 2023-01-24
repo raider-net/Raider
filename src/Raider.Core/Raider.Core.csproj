@@ -19,7 +19,7 @@
 		<Authors>Tomas Pilat</Authors>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\..\Raider.snk</AssemblyOriginatorKeyFile>
-		<Version>1.5.0</Version>
+		<Version>1.5.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
