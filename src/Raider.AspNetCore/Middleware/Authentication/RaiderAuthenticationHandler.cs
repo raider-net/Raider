@@ -211,7 +211,8 @@ namespace Raider.AspNetCore.Middleware.Authentication
 			var cookieStore = Context.RequestServices.GetService<ICookieStore>();
 			if (cookieStore != null)
 			{
-				var existsInStore = await cookieStore.ExistsAsync(Context, cookie);
+				var appCtx = Context.RequestServices.GetService<IApplicationContext>();
+				var existsInStore = await cookieStore.ExistsAsync(appCtx!, cookie);
 				if (!existsInStore)
 					return AuthenticateResult.NoResult();
 			}
