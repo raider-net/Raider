@@ -14,6 +14,8 @@ namespace Raider.AspNetCore.Authentication
 
 		Task<AuthenticatedUser?> CreateFromWindowsIdentityAsync(string? logonWithoutDomain, string? windowsIdentityName, IRequestMetadata? requestMetadata = null);
 
+		Task<AuthenticatedUser?> CreateFromAzureADIdentityAsync(string identityObjectId, IRequestMetadata? requestMetadata = null);
+
 		Task<AuthenticatedUser?> CreateFromLoginPasswordAsync(string? login, string? password);
 
 		Task<AuthenticatedUser?> CreateFromLoginAsync(string? login, IRequestMetadata? requestMetadata = null);

@@ -1,7 +1,8 @@
 ﻿namespace Raider.AspNetCore.Middleware.Authentication
 {
-	public class AuthenticationDefaults
+	public static class AuthenticationDefaults
 	{
-		public const string AuthenticationScheme = "RaiderAuth";
+		public const string DefaultAuthenticationScheme = "RaiderAuth";
+		public static string AuthenticationScheme { get; set; } = DefaultAuthenticationScheme;
 	}
 }
