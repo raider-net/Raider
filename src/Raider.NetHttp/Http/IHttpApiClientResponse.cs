@@ -17,7 +17,7 @@ namespace Raider.NetHttp.Http
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 		[Newtonsoft.Json.JsonIgnore]
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 		[System.Text.Json.Serialization.JsonIgnore]
 #endif
 		Exception? Exception { get; }
@@ -25,14 +25,14 @@ namespace Raider.NetHttp.Http
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 		[Newtonsoft.Json.JsonIgnore]
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 		[System.Text.Json.Serialization.JsonIgnore]
 #endif
 		bool StatusCodeIsOK { get; }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 		[Newtonsoft.Json.JsonIgnore]
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 		[System.Text.Json.Serialization.JsonIgnore]
 #endif
 		bool IsOK { get; }
@@ -47,7 +47,7 @@ namespace Raider.NetHttp.Http
 		Task<string?> ReadContentAsStringAsync(CancellationToken cancellationToken);
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 		Task<T?> ReadJsonContentAsAsync<T>(Newtonsoft.Json.JsonSerializerSettings? jsonSerializerOptions = null, CancellationToken cancellationToken = default);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 		Task<T?> ReadJsonContentAsAsync<T>(System.Text.Json.JsonSerializerOptions? jsonSerializerOptions = null, CancellationToken cancellationToken = default);
 #endif
 	}

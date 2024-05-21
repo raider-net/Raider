@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Raider.Transactions.Internal
 {
 	internal class TransactionContext : ITransactionContext, IDisposable
-#if NET5_0
+#if NET5_0_OR_GREATER
 		, IAsyncDisposable
 #endif
 	{
@@ -29,7 +29,7 @@ namespace Raider.Transactions.Internal
 		private List<Func<ITransactionContext, CancellationToken, Task>> _onAfterCommitAsyncActions;
 		private List<Func<ITransactionContext, CancellationToken, Task>> _onRollbackAsyncActions;
 		private List<Func<ITransactionContext, CancellationToken, Task>> _onAfterRollbackAsyncActions;
-#if NET5_0
+#if NET5_0_OR_GREATER
 		private List<Func<ITransactionContext, ValueTask>> _onDisposedAsyncActions;
 #endif
 
@@ -84,7 +84,7 @@ namespace Raider.Transactions.Internal
 			_onAfterCommitAsyncActions = options.OnAfterCommitAsyncActions.ToList();
 			_onRollbackAsyncActions = options.OnRollbackAsyncActions.ToList();
 			_onAfterRollbackAsyncActions = options.OnAfterRollbackAsyncActions.ToList();
-#if NET5_0
+#if NET5_0_OR_GREATER
 			_onDisposedAsyncActions = options.OnDisposedAsyncActions.ToList();
 #endif
 		}
@@ -279,7 +279,7 @@ namespace Raider.Transactions.Internal
 			foreach (var action in _onAfterRollbackAsyncActions)
 				transactionContextRegister.OnAfterRollback(action);
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 			foreach (var action in _onDisposedAsyncActions)
 				transactionContextRegister.OnDisposed(action);
 #endif
@@ -305,7 +305,7 @@ namespace Raider.Transactions.Internal
 			transactionContextRegister.OnBeforeDispose += () =>
 			{
 				var onDisposedActions = Interlocked.Exchange(ref _onDisposedActions, new List<Action<ITransactionContext>>());
-#if NET5_0
+#if NET5_0_OR_GREATER
 				var onDisposedAsyncActions = Interlocked.Exchange(ref _onDisposedAsyncActions, new List<Func<ITransactionContext, ValueTask>>());
 #endif
 				Dispose();
@@ -384,7 +384,7 @@ namespace Raider.Transactions.Internal
 			return _onAfterRollbackActions.TryAddUniqueItem(afterRollbackAction);
 		}
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 		/// <inheritdoc/>
 		public bool OnDisposed(Func<ITransactionContext, ValueTask> disposedAction)
 		{
@@ -404,7 +404,7 @@ namespace Raider.Transactions.Internal
 			return _onDisposedActions.TryAddUniqueItem(disposedAction);
 		}
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 		/// <inheritdoc/>
 		public async ValueTask DisposeAsync()
 		{

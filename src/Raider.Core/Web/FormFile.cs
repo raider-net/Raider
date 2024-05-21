@@ -9,14 +9,14 @@ namespace Raider.Web
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 		[Newtonsoft.Json.JsonIgnore]
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 		[System.Text.Json.Serialization.JsonIgnore]
 #endif
 		public Stream? Content { get; set; }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 		[Newtonsoft.Json.JsonIgnore]
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 		[System.Text.Json.Serialization.JsonIgnore]
 #endif
 		public byte[]? Data { get; set; }
@@ -30,7 +30,7 @@ namespace Raider.Web
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 		[Newtonsoft.Json.JsonIgnore]
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 		[System.Text.Json.Serialization.JsonIgnore]
 #endif
 		public bool HasContentData => Content != null || Data != null;

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Raider.Transactions
 {
 	public interface ITransactionContext : ITransactionContextRegister, IDisposable
-#if NET5_0
+#if NET5_0_OR_GREATER
 		, IAsyncDisposable
 #endif
 	{

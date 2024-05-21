@@ -75,7 +75,7 @@ namespace Npgsql
 			return transactionContext;
 		}
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 		public static async Task<NpgsqlTransaction> BeginTransactionAndAttachToTransactionContextAsync(this NpgsqlConnection connection, ITransactionContext transactionContext, CancellationToken cancellationToken = default)
 		{
 			if (connection == null)

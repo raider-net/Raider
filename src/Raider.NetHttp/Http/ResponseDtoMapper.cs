@@ -47,7 +47,7 @@ namespace Raider.NetHttp.Http
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 						response.Headers = Newtonsoft.Json.JsonConvert.SerializeObject(headers);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 						response.Headers = System.Text.Json.JsonSerializer.Serialize(headers);
 #endif
 					}
@@ -59,7 +59,7 @@ namespace Raider.NetHttp.Http
 			{
 				if (httpResponse.Content != null)
 					response.Body = await httpResponse.Content.ReadAsStringAsync(
-#if NET5_0
+#if NET5_0_OR_GREATER
 						cancellationToken
 #endif
 						).ConfigureAwait(false);
@@ -72,7 +72,7 @@ namespace Raider.NetHttp.Http
 			{
 				if (httpResponse.Content != null)
 					response.BodyByteArray = await httpResponse.Content.ReadAsByteArrayAsync(
-#if NET5_0
+#if NET5_0_OR_GREATER
 						cancellationToken
 #endif
 						).ConfigureAwait(false);

@@ -238,6 +238,32 @@ namespace Raider.Services.EntityFramework.Commands
 			return ValueTask.CompletedTask;
 		}
 
+		public override void Dispose()
+		{
+			if (IsDisposable)
+			{
+				foreach (var item in _dbContextCache)
+				{
+					item.Value.Dispose();
+				}
+
+				_dbContextCache.Clear();
+			}
+		}
+
+		public override async ValueTask DisposeAsync()
+		{
+			if (IsDisposable)
+			{
+				foreach (var item in _dbContextCache)
+				{
+					await item.Value.DisposeAsync();
+				}
+
+				_dbContextCache.Clear();
+			}
+		}
+
 		public override string GetDefaultClientErrorMessage(Exception ex)
 		{
 			return ex is DbUpdateConcurrencyException

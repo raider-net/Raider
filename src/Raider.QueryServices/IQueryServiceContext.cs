@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Raider.QueryServices
 {
-	public interface IQueryServiceContext
+	public interface IQueryServiceContext : IDisposable, IAsyncDisposable
 	{
 		IServiceProvider ServiceProvider { get; }
 		ITraceInfo TraceInfo { get; }

@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Raider.Services
 {
-	public interface ICommandServiceContext
+	public interface ICommandServiceContext : IDisposable, IAsyncDisposable
 	{
 		IServiceProvider ServiceProvider { get; }
 		ITraceInfo TraceInfo { get; }

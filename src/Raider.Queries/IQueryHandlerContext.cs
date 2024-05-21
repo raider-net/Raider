@@ -1,6 +1,9 @@
-﻿namespace Raider.Queries
+﻿using System;
+
+namespace Raider.Queries
 {
-	public interface IQueryHandlerContext
+	public interface IQueryHandlerContext: IDisposable, IAsyncDisposable
 	{
+		bool IsDisposable { get; set; }
 	}
 }

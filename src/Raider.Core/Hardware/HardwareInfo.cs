@@ -12,7 +12,7 @@ using System.Text;
 
 using Newtonsoft.Json;
 
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 
 using System.Text.Json;
 
@@ -53,7 +53,7 @@ namespace Raider.Hardware
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 				HWJson = JsonConvert.SerializeObject(this, Formatting.Indented)
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 				HWJson = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true })
 #endif
 			};

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Raider.QueryServices.Queries
 {
-	public abstract class QueryHandlerContext : IQueryHandlerContext, IQueryServiceContext
+	public abstract class QueryHandlerContext : IQueryHandlerContext, IQueryServiceContext, IDisposable, IAsyncDisposable
 	{
 		public IServiceProvider ServiceProvider { get; }
 		public ITraceInfo TraceInfo { get; protected set; }
@@ -27,6 +27,8 @@ namespace Raider.QueryServices.Queries
 		public Guid? IdQueryEntry { get; private set; }
 		public ILogger Logger { get; private set; }
 		public Dictionary<object, object?> CommandHandlerItems { get; } = new Dictionary<object, object?>();
+
+		public bool IsDisposable { get; set; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 		public QueryHandlerContext(IServiceProvider serviceProvider)
@@ -346,7 +348,8 @@ namespace Raider.QueryServices.Queries
 		public virtual ValueTask DisposeTransactionAsync()
 			=> ValueTask.CompletedTask;
 
-
+		public abstract void Dispose();
+		public abstract ValueTask DisposeAsync();
 
 		public abstract class Builder<TContext>
 			where TContext : QueryHandlerContext

@@ -17,7 +17,7 @@ namespace Raider.Converters
 		public static Guid ToGuid(sbyte value)
 		{
 			byte[] bytes = new byte[16];
-			BitConverter.GetBytes(value).CopyTo(bytes, 0);
+			BitConverter.GetBytes((short)value).CopyTo(bytes, 0);
 			var result = new Guid(bytes);
 			return result;
 		}
@@ -35,7 +35,7 @@ namespace Raider.Converters
 		public static Guid ToGuid(byte value)
 		{
 			byte[] bytes = new byte[16];
-			BitConverter.GetBytes(value).CopyTo(bytes, 0);
+			BitConverter.GetBytes((short)value).CopyTo(bytes, 0);
 			var result = new Guid(bytes);
 			return result;
 		}
@@ -364,7 +364,7 @@ namespace Raider.Converters
 		public static Guid WriteToGuid(sbyte value, Guid guid)
 		{
 			byte[] bytes = guid.ToByteArray();
-			var b = BitConverter.GetBytes(value);
+			var b = BitConverter.GetBytes((short)value);
 
 			for (int i = 0; i < 2; i++)
 				bytes[i] = b[i];
@@ -376,7 +376,7 @@ namespace Raider.Converters
 		public static Guid WriteToGuid(byte value, Guid guid)
 		{
 			byte[] bytes = guid.ToByteArray();
-			var b = BitConverter.GetBytes(value);
+			var b = BitConverter.GetBytes((short)value);
 
 			for (int i = 0; i < 2; i++)
 				bytes[i] = b[i];

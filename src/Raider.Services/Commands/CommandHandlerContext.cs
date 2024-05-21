@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Raider.Services.Commands
 {
-	public abstract class CommandHandlerContext : ICommandHandlerContext, ICommandServiceContext
+	public abstract class CommandHandlerContext : ICommandHandlerContext, ICommandServiceContext, IDisposable, IAsyncDisposable
 	{
 		public IServiceProvider ServiceProvider { get; }
 		public ITraceInfo TraceInfo { get; protected set; }
@@ -27,6 +27,8 @@ namespace Raider.Services.Commands
 		public Guid? IdCommandEntry { get; private set; }
 		public ILogger Logger { get; private set; }
 		public Dictionary<object, object?> CommandHandlerItems { get; } = new Dictionary<object, object?>();
+
+		public bool IsDisposable { get; set; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 		public CommandHandlerContext(IServiceProvider serviceProvider)
@@ -342,6 +344,9 @@ namespace Raider.Services.Commands
 
 		public abstract string GetDefaultClientErrorMessage(Exception ex);
 
+		public abstract void Dispose();
+
+		public abstract ValueTask DisposeAsync();
 
 		public abstract class Builder<TContext>
 			where TContext : CommandHandlerContext

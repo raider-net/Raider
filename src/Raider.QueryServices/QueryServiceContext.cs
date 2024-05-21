@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Raider.QueryServices
 {
-	public class QueryServiceContext :IServiceContext, IQueryServiceContext
+	public class QueryServiceContext :IServiceContext, IQueryServiceContext, IDisposable, IAsyncDisposable
 	{
 		private QueryHandlerContext _queryHandlerContext;
 
@@ -202,6 +202,25 @@ namespace Raider.QueryServices
 			}
 
 			return false;
+		}
+
+		public void Dispose()
+		{
+			_queryHandlerContext?.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			if (_queryHandlerContext != null)
+				return _queryHandlerContext.DisposeAsync();
+
+			return ValueTask.CompletedTask;
+		}
+
+		public void SetIsDisposable()
+		{
+			if (_queryHandlerContext != null)
+				_queryHandlerContext.IsDisposable = true;
 		}
 	}
 }

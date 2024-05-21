@@ -131,7 +131,7 @@ namespace Raider.Transactions
 			return this;
 		}
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 		/// <summary>
 		/// Registers a listener to be called after the transaction is over.
 		/// </summary>

@@ -40,7 +40,7 @@ namespace Raider.NetHttp
 					string? body = null;
 					if (request.Content != null)
 						body = await request.Content.ReadAsStringAsync(
-#if NET5_0
+#if NET5_0_OR_GREATER
 						cancellationToken
 #endif
 						).ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace Raider.NetHttp
 					byte[]? body = null;
 					if (request.Content != null)
 						body = await request.Content.ReadAsByteArrayAsync(
-#if NET5_0
+#if NET5_0_OR_GREATER
 						cancellationToken
 #endif
 						).ConfigureAwait(false);
@@ -82,7 +82,7 @@ namespace Raider.NetHttp
 					Stream? body = null;
 					if (request.Content != null)
 						body = await request.Content.ReadAsStreamAsync(
-#if NET5_0
+#if NET5_0_OR_GREATER
 						cancellationToken
 #endif
 						).ConfigureAwait(false);
@@ -112,7 +112,7 @@ namespace Raider.NetHttp
 					string? body = null;
 					if (response.Content != null)
 						body = await response.Content.ReadAsStringAsync(
-#if NET5_0
+#if NET5_0_OR_GREATER
 						cancellationToken
 #endif
 						).ConfigureAwait(false);
@@ -133,7 +133,7 @@ namespace Raider.NetHttp
 					byte[]? body = null;
 					if (response.Content != null)
 						body = await response.Content.ReadAsByteArrayAsync(
-#if NET5_0
+#if NET5_0_OR_GREATER
 						cancellationToken
 #endif
 						).ConfigureAwait(false);
@@ -154,7 +154,7 @@ namespace Raider.NetHttp
 					Stream? body = null;
 					if (response.Content != null)
 						body = await response.Content.ReadAsStreamAsync(
-#if NET5_0
+#if NET5_0_OR_GREATER
 						cancellationToken
 #endif
 						).ConfigureAwait(false);

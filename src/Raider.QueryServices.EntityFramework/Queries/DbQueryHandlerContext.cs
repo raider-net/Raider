@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Raider.QueryServices.EntityFramework.Queries
 {
-	public abstract class DbQueryHandlerContext : Raider.QueryServices.Queries.QueryHandlerContext, IQueryHandlerContext, IDbQueryServiceContext
+	public abstract class DbQueryHandlerContext : Raider.QueryServices.Queries.QueryHandlerContext, IQueryHandlerContext, IDbQueryServiceContext, IDisposable, IAsyncDisposable
 	{
 		private readonly ConcurrentDictionary<Type, DbContext> _dbContextCache = new ConcurrentDictionary<Type, DbContext>();
 
@@ -212,6 +212,32 @@ namespace Raider.QueryServices.EntityFramework.Queries
 				return DbContextTransaction.DisposeAsync();
 
 			return ValueTask.CompletedTask;
+		}
+
+		public override void Dispose()
+		{
+			if (IsDisposable)
+			{
+				foreach (var item in _dbContextCache)
+				{
+					item.Value.Dispose();
+				}
+
+				_dbContextCache.Clear();
+			}
+		}
+
+		public override async ValueTask DisposeAsync()
+		{
+			if (IsDisposable)
+			{
+				foreach (var item in _dbContextCache)
+				{
+					await item.Value.DisposeAsync();
+				}
+
+				_dbContextCache.Clear();
+			}
 		}
 	}
 }

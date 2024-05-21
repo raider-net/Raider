@@ -11,7 +11,7 @@ namespace Raider.NetHttp.Http
 		Options = 4,
 		Head = 5,
 		Trace = 6,
-#if NET5_0
+#if NET5_0_OR_GREATER
 		Patch = 7
 #endif
 	}
@@ -29,7 +29,7 @@ namespace Raider.NetHttp.Http
 				HttpApiMethod.Options => HttpMethod.Options,
 				HttpApiMethod.Head => HttpMethod.Head,
 				HttpApiMethod.Trace => HttpMethod.Trace,
-#if NET5_0
+#if NET5_0_OR_GREATER
 				HttpApiMethod.Patch => HttpMethod.Patch,
 #endif
 				_ => HttpMethod.Get,

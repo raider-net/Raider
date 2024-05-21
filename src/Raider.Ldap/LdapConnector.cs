@@ -26,7 +26,19 @@ namespace Raider.Ldap
 			{
 				AuthType = config.AuthType,
 			};
-			_connection.Timeout = TimeSpan.FromSeconds(30);
+
+			if (config.TimeoutInSeconds.HasValue)
+			{
+				_connection.Timeout = TimeSpan.FromSeconds(config.TimeoutInSeconds.Value);
+			}
+			else
+			{
+				_connection.Timeout = TimeSpan.FromSeconds(30);
+			}
+
+			if (config.ProtocolVersion.HasValue)
+				_connection.SessionOptions.ProtocolVersion = config.ProtocolVersion.Value;
+
 			_connection.SessionOptions.VerifyServerCertificate = (LdapConnection conn, X509Certificate cert) => true;
 			_connection.SessionOptions.SecureSocketLayer = config.SecureSocketLayer;
 
@@ -36,8 +48,16 @@ namespace Raider.Ldap
 			}
 			else
 			{
-				var credential = new NetworkCredential(config.UserName, config.Password, config.DomainName);
-				_connection.Bind(credential);
+				if (string.IsNullOrWhiteSpace(config.DomainName))
+				{
+					var credential = new NetworkCredential(config.UserName, config.Password);
+					_connection.Bind(credential);
+				}
+				else
+				{
+					var credential = new NetworkCredential(config.UserName, config.Password, config.DomainName);
+					_connection.Bind(credential);
+				}
 			}
 
 			_utf8 = new UTF8Encoding(false, true);

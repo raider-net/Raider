@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Raider.Services.EntityFramework
 {
-	public interface IDbCommandServiceContext : Raider.Services.ICommandServiceContext, Raider.EntityFrameworkCore.IDbContextTransactionManager
+	public interface IDbCommandServiceContext : Raider.Services.ICommandServiceContext, Raider.EntityFrameworkCore.IDbContextTransactionManager, IDisposable, IAsyncDisposable
 	{
 		TContext CreateNewDbContextWithNewTransaction<TContext>(
 			out IDbContextTransaction? newDbContextTransaction,

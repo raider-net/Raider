@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 using Newtonsoft.Json;
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 using System.Text.Json;
 #endif
 
@@ -53,7 +53,7 @@ namespace Raider.Exceptions
 					PreserveReferencesHandling = PreserveReferencesHandling.Objects, //PreserveReferencesHandling.All,
 					TypeNameHandling = TypeNameHandling.All
 				};
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 				var jsonSerializerOptions = new JsonSerializerOptions
 				{
 					WriteIndented = true,
@@ -70,7 +70,7 @@ namespace Raider.Exceptions
 					{
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 						key = JsonConvert.SerializeObject(item, jsonSerializerSettings);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 						key = JsonSerializer.Serialize(item, jsonSerializerOptions);
 #endif
 					}
@@ -79,7 +79,7 @@ namespace Raider.Exceptions
 					{
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 						value = JsonConvert.SerializeObject(obj, jsonSerializerSettings);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 						value = JsonSerializer.Serialize(obj, jsonSerializerOptions);
 #endif
 					}

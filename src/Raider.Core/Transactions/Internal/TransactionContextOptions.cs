@@ -19,7 +19,7 @@ namespace Raider.Transactions.Internal
 		public List<Func<ITransactionContext, CancellationToken, Task>> OnAfterCommitAsyncActions { get; }
 		public List<Func<ITransactionContext, CancellationToken, Task>> OnRollbackAsyncActions { get; }
 		public List<Func<ITransactionContext, CancellationToken, Task>> OnAfterRollbackAsyncActions { get; }
-#if NET5_0
+#if NET5_0_OR_GREATER
 		public List<Func<ITransactionContext, ValueTask>> OnDisposedAsyncActions { get; }
 #endif
 
@@ -35,7 +35,7 @@ namespace Raider.Transactions.Internal
 			OnAfterCommitAsyncActions = new List<Func<ITransactionContext, CancellationToken, Task>>();
 			OnRollbackAsyncActions = new List<Func<ITransactionContext, CancellationToken, Task>>();
 			OnAfterRollbackAsyncActions = new List<Func<ITransactionContext, CancellationToken, Task>>();
-#if NET5_0
+#if NET5_0_OR_GREATER
 			OnDisposedAsyncActions = new List<Func<ITransactionContext, ValueTask>>();
 #endif
 		}

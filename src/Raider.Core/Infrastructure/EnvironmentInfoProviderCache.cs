@@ -79,7 +79,7 @@ namespace Raider.Infrastructure
 
 		}
 
-#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0)
+#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER)
 		private static string GetOSPlatform()
 		{
 			var platform = OSPlatform.Create("Other Platform");
@@ -95,7 +95,7 @@ namespace Raider.Infrastructure
 		private static string GetOSPlatform() { return Environment.OSVersion.Platform.ToString(); }
 #endif
 
-#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0)
+#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER)
 		private static string GetProcessArchitecture()
 		{
 			return RuntimeInformation.ProcessArchitecture.ToString();
@@ -104,7 +104,7 @@ namespace Raider.Infrastructure
 		private static string GetProcessArchitecture() { return Environment.Is64BitProcess ? "X64" : "X86"; }
 #endif
 
-#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0)
+#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER)
 		private static string GetOSArchitecture()
 		{
 			return RuntimeInformation.OSArchitecture.ToString();
@@ -113,7 +113,7 @@ namespace Raider.Infrastructure
 		private static string GetOSArchitecture() { return Environment.Is64BitOperatingSystem ? "X64" : "X86"; }
 #endif
 
-#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0)
+#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER)
 		private static string GetOSVersion()
 		{
 			return RuntimeInformation.OSDescription;
@@ -126,7 +126,7 @@ namespace Raider.Infrastructure
 		}
 #endif
 
-#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0)
+#if (NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER)
 		private static string GetFrameworkDescription()
 		{
 			return RuntimeInformation.FrameworkDescription;

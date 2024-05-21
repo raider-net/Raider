@@ -7,16 +7,19 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace Raider.Services.EntityFramework
 {
-	public interface IQueryableBase
+	public interface IQueryableBase : IDisposable, IAsyncDisposable
 	{
 	}
 
-	public abstract class QueryableBase<T, TDbContext> : ServiceBase<DbServiceContext>, IQueryableBase
+	public abstract class QueryableBase<T, TDbContext> : ServiceBase<DbServiceContext>, IQueryableBase, IDisposable, IAsyncDisposable
 		where TDbContext : DbContext
 	{
+		private bool disposable;
+		private bool _disposed;
 		private readonly IServiceProvider _serviceProvider;
 		protected TDbContext DbContext { get; private set; }
 
@@ -71,6 +74,8 @@ namespace Raider.Services.EntityFramework
 			where TBuilder : DbCommandHandlerContext.Builder<THandlerContext>
 		{
 			SetServiceContext<THandlerContext, TBuilder>(_serviceProvider, this.GetType());
+			disposable = true;
+			ServiceContext.SetIsDisposable();
 			if (dbContextTransaction == null)
 				SetDbContext(ServiceContext.GetOrCreateDbContext<TDbContext>(TransactionUsage.NONE), true);
 			else
@@ -106,5 +111,56 @@ namespace Raider.Services.EntityFramework
 
 		public virtual IQueryable<T> WithWriteAcl<TProp>(Func<IQueryable<T>, IIncludableQueryable<T, TProp>>? includableConfigurator = null)
 			=> WithReadOnlyAcl(includableConfigurator);
+
+		public async ValueTask DisposeAsync()
+		{
+			if (_disposed)
+				return;
+
+			_disposed = true;
+
+			await DisposeAsyncCoreAsync().ConfigureAwait(false);
+
+			Dispose(disposing: false);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual async ValueTask DisposeAsyncCoreAsync()
+		{
+			if (disposable)
+			{
+				if (DbContext != null)
+					await DbContext.DisposeAsync();
+
+				if (ServiceContext != null)
+					await ServiceContext.DisposeAsync();
+			}
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed)
+				return;
+
+			_disposed = true;
+
+			if (disposing)
+			{
+				if (disposable)
+				{
+					if (DbContext != null)
+						DbContext.Dispose();
+
+					if (ServiceContext != null)
+						ServiceContext.Dispose();
+				}
+			}
+		}
+
+		public void Dispose()
+		{
+			Dispose(disposing: true);
+			GC.SuppressFinalize(this);
+		}
 	}
 }

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Raider.Services
 {
-	public class ServiceContext : IServiceContext, ICommandServiceContext
+	public class ServiceContext : IServiceContext, ICommandServiceContext, IDisposable, IAsyncDisposable
 	{
 		private CommandHandlerContext _commandHandlerContext;
 
@@ -205,6 +205,25 @@ namespace Raider.Services
 			}
 
 			return false;
+		}
+
+		public void Dispose()
+		{
+			_commandHandlerContext?.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			if (_commandHandlerContext != null)
+				return _commandHandlerContext.DisposeAsync();
+
+			return ValueTask.CompletedTask;
+		}
+
+		public void SetIsDisposable()
+		{
+			if (_commandHandlerContext != null)
+				_commandHandlerContext.IsDisposable = true;
 		}
 	}
 }

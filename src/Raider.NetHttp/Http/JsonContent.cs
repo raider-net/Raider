@@ -8,7 +8,7 @@ namespace Raider.NetHttp.Http
 		public object? Content { get; set; }
 		public Type? InputType { get; set; }
 		public MediaTypeHeaderValue? MediaType { get; set; }
-#if NET5_0
+#if NET5_0_OR_GREATER
 		public System.Text.Json.JsonSerializerOptions? JsonSerializerOptions { get; set; }
 #elif NETSTANDARD2_0 || NETSTANDARD2_1
 		public Newtonsoft.Json.JsonSerializerSettings? JsonSerializerOptions { get; set; }

@@ -8,7 +8,7 @@ using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 
 using System.Text.Json;
 
@@ -227,7 +227,7 @@ namespace Raider.Extensions
 				y => y.Value as string
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 					?? JsonConvert.SerializeObject(y.Value))
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 				?? JsonSerializer.Serialize(y.Value))
 #endif
 				?? new Dictionary<string, string>();

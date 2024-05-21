@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Raider.Transactions
 {
 	public interface ITransactionContextRegister : IDisposable
-#if NET5_0
+#if NET5_0_OR_GREATER
 		, IAsyncDisposable
 #endif
 	{
@@ -72,7 +72,7 @@ namespace Raider.Transactions
 		/// </summary>
 		bool OnAfterRollback(Action<ITransactionContext> afterRollbackAction);
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 		/// <summary>
 		/// Registers a listener to be called after the transaction is over.
 		/// </summary>

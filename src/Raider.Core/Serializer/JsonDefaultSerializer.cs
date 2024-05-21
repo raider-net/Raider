@@ -1,4 +1,4 @@
-﻿#if NET5_0
+﻿#if NET5_0_OR_GREATER
 namespace Raider.Serializer
 {
 	public static class JsonDefaultSerializerOptions

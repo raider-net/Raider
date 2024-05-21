@@ -119,7 +119,7 @@ namespace Raider.Net
 			using var responseStream = response.GetResponseStream();
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 			await responseStream.CopyToAsync(ms).ConfigureAwait(false);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 			await responseStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
 #endif
 			return ms;
@@ -153,7 +153,7 @@ namespace Raider.Net
 			using var responseStream = response.GetResponseStream();
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 			await responseStream.CopyToAsync(ms).ConfigureAwait(false);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 			await responseStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
 #endif
 			return ms.ToArray();
@@ -320,7 +320,7 @@ namespace Raider.Net
 			using var ms = new System.IO.MemoryStream();
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 			await responseStream.CopyToAsync(ms).ConfigureAwait(false);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 			await responseStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
 #endif
 			ms.Seek(0, System.IO.SeekOrigin.Begin);
@@ -333,7 +333,7 @@ namespace Raider.Net
 			{
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 				await ms.CopyToAsync(requestStream).ConfigureAwait(false);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 				await ms.CopyToAsync(requestStream, cancellationToken).ConfigureAwait(false);
 #endif
 			}
@@ -422,7 +422,7 @@ namespace Raider.Net
 			using var ms = new System.IO.MemoryStream();
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 			await responseStream.CopyToAsync(ms).ConfigureAwait(false);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 			await responseStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
 #endif
 			ms.Seek(0, System.IO.SeekOrigin.Begin);
@@ -435,7 +435,7 @@ namespace Raider.Net
 			{
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 				await ms.CopyToAsync(requestStream).ConfigureAwait(false);
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 				await ms.CopyToAsync(requestStream, cancellationToken).ConfigureAwait(false);
 #endif
 			}

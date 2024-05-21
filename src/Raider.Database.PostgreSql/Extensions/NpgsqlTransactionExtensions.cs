@@ -20,7 +20,7 @@ namespace Npgsql
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 			transactionContext.OnDisposed(transactionContext => transaction.Dispose());
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 			transactionContext.OnDisposed(transactionContext => transaction.DisposeAsync());
 #endif
 
@@ -46,7 +46,7 @@ namespace Npgsql
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 			builder.OnDisposed(transactionContext => transaction.Dispose());
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 			builder.OnDisposed(transactionContext => transaction.DisposeAsync());
 #endif
 

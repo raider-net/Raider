@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 using Newtonsoft.Json;
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 using System.Text.Json;
 #endif
 
@@ -188,14 +188,14 @@ namespace Raider.Logging
 			if (CustomData != null && 0 < CustomData.Count)
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 				dict.Add(nameof(CustomData), JsonConvert.SerializeObject(CustomData));
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 				dict.Add(nameof(CustomData), JsonSerializer.Serialize(CustomData));
 #endif
 
 			if (Tags != null && 0 < Tags.Count)
 #if NETSTANDARD2_0 || NETSTANDARD2_1
 				dict.Add(nameof(Tags), JsonConvert.SerializeObject(Tags));
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 				dict.Add(nameof(Tags), JsonSerializer.Serialize(Tags));
 #endif
 

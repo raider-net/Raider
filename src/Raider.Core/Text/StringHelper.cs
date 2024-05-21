@@ -544,7 +544,7 @@ namespace Raider.Text
 			var obj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
 			var formatted = Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
 			return formatted;
-#elif NET5_0
+#elif NET5_0_OR_GREATER
 			using var document = System.Text.Json.JsonDocument.Parse(json);
 			using var stream = new System.IO.MemoryStream();
 
