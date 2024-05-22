@@ -96,7 +96,7 @@ namespace Raider.EntityFrameworkCore.Database
 			{
 			}
 
-			public override long GetServiceProviderHashCode()
+			public override int GetServiceProviderHashCode()
 			{
 				var hashCode = new HashCode();
 				hashCode.Add(true);
@@ -107,6 +107,9 @@ namespace Raider.EntityFrameworkCore.Database
 			public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
 			{
 			}
+
+			public override bool ShouldUseSameServiceProvider(DbContextOptionsExtensionInfo other)
+				=> true;
 		}
 	}
 
