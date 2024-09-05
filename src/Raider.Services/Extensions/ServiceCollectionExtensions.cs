@@ -18,10 +18,10 @@ namespace Raider.Services.Extensions
 
 			services.TryAddTransient<ContextFactory>();
 
-			services.TryAddTransient(typeof(IAsyncCommandInterceptor<,>), typeof(AsyncCommandInterceptor<,,,>));
-			services.TryAddTransient(typeof(IAsyncCommandInterceptor<>), typeof(AsyncCommandInterceptor<,,>));
-			services.TryAddTransient(typeof(ICommandInterceptor<,>), typeof(CommandInterceptor<,,,>));
-			services.TryAddTransient(typeof(ICommandInterceptor<>), typeof(CommandInterceptor<,,>));
+			//services.TryAddTransient(typeof(IAsyncCommandInterceptor<,>), typeof(AsyncCommandInterceptor<,,,>));
+			//services.TryAddTransient(typeof(IAsyncCommandInterceptor<>), typeof(AsyncCommandInterceptor<,,>));
+			//services.TryAddTransient(typeof(ICommandInterceptor<,>), typeof(CommandInterceptor<,,,>));
+			//services.TryAddTransient(typeof(ICommandInterceptor<>), typeof(CommandInterceptor<,,>));
 
 			services.TryAddTransient(typeof(AsyncCommandInterceptor<,,,>), typeof(AsyncCommandInterceptor<,,,>));
 			services.TryAddTransient(typeof(AsyncCommandInterceptor<,,>), typeof(AsyncCommandInterceptor<,,>));
