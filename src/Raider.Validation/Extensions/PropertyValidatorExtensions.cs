@@ -8,9 +8,9 @@ namespace Raider.Validation
 {
 	public static class PropertyValidatorExtensions
 	{
-		public static PropertyValidator<T, string?> EmailAddress<T>(this PropertyValidator<T, string?> validator)
+		public static PropertyValidator<T, string?> EmailAddress<T>(this PropertyValidator<T, string?> validator, bool useUTFCharacters = false, bool useSpecialCharacters = false)
 		{
-			validator.AddValidator(new EmailValidator<T, string?>(validator));
+			validator.AddValidator(new EmailValidator<T, string?>(validator, useUTFCharacters, useSpecialCharacters));
 			return validator;
 		}
 
