@@ -30,11 +30,11 @@
 	</ItemGroup>
 	
 	<ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.10.48">
+	  <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>

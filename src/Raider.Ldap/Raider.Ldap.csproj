@@ -29,7 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="System.DirectoryServices.Protocols" Version="8.0.0" />
+	  <PackageReference Include="System.DirectoryServices.Protocols" Version="8.0.2" />
 	</ItemGroup>
 
 </Project>
